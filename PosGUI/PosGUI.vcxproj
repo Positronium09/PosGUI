@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="modules\ComPtr.ixx" />
+    <ClCompile Include="modules\EnumFlag.ixx" />
+    <ClCompile Include="modules\Event.ixx" />
+    <ClCompile Include="modules\Exceptions.ixx" />
+    <ClCompile Include="modules\Factories\D2DFactory.ixx" />
+    <ClCompile Include="modules\Factories\DWriteFactory.ixx" />
+    <ClCompile Include="modules\Factories\DXGIFactory.ixx" />
+    <ClCompile Include="modules\Factories\Factories.ixx" />
+    <ClCompile Include="modules\Factories\WICFactory.ixx" />
+    <ClCompile Include="modules\Logging.ixx" />
+    <ClCompile Include="modules\MessageLoop.ixx" />
+    <ClCompile Include="modules\Property.ixx" />
+    <ClCompile Include="modules\PropVariant.ixx" />
+    <ClCompile Include="modules\Shape2D\Ellipse.ixx" />
+    <ClCompile Include="modules\Shape2D\Line.ixx" />
+    <ClCompile Include="modules\Shape2D\LineSegment.ixx" />
+    <ClCompile Include="modules\Shape2D\Point.ixx" />
+    <ClCompile Include="modules\Shape2D\Rect.ixx" />
+    <ClCompile Include="modules\Shape2D\RoundedRect.ixx" />
+    <ClCompile Include="modules\Shape2D\Shape2D.ixx" />
+    <ClCompile Include="modules\PGUI.ixx" />
+    <ClCompile Include="modules\Shape2D\Size.ixx" />
+    <ClCompile Include="modules\UI\Animation\Animation.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationManager.ixx" />
+    <ClCompile Include="modules\UI\AppWindow.ixx" />
+    <ClCompile Include="modules\UI\Brush.ixx" />
+    <ClCompile Include="modules\UI\Clip.ixx" />
+    <ClCompile Include="modules\UI\Color.ixx" />
+    <ClCompile Include="modules\UI\Colors.ixx" />
+    <ClCompile Include="modules\UI\D2D\BitmapRenderTarget.ixx" />
+    <ClCompile Include="modules\UI\D2D\D2D.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\D2DEllipseGeometry.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\D2DGeometry.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\D2DLayer.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\D2DPathGeometry.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\D2DRectangleGeometry.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\D2DRoundedRectangleGeometry.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\Geometry.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\GeometrySink.ixx" />
+    <ClCompile Include="modules\UI\D2D\Geometry\SimplifiedGeometrySink.ixx" />
+    <ClCompile Include="modules\UI\DirectXCompositionWindow.ixx" />
+    <ClCompile Include="modules\UI\Font\Font.ixx" />
+    <ClCompile Include="modules\UI\Font\FontCollection.ixx" />
+    <ClCompile Include="modules\UI\Font\FontEnums.ixx" />
+    <ClCompile Include="modules\UI\Font\FontFamily.ixx" />
+    <ClCompile Include="modules\UI\Font\FontSet.ixx" />
+    <ClCompile Include="modules\UI\Font\FontStructs.ixx" />
+    <ClCompile Include="modules\UI\Font\LocalizedStrings.ixx" />
+    <ClCompile Include="modules\UI\Gradient.ixx" />
+    <ClCompile Include="modules\UI\Graphics.ixx" />
+    <ClCompile Include="modules\UI\Imaging\BimapFrameDecode.ixx" />
+    <ClCompile Include="modules\UI\Imaging\BitmapDecoder.ixx" />
+    <ClCompile Include="modules\UI\Imaging\BitmapSource.ixx" />
+    <ClCompile Include="modules\UI\Imaging\ContainerFormats.ixx" />
+    <ClCompile Include="modules\UI\Imaging\FormatConverter.ixx" />
+    <ClCompile Include="modules\UI\Imaging\Imaging.ixx" />
+    <ClCompile Include="modules\UI\Imaging\MetadataReader.ixx" />
+    <ClCompile Include="modules\UI\Imaging\Palette.ixx" />
+    <ClCompile Include="modules\UI\Imaging\WICBitmap.ixx" />
+    <ClCompile Include="modules\UI\D2D\D2DBitmap.ixx" />
+    <ClCompile Include="modules\UI\D2D\D2DImage.ixx" />
+    <ClCompile Include="modules\UI\D2D\RenderTarget.ixx" />
+    <ClCompile Include="modules\UI\D2D\D2DEnums.ixx" />
+    <ClCompile Include="modules\UI\D2D\D2DStructs.ixx" />
+    <ClCompile Include="modules\UI\Styling\Styles.ixx" />
+    <ClCompile Include="modules\UI\Styling\Styling.ixx" />
+    <ClCompile Include="modules\UI\Styling\ThemeAware.ixx" />
+    <ClCompile Include="modules\UI\TextFormat.ixx" />
+    <ClCompile Include="modules\UI\TextLayout.ixx" />
+    <ClCompile Include="modules\UI\Styling\Theme.ixx" />
+    <ClCompile Include="modules\UI\UI.ixx" />
+    <ClCompile Include="modules\UI\UIComponent.ixx" />
+    <ClCompile Include="modules\UI\SystemTheme.ixx" />
+    <ClCompile Include="modules\Utils\ArithmeticUtils.ixx" />
+    <ClCompile Include="modules\IEnumStringIterator.ixx" />
+    <ClCompile Include="modules\Utils\StringUtils.ixx" />
+    <ClCompile Include="modules\Utils\Utils.ixx" />
+    <ClCompile Include="modules\Utils\WindowsUtils.ixx" />
+    <ClCompile Include="modules\Window.ixx" />
+    <ClCompile Include="modules\WindowClass.ixx" />
+    <ClCompile Include="src\MessageLoop.cpp" />
+    <ClCompile Include="src\PGUI.cpp" />
+    <ClCompile Include="src\PropVariant.cpp" />
+    <ClCompile Include="src\UI\AppWindow.cpp" />
+    <ClCompile Include="src\UI\Brush.cpp" />
+    <ClCompile Include="src\UI\Clip.cpp" />
+    <ClCompile Include="src\UI\Color.cpp" />
+    <ClCompile Include="src\UI\D2D\D2DBitmap.cpp" />
+    <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
+    <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
+    <ClCompile Include="src\UI\Font\FontCollection.cpp" />
+    <ClCompile Include="src\UI\Font\FontFamily.cpp" />
+    <ClCompile Include="src\UI\Font\FontSet.cpp" />
+    <ClCompile Include="src\UI\Font\LocalizedStrings.cpp" />
+    <ClCompile Include="src\UI\Graphics.cpp" />
+    <ClCompile Include="src\UI\Imaging\BimapFrameDecode.cpp" />
+    <ClCompile Include="src\UI\Imaging\BitmapDecoder.cpp" />
+    <ClCompile Include="src\UI\Imaging\FormatConverter.cpp" />
+    <ClCompile Include="src\UI\Imaging\MetadataReader.cpp" />
+    <ClCompile Include="src\UI\Imaging\Palette.cpp" />
+    <ClCompile Include="src\UI\Imaging\WICBitmap.cpp" />
+    <ClCompile Include="src\UI\SystemUIColors.cpp" />
+    <ClCompile Include="src\UI\TextFormat.cpp" />
+    <ClCompile Include="src\UI\Gradient.cpp" />
+    <ClCompile Include="src\UI\TextLayout.cpp" />
+    <ClCompile Include="src\UI\UIComponent.cpp" />
+    <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
+    <ClCompile Include="src\Utils\IEnumStringIterator.cpp" />
+    <ClCompile Include="src\Utils\StringUtils.cpp" />
+    <ClCompile Include="src\Utils\Utils.cpp" />
+    <ClCompile Include="src\Utils\WindowsUtils.cpp" />
+    <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="src\WindowClass.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{78445e98-6247-4e0f-802d-fd08ab9f667d}</ProjectGuid>
+    <RootNamespace>PosGUI</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NODRAWTEXT;NOMINMAX;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NODRAWTEXT;NOMINMAX;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NODRAWTEXT;NOMINMAX;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NODRAWTEXT;NOMINMAX;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

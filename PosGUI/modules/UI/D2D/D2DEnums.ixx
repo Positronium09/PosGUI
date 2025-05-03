@@ -1,0 +1,120 @@
+module;
+#include <dwrite_3.h>
+#include <d2d1_3.h>
+
+export module PGUI.UI.D2D.D2DEnums;
+import PGUI.EnumFlag;
+
+export namespace PGUI::UI::D2D
+{
+	enum class DrawTextOptions
+	{
+		None = D2D1_DRAW_TEXT_OPTIONS_NONE,
+		NoSnap = D2D1_DRAW_TEXT_OPTIONS_NO_SNAP,
+		Clip = D2D1_DRAW_TEXT_OPTIONS_CLIP,
+		EnableColorFont = D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT,
+		DisableColorBitmapSnapping = D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING
+	};
+
+	enum class AntiAliasingMode
+	{
+		PerPrimitive = D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
+		Aliased = D2D1_ANTIALIAS_MODE_ALIASED
+	};
+
+	enum class TextAntialiasingMode
+	{
+		Default = D2D1_TEXT_ANTIALIAS_MODE_DEFAULT,
+		ClearType = D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE,
+		GrayScale = D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE,
+		Aliased = D2D1_TEXT_ANTIALIAS_MODE_ALIASED
+	};
+
+	enum class BitmapOptions
+	{
+		None = D2D1_BITMAP_OPTIONS_NONE,
+		Target = D2D1_BITMAP_OPTIONS_TARGET,
+		CannotDraw = D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+		CpuRead = D2D1_BITMAP_OPTIONS_CPU_READ,
+		GdiCompatible = D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
+	};
+
+	enum class BitmapInterpolationMode
+	{
+		NearestNeighbor = D2D1_INTERPOLATION_MODE_DEFINITION_NEAREST_NEIGHBOR,
+		Linear = D2D1_INTERPOLATION_MODE_DEFINITION_LINEAR,
+		Cubic = D2D1_INTERPOLATION_MODE_DEFINITION_CUBIC,
+		MultiSampleLinear = D2D1_INTERPOLATION_MODE_DEFINITION_MULTI_SAMPLE_LINEAR,
+		Anisotropic = D2D1_INTERPOLATION_MODE_DEFINITION_ANISOTROPIC,
+		HighQualityCubic = D2D1_INTERPOLATION_MODE_DEFINITION_HIGH_QUALITY_CUBIC
+	};
+
+	enum class GeometryRelation
+	{
+		Unknown = D2D1_GEOMETRY_RELATION_UNKNOWN,
+		Disjoint = D2D1_GEOMETRY_RELATION_DISJOINT,
+		IsContained = D2D1_GEOMETRY_RELATION_IS_CONTAINED,
+		Contains = D2D1_GEOMETRY_RELATION_CONTAINS,
+		Overlap = D2D1_GEOMETRY_RELATION_OVERLAP,
+	};
+
+	enum class ExtendMode
+	{
+		Clamp = D2D1_EXTEND_MODE_CLAMP,
+		Mirror = D2D1_EXTEND_MODE_MIRROR,
+		Wrap = D2D1_EXTEND_MODE_WRAP
+	};
+
+	enum class FigureBegin
+	{
+		Filled = D2D1_FIGURE_BEGIN_FILLED,
+		Hollow = D2D1_FIGURE_BEGIN_HOLLOW
+	};
+
+	enum class FigureEnd
+	{
+		Open = D2D1_FIGURE_END_OPEN,
+		Closed = D2D1_FIGURE_END_CLOSED
+	};
+
+	enum class FillMode
+	{
+		Winding = D2D1_FILL_MODE_WINDING,
+		Alternate = D2D1_FILL_MODE_ALTERNATE
+	};
+
+	enum class SegmentFlags
+	{
+		None = D2D1_PATH_SEGMENT_NONE,
+		ForceUnstroked = D2D1_PATH_SEGMENT_FORCE_UNSTROKED,
+		ForceRoundLineJoin = D2D1_PATH_SEGMENT_FORCE_ROUND_LINE_JOIN
+	};
+
+	enum class SweepDirection
+	{
+		Clockwise = D2D1_SWEEP_DIRECTION_CLOCKWISE,
+		CounterClockwise = D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE
+	};
+
+	enum class ArcSize
+	{
+		Small = D2D1_ARC_SIZE_SMALL,
+		Large = D2D1_ARC_SIZE_LARGE
+	};
+
+	enum class LayerOptions
+	{
+		None = D2D1_LAYER_OPTIONS1_NONE,
+		InitializeFromBackground = D2D1_LAYER_OPTIONS1_INITIALIZE_FROM_BACKGROUND,
+		IgnoreAlpha = D2D1_LAYER_OPTIONS1_IGNORE_ALPHA
+	};
+}
+
+export namespace PGUI
+{
+	template <>
+	struct IsEnumFlagEnabled<UI::D2D::DrawTextOptions> : Enabled { };
+
+	template <>
+	struct IsEnumFlagEnabled<UI::D2D::BitmapOptions> : Enabled { };
+}

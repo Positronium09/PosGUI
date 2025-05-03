@@ -1,6 +1,7 @@
 module;
 #include <any>
 #include <mutex>
+#include <atomic>
 #include <typeindex>
 #include <unordered_map>
 
@@ -30,6 +31,10 @@ export namespace PGUI::UI::Theming
 		template <typename T>
 		[[nodiscard]] const auto& GetCustomStyle() const
 		{
+			if (!customStyles.contains(typeid(T)))
+			{
+				throw std::runtime_error("Custom style not found");
+			}
 			return std::any_cast<const T&>(customStyles.at(typeid(T)));
 		}
 		template <typename T>
@@ -62,7 +67,7 @@ export namespace PGUI::UI::Theming
 		[[nodiscard]] static auto& RespondToSystemThemeChange() noexcept { return respondToSystemThemeChange; }
 
 		private:
-		inline static bool respondToSystemThemeChange = true;
+		inline static std::atomic_bool respondToSystemThemeChange = true;
 		inline static Theme currentTheme =
 			SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
 		inline static Event<const Theme&> themeChangedEvent;

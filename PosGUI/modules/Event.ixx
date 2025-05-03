@@ -55,7 +55,7 @@ export namespace PGUI
 			std::lock_guard lock{ callbackMutex };
 
 			CallbackData data{ nextCallbackId, CallbackType{ callback } };
-			callbacks[static_cast<int>(priority)].push_back(data);
+			callbacks[2 - static_cast<int>(priority)].push_back(data);
 
 			return nextCallbackId++;
 		}
@@ -89,9 +89,9 @@ export namespace PGUI
 		{
 			std::lock_guard lock{ callbackMutex };
 
-			for (auto& callbackVector : callbacks | std::ranges::reverse)
+			for (const auto& callbackVector : callbacks)
 			{
-				for (auto& [id, callback] : callbackVector)
+				for (const auto& [id, callback] : callbackVector)
 				{
 					if (std::holds_alternative<CancellingCallback>(callback))
 					{
@@ -114,9 +114,9 @@ export namespace PGUI
 		{
 			std::lock_guard lock{ callbackMutex };
 
-			for (auto& callbackVector : callbacks | std::ranges::reverse)
+			for (const auto& callbackVector : callbacks)
 			{
-				for (auto& [id, callback] : callbackVector)
+				for (const auto& [id, callback] : callbackVector)
 				{
 					auto future = std::async(std::launch::async, [callback, args...]()
 					{
@@ -135,12 +135,7 @@ export namespace PGUI
 			}
 		}
 
-		Event() noexcept
-		{
-			callbacks[EventPriority::Low] = { };
-			callbacks[EventPriority::Normal] = { };
-			callbacks[EventPriority::High] = { };
-		}
+		Event() noexcept = default;
 		~Event() = default;
 		Event(Event&&) = default;
 		auto operator=(Event&&) -> Event& = default;

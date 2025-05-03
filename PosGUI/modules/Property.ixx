@@ -84,6 +84,19 @@ export namespace PGUI
 			}
 			valueChangedEvent.Invoke(Get());
 		}
+		void Set(T&& newValue)
+		{
+			{
+				std::lock_guard lock{ mutex };
+				if constexpr (std::equality_comparable<T>)
+				{
+					if (value == newValue)
+						return;
+				}
+				value = std::move(newValue);
+			}
+			valueChangedEvent.Invoke(Get());
+		}
 
 		auto AddObserver(CallbackType<T&> auto callback) noexcept
 		{
@@ -97,16 +110,12 @@ export namespace PGUI
 
 		auto operator=(const T& val) noexcept -> Property&
 		{
-			std::lock_guard lock{ mutex };
-			value = val;
-			valueChangedEvent.Invoke(value);
+			Set(val);
 			return *this;
 		}
 		auto operator=(T&& val) noexcept -> Property&
 		{
-			std::lock_guard lock{ mutex };
-			value = std::move(val);
-			valueChangedEvent.Invoke(value);
+			Set(val);
 			return *this;
 		}
 

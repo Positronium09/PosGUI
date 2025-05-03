@@ -2,6 +2,8 @@ module;
 #include <any>
 #include <mutex>
 #include <atomic>
+#include <type_traits>
+#include <concepts>
 #include <typeindex>
 #include <unordered_map>
 
@@ -65,6 +67,14 @@ export namespace PGUI::UI::Theming
 		[[nodiscard]] static auto& ThemeChangedEvent() noexcept { return themeChangedEvent; }
 
 		[[nodiscard]] static auto& RespondToSystemThemeChange() noexcept { return respondToSystemThemeChange; }
+
+		template <typename Function>
+		static void WithCurrentTheme(const Function& function) noexcept
+			requires std::invocable<Function, const Theme&>
+		{
+			std::scoped_lock lock{ themeMutex };
+			function(currentTheme);
+		}
 
 		private:
 		inline static std::atomic_bool respondToSystemThemeChange = true;

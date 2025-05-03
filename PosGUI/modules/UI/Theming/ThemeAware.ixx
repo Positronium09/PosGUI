@@ -31,8 +31,10 @@ export namespace PGUI::UI::Theming
 
 		void ApplyCurrentTheme()
 		{
-			const auto& currentTheme = ThemeContext::GetCurrentTheme();
-			ApplyTheme(currentTheme);
+			ThemeContext::WithCurrentTheme([this](const Theme& theme)
+			{
+				ApplyTheme(theme);
+			});
 		}
 
 		void OnThemeChanged(const Theme& theme)

@@ -354,5 +354,8 @@
     <ClCompile Include="modules\Property.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\UI\Theming\Theme.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

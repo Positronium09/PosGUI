@@ -124,6 +124,7 @@
     <ClCompile Include="src\UI\TextFormat.cpp" />
     <ClCompile Include="src\UI\Gradient.cpp" />
     <ClCompile Include="src\UI\TextLayout.cpp" />
+    <ClCompile Include="src\UI\Theming\Theme.cpp" />
     <ClCompile Include="src\UI\UIComponent.cpp" />
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
     <ClCompile Include="src\Utils\IEnumStringIterator.cpp" />

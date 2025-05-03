@@ -1,5 +1,6 @@
 module;
 #include <any>
+#include <mutex>
 #include <typeindex>
 #include <unordered_map>
 
@@ -53,12 +54,8 @@ export namespace PGUI::UI::Theming
 
 		ThemeContext() = delete;
 
-		[[nodiscard]] static const auto& GetCurrentTheme() noexcept { return currentTheme; }
-		static void ChangeCurrentTheme(const Theme& theme) noexcept
-		{
-			currentTheme = theme;
-			themeChangedEvent.Invoke(currentTheme);
-		}
+		[[nodiscard]] static const auto& GetCurrentTheme() noexcept;
+		static void ChangeCurrentTheme(const Theme& theme) noexcept;
 
 		[[nodiscard]] static auto& ThemeChangedEvent() noexcept { return themeChangedEvent; }
 
@@ -69,38 +66,10 @@ export namespace PGUI::UI::Theming
 		inline static Theme currentTheme =
 			SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
 		inline static Event<const Theme&> themeChangedEvent;
+		inline static std::mutex themeMutex{ };
 
-		static void InitializeThemes() noexcept
-		{
-			DarkTheme = Theme {
-				.appWindowStyle{
-					.borderColor = Colors::Transparent,
-					.captionColor = Colors::Transparent,
-					.captionTextColor = Colors::Transparent,
-					.darkMode = true,
-					.cornerPreference = CornerPreference::Default
-				}
-			};
+		static void InitializeThemes() noexcept;
 
-			LightTheme = Theme {
-				.appWindowStyle{
-					.borderColor = Colors::Transparent,
-					.captionColor = Colors::Transparent,
-					.captionTextColor = Colors::Transparent,
-					.darkMode = false,
-					.cornerPreference = CornerPreference::Default
-				}
-			};
-		}
-
-		static void OnSystemThemeChanged()
-		{
-			if (respondToSystemThemeChange)
-			{
-				InitializeThemes();
-				currentTheme = SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
-				themeChangedEvent.Invoke(currentTheme);
-			}
-		}
+		static void OnSystemThemeChanged();
 	};
 }

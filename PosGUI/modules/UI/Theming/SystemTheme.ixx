@@ -2,7 +2,7 @@ module;
 #include <Windows.h>
 #include <winrt//windows.ui.viewmanagement.h>
 
-export module PGUI.UI.SystemTheme;
+export module PGUI.UI.Theming.SystemTheme;
 
 import PGUI.UI.Color;
 import PGUI.Event;
@@ -12,7 +12,7 @@ namespace PGUI
 	void Init();
 }
 
-export namespace PGUI::UI
+export namespace PGUI::UI::Theming
 {
 	enum class ColorType
 	{

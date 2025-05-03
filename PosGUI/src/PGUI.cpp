@@ -9,8 +9,8 @@ module;
 module PGUI;
 
 import PGUI.Factories;
-import PGUI.UI.SystemTheme;
-import PGUI.UI.Styling.Theme;
+import PGUI.UI.Theming.SystemTheme;
+import PGUI.UI.Theming.Theme;
 import PGUI.UI.DirectXCompositionWindow;
 
 namespace PGUI
@@ -24,17 +24,17 @@ namespace PGUI
 		(void)Factories::DWriteFactory::GetFactory();
 		(void)Factories::WICFactory::GetFactory();
 
-		UI::SystemTheme::uiSettings.ColorValuesChanged([](
+		UI::Theming::SystemTheme::uiSettings.ColorValuesChanged([](
 			const winrt::Windows::UI::ViewManagement::UISettings&,
 			const winrt::Windows::Foundation::IInspectable&)
 		{
-			UI::SystemTheme::ColorValuesChanged().InvokeAsync();
+			UI::Theming::SystemTheme::ColorValuesChanged().InvokeAsync();
 		});
 		
-		UI::Styling::ThemeContext::InitializeThemes();
+		UI::Theming::ThemeContext::InitializeThemes();
 
-		UI::SystemTheme::ColorValuesChanged().AddCallback(
-			&UI::Styling::ThemeContext::OnSystemThemeChanged
+		UI::Theming::SystemTheme::ColorValuesChanged().AddCallback(
+			&UI::Theming::ThemeContext::OnSystemThemeChanged
 		);
 
 		auto* awarenessContext = GetDpiAwarenessContextForProcess(nullptr);

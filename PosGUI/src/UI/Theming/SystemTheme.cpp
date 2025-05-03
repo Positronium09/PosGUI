@@ -2,13 +2,13 @@ module;
 #include <Windows.h>
 #include <winrt//windows.ui.viewmanagement.h>
 
-module PGUI.UI.SystemTheme;
+module PGUI.UI.Theming.SystemTheme;
 
 import PGUI.UI.Color;
 import PGUI.Exceptions;
 import PGUI.Logging;
 
-namespace PGUI::UI
+namespace PGUI::UI::Theming
 {
 	auto SystemTheme::IsDarkMode() -> bool
 

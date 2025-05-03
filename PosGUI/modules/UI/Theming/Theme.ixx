@@ -3,10 +3,10 @@ module;
 #include <typeindex>
 #include <unordered_map>
 
-export module PGUI.UI.Styling.Theme;
+export module PGUI.UI.Theming.Theme;
 
-import PGUI.UI.Styling.Styles;
-import PGUI.UI.SystemTheme;
+import PGUI.UI.Theming.Styles;
+import PGUI.UI.Theming.SystemTheme;
 import PGUI.Event;
 
 namespace PGUI
@@ -14,7 +14,7 @@ namespace PGUI
 	void Init();
 }
 
-export namespace PGUI::UI::Styling
+export namespace PGUI::UI::Theming
 {
 	struct Theme
 	{
@@ -67,7 +67,7 @@ export namespace PGUI::UI::Styling
 		private:
 		inline static bool respondToSystemThemeChange = true;
 		inline static Theme currentTheme =
-			PGUI::UI::SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
+			SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
 		inline static Event<const Theme&> themeChangedEvent;
 
 		static void InitializeThemes() noexcept
@@ -98,7 +98,7 @@ export namespace PGUI::UI::Styling
 			if (respondToSystemThemeChange)
 			{
 				InitializeThemes();
-				currentTheme = PGUI::UI::SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
+				currentTheme = SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
 				themeChangedEvent.Invoke(currentTheme);
 			}
 		}

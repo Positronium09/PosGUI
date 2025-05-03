@@ -327,22 +327,22 @@
     <ClCompile Include="src\UI\UIComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\Styling\Theme.ixx">
+    <ClCompile Include="modules\UI\Theming\Theme.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\Styling\Styles.ixx">
+    <ClCompile Include="modules\UI\Theming\Styles.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\SystemTheme.ixx">
+    <ClCompile Include="modules\UI\Theming\SystemTheme.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\Styling\Styling.ixx">
+    <ClCompile Include="modules\UI\Theming\Theming.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\SystemUIColors.cpp">
+    <ClCompile Include="src\UI\Theming\SystemTheme.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\Styling\ThemeAware.ixx">
+    <ClCompile Include="modules\UI\Theming\ThemeAware.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Animation\Animation.ixx">

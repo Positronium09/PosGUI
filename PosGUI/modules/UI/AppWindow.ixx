@@ -9,14 +9,14 @@ import PGUI.Shape2D;
 import PGUI.Window;
 import PGUI.UI.Color;
 import PGUI.UI.Brush;
-import PGUI.UI.Styling.Styles;
-import PGUI.UI.Styling.ThemeAware;
+import PGUI.UI.Theming.Styles;
+import PGUI.UI.Theming.ThemeAware;
 import PGUI.UI.DirectXCompositionWindow;
 
 
 export namespace PGUI::UI
 {
-	class AppWindow : public DirectXCompositionWindow, public Styling::ThemeAware<Styling::AppWindowStyle>
+	class AppWindow : public DirectXCompositionWindow, public Theming::ThemeAware<Theming::AppWindowStyle>
 	{
 		public:
 		AppWindow() noexcept;
@@ -50,9 +50,9 @@ export namespace PGUI::UI
 		void SetBorderColor(RGBA color) const noexcept;
 		void SetCaptionColor(RGBA color) const noexcept;
 		void SetCaptionTextColor(RGBA color) const noexcept;
-		void SetCornerPreference(Styling::CornerPreference cornerPreference) const noexcept;
+		void SetCornerPreference(Theming::CornerPreference cornerPreference) const noexcept;
 
-		void ApplyStyle(const Styling::AppWindowStyle& style) noexcept override;
+		void ApplyStyle(const Theming::AppWindowStyle& style) noexcept override;
 
 		private:
 		std::wstring titleText;

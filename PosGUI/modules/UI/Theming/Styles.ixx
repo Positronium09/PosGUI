@@ -2,14 +2,14 @@ module;
 #include <Windows.h>
 #include <dwmapi.h>
 
-export module PGUI.UI.Styling.Styles;
+export module PGUI.UI.Theming.Styles;
 
-import PGUI.UI.SystemTheme;
+import PGUI.UI.Theming.SystemTheme;
 import PGUI.UI.Brush;
 import PGUI.UI.Color;
 import PGUI.UI.Colors;
 
-export namespace PGUI::UI::Styling
+export namespace PGUI::UI::Theming
 {
 	enum CornerPreference
 	{

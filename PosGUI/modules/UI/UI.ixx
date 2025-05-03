@@ -14,6 +14,5 @@ export import PGUI.UI.D2D;
 export import PGUI.UI.Imaging;
 export import PGUI.UI.AppWindow;
 export import PGUI.UI.UIComponent;
-export import PGUI.UI.SystemTheme;
-export import PGUI.UI.Styling;
+export import PGUI.UI.Theming;
 export import PGUI.UI.Animation;

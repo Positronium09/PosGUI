@@ -2,12 +2,12 @@ module;
 #include <any>
 #include <functional>
 
-export module PGUI.UI.Styling.ThemeAware;
+export module PGUI.UI.Theming.ThemeAware;
 
-import PGUI.UI.Styling.Styles;
-import PGUI.UI.Styling.Theme;
+import PGUI.UI.Theming.Styles;
+import PGUI.UI.Theming.Theme;
 
-export namespace PGUI::UI::Styling
+export namespace PGUI::UI::Theming
 {
 	template <typename StyleType>
 	class ThemeAware

@@ -175,7 +175,7 @@ namespace PGUI::UI
 			sizeof(colorRef)); LogFailed(LogLevel::Error, hr);
 	}
 
-	void AppWindow::SetCornerPreference(Styling::CornerPreference cornerPreference) const noexcept
+	void AppWindow::SetCornerPreference(Theming::CornerPreference cornerPreference) const noexcept
 	{
 		auto preference = static_cast<DWM_WINDOW_CORNER_PREFERENCE>(cornerPreference);
 		auto hr = DwmSetWindowAttribute(Hwnd(),
@@ -184,7 +184,7 @@ namespace PGUI::UI
 			sizeof(preference)); LogFailed(LogLevel::Error, hr);
 	}
 
-	void AppWindow::ApplyStyle(const Styling::AppWindowStyle& style) noexcept
+	void AppWindow::ApplyStyle(const Theming::AppWindowStyle& style) noexcept
 	{
 		SetBorderColor(style.borderColor);
 		SetCaptionColor(style.captionColor);

@@ -42,7 +42,7 @@ export namespace PGUI
 		{
 			if (this != &other)
 			{
-				std::lock_guard lock{ mutex };
+				std::scoped_lock lock{ mutex };
 				value = other.Get();
 				valueChangedEvent.Invoke(value);
 			}
@@ -53,7 +53,7 @@ export namespace PGUI
 		{
 			if (this != &other)
 			{
-				std::lock_guard lock{ mutex };
+				std::scoped_lock lock{ mutex };
 				value = std::move(other.Get());
 				valueChangedEvent.Invoke(value);
 			}
@@ -62,23 +62,25 @@ export namespace PGUI
 
 		[[nodiscard]] const auto& Get() const noexcept
 		{
-			std::lock_guard lock{ mutex };
+			std::scoped_lock lock{ mutex };
 			return value;
 		}
 		[[nodiscard]] auto& Get() noexcept
 		{
-			std::lock_guard lock{ mutex };
+			std::scoped_lock lock{ mutex };
 			return value;
 		}
 
 		void Set(const T& newValue)
 		{
 			{
-				std::lock_guard lock{ mutex };
+				std::scoped_lock lock{ mutex };
 				if constexpr (std::equality_comparable<T>)
 				{
 					if (value == newValue)
+					{
 						return;
+					}
 				}
 				value = newValue;
 			}
@@ -87,11 +89,13 @@ export namespace PGUI
 		void Set(T&& newValue)
 		{
 			{
-				std::lock_guard lock{ mutex };
+				std::scoped_lock lock{ mutex };
 				if constexpr (std::equality_comparable<T>)
 				{
 					if (value == newValue)
+					{
 						return;
+					}
 				}
 				value = std::move(newValue);
 			}
@@ -124,12 +128,12 @@ export namespace PGUI
 
 		auto operator==(const Property& other) const noexcept -> bool
 		{
-			std::lock_guard lock{ mutex };
+			std::scoped_lock lock{ mutex };
 			return value == other.Get();
 		}
 		auto operator<=>(const Property& other) const noexcept
 		{
-			std::lock_guard lock{ mutex };
+			std::scoped_lock lock{ mutex };
 			return value <=> other.Get();
 		}
 

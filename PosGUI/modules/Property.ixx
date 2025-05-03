@@ -8,7 +8,18 @@ import PGUI.Event;
 
 export namespace PGUI
 {
-	template <typename T>
+	class NullMutex
+	{
+		public:
+		void lock() noexcept
+		{
+		}
+		void unlock() noexcept
+		{
+		}
+	};;
+
+	template <typename T, typename MutexType = std::mutex>
 	class Property
 	{
 		using EventType = Event<T&>;
@@ -64,6 +75,11 @@ export namespace PGUI
 		{
 			{
 				std::lock_guard lock{ mutex };
+				if constexpr (std::equality_comparable<T>)
+				{
+					if (value == newValue)
+						return;
+				}
 				value = newValue;
 			}
 			valueChangedEvent.Invoke(Get());
@@ -110,7 +126,7 @@ export namespace PGUI
 
 		private:
 		T value;
-		std::mutex mutex;
+		MutexType mutex;
 		EventType valueChangedEvent{ };
 	};
 }

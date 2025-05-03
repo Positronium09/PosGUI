@@ -2,7 +2,7 @@ module;
 #include <vector>
 #include <functional>
 #include <utility>
-#include <unordered_map>
+#include <array>
 #include <mutex>
 #include <concepts>
 #include <variant>
@@ -32,8 +32,8 @@ export namespace PGUI
 	class Event
 	{
 		public:
-		using CancellingCallback = std::function<bool(Args&&...)>;
-		using NonCancellingCallback = std::function<void(Args&&...)>;
+		using CancellingCallback = std::function<bool(Args...)>;
+		using NonCancellingCallback = std::function<void(Args...)>;
 		using Callback = std::variant<NonCancellingCallback, CancellingCallback>;
 
 		private:
@@ -55,7 +55,7 @@ export namespace PGUI
 			std::lock_guard lock{ callbackMutex };
 
 			CallbackData data{ nextCallbackId, CallbackType{ callback } };
-			callbacks.at(priority).push_back(data);
+			callbacks[static_cast<int>(priority)].push_back(data);
 
 			return nextCallbackId++;
 		}
@@ -64,7 +64,7 @@ export namespace PGUI
 		{
 			std::lock_guard lock{ callbackMutex };
 
-			for (auto& [priority, callbackList] : callbacks)
+			for (auto& callbackList : callbacks)
 			{
 				auto erased = std::erase_if(callbackList, 
 					[id](const CallbackData& data) { return data.id == id; });
@@ -79,61 +79,33 @@ export namespace PGUI
 		{
 			std::lock_guard lock{ callbackMutex };
 
-			callbacks[EventPriority::Low].clear();
-			callbacks[EventPriority::Normal].clear();
-			callbacks[EventPriority::High].clear();
+			for (auto& callbackList : callbacks)
+			{
+				callbackList.clear();
+			}
 		}
 
 		void Invoke(Args&&... args) const noexcept
 		{
 			std::lock_guard lock{ callbackMutex };
 
-			for (auto& [id, callback] : callbacks.at(EventPriority::High))
+			for (auto& callbackVector : callbacks | std::ranges::reverse)
 			{
-				if (std::holds_alternative<CancellingCallback>(callback))
+				for (auto& [id, callback] : callbackVector)
 				{
-					auto& cancellingCallback = std::get<CancellingCallback>(callback);
-					if (!cancellingCallback(std::forward<Args>(args)...))
+					if (std::holds_alternative<CancellingCallback>(callback))
 					{
-						return;
+						auto& cancellingCallback = std::get<CancellingCallback>(callback);
+						if (!cancellingCallback(std::forward<Args>(args)...))
+						{
+							return;
+						}
 					}
-				}
-				else
-				{
-					auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
-					nonCancellingCallback(std::forward<Args>(args)...);
-				}
-			}
-			for (auto& [id, callback] : callbacks.at(EventPriority::Normal))
-			{
-				if (std::holds_alternative<CancellingCallback>(callback))
-				{
-					auto& cancellingCallback = std::get<CancellingCallback>(callback);
-					if (!cancellingCallback(std::forward<Args>(args)...))
+					else
 					{
-						return;
+						auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
+						nonCancellingCallback(std::forward<Args>(args)...);
 					}
-				}
-				else
-				{
-					auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
-					nonCancellingCallback(std::forward<Args>(args)...);
-				}
-			}
-			for (auto& [id, callback] : callbacks.at(EventPriority::Low))
-			{
-				if (std::holds_alternative<CancellingCallback>(callback))
-				{
-					auto& cancellingCallback = std::get<CancellingCallback>(callback);
-					if (!cancellingCallback(std::forward<Args>(args)...))
-					{
-						return;
-					}
-				}
-				else
-				{
-					auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
-					nonCancellingCallback(std::forward<Args>(args)...);
 				}
 			}
 		}
@@ -142,9 +114,9 @@ export namespace PGUI
 		{
 			std::lock_guard lock{ callbackMutex };
 
-			for (const auto& [priority, callbackList] : callbacks)
+			for (auto& callbackVector : callbacks | std::ranges::reverse)
 			{
-				for (const auto& [id, callback] : callbackList)
+				for (auto& [id, callback] : callbackVector)
 				{
 					auto future = std::async(std::launch::async, [callback, args...]()
 					{
@@ -178,19 +150,22 @@ export namespace PGUI
 		auto operator+=(const CallbackType<Args...> auto& callback) -> Event&
 		{
 			AddCallback(callback);
+			return *this;
 		}
 
 		private:
 		CallbackId nextCallbackId = 0;
 		mutable std::mutex callbackMutex;
-		std::unordered_map<EventPriority, std::vector<CallbackData>> callbacks;
+		std::array<std::vector<CallbackData>, 3> callbacks;
 	};
 
 	template <typename ...Args>
 	class ScopedCallback final
 	{
+		using EventType = Event<Args...>;
+
 		public:
-		ScopedCallback(Event<Args...>& event, Event<Args...>::CallbackId id) noexcept : 
+		ScopedCallback(EventType& event, CallbackId id) noexcept : 
 			event(event), id(id)
 		{
 		}
@@ -205,7 +180,7 @@ export namespace PGUI
 		auto operator=(const ScopedCallback&) -> ScopedCallback& = delete;
 
 		private:
-		Event<Args...>& event;
-		Event<Args...>::CallbackId id{ };
+		EventType& event;
+		CallbackId id{ };
 	};
 }

@@ -6,13 +6,14 @@ module;
 
 module PGUI.UI.Theming.Theme;
 
+import PGUI.Event;
+import PGUI.UI.Colors;
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.SystemTheme;
-import PGUI.Event;
 
 namespace PGUI::UI::Theming
 {
-	const auto& ThemeContext::GetCurrentTheme() noexcept
+	auto ThemeContext::GetCurrentTheme() noexcept -> const Theme&
 	{
 		std::scoped_lock lock{ themeMutex };
 		return currentTheme;
@@ -52,7 +53,7 @@ namespace PGUI::UI::Theming
 	void ThemeContext::OnSystemThemeChanged()
 	{
 		if (respondToSystemThemeChange && 
-			(&currentTheme == &DarkTheme || &currentTheme == &LightTheme))
+			(&currentTheme == &DarkTheme || &currentTheme == &DarkTheme))
 		{
 			InitializeThemes();
 			currentTheme = SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;

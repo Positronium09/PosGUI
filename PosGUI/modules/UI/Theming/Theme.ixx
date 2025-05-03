@@ -59,7 +59,7 @@ export namespace PGUI::UI::Theming
 
 		ThemeContext() = delete;
 
-		[[nodiscard]] static const auto& GetCurrentTheme() noexcept;
+		[[nodiscard]] static auto GetCurrentTheme() noexcept -> const Theme&;
 		static void ChangeCurrentTheme(const Theme& theme) noexcept;
 
 		[[nodiscard]] static auto& ThemeChangedEvent() noexcept { return themeChangedEvent; }

@@ -27,7 +27,7 @@ export namespace PGUI::UI::Imaging
 		{
 		}
 
-		[[nodiscard]] auto GetSize() const noexcept
+		[[nodiscard]] auto GetSize() const
 		{
 			UINT width{ };
 			UINT height{ };
@@ -35,14 +35,14 @@ export namespace PGUI::UI::Imaging
 
 			return SizeU{ width, height };
 		}
-		[[nodiscard]] auto GetPixelFormat() const noexcept
+		[[nodiscard]] auto GetPixelFormat() const
 		{
 			WICPixelFormatGUID format{ };
 			auto hr =this->Get()->GetPixelFormat(&format); ThrowFailed(hr);
 
 			return format;
 		}
-		[[nodiscard]] auto GetResolution() const noexcept
+		[[nodiscard]] auto GetResolution() const
 		{
 			double dpiX{ };
 			double dpiY{ };
@@ -50,23 +50,26 @@ export namespace PGUI::UI::Imaging
 
 			return std::pair{ dpiX, dpiY };
 		}
-		[[nodiscard]] auto CopyPixels(RectI rect) const noexcept
+		[[nodiscard]] auto CopyPixels(UINT stride) const
 		{
-			std::vector<BYTE> buffer(rect.Area() * 4);
-			auto hr =this->Get()->CopyPixels(&rect, rect.Size().cx * 4, 
+			auto size = this->GetSize();
+			RectI rect = { 0, 0, size.cx, size.cy };
+			std::vector<BYTE> buffer(rect.Area() * stride);
+			auto hr = this->Get()->CopyPixels(nullptr, stride,
 				static_cast<UINT>(buffer.size()), buffer.data()); ThrowFailed(hr);
 
 			return buffer;
 		}
-		[[nodiscard]] auto CopyPixels(RectI rect, UINT stride) const noexcept
+		[[nodiscard]] auto CopyPixels(RectI rect, UINT stride) const
 		{
-			std::vector<BYTE> buffer(rect.Area() * 4);
-			auto hr =this->Get()->CopyPixels(&rect, stride, 
+			std::vector<BYTE> buffer(rect.Area() * stride);
+			WICRect rc = rect;
+			auto hr =this->Get()->CopyPixels(&rc, stride, 
 				static_cast<UINT>(buffer.size()), buffer.data()); ThrowFailed(hr);
 
 			return buffer;
 		}
-		[[nodiscard]] auto CopyPixels(RectI rect, UINT stride, UINT bufferSize) const noexcept
+		[[nodiscard]] auto CopyPixels(RectI rect, UINT stride, UINT bufferSize) const
 		{
 			std::vector<BYTE> buffer(bufferSize);
 			WICRect rc = rect;

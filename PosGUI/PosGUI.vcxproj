@@ -83,6 +83,7 @@
     <ClCompile Include="modules\UI\D2D\RenderTarget.ixx" />
     <ClCompile Include="modules\UI\D2D\D2DEnums.ixx" />
     <ClCompile Include="modules\UI\D2D\D2DStructs.ixx" />
+    <ClCompile Include="modules\UI\Imaging\WICBitmapLock.ixx" />
     <ClCompile Include="modules\UI\Theming\Styles.ixx" />
     <ClCompile Include="modules\UI\Theming\Theming.ixx" />
     <ClCompile Include="modules\UI\Theming\ThemeAware.ixx" />
@@ -120,6 +121,7 @@
     <ClCompile Include="src\UI\Imaging\MetadataReader.cpp" />
     <ClCompile Include="src\UI\Imaging\Palette.cpp" />
     <ClCompile Include="src\UI\Imaging\WICBitmap.cpp" />
+    <ClCompile Include="src\UI\Imaging\WICBitmapLock.cpp" />
     <ClCompile Include="src\UI\Theming\SystemTheme.cpp" />
     <ClCompile Include="src\UI\TextFormat.cpp" />
     <ClCompile Include="src\UI\Gradient.cpp" />

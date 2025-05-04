@@ -7,6 +7,7 @@ export module PGUI.UI.Imaging.WICBitmap;
 import PGUI.ComPtr;
 import PGUI.UI.Imaging.BitmapSource;
 import PGUI.UI.Imaging.Palette;
+import PGUI.UI.Imaging.WICBitmapLock;
 
 export namespace PGUI::UI::Imaging
 {
@@ -15,7 +16,8 @@ export namespace PGUI::UI::Imaging
 		public:
 		WICBitmap() noexcept = default;
 		WICBitmap(ComPtr<IWICBitmap> bitmap) noexcept;
-		[[nodiscard]] auto Lock(RectI rect, WICBitmapLockFlags flags) const noexcept -> ComPtr<IWICBitmapLock>;
+		//TODO Wrapper for IWICBitmapLock
+		[[nodiscard]] auto Lock(RectI rect, WICBitmapLockFlags flags) const noexcept -> WICBitmapLock;
 
 		void SetPalette(Palette palette) noexcept;
 

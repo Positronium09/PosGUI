@@ -26,6 +26,13 @@ namespace PGUI::UI::Imaging
 		const auto& factory = Factories::WICFactory::GetFactory();
 		auto hr = factory->CreateFormatConverter(GetAddress()); ThrowFailed(hr);
 
+		auto srcPixelFormat = bitmapSource.GetPixelFormat();
+		if (srcPixelFormat == destinationFormat)
+		{
+			ThrowFailed(E_INVALIDARG);
+			return;
+		}
+
 		hr = Get()->Initialize(bitmapSource.GetRaw(), destinationFormat, 
 			ditherType, palette.has_value() ? palette->GetRaw() : nullptr,
 			alphaThresholdPercent, paletteType); ThrowFailed(hr);

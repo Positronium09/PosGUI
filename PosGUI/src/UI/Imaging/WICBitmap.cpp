@@ -16,7 +16,7 @@ namespace PGUI::UI::Imaging
 	{
 	}
 
-	auto WICBitmap::Lock(RectI rect, WICBitmapLockFlags flags) const noexcept -> ComPtr<IWICBitmapLock>
+	auto WICBitmap::Lock(RectI rect, WICBitmapLockFlags flags) const noexcept -> WICBitmapLock
 	{
 		WICRect wicRect = rect;
 		ComPtr<IWICBitmapLock> lock;

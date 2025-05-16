@@ -19,6 +19,11 @@ namespace PGUI
 	{
 		winrt::init_apartment();
 
+		BOOL val = FALSE;
+		SetUserObjectInformationW(GetCurrentProcess(),
+			UOI_TIMERPROC_EXCEPTION_SUPPRESSION,
+			&val, sizeof(val));
+
 		(void)Factories::D2DFactory::GetFactory();
 		(void)Factories::DXGIFactory::GetFactory();
 		(void)Factories::DWriteFactory::GetFactory();

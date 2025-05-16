@@ -7,6 +7,7 @@ module PGUI.UI.Imaging.WICBitmapLock;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;
+import PGUI.Exceptions;
 import PGUI.UI.Imaging.BitmapSource;
 import PGUI.UI.Imaging.Palette;
 

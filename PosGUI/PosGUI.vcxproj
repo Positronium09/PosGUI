@@ -50,6 +50,9 @@
     <ClCompile Include="modules\UI\Colors.ixx" />
     <ClCompile Include="modules\UI\D2D\BitmapRenderTarget.ixx" />
     <ClCompile Include="modules\UI\D2D\D2D.ixx" />
+    <ClCompile Include="modules\UI\D2D\D2DProperties.ixx" />
+    <ClCompile Include="modules\UI\D2D\DeviceContext.ixx" />
+    <ClCompile Include="modules\UI\D2D\Effect.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DEllipseGeometry.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DGeometry.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DLayer.ixx" />
@@ -108,6 +111,8 @@
     <ClCompile Include="src\UI\Clip.cpp" />
     <ClCompile Include="src\UI\Color.cpp" />
     <ClCompile Include="src\UI\D2D\D2DBitmap.cpp" />
+    <ClCompile Include="src\UI\D2D\D2DProperties.cpp" />
+    <ClCompile Include="src\UI\D2D\Effect.cpp" />
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
     <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
     <ClCompile Include="src\UI\Font\FontCollection.cpp" />
@@ -237,7 +242,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -265,7 +270,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -289,7 +294,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -317,7 +322,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

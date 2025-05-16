@@ -19,6 +19,7 @@ export namespace PGUI::UI::Font
 		[[nodiscard]] static auto GetSystemFontCollection() -> FontCollection;
 		[[nodiscard]] static auto LoadFontFile(std::filesystem::path filePath) -> FontCollection;
 
+		FontCollection() noexcept = default;
 		FontCollection(ComPtr<IDWriteFontCollection3> collection) noexcept;
 
 		[[nodiscard]] auto FindFontFamilyByName(std::wstring_view fontFamilyName) const noexcept -> std::expected<UINT32, bool>;

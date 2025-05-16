@@ -26,8 +26,26 @@ namespace PGUI::UI::Font
 
 	auto FontCollection::LoadFontFile(std::filesystem::path filePath) -> FontCollection
 	{
-		(void)filePath;
-		throw HResultException{ E_NOTIMPL };
+		const auto& factory = Factories::DWriteFactory::GetFactory();
+		ComPtr<IDWriteFontSetBuilder2> fontSetBuilder;
+
+		auto hr = factory->CreateFontSetBuilder(&fontSetBuilder); ThrowFailed(hr);
+
+		ComPtr<IDWriteFontFile> fontFile;
+		hr = factory->CreateFontFileReference(filePath.c_str(), nullptr, &fontFile); ThrowFailed(hr);
+
+		fontSetBuilder->AddFontFile(fontFile.Get());
+
+		ComPtr<IDWriteFontSet> fontSet;
+		hr = fontSetBuilder->CreateFontSet(&fontSet); ThrowFailed(hr);
+
+		ComPtr<IDWriteFontCollection1> fontCollection;
+		hr = factory->CreateFontCollectionFromFontSet(fontSet.Get(), &fontCollection); ThrowFailed(hr);
+
+		ComPtr<IDWriteFontCollection3> fontCollection3;
+		hr = fontCollection.As(&fontCollection3); ThrowFailed(hr);
+
+		return fontCollection3;
 	}
 
 	FontCollection::FontCollection(ComPtr<IDWriteFontCollection3> collection) noexcept :

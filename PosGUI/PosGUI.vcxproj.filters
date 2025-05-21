@@ -420,5 +420,11 @@
     <ClCompile Include="modules\UI\Animation\AnimationEnums.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\UI\Animation\AnimationStoryboardEventHandler.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Animation\AnimationStoryboardEventHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

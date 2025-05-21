@@ -6,6 +6,7 @@ module;
 module PGUI.UI.Animation.AnimationManagerEventHandler;
 
 import PGUI.ComPtr;
+import PGUI.Event;
 import PGUI.Utils;
 import PGUI.Exceptions;
 import PGUI.UI.Animation.AnimationEnums;
@@ -102,14 +103,14 @@ namespace PGUI::UI::Animation
 		}
 	}
 
-	AnimationManagerEventHandler::AnimationManagerEventHandler()
+	AnimationManagerEventHandler::AnimationManagerEventHandler() : 
+		router{ std::bind_front(&AnimationManagerEventHandler::CallHandler, this) }
 	{
-		router.SetHandler(std::bind_front(&AnimationManagerEventHandler::CallHandler, this));
 	}
 
 	void AnimationManagerEvent::OnManagerStatusChanged(AnimationManagerStatus newStatus,
 		AnimationManagerStatus previousStatus)
 	{
-		Invoke(std::move(newStatus), std::move(previousStatus));
+		managerStatusChangedEvent.Invoke(std::move(newStatus), std::move(previousStatus));
 	}
 }

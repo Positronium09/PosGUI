@@ -57,9 +57,15 @@ export namespace PGUI::UI::Animation
 			AnimationManagerStatus previousStatus) noexcept -> HRESULT;
 	};
 
-	class AnimationManagerEvent : public AnimationManagerEventHandler, 
-		public Event<AnimationManagerStatus, AnimationManagerStatus>
+	class AnimationManagerEvent : public AnimationManagerEventHandler
 	{
+		public:
+		[[nodiscard]] const auto& ManagerStatusChanged() const noexcept { return managerStatusChangedEvent; }
+		[[nodiscard]] auto& ManagerStatusChanged() noexcept { return managerStatusChangedEvent; }
+
+		private:
+		Event<AnimationManagerStatus, AnimationManagerStatus> managerStatusChangedEvent{ };
+
 		void OnManagerStatusChanged(AnimationManagerStatus newStatus, 
 			AnimationManagerStatus previousStatus) override;
 	};

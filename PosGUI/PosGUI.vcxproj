@@ -43,6 +43,11 @@
     <ClCompile Include="modules\Shape2D\Size.ixx" />
     <ClCompile Include="modules\UI\Animation\Animation.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationManager.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationTimer.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationTransition.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationTransitionLibrary.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationVariable.ixx" />
+    <ClCompile Include="modules\UI\Animation\Storyboard.ixx" />
     <ClCompile Include="modules\UI\AppWindow.ixx" />
     <ClCompile Include="modules\UI\Brush.ixx" />
     <ClCompile Include="modules\UI\Clip.ixx" />
@@ -106,6 +111,12 @@
     <ClCompile Include="src\MessageLoop.cpp" />
     <ClCompile Include="src\PGUI.cpp" />
     <ClCompile Include="src\PropVariant.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationManager.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationTimer.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationTransition.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationTransitionLibrary.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationVariable.cpp" />
+    <ClCompile Include="src\UI\Animation\Storyboard.cpp" />
     <ClCompile Include="src\UI\AppWindow.cpp" />
     <ClCompile Include="src\UI\Brush.cpp" />
     <ClCompile Include="src\UI\Clip.cpp" />

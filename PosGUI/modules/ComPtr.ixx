@@ -81,6 +81,11 @@ export namespace PGUI
 			return ptr;
 		}
 		template <IsAnyOf<Interfaces...> T = FirstType>
+		[[nodiscard]] auto GetVoidAddress() const noexcept
+		{
+			return std::bit_cast<void**>(Get<T>().GetAddressOf());
+		}
+		template <IsAnyOf<Interfaces...> T = FirstType>
 		[[nodiscard]] auto GetAddress() const noexcept
 		{
 			return Get<T>().GetAddressOf();

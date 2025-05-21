@@ -42,7 +42,9 @@
     <ClCompile Include="modules\PGUI.ixx" />
     <ClCompile Include="modules\Shape2D\Size.ixx" />
     <ClCompile Include="modules\UI\Animation\Animation.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationEnums.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationManager.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationManagerEventHandler.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTimer.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTransition.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTransitionLibrary.ixx" />
@@ -112,6 +114,7 @@
     <ClCompile Include="src\PGUI.cpp" />
     <ClCompile Include="src\PropVariant.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationManager.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationManagerEventHandler.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationTimer.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationTransition.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationTransitionLibrary.cpp" />

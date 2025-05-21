@@ -4,32 +4,12 @@ module;
 export module PGUI.UI.Animation.Storyboard;
 
 import PGUI.ComPtr;
+import PGUI.UI.Animation.AnimationEnums;
 
 export namespace  PGUI::UI::Animation
 {
 	class AnimationVariable;
 	class AnimationTransition;
-
-	enum class StoryboardStatus
-	{
-		Building = UI_ANIMATION_STORYBOARD_BUILDING,
-		Scheduled = UI_ANIMATION_STORYBOARD_SCHEDULED,
-		Cancelled = UI_ANIMATION_STORYBOARD_CANCELLED,
-		Playing = UI_ANIMATION_STORYBOARD_PLAYING,
-		Truncated = UI_ANIMATION_STORYBOARD_TRUNCATED,
-		Finished = UI_ANIMATION_STORYBOARD_FINISHED,
-		Ready = UI_ANIMATION_STORYBOARD_READY,
-		InsufficentPriority = UI_ANIMATION_STORYBOARD_INSUFFICIENT_PRIORITY
-	};
-
-	enum class AnimationSchedulingResult
-	{
-		UnexpectedFailure = UI_ANIMATION_SCHEDULING_UNEXPECTED_FAILURE,
-		InsufficientPriority = UI_ANIMATION_SCHEDULING_INSUFFICIENT_PRIORITY,
-		AlreadyScheduled = UI_ANIMATION_SCHEDULING_ALREADY_SCHEDULED,
-		Succeeded = UI_ANIMATION_SCHEDULING_SUCCEEDED,
-		Deferred = UI_ANIMATION_SCHEDULING_DEFERRED
-	};
 
 	using KeyFrame = UI_ANIMATION_KEYFRAME;
 	const auto StartKeyFrame = KeyFrame(-1);

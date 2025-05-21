@@ -12,6 +12,8 @@ import PGUI.Factories;
 import PGUI.UI.Theming.SystemTheme;
 import PGUI.UI.Theming.Theme;
 import PGUI.UI.DirectXCompositionWindow;
+import PGUI.UI.Animation.AnimationManager;
+import PGUI.UI.Animation.AnimationTransitionLibrary;
 
 namespace PGUI
 {
@@ -28,6 +30,8 @@ namespace PGUI
 		(void)Factories::DXGIFactory::GetFactory();
 		(void)Factories::DWriteFactory::GetFactory();
 		(void)Factories::WICFactory::GetFactory();
+		(void)UI::Animation::AnimationManager::GetInstance();
+		(void)UI::Animation::AnimationTransitionLibrary::GetInstance();
 
 		UI::Theming::SystemTheme::uiSettings.ColorValuesChanged([](
 			const winrt::Windows::UI::ViewManagement::UISettings&,

@@ -1,45 +1,61 @@
 module;
 #include <UIAnimation.h>
+#include <span>
 
 export module PGUI.UI.Animation.AnimationManager;
 
 import PGUI.ComPtr;
+import PGUI.UI.Animation.AnimationEnums;
 
 export namespace PGUI::UI::Animation
 {
-	enum class AnimationManagerStatus
-	{
-		Idle = UI_ANIMATION_MANAGER_IDLE,
-		Busy = UI_ANIMATION_MANAGER_BUSY
-	};
-
-	enum class AnimationMode
-	{
-		Disabled = UI_ANIMATION_MODE_DISABLED,
-		SystemDefault = UI_ANIMATION_MODE_SYSTEM_DEFAULT,
-		Enabled = UI_ANIMATION_MODE_ENABLED
-	};
+	class Storyboard;
+	class AnimationVariable;
+	class AnimationTransition;
+	class AnimationManagerEventHandler;
 
 	class AnimationManager : public ComPtrHolder<IUIAnimationManager2>
 	{
 		public:
-		[[nodiscard]] static const auto& GetInstance() noexcept { return instance; }
+		[[nodiscard]] static auto GetInstance() -> const AnimationManager&;
 
 		static void AbandonAllStoryboards();
 
 		static void Pause();
 		static void Resume();
 		static void Shutdown();
+		[[nodiscard]] static auto Update(double timeNow) -> AnimationUpdateResult;
+
+		[[nodiscard]] static auto CreateAnimationVariable(double initialValue) -> AnimationVariable;
+		[[nodiscard]] static auto CreateAnimationVariable(std::span<double> initialValues) -> AnimationVariable;
+		[[nodiscard]] static auto CreateStoryboard() -> Storyboard;
 
 		[[nodiscard]] static auto GetStatus() -> AnimationManagerStatus;
 
+		[[nodiscard]] static auto EstimateNextEventTime() -> double;
+
 		static void SetAnimationMode(AnimationMode mode);
+
+		static void SetDefaultLongestAcceptableDelay(double delay);
+
+		[[nodiscard]] static auto GetStoryboardFromTag(ComPtr<IUnknown> obj, UINT32 id) -> Storyboard;
+		[[nodiscard]] static auto GetAnimationVariableFromTag(ComPtr<IUnknown> obj, UINT32 id) -> AnimationVariable;
+
+		static void ScheduleTransition(const AnimationVariable& variable,
+			AnimationTransition transition, double currentTime);
+
+		void SetManagerEventHandler(
+			AnimationManagerEventHandler& eventHandler,
+			bool registerForNext = true) const;
+		void ClearManagerEventHandler(bool registerForNext = true) const;
+		//TODO SetCancelPriorityComparison
+		//TODO SetCompressPriorityComparison 
+		//TODO SetConcludePriorityComparison
+		//TODO SetTrimPriorityComparison
 
 		private:
 		AnimationManager();
 
-		static AnimationManager instance;
+		inline static AnimationManager* instance;
 	};
-
-	inline AnimationManager AnimationManager::instance{ };
 }

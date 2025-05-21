@@ -52,7 +52,7 @@ export namespace PGUI
 				CancellingCallback,
 				NonCancellingCallback>;
 
-			std::lock_guard lock{ callbackMutex };
+			std::scoped_lock lock{ callbackMutex };
 
 			CallbackData data{ nextCallbackId, CallbackType{ callback } };
 			callbacks[2 - static_cast<int>(priority)].push_back(data);
@@ -62,7 +62,7 @@ export namespace PGUI
 
 		void RemoveCallback(CallbackId id) noexcept
 		{
-			std::lock_guard lock{ callbackMutex };
+			std::scoped_lock lock{ callbackMutex };
 
 			for (auto& callbackList : callbacks)
 			{
@@ -77,7 +77,7 @@ export namespace PGUI
 
 		void ClearCallbacks() noexcept
 		{
-			std::lock_guard lock{ callbackMutex };
+			std::scoped_lock lock{ callbackMutex };
 
 			for (auto& callbackList : callbacks)
 			{
@@ -87,7 +87,7 @@ export namespace PGUI
 
 		void Invoke(Args&&... args) const noexcept
 		{
-			std::lock_guard lock{ callbackMutex };
+			std::scoped_lock lock{ callbackMutex };
 
 			for (const auto& callbackVector : callbacks)
 			{
@@ -112,7 +112,7 @@ export namespace PGUI
 
 		void InvokeAsync(Args&&... args) const noexcept
 		{
-			std::lock_guard lock{ callbackMutex };
+			std::scoped_lock lock{ callbackMutex };
 
 			for (const auto& callbackVector : callbacks)
 			{

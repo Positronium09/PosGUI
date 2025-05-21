@@ -8,17 +8,11 @@ module;
 export module PGUI.UI.Animation.AnimationVariable;
 
 import PGUI.ComPtr;
+import PGUI.UI.Animation.AnimationEnums;
 
 export namespace  PGUI::UI::Animation
 {
 	class Storyboard;
-
-	enum class AnimationRoundingMode
-	{
-		Nearest = UI_ANIMATION_ROUNDING_NEAREST,
-		Floor = UI_ANIMATION_ROUNDING_FLOOR,
-		Ceiling = UI_ANIMATION_ROUNDING_CEILING
-	};
 
 	class AnimationVariable : public ComPtrHolder<IUIAnimationVariable2>
 	{

@@ -7,19 +7,14 @@ export module PGUI.UI.Animation.AnimationTransitionLibrary;
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.UI.Animation.AnimationTransition;
+import PGUI.UI.Animation.AnimationEnums;
 
 export namespace PGUI::UI::Animation
 {
-	enum class AnimationSlope
-	{
-		Increasing = UI_ANIMATION_SLOPE_INCREASING,
-		Decreasing = UI_ANIMATION_SLOPE_DECREASING
-	};
-
 	class AnimationTransitionLibrary : public ComPtrHolder<IUIAnimationTransitionLibrary2>
 	{
 		public:
-		[[nodiscard]] static const auto& GetInstance() noexcept { return instance; }
+		[[nodiscard]] static auto GetInstance() -> const AnimationTransitionLibrary&;
 
 		[[nodiscard]] static auto AccelerateDecelerateTransition(
 			double duration, double finalValue,
@@ -70,8 +65,6 @@ export namespace PGUI::UI::Animation
 		private:
 		AnimationTransitionLibrary();
 
-		static AnimationTransitionLibrary instance;
+		inline static AnimationTransitionLibrary* instance = nullptr;
 	};
-
-	inline AnimationTransitionLibrary AnimationTransitionLibrary::instance{ };
 }

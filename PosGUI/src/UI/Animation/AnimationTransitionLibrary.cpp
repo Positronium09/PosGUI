@@ -23,13 +23,22 @@ namespace PGUI::UI::Animation
 			GetVoidAddress()); ThrowFailed(hr);
 	}
 
+	auto AnimationTransitionLibrary::GetInstance() -> const AnimationTransitionLibrary&
+	{
+		if (instance == nullptr)
+		{
+			instance = new AnimationTransitionLibrary{ };
+		}
+		return *instance;
+	}
+
 	auto AnimationTransitionLibrary::AccelerateDecelerateTransition(
 		double duration, double finalValue, 
 		double accelerationRatio, double decelerationRatio) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateAccelerateDecelerateTransition(
+		auto hr = instance->Get()->CreateAccelerateDecelerateTransition(
 			duration, finalValue,
 			accelerationRatio, decelerationRatio,
 			transition.GetAddress()
@@ -41,7 +50,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateConstantTransition(duration,
+		auto hr = instance->Get()->CreateConstantTransition(duration,
 			transition.GetAddress()); ThrowFailed(hr);
 
 		return transition;
@@ -51,7 +60,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateCubicBezierLinearTransition(
+		auto hr = instance->Get()->CreateCubicBezierLinearTransition(
 			duration, finalValue,
 			p1.x, p1.y, p2.x, p2.y,
 			transition.GetAddress()); ThrowFailed(hr);
@@ -63,7 +72,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateCubicBezierLinearVectorTransition(
+		auto hr = instance->Get()->CreateCubicBezierLinearVectorTransition(
 			duration, finalValues.data(),
 			static_cast<UINT>(finalValues.size()),
 			p1.x, p1.y, p2.x, p2.y,
@@ -76,7 +85,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateCubicTransition(duration,
+		auto hr = instance->Get()->CreateCubicTransition(duration,
 			finalValue, finalVelocity,
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -92,7 +101,7 @@ namespace PGUI::UI::Animation
 
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateCubicVectorTransition(duration,
+		auto hr = instance->Get()->CreateCubicVectorTransition(duration,
 			finalValues.data(), finalVelocities.data(),
 			static_cast<UINT>(finalValues.size()),
 			transition.GetAddress()); ThrowFailed(hr);
@@ -104,7 +113,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateDiscreteTransition(duration,
+		auto hr = instance->Get()->CreateDiscreteTransition(duration,
 			finalValue, hold,
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -115,7 +124,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateDiscreteVectorTransition(duration,
+		auto hr = instance->Get()->CreateDiscreteVectorTransition(duration,
 			finalValues.data(),
 			static_cast<UINT>(finalValues.size()), 
 			hold,
@@ -127,7 +136,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateInstantaneousTransition(finalValue,
+		auto hr = instance->Get()->CreateInstantaneousTransition(finalValue,
 			transition.GetAddress()); ThrowFailed(hr);
 
 		return transition;
@@ -136,7 +145,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateInstantaneousVectorTransition(
+		auto hr = instance->Get()->CreateInstantaneousVectorTransition(
 			finalValues.data(), static_cast<UINT>(finalValues.size()),
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -147,7 +156,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateLinearTransition(duration, 
+		auto hr = instance->Get()->CreateLinearTransition(duration, 
 			finalValue,
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -158,7 +167,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateLinearVectorTransition(duration,
+		auto hr = instance->Get()->CreateLinearVectorTransition(duration,
 			finalValues.data(), static_cast<UINT>(finalValues.size()),
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -169,7 +178,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateLinearTransitionFromSpeed(speed,
+		auto hr = instance->Get()->CreateLinearTransitionFromSpeed(speed,
 			finalValue,
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -180,7 +189,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateLinearVectorTransitionFromSpeed(speed,
+		auto hr = instance->Get()->CreateLinearVectorTransitionFromSpeed(speed,
 			finalValues.data(), static_cast<UINT>(finalValues.size()),
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -191,7 +200,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateParabolicTransitionFromAcceleration(
+		auto hr = instance->Get()->CreateParabolicTransitionFromAcceleration(
 			finalValue,
 			finalVelocity,
 			acceleration,
@@ -203,7 +212,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateReversalTransition(
+		auto hr = instance->Get()->CreateReversalTransition(
 			duration,
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -215,7 +224,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateSinusoidalTransitionFromRange(
+		auto hr = instance->Get()->CreateSinusoidalTransitionFromRange(
 			duration, minimumValue, maximumValue,
 			period, static_cast<UI_ANIMATION_SLOPE>(slope),
 			transition.GetAddress()); ThrowFailed(hr);
@@ -227,7 +236,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateSinusoidalTransitionFromVelocity(
+		auto hr = instance->Get()->CreateSinusoidalTransitionFromVelocity(
 			duration, period,
 			transition.GetAddress()); ThrowFailed(hr);
 
@@ -238,7 +247,7 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance.Get()->CreateSmoothStopTransition(
+		auto hr = instance->Get()->CreateSmoothStopTransition(
 			maximumDuration, finalValue,
 			transition.GetAddress()); ThrowFailed(hr);
 

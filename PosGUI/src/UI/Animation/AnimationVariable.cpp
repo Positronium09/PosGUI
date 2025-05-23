@@ -7,6 +7,7 @@ module PGUI.UI.Animation.AnimationVariable;
 import PGUI.ComPtr;
 import PGUI.Exceptions;
 import PGUI.UI.Animation.Storyboard;
+import PGUI.UI.Animation.AnimationVariableChangeEventHandler;
 
 namespace  PGUI::UI::Animation
 {
@@ -164,5 +165,25 @@ namespace  PGUI::UI::Animation
 		auto hr = Get()->GetTag(&obj, &tag); ThrowFailed(hr);
 
 		return { obj, tag };
+	}
+
+	void AnimationVariable::SetVariableChangeHandler(AnimationVariableChangeEventHandler& handler,
+		bool registerForNext) const
+	{
+		const auto& ptr = Get();
+		auto hr = ptr->SetVariableChangeHandler(
+			static_cast<IUIAnimationVariableChangeHandler2*>(&handler.GetRouter()),
+			registerForNext
+		); ThrowFailed(hr);
+		hr = ptr->SetVariableIntegerChangeHandler(
+			static_cast<IUIAnimationVariableIntegerChangeHandler2*>(&handler.GetIntegerRouter()),
+			registerForNext
+		); ThrowFailed(hr);
+	}
+	void AnimationVariable::ClearVariableChangeHandler(bool registerForNext) const
+	{
+		const auto& ptr = Get();
+		auto hr = ptr->SetVariableChangeHandler(nullptr, registerForNext); ThrowFailed(hr);
+		hr = ptr->SetVariableIntegerChangeHandler(nullptr, registerForNext); ThrowFailed(hr);
 	}
 }

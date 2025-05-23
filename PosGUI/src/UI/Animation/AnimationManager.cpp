@@ -65,7 +65,7 @@ namespace PGUI::UI::Animation
 
 		return variable;
 	}
-	auto AnimationManager::CreateAnimationVariable(std::span<double> initialValues) -> AnimationVariable
+	auto AnimationManager::CreateAnimationVariable(std::span<const double> initialValues) -> AnimationVariable
 	{
 		AnimationVariable variable;
 		auto hr = instance->Get()->CreateAnimationVectorVariable(

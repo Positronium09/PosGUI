@@ -426,5 +426,11 @@
     <ClCompile Include="src\UI\Animation\AnimationStoryboardEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\UI\Animation\AnimationVariableChangeEventHandler.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Animation\AnimationVariableChangeEventHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

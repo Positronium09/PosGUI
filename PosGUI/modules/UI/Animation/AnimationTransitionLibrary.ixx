@@ -24,30 +24,30 @@ export namespace PGUI::UI::Animation
 			double duration, double finalValue,
 			Point<double> p1, Point<double> p2) -> AnimationTransition;
 		[[nodiscard]] static auto CubicBezierLinearTransition(
-			double duration, std::span<double> finalValues,
+			double duration, std::span<const double> finalValues,
 			Point<double> p1, Point<double> p2) -> AnimationTransition;
 		[[nodiscard]] static auto CubicTransition(
 			double duration, double finalValue, 
 			double finalVelocity) -> AnimationTransition;
 		[[nodiscard]] static auto CubicTransition(
-			double duration, std::span<double> finalValues,
-			std::span<double> finalVelocities) -> AnimationTransition;
+			double duration, std::span<const double> finalValues,
+			std::span<const double> finalVelocities) -> AnimationTransition;
 		[[nodiscard]] static auto DiscreteTransition(
 			double duration, double finalValue,
 			double hold) -> AnimationTransition;
 		[[nodiscard]] static auto DiscreteTransition(
-			double duration, std::span<double> finalValues,
+			double duration, std::span<const double> finalValues,
 			double hold) -> AnimationTransition;
 		[[nodiscard]] static auto InstantaneousTransition(double finalValue) -> AnimationTransition;
-		[[nodiscard]] static auto InstantaneousTransition(std::span<double> finalValues) -> AnimationTransition;
+		[[nodiscard]] static auto InstantaneousTransition(std::span<const double> finalValues) -> AnimationTransition;
 		[[nodiscard]] static auto LinearTransition(double duration,
 			double finalValue) -> AnimationTransition;
 		[[nodiscard]] static auto LinearTransition(double duration,
-			std::span<double> finalValues) -> AnimationTransition;
+			std::span<const double> finalValues) -> AnimationTransition;
 		[[nodiscard]] static auto LinearTransitionFromSpeed(double speed,
 			double finalValue) -> AnimationTransition;
 		[[nodiscard]] static auto LinearTransitionFromSpeed(double speed,
-			std::span<double> finalValues) -> AnimationTransition;
+			std::span<const double> finalValues) -> AnimationTransition;
 		[[nodiscard]] static auto ParabolicTransitionFromAcceleration(
 			double finalValue, double finalVelocity, double acceleration
 		) -> AnimationTransition;

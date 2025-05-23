@@ -38,7 +38,7 @@ namespace  PGUI::UI::Animation
 	{
 		auto hr = Get()->SetInitialValue(value); ThrowFailed(hr);
 	}
-	void AnimationTransition::SetInitialValue(std::span<double> values) const
+	void AnimationTransition::SetInitialValue(std::span<const double> values) const
 	{
 		auto hr = Get()->SetInitialVectorValue(values.data(), 
 			static_cast<UINT>(values.size())); ThrowFailed(hr);
@@ -47,7 +47,7 @@ namespace  PGUI::UI::Animation
 	{
 		auto hr = Get()->SetInitialVelocity(velocity); ThrowFailed(hr);
 	}
-	void AnimationTransition::SetInitialVelocity(std::span<double> velocities) const
+	void AnimationTransition::SetInitialVelocity(std::span<const double> velocities) const
 	{
 		auto hr = Get()->SetInitialVectorVelocity(velocities.data(),
 			static_cast<UINT>(velocities.size())); ThrowFailed(hr);

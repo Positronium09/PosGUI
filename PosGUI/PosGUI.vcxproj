@@ -50,6 +50,7 @@
     <ClCompile Include="modules\UI\Animation\AnimationTransition.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTransitionLibrary.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationVariable.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationVariableChangeEventHandler.ixx" />
     <ClCompile Include="modules\UI\Animation\Storyboard.ixx" />
     <ClCompile Include="modules\UI\AppWindow.ixx" />
     <ClCompile Include="modules\UI\Brush.ixx" />
@@ -121,6 +122,7 @@
     <ClCompile Include="src\UI\Animation\AnimationTransition.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationTransitionLibrary.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationVariable.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationVariableChangeEventHandler.cpp" />
     <ClCompile Include="src\UI\Animation\Storyboard.cpp" />
     <ClCompile Include="src\UI\AppWindow.cpp" />
     <ClCompile Include="src\UI\Brush.cpp" />

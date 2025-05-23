@@ -68,7 +68,7 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 	auto AnimationTransitionLibrary::CubicBezierLinearTransition(double duration,
-		std::span<double> finalValues, Point<double> p1, Point<double> p2) -> AnimationTransition
+		std::span<const double> finalValues, Point<double> p1, Point<double> p2) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
@@ -92,7 +92,7 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 	auto AnimationTransitionLibrary::CubicTransition(double duration,
-		std::span<double> finalValues, std::span<double> finalVelocities) -> AnimationTransition
+		std::span<const double> finalValues, std::span<const double> finalVelocities) -> AnimationTransition
 	{
 		if (finalValues.size() != finalVelocities.size())
 		{
@@ -120,7 +120,7 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 	auto AnimationTransitionLibrary::DiscreteTransition(double duration,
-		std::span<double> finalValues, double hold) -> AnimationTransition
+		std::span<const double> finalValues, double hold) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
@@ -141,7 +141,7 @@ namespace PGUI::UI::Animation
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::InstantaneousTransition(std::span<double> finalValues) -> AnimationTransition
+	auto AnimationTransitionLibrary::InstantaneousTransition(std::span<const double> finalValues) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
@@ -163,7 +163,7 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 	auto AnimationTransitionLibrary::LinearTransition(double duration,
-		std::span<double> finalValues) -> AnimationTransition
+		std::span<const double> finalValues) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
@@ -185,7 +185,7 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 	auto AnimationTransitionLibrary::LinearTransitionFromSpeed(double speed,
-		std::span<double> finalValues) -> AnimationTransition
+		std::span<const double> finalValues) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 

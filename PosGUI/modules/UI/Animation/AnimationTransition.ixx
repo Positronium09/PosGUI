@@ -19,8 +19,8 @@ export namespace  PGUI::UI::Animation
 		[[nodiscard]] auto IsDurationKnown() const noexcept -> bool;
 
 		void SetInitialValue(double value) const;
-		void SetInitialValue(std::span<double> values) const;
+		void SetInitialValue(std::span<const double> values) const;
 		void SetInitialVelocity(double velocity) const;
-		void SetInitialVelocity(std::span<double> velocities) const;
+		void SetInitialVelocity(std::span<const double> velocities) const;
 	};
 }

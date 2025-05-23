@@ -27,7 +27,7 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] static auto Update(double timeNow) -> AnimationUpdateResult;
 
 		[[nodiscard]] static auto CreateAnimationVariable(double initialValue) -> AnimationVariable;
-		[[nodiscard]] static auto CreateAnimationVariable(std::span<double> initialValues) -> AnimationVariable;
+		[[nodiscard]] static auto CreateAnimationVariable(std::span<const double> initialValues) -> AnimationVariable;
 		[[nodiscard]] static auto CreateStoryboard() -> Storyboard;
 
 		[[nodiscard]] static auto GetStatus() -> AnimationManagerStatus;
@@ -46,8 +46,8 @@ export namespace PGUI::UI::Animation
 
 		void SetManagerEventHandler(
 			AnimationManagerEventHandler& eventHandler,
-			bool registerForNext = true) const;
-		void ClearManagerEventHandler(bool registerForNext = true) const;
+			bool registerForNext = false) const;
+		void ClearManagerEventHandler(bool registerForNext = false) const;
 		//TODO SetCancelPriorityComparison
 		//TODO SetCompressPriorityComparison 
 		//TODO SetConcludePriorityComparison

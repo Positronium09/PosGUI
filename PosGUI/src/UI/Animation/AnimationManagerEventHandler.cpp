@@ -103,7 +103,7 @@ namespace PGUI::UI::Animation
 		}
 	}
 
-	AnimationManagerEventHandler::AnimationManagerEventHandler() : 
+	AnimationManagerEventHandler::AnimationManagerEventHandler() noexcept : 
 		router{ std::bind_front(&AnimationManagerEventHandler::CallHandler, this) }
 	{
 	}

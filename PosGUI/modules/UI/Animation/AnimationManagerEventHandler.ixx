@@ -41,7 +41,7 @@ export namespace PGUI::UI::Animation
 	class AnimationManagerEventHandler
 	{
 		public:
-		AnimationManagerEventHandler();
+		AnimationManagerEventHandler() noexcept;
 
 		virtual void OnManagerStatusChanged(
 			AnimationManagerStatus newStatus, 

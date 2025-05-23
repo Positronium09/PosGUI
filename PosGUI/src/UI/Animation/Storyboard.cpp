@@ -8,6 +8,7 @@ import PGUI.ComPtr;
 import PGUI.Exceptions;
 import PGUI.UI.Animation.AnimationVariable;
 import PGUI.UI.Animation.AnimationTransition;
+import PGUI.UI.Animation.AnimationStoryboardEventHandler;
 
 namespace  PGUI::UI::Animation
 {
@@ -86,6 +87,15 @@ namespace  PGUI::UI::Animation
 			transition.GetRaw(), startKeyFrame, endKeyFrame); ThrowFailed(hr);
 	}
 
+	void Storyboard::RepeatBetweenKeyframes(KeyFrame startKeyframe, KeyFrame endKeyframe, 
+		double iterationCount, AnimationRepeatMode repeatMode, 
+		bool registerForNext) const
+	{
+		auto hr = Get()->RepeatBetweenKeyframes(startKeyframe, endKeyframe, 
+			iterationCount, static_cast<UI_ANIMATION_REPEAT_MODE>(repeatMode), 
+			nullptr, 0, registerForNext); ThrowFailed(hr);
+	}
+
 	auto Storyboard::GetStatus() const -> StoryboardStatus
 	{
 		UI_ANIMATION_STORYBOARD_STATUS status;
@@ -113,5 +123,13 @@ namespace  PGUI::UI::Animation
 		auto hr = Get()->GetTag(&obj, &tag); ThrowFailed(hr);
 
 		return { obj, tag };
+	}
+
+	void Storyboard::SetStoryboardEventHandler(AnimationStoryboardEventHandler& eventHandler) const
+	{
+		auto hr = Get()->SetStoryboardEventHandler(
+			static_cast<IUIAnimationStoryboardEventHandler2*>(
+				&eventHandler.GetRouter()
+				)); ThrowFailed(hr);
 	}
 }

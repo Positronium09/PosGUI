@@ -409,7 +409,7 @@ export namespace PGUI
 		void Minimize() const noexcept { Show(ShowWindowCommand::Minimize); }
 		void Maximize() const noexcept { Show(ShowWindowCommand::Maximize); }
 		void BringToTop() const noexcept { BringWindowToTop(Hwnd()); }
-		void Invalidate() const noexcept { InvalidateRect(Hwnd(), nullptr, false); }
+		void Invalidate(bool erase = false) const noexcept { InvalidateRect(Hwnd(), nullptr, erase); }
 		void Update() const noexcept { UpdateWindow(Hwnd()); }
 		void SetFocus() const noexcept { ::SetFocus(Hwnd()); }
 		void SetForeground() const noexcept { SetForegroundWindow(hWnd); }

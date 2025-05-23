@@ -13,7 +13,7 @@ namespace PGUI::UI::Animation
 {
 	class Storyboard;
 
-	class AnimationStoryboardEventHandlerRouter final : IUIAnimationStoryboardEventHandler2
+	class AnimationStoryboardEventHandlerRouter final : public IUIAnimationStoryboardEventHandler2
 	{
 		using StoryboardStatusChangedHandler = std::function<HRESULT(Storyboard, StoryboardStatus, StoryboardStatus)>;
 		using StoryboardUpdatedHandler = std::function<HRESULT(Storyboard)>;
@@ -54,7 +54,7 @@ export namespace PGUI::UI::Animation
 	class AnimationStoryboardEventHandler
 	{
 		public:
-		AnimationStoryboardEventHandler();
+		AnimationStoryboardEventHandler() noexcept;
 
 		[[nodiscard]] auto& GetRouter() noexcept { return router; }
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
@@ -88,5 +88,4 @@ export namespace PGUI::UI::Animation
 			StoryboardStatus newStatus, StoryboardStatus previousStatus) override;
 		void OnStoryBoardUpdated(Storyboard storyboard) override;
 	};
-
 }

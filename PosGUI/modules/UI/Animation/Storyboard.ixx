@@ -10,9 +10,12 @@ export namespace  PGUI::UI::Animation
 {
 	class AnimationVariable;
 	class AnimationTransition;
+	class AnimationStoryboardEventHandler;
 
 	using KeyFrame = UI_ANIMATION_KEYFRAME;
 	const auto StartKeyFrame = KeyFrame(-1);
+
+	constexpr double RepeatIndefinitely = UI_ANIMATION_REPEAT_INDEFINITELY;
 
 	class Storyboard : public ComPtrHolder<IUIAnimationStoryboard2>
 	{
@@ -38,12 +41,16 @@ export namespace  PGUI::UI::Animation
 		void AddTransitionBetweenKeyframes(const AnimationVariable& variable, AnimationTransition transition, 
 			KeyFrame startKeyFrame, KeyFrame endKeyFrame) const;
 
+		void RepeatBetweenKeyframes(KeyFrame startKeyframe, KeyFrame endKeyframe,
+			double iterationCount, AnimationRepeatMode repeatMode,
+			/* iterationChangeHandler, id */ bool registerForNext = false) const;
+
 		[[nodiscard]] auto GetStatus() const -> StoryboardStatus;
 		[[nodiscard]] auto GetElapsedTime() const -> double;
 
 		void SetTag(ComPtr<IUnknown> obj, UINT32 id) const;
 		[[nodiscard]] auto GetTag() const -> std::pair<ComPtr<IUnknown>, UINT32>;
 
-		//TODO SetStoryboardEventHandler
+		void SetStoryboardEventHandler(AnimationStoryboardEventHandler& eventHandler) const;
 	};
 }

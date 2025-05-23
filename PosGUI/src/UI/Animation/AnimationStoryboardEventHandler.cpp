@@ -110,7 +110,7 @@ namespace PGUI::UI::Animation
 		updatedHandler = nullptr;
 	}
 
-	AnimationStoryboardEventHandler::AnimationStoryboardEventHandler() : 
+	AnimationStoryboardEventHandler::AnimationStoryboardEventHandler() noexcept :
 		router{ 
 			std::bind_front(&AnimationStoryboardEventHandler::CallStoryBoardStatusChangedHandler, this),
 			std::bind_front(&AnimationStoryboardEventHandler::CallStoryBoardUpdatedHandler, this)

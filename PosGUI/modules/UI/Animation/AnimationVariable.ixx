@@ -12,6 +12,8 @@ import PGUI.UI.Animation.AnimationEnums;
 
 export namespace  PGUI::UI::Animation
 {
+	class AnimationVariableChangeEventHandler;
+
 	class Storyboard;
 
 	class AnimationVariable : public ComPtrHolder<IUIAnimationVariable2>
@@ -48,13 +50,14 @@ export namespace  PGUI::UI::Animation
 		void SetTag(ComPtr<IUnknown> obj, UINT32 id) const;
 		[[nodiscard]] auto GetTag() const -> std::pair<ComPtr<IUnknown>, UINT32>;
 
+		void SetVariableChangeHandler(AnimationVariableChangeEventHandler& handler, bool registerForNext = false) const;
+		void ClearVariableChangeHandler(bool registerForNext = false) const;
+
 		template <std::floating_point T>
 		explicit(false) operator T() const { return static_cast<T>(GetValue()); }
 		template <std::integral T>
 		explicit(false) operator T() const { return static_cast<T>(GetIntegerValue()); }
 
-		//TODO SetVariableChangeHandler
-		//TODO SetVariableIntegerChangeHandler
 		//TODO SetVariableCurveChangeHandler
 	};
 }

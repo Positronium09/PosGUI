@@ -57,4 +57,10 @@ export namespace PGUI::UI::Animation
 		Succeeded = UI_ANIMATION_SCHEDULING_SUCCEEDED,
 		Deferred = UI_ANIMATION_SCHEDULING_DEFERRED
 	};
+
+	enum class AnimationRepeatMode
+	{
+		Normal = UI_ANIMATION_REPEAT_MODE_NORMAL,
+		Alternate = UI_ANIMATION_REPEAT_MODE_ALTERNATE
+	};
 }

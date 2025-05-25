@@ -85,7 +85,7 @@ export namespace PGUI
 			}
 		}
 
-		void Invoke(Args&&... args) const noexcept
+		void Invoke(Args... args) const noexcept
 		{
 			std::scoped_lock lock{ callbackMutex };
 
@@ -110,7 +110,7 @@ export namespace PGUI
 			}
 		}
 
-		void InvokeAsync(Args&&... args) const noexcept
+		void InvokeAsync(Args... args) const noexcept
 		{
 			std::scoped_lock lock{ callbackMutex };
 
@@ -161,7 +161,7 @@ export namespace PGUI
 
 		public:
 		ScopedCallback(EventType& event, CallbackId id) noexcept : 
-			event(event), id(id)
+			event{ event }, id{ id }
 		{
 		}
 		~ScopedCallback() noexcept

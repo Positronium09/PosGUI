@@ -111,6 +111,6 @@ namespace PGUI::UI::Animation
 	void AnimationManagerEvent::OnManagerStatusChanged(AnimationManagerStatus newStatus,
 		AnimationManagerStatus previousStatus)
 	{
-		managerStatusChangedEvent.Invoke(std::move(newStatus), std::move(previousStatus));
+		managerStatusChangedEvent.Invoke(newStatus, previousStatus);
 	}
 }

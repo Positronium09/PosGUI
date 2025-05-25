@@ -167,13 +167,10 @@ namespace PGUI::UI::Animation
 	void AnimationStoryboardEvent::OnStoryBoardStatusChanged(Storyboard storyboard,
 		StoryboardStatus newStatus, StoryboardStatus previousStatus)
 	{
-		storyboardStatusChangedEvent.Invoke(
-			std::move(storyboard), 
-			std::move(newStatus), 
-			std::move(previousStatus));
+		storyboardStatusChangedEvent.Invoke(storyboard, newStatus, previousStatus);
 	}
 	void AnimationStoryboardEvent::OnStoryBoardUpdated(Storyboard storyboard)
 	{
-		storyboardUpdatedEvent.Invoke(std::move(storyboard));
+		storyboardUpdatedEvent.Invoke(storyboard);
 	}
 }

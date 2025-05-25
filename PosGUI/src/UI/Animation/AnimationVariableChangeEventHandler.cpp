@@ -208,14 +208,14 @@ namespace PGUI::UI::Animation
 		std::span<double> newValues, std::span<double> previousValues)
 	{
 		variableChangedEvent.Invoke(
-			std::move(storyboard), std::move(variable), 
-			std::move(newValues), std::move(previousValues));
+			storyboard, variable, 
+			newValues, previousValues);
 	}
 	void AnimationVariableChangeEvent::OnVariableIntegerChanged(Storyboard storyboard, AnimationVariable variable, 
 		std::span<INT32> newValues, std::span<INT32> previousValues)
 	{
 		variableIntegerChangedEvent.Invoke(
-			std::move(storyboard), std::move(variable),
-			std::move(newValues), std::move(previousValues));
+			storyboard, variable,
+			newValues, previousValues);
 	}
 }

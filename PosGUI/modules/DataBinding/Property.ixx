@@ -1,12 +1,13 @@
 module;
 #include <functional>
+#include <type_traits>
 #include <mutex>
 
-export module PGUI.Property;
+export module PGUI.DataBinding.Property;
 
 import PGUI.Event;
 
-export namespace PGUI
+export namespace PGUI::DataBinding
 {
 	class NullMutex
 	{
@@ -17,7 +18,7 @@ export namespace PGUI
 		void unlock() noexcept
 		{
 		}
-	};;
+	};
 
 	template <typename T, typename MutexType = std::mutex>
 	class Property
@@ -26,24 +27,27 @@ export namespace PGUI
 
 		public:
 		Property() noexcept = default;
-		explicit(false) Property(const T& value) : value{ value }
+		explicit(false) Property(const T& value) noexcept :
+			value{ value }
 		{
 		}
 
-		Property(const Property& other) : value{ other.Get() }
+		Property(const Property& other) noexcept :
+			value{ other.Get() }
 		{
 		}
 
-		Property(Property&& other) noexcept : value{ std::move(other.Get()) }
+		Property(Property&& other) noexcept : 
+			value{ std::move(other.Get()) }
 		{
 		}
+		virtual ~Property() = default;
 
 		auto operator=(const Property& other) noexcept -> Property&
 		{
 			if (this != &other)
 			{
-				std::scoped_lock lock{ mutex };
-				value = other.Get();
+				Set(other.Get());
 				valueChangedEvent.Invoke(value);
 			}
 			return *this;
@@ -53,8 +57,7 @@ export namespace PGUI
 		{
 			if (this != &other)
 			{
-				std::scoped_lock lock{ mutex };
-				value = std::move(other.Get());
+				Set(std::move(other.Get()));
 				valueChangedEvent.Invoke(value);
 			}
 			return *this;
@@ -71,7 +74,7 @@ export namespace PGUI
 			return value;
 		}
 
-		void Set(const T& newValue)
+		virtual void Set(const T& newValue)
 		{
 			{
 				std::scoped_lock lock{ mutex };
@@ -86,7 +89,7 @@ export namespace PGUI
 			}
 			valueChangedEvent.Invoke(Get());
 		}
-		void Set(T&& newValue)
+		virtual void Set(T&& newValue)
 		{
 			{
 				std::scoped_lock lock{ mutex };
@@ -123,18 +126,28 @@ export namespace PGUI
 			return *this;
 		}
 
-		explicit(false) operator const T&() const { return Get(); }
-		explicit(false) operator T&() { return Get(); }
+		explicit(false) operator const T&() const noexcept { return Get(); }
+		explicit(false) operator T&() noexcept { return Get(); }
 
 		auto operator==(const Property& other) const noexcept -> bool
 		{
 			std::scoped_lock lock{ mutex };
 			return value == other.Get();
 		}
+		auto operator==(const T& val) const noexcept -> bool
+		{
+			std::scoped_lock lock{ mutex };
+			return value == val;
+		}
 		auto operator<=>(const Property& other) const noexcept
 		{
 			std::scoped_lock lock{ mutex };
 			return value <=> other.Get();
+		}
+		auto operator<=>(const T& val) const noexcept
+		{
+			std::scoped_lock lock{ mutex };
+			return value <=> val;
 		}
 
 		private:

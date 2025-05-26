@@ -25,9 +25,9 @@ export namespace PGUI::UI::Imaging
 		[[nodiscard]] auto GetEnumerator() const -> ComPtr<IEnumString>;
 		[[nodiscard]] auto operator[](std::wstring_view name) const noexcept -> PropVariant;
 
-		[[nodiscard]] auto cbegin() const -> IEnumStringIterator;
-		[[nodiscard]] auto cend() const -> IEnumStringIterator;
-		[[nodiscard]] auto begin() const -> IEnumStringIterator;
-		[[nodiscard]] auto end() const -> IEnumStringIterator;
+		[[nodiscard]] auto cbegin() const noexcept -> IEnumStringIterator;
+		[[nodiscard]] auto cend() const noexcept -> IEnumStringIterator;
+		[[nodiscard]] auto begin() const noexcept -> IEnumStringIterator;
+		[[nodiscard]] auto end() const noexcept -> IEnumStringIterator;
 	};
 }

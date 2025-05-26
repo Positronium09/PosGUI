@@ -58,19 +58,19 @@ namespace PGUI::UI::Imaging
 		return GetMetadata(name);
 	}
 
-	auto MetadataReader::cbegin() const -> IEnumStringIterator
+	auto MetadataReader::cbegin() const noexcept -> IEnumStringIterator
 	{
 		return IEnumStringIterator{ GetEnumerator() };
 	}
-	auto MetadataReader::cend() const -> IEnumStringIterator
+	auto MetadataReader::cend() const noexcept -> IEnumStringIterator
 	{
 		return IEnumStringIterator{ GetEnumerator(), true };
 	}
-	auto MetadataReader::begin() const -> IEnumStringIterator
+	auto MetadataReader::begin() const noexcept -> IEnumStringIterator
 	{
 		return IEnumStringIterator{ GetEnumerator() };
 	}
-	auto MetadataReader::end() const -> IEnumStringIterator
+	auto MetadataReader::end() const noexcept -> IEnumStringIterator
 	{
 		return IEnumStringIterator{ GetEnumerator(), true };
 	}

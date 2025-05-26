@@ -11,10 +11,31 @@ export module PGUI.UI.Imaging.BitmapSource;
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Logging;
+import PGUI.Factories;
 import PGUI.Exceptions;
 
 export namespace PGUI::UI::Imaging
 {
+	enum class InterpolationMode
+	{
+		NearestNeighbor = WICBitmapInterpolationModeNearestNeighbor,
+		Linear = WICBitmapInterpolationModeLinear,
+		Cubic = WICBitmapInterpolationModeCubic,
+		Fant = WICBitmapInterpolationModeFant,
+		HighQualityCubic = WICBitmapInterpolationModeHighQualityCubic
+	};
+
+	enum class TransformOptions
+	{
+		None = WICBitmapTransformRotate0,
+		FlipHorizontal = WICBitmapTransformFlipHorizontal,
+		FlipVertical = WICBitmapTransformFlipVertical,
+		Rotate0 = WICBitmapTransformRotate0,
+		Rotate90 = WICBitmapTransformRotate90,
+		Rotate180 = WICBitmapTransformRotate180,
+		Rotate270 = WICBitmapTransformRotate270
+	};
+
 	template <typename Interface = IWICBitmapSource>
 	class BitmapSource : public ComPtrHolder<Interface>
 	{
@@ -83,5 +104,51 @@ export namespace PGUI::UI::Imaging
 		{
 			return BitmapSource<>{ this->Get() };
 		}
+	};
+
+	class BitmapSourceScaler : public BitmapSource<IWICBitmapScaler>
+	{
+		public:
+		BitmapSourceScaler() noexcept = default;
+		BitmapSourceScaler(BitmapSource<> source, SizeU targetSize, InterpolationMode interpolationMode)
+		{
+			const auto& factory = Factories::WICFactory::GetFactory();
+			auto hr = factory->CreateBitmapScaler(GetAddress()); ThrowFailed(hr);
+			hr = Get()->Initialize(source.GetRaw(), targetSize.cx, targetSize.cy,
+				static_cast<WICBitmapInterpolationMode>(interpolationMode)); ThrowFailed(hr);
+		}
+	};
+
+	class BitmapSourceClipper : public BitmapSource<IWICBitmapClipper>
+	{
+		public:
+		BitmapSourceClipper() noexcept = default;
+		BitmapSourceClipper(BitmapSource<> source, RectI clipRect)
+		{
+			const auto& factory = Factories::WICFactory::GetFactory();
+			auto hr = factory->CreateBitmapClipper(GetAddress()); ThrowFailed(hr);
+			WICRect wicRect = clipRect;
+			hr = Get()->Initialize(source.GetRaw(), &wicRect); ThrowFailed(hr);
+		}
+	};
+
+	class BitmapSourceFlipRotator : public BitmapSource<IWICBitmapFlipRotator>
+	{
+		public:
+		BitmapSourceFlipRotator() noexcept = default;
+		BitmapSourceFlipRotator(BitmapSource<> source, TransformOptions transformOptions)
+		{
+			const auto& factory = Factories::WICFactory::GetFactory();
+			auto hr = factory->CreateBitmapFlipRotator(GetAddress()); ThrowFailed(hr);
+			hr = Get()->Initialize(source.GetRaw(), static_cast<WICBitmapTransformOptions>(transformOptions)); ThrowFailed(hr);
+		}
+
+	};
+
+	class BitmapSourceColorTransform : public BitmapSource<IWICColorTransform>
+	{
+		public:
+		BitmapSourceColorTransform() noexcept = default;
+		//TODO BitmapSourceColorTransform(BitmapSource<> source);
 	};
 }

@@ -20,6 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="modules\ComPtr.ixx" />
+    <ClCompile Include="modules\DataBinding\DataBinding.ixx" />
+    <ClCompile Include="modules\DataBinding\DerivedProperty.ixx" />
+    <ClCompile Include="modules\DataBinding\OneWayBinder.ixx" />
+    <ClCompile Include="modules\DataBinding\TwoWayBinder.ixx" />
+    <ClCompile Include="modules\DataBinding\ValidatedProperty.ixx" />
     <ClCompile Include="modules\EnumFlag.ixx" />
     <ClCompile Include="modules\Event.ixx" />
     <ClCompile Include="modules\Exceptions.ixx" />
@@ -30,7 +35,7 @@
     <ClCompile Include="modules\Factories\WICFactory.ixx" />
     <ClCompile Include="modules\Logging.ixx" />
     <ClCompile Include="modules\MessageLoop.ixx" />
-    <ClCompile Include="modules\Property.ixx" />
+    <ClCompile Include="modules\DataBinding\Property.ixx" />
     <ClCompile Include="modules\PropVariant.ixx" />
     <ClCompile Include="modules\Shape2D\Ellipse.ixx" />
     <ClCompile Include="modules\Shape2D\Line.ixx" />

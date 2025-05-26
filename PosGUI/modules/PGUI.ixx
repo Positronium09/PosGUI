@@ -12,7 +12,7 @@ export import PGUI.Exceptions;
 export import PGUI.IEnumStringIterator;
 export import PGUI.Logging;
 export import PGUI.ComPtr;
-export import PGUI.Property;
+export import PGUI.DataBinding;
 export import PGUI.Factories;
 export import PGUI.Shape2D;
 export import PGUI.Utils;

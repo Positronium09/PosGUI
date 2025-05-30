@@ -10,6 +10,7 @@ module;
 export module PGUI.UI.Theming.Theme;
 
 import PGUI.UI.Theming.Styles;
+import PGUI.UI.Theming.ColorContext;
 import PGUI.UI.Theming.SystemTheme;
 import PGUI.Event;
 
@@ -22,6 +23,7 @@ export namespace PGUI::UI::Theming
 {
 	struct Theme
 	{
+		ColorContext colorContext;
 		AppWindowStyle appWindowStyle{ };
 		std::unordered_map<std::type_index, std::any> customStyles{ };
 

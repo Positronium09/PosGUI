@@ -37,11 +37,11 @@ export namespace PGUI::DataBinding
 
 		~OneWayBinder() noexcept
 		{
-			source.RemoveObserver(observerId);
+			source.get().RemoveObserver(observerId);
 		}
 
 		private:
-		Property<SourceType>& source;
+		std::reference_wrapper<Property<SourceType>> source;
 		CallbackId observerId{ };
 	};
 }

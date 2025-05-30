@@ -30,6 +30,13 @@ namespace PGUI::UI::Theming
 	void ThemeContext::InitializeThemes() noexcept
 	{
 		DarkTheme = Theme{
+			.colorContext{
+				.text = SystemTheme::GetTextColor(),
+				.background = SystemTheme::GetBackgroundColor(),
+				.primary = SystemTheme::GetAccentLight1Color(),
+				.secondary = RGBA{ 0x1b1b1b },
+				.accent = SystemTheme::GetAccentColor()
+			},
 			.appWindowStyle{
 				.borderColor = Colors::Transparent,
 				.captionColor = Colors::Transparent,
@@ -40,6 +47,13 @@ namespace PGUI::UI::Theming
 		};
 
 		LightTheme = Theme{
+			.colorContext{
+				.text = SystemTheme::GetTextColor(),
+				.background = SystemTheme::GetBackgroundColor(),
+				.primary = SystemTheme::GetAccentDark1Color(),
+				.secondary = Colors::AntiqueWhite,
+				.accent = SystemTheme::GetAccentColor()
+			},
 			.appWindowStyle{
 				.borderColor = Colors::Transparent,
 				.captionColor = Colors::Transparent,

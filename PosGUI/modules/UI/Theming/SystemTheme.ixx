@@ -40,6 +40,10 @@ export namespace PGUI::UI::Theming
 		[[nodiscard]] static auto IsLightMode() { return !IsDarkMode(); }
 
 		[[nodiscard]] static auto GetColor(ColorType colorType) -> RGBA;
+		[[nodiscard]] static auto GetTextColor()
+		{
+			return GetColor(ColorType::Foreground);
+		}
 		[[nodiscard]] static auto GetBackgroundColor()
 		{
 			return GetColor(ColorType::Background);

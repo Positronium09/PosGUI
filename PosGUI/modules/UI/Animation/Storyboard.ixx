@@ -33,8 +33,8 @@ export namespace  PGUI::UI::Animation
 
 		void HoldVariable(const AnimationVariable& variable) const;
 
-		[[nodiscard]] auto AddKeyframeAfterTransition(const AnimationTransition& transition) const -> KeyFrame;
-		[[nodiscard]] auto AddKeyframeAtOffset(KeyFrame keyFrame, double durationOffset) const -> KeyFrame;
+		[[nodiscard]] auto AddKeyframeAfterTransition(const AnimationTransition& transition) -> KeyFrame;
+		[[nodiscard]] auto AddKeyframeAtOffset(KeyFrame keyFrame, double durationOffset) -> KeyFrame;
 
 		void AddTransition(const AnimationVariable& variable, AnimationTransition transition) const;
 		void AddTransitionAtKeyframe(const AnimationVariable& variable, AnimationTransition transition, KeyFrame keyFrame) const;

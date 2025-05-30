@@ -46,6 +46,7 @@
     <ClCompile Include="modules\Shape2D\Shape2D.ixx" />
     <ClCompile Include="modules\PGUI.ixx" />
     <ClCompile Include="modules\Shape2D\Size.ixx" />
+    <ClCompile Include="modules\UI\Animation\Animated.ixx" />
     <ClCompile Include="modules\UI\Animation\Animation.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationEnums.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationManager.ixx" />
@@ -101,6 +102,7 @@
     <ClCompile Include="modules\UI\D2D\D2DEnums.ixx" />
     <ClCompile Include="modules\UI\D2D\D2DStructs.ixx" />
     <ClCompile Include="modules\UI\Imaging\WICBitmapLock.ixx" />
+    <ClCompile Include="modules\UI\Theming\ColorContext.ixx" />
     <ClCompile Include="modules\UI\Theming\Styles.ixx" />
     <ClCompile Include="modules\UI\Theming\Theming.ixx" />
     <ClCompile Include="modules\UI\Theming\ThemeAware.ixx" />

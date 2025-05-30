@@ -41,6 +41,14 @@ namespace PGUI
 		});
 		
 		UI::Theming::ThemeContext::InitializeThemes();
+		if (UI::Theming::SystemTheme::IsDarkMode())
+		{
+			UI::Theming::ThemeContext::ChangeCurrentTheme(UI::Theming::ThemeContext::DarkTheme);
+		}
+		else
+		{
+			UI::Theming::ThemeContext::ChangeCurrentTheme(UI::Theming::ThemeContext::LightTheme);
+		}
 
 		UI::Theming::SystemTheme::ColorValuesChanged().AddCallback(
 			&UI::Theming::ThemeContext::OnSystemThemeChanged

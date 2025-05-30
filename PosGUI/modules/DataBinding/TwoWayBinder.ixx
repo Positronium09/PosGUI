@@ -46,13 +46,13 @@ export namespace PGUI::DataBinding
 
 		~TwoWayBinder() noexcept
 		{
-			property1.RemoveObserver(observer1Id);
-			property2.RemoveObserver(observer2Id);
+			property1.get().RemoveObserver(observer1Id);
+			property2.get().RemoveObserver(observer2Id);
 		}
 
 		private:
-		Property<Type1>& property1;
-		Property<Type2>& property2;
+		std::reference_wrapper<Property<Type1>> property1;
+		std::reference_wrapper<Property<Type2>> property2;
 		CallbackId observer1Id{ };
 		CallbackId observer2Id{ };
 	};

@@ -55,14 +55,14 @@ namespace  PGUI::UI::Animation
 		auto hr = Get()->HoldVariable(variable.GetRaw()); ThrowFailed(hr);
 	}
 
-	auto Storyboard::AddKeyframeAfterTransition(const AnimationTransition& transition) const -> KeyFrame
+	auto Storyboard::AddKeyframeAfterTransition(const AnimationTransition& transition) -> KeyFrame
 	{
 		KeyFrame keyFrame;
 		auto hr = Get()->AddKeyframeAfterTransition(transition.GetRaw(), &keyFrame); ThrowFailed(hr);
 		
 		return keyFrame;
 	}
-	auto Storyboard::AddKeyframeAtOffset(KeyFrame keyFrame, double durationOffset) const -> KeyFrame
+	auto Storyboard::AddKeyframeAtOffset(KeyFrame keyFrame, double durationOffset) -> KeyFrame
 	{
 		KeyFrame newKeyFrame;
 		auto hr = Get()->AddKeyframeAtOffset(keyFrame, durationOffset, &newKeyFrame); ThrowFailed(hr);

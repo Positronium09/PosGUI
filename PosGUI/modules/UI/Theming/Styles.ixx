@@ -26,5 +26,7 @@ export namespace PGUI::UI::Theming
 		RGBA captionTextColor = Colors::Transparent;
 		bool darkMode = SystemTheme::IsDarkMode();
 		CornerPreference cornerPreference = CornerPreference::Default;
+
+		constexpr auto operator==(const AppWindowStyle&) const noexcept -> bool = default;
 	};
 }

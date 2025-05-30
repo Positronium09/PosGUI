@@ -51,6 +51,20 @@ export namespace PGUI::UI::Theming
 		{
 			customStyles.erase(typeid(T));
 		}
+
+		auto operator==(const Theme& other) const noexcept -> bool
+		{
+			for (const auto& [key, val] : customStyles)
+			{
+				if (!other.customStyles.contains(key))
+				{
+					return false;
+				}
+			}
+
+			return colorContext == other.colorContext &&
+				appWindowStyle == other.appWindowStyle;
+		}
 	};
 
 	class ThemeContext
@@ -80,8 +94,7 @@ export namespace PGUI::UI::Theming
 
 		private:
 		inline static std::atomic_bool respondToSystemThemeChange = true;
-		inline static Theme currentTheme =
-			SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;
+		inline static Theme currentTheme{ };
 		inline static Event<const Theme&> themeChangedEvent;
 		inline static std::mutex themeMutex{ };
 

@@ -13,5 +13,7 @@ export namespace PGUI::UI::Theming
 		RGBA primary{ };
 		RGBA secondary{ };
 		RGBA accent{ };
+
+		constexpr auto operator==(const ColorContext&) const noexcept -> bool = default;
 	};
 }

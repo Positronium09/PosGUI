@@ -1,6 +1,8 @@
 module;
+#include <span>
 #include <cmath>
 #include <cstdint>
+#include <type_traits>
 #include <d2d1.h>
 #include <wincodec.h>
 #include <Windows.h>
@@ -37,6 +39,23 @@ export namespace PGUI::UI
 			g{ ((rgb & 0xff << 8) >> 8) / 255.0F },
 			b{ (rgb & 0xff) / 255.0F },
 			a{ a }
+		{
+		}
+
+		template <std::floating_point T>
+		constexpr RGBA(std::span<T, 3> values) : 
+			r{ static_cast<float>(values[0]) }, 
+			g{ static_cast<float>(values[1]) },
+			b{ static_cast<float>(values[2]) },
+			a{ 1.0F }
+		{
+		}
+		template <std::floating_point T>
+		constexpr RGBA(std::span<T, 4> values) :
+			r{ static_cast<float>(values[0]) },
+			g{ static_cast<float>(values[1]) },
+			b{ static_cast<float>(values[2]) },
+			a{ static_cast<float>(values[3]) }
 		{
 		}
 

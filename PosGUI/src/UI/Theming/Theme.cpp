@@ -67,7 +67,7 @@ namespace PGUI::UI::Theming
 	void ThemeContext::OnSystemThemeChanged()
 	{
 		if (respondToSystemThemeChange && 
-			(&currentTheme == &DarkTheme || &currentTheme == &DarkTheme))
+			(currentTheme == DarkTheme || currentTheme == LightTheme))
 		{
 			InitializeThemes();
 			currentTheme = SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;

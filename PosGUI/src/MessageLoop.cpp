@@ -1,8 +1,11 @@
 module;
+#include <stacktrace>
 #include <Windows.h>
 
 module PGUI.MessageLoop;
+
 import PGUI.Exceptions;
+import PGUI.Logging;
 
 namespace PGUI
 {
@@ -16,7 +19,7 @@ namespace PGUI
 			if (ret == -1)
 			{
 				auto errCode = GetLastError();
-				// HR_L(HresultFromWin32(errCode));
+				LogFailed(LogLevel::Fatal, errCode);
 				return static_cast<int>(errCode);
 			}
 			TranslateMessage(&msg);

@@ -226,6 +226,57 @@ export namespace PGUI
 		return std::bit_cast<RawWindowPtr<>>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 	}
 
+	class MessageHooker
+	{
+		friend class Window;
+
+		public:
+		virtual ~MessageHooker() noexcept = default;
+
+		[[nodiscard]] const auto& GetHandlers() const noexcept { return messageHandlerMap; }
+
+		protected:
+		void RegisterHandler(UINT msg, const HandlerHWND& handler) { _RegisterHandler(msg, handler); }
+		void RegisterHandler(UINT msg, const Handler& handler) { _RegisterHandler(msg, handler); }
+		template <typename T>
+		void RegisterHandler(UINT msg, HandlerHWNDMember<T> func)
+		{
+			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
+		}
+		template <typename T>
+		void RegisterHandler(UINT msg, HandlerMember<T> func)
+		{
+			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
+		}
+		template <typename T>
+		void RegisterHandler(UINT msg, HandlerHWNDCMember<T> func)
+		{
+			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
+		}
+		template <typename T>
+		void RegisterHandler(UINT msg, HandlerCMember<T> func)
+		{
+			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
+		}
+
+		const auto& GetHookedWindow() const noexcept { return hookedWindow; }
+
+		private:
+		RawWindowPtr<> hookedWindow = nullptr;
+		MessageHandlerMap messageHandlerMap{ };
+
+		void _RegisterHandler(UINT msg, const HandlerHWND& handler)
+		{
+			messageHandlerMap[msg].push_back(handler);
+		}
+		void _RegisterHandler(UINT msg, const Handler& handler)
+		{
+			messageHandlerMap[msg].push_back(handler);
+		}
+	};
+
+	using MessageHookers = std::vector<std::reference_wrapper<const MessageHooker>>;
+
 	class Window
 	{
 		friend auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
@@ -337,6 +388,9 @@ export namespace PGUI
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
 
+		void Hook(MessageHooker& hooker) noexcept;
+		void UnHook(MessageHooker& hooker) noexcept;
+
 		auto AddTimer(TimerId id, std::chrono::milliseconds delay,
 			std::optional<TimerCallback> callback = std::nullopt) noexcept -> TimerId;
 		void RemoveTimer(TimerId id) noexcept;
@@ -409,7 +463,7 @@ export namespace PGUI
 		void Minimize() const noexcept { Show(ShowWindowCommand::Minimize); }
 		void Maximize() const noexcept { Show(ShowWindowCommand::Maximize); }
 		void BringToTop() const noexcept { BringWindowToTop(Hwnd()); }
-		void Invalidate(bool erase = false) const noexcept { InvalidateRect(Hwnd(), nullptr, erase); }
+		void Invalidate(bool erase = true) const noexcept { InvalidateRect(Hwnd(), nullptr, erase); }
 		void Update() const noexcept { UpdateWindow(Hwnd()); }
 		void SetFocus() const noexcept { ::SetFocus(Hwnd()); }
 		void SetForeground() const noexcept { SetForegroundWindow(hWnd); }
@@ -448,6 +502,7 @@ export namespace PGUI
 		MessageHandlerMap messageHandlerMap;
 		ChildWindowList childWindows;
 		TimerMap timerMap;
+		MessageHookers hookers;
 		WindowClassPtr windowClass;
 		HWND hWnd = nullptr;
 		HWND parentHwnd = nullptr;

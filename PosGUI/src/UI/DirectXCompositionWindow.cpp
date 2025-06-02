@@ -42,8 +42,6 @@ namespace PGUI::UI
 	}
 	auto DirectXCompositionWindow::EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG>
 	{
-		EndPaint(Hwnd(), &paintStruct);
-
 		D2D1_TAG tag1{ };
 		D2D1_TAG tag2{ };
 		auto hr = GetD2D1DeviceContext()->EndDraw(&tag1, &tag2);
@@ -56,6 +54,9 @@ namespace PGUI::UI
 		ThrowFailed(hr);
 
 		hr = GetSwapChain()->Present(1, NULL); ThrowFailed(hr);
+
+		EndPaint(Hwnd(), &paintStruct);
+		
 		return { tag1, tag2 };
 	}
 

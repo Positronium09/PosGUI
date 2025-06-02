@@ -22,6 +22,7 @@ namespace PGUI::UI
 	AppWindow::AppWindow(const WindowClassPtr& wndClass) noexcept : 
 		DirectXCompositionWindow{ wndClass }
 	{
+		Hook(autoStop);
 		RegisterHandler(WM_NCCREATE, &AppWindow::OnNCCreate);
 		RegisterHandler(WM_SETTEXT, &AppWindow::OnSetText);
 		RegisterHandler(WM_GETTEXT, &AppWindow::OnGetText);
@@ -145,6 +146,22 @@ namespace PGUI::UI
 			return;
 		}
 		RemoveStyle(WS_SIZEBOX);
+	}
+
+	void AppWindow::SetAutoStopAnimations(bool enable) noexcept
+	{
+		if (autoStopAnimations == enable)
+		{
+			return;
+		}
+		autoStopAnimations = enable;
+
+		if (autoStopAnimations)
+		{
+			Hook(autoStop);
+			return;
+		}
+		UnHook(autoStop);
 	}
 
 	void AppWindow::SetBorderColor(RGBA color) const noexcept

@@ -11,11 +11,31 @@ import PGUI.UI.Color;
 import PGUI.UI.Brush;
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ThemeAware;
+import PGUI.UI.Animation.AnimationManager;
 import PGUI.UI.DirectXCompositionWindow;
 
 
 export namespace PGUI::UI
 {
+	struct AutoStopAnimations : public MessageHooker
+	{
+		AutoStopAnimations() noexcept
+		{
+			RegisterHandler(WM_SETFOCUS, [this](UINT, WPARAM, LPARAM) -> MessageHandlerResult
+			{
+				Animation::AnimationManager::Resume();
+				GetHookedWindow()->Invalidate();
+
+				return 0;
+			});
+			RegisterHandler(WM_KILLFOCUS, [](UINT, WPARAM, LPARAM) -> MessageHandlerResult
+			{
+				Animation::AnimationManager::Pause();
+				return 0;
+			});
+		}
+	};
+
 	class AppWindow : public DirectXCompositionWindow, public Theming::ThemeAware<Theming::AppWindowStyle>
 	{
 		public:
@@ -47,6 +67,9 @@ export namespace PGUI::UI
 		[[nodiscard]] auto IsResizable() const noexcept -> bool;
 		void SetResizable(bool isResizable) const noexcept;
 
+		[[nodiscard]] auto IsAutoStopAnimationsEnabled() const noexcept { return autoStopAnimations; }
+		void SetAutoStopAnimations(bool enable) noexcept;
+
 		void SetBorderColor(RGBA color) const noexcept;
 		void SetCaptionColor(RGBA color) const noexcept;
 		void SetCaptionTextColor(RGBA color) const noexcept;
@@ -58,6 +81,8 @@ export namespace PGUI::UI
 		std::wstring titleText;
 		WindowPlacement prevPlacement{ };
 		bool isFullScreen = false;
+		bool autoStopAnimations = true;
+		AutoStopAnimations autoStop;
 		SizeI minSize = SizeI{ 300, 300 };
 
 		auto OnNCCreate(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;

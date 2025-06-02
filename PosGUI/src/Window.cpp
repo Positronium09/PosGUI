@@ -61,11 +61,18 @@ namespace PGUI
 		{
 			return wnd->hWnd == childHwnd;
 		});
+		if (found == childWindows.end())
+		{
+			return;
+		}
 		auto& childWindow = *found;
 		childWindows.erase(found);
 
 		SetParent(childHwnd, nullptr);
+		childWindow->parentHwnd = nullptr;
 		childWindow->ModifyStyle(WS_POPUP, WS_CHILD);
+
+		OnChildRemoved(childHwnd);
 	}
 
 	auto Window::GetParentWindow() const noexcept -> Window*
@@ -483,6 +490,7 @@ namespace PGUI
 			auto* window = std::bit_cast<Window*>(createStruct->lpCreateParams);
 
 			window->hWnd = hWnd;
+			window->parentHwnd = createStruct->hwndParent;
 
 			SetWindowLongPtrW(hWnd, GWLP_USERDATA, std::bit_cast<LONG_PTR>(window));
 		}

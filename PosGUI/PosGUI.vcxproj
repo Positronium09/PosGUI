@@ -76,6 +76,7 @@
     <ClCompile Include="modules\UI\D2D\Geometry\Geometry.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\GeometrySink.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\SimplifiedGeometrySink.ixx" />
+    <ClCompile Include="modules\UI\Dialog.ixx" />
     <ClCompile Include="modules\UI\DirectXCompositionWindow.ixx" />
     <ClCompile Include="modules\UI\Font\Font.ixx" />
     <ClCompile Include="modules\UI\Font\FontCollection.ixx" />
@@ -101,6 +102,7 @@
     <ClCompile Include="modules\UI\D2D\D2DEnums.ixx" />
     <ClCompile Include="modules\UI\D2D\D2DStructs.ixx" />
     <ClCompile Include="modules\UI\Imaging\WICBitmapLock.ixx" />
+    <ClCompile Include="modules\UI\Layout\Layout.ixx" />
     <ClCompile Include="modules\UI\Theming\ColorContext.ixx" />
     <ClCompile Include="modules\UI\Theming\Styles.ixx" />
     <ClCompile Include="modules\UI\Theming\Theming.ixx" />
@@ -138,6 +140,7 @@
     <ClCompile Include="src\UI\D2D\D2DProperties.cpp" />
     <ClCompile Include="src\UI\D2D\Effect.cpp" />
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
+    <ClCompile Include="src\UI\Dialog.cpp" />
     <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
     <ClCompile Include="src\UI\Font\FontCollection.cpp" />
     <ClCompile Include="src\UI\Font\FontFamily.cpp" />

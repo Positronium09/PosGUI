@@ -15,7 +15,7 @@ import PGUI.Logging;
 namespace PGUI::UI
 {
 	AppWindow::AppWindow() noexcept :
-		AppWindow{ WindowClass::Create(L"AppWindow") }
+		AppWindow{ WindowClass::Create(L"PGUI_AppWindow") }
 	{
 	}
 

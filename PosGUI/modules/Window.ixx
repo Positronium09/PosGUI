@@ -168,8 +168,8 @@ export namespace PGUI
 	struct WindowCreateInfo
 	{
 		std::wstring title;
-		PointI position;
-		SizeI size;
+		PointI position{ };
+		SizeI size{ };
 		DWORD style;
 		DWORD exStyle;
 
@@ -335,6 +335,8 @@ export namespace PGUI
 
 			childWindows.push_back(window);
 
+			OnChildAdded(window);
+
 			return std::dynamic_pointer_cast<T>(childWindows.back());
 		}
 		template <WindowType T>
@@ -349,6 +351,8 @@ export namespace PGUI
 			wnd->parentHwnd = Hwnd();
 
 			childWindows.push_back(window);
+
+			OnChildAdded(window);
 
 			return wnd;
 		}
@@ -492,6 +496,9 @@ export namespace PGUI
 		protected:
 		explicit Window(const WindowClassPtr& windowClass) noexcept;
 		virtual auto OnDpiChanged(UINT dpi, RectL suggestedRect) -> MessageHandlerResult;
+
+		virtual void OnChildAdded(const WindowPtr<Window>&) { /* E_NOTIMPL */ }
+		virtual void OnChildRemoved(HWND) { /* E_NOTIMPL */ }
 
 		private:
 		void _RegisterHandler(UINT msg, const HandlerHWND& handler);

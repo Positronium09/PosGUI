@@ -13,6 +13,7 @@ export import PGUI.UI.Graphics;
 export import PGUI.UI.D2D;
 export import PGUI.UI.Imaging;
 export import PGUI.UI.AppWindow;
+export import PGUI.UI.Dialog;
 export import PGUI.UI.UIComponent;
 export import PGUI.UI.Theming;
 export import PGUI.UI.Animation;

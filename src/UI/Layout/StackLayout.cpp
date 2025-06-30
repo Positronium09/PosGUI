@@ -6,6 +6,7 @@ import PGUI.Logging;
 
 #include <algorithm>
 #include <limits>
+#include <vector>
 
 namespace PGUI::UI::Layout
 {

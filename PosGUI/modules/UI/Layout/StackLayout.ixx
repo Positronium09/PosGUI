@@ -1,6 +1,7 @@
 module;
 #include <unordered_map>
 #include <optional>
+#include <vector>
 #include <Windows.h>
 
 export module PGUI.UI.Layout.StackLayout;

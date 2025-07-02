@@ -299,14 +299,14 @@ namespace PGUI
 				};
 
 		case Vector | LPSTR:
-				return std::vector<LPSTR>{
+			return std::vector<::LPSTR>{
 					var.calpstr.pElems,
 						var.calpstr.pElems + var.calpstr.cElems
 				};
 
-			case Vector | Bstr:
+		case Vector | Bstr:
 		case Vector | LPWSTR:
-				return std::vector<LPWSTR>{
+			return std::vector<::LPWSTR>{
 					var.calpwstr.pElems,
 						var.calpwstr.pElems + var.calpwstr.cElems
 				};

@@ -60,7 +60,8 @@ export namespace PGUI
 	std::variant<
 		std::nullptr_t,
 		CHAR, UCHAR,
-		SHORT, USHORT, INT, UINT,
+		SHORT, USHORT,
+		INT, UINT,
 		LARGE_INTEGER, ULARGE_INTEGER,
 		FLOAT, DOUBLE, // DATE is DOUBLE
 		bool, SCODE,

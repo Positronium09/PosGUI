@@ -11,13 +11,14 @@ export namespace PGUI
 		High = 2
 	};
 
-	template <typename T, typename ...Args>
-	concept CallbackType = std::invocable<T, Args...> &&
+	template <typename T, typename... Args>
+	concept CallbackType =
+		std::invocable<T, Args...> &&
 		(std::is_same_v<bool, std::invoke_result_t<T, Args...>> ||
 			std::is_same_v<void, std::invoke_result_t<T, Args...>>);
-	using CallbackId = std::size_t;	
+	using CallbackId = std::size_t;
 
-	template <typename ...Args>
+	template <typename... Args>
 	class Event
 	{
 		public:
@@ -49,13 +50,14 @@ export namespace PGUI
 			return nextCallbackId++;
 		}
 
-		void RemoveCallback(CallbackId id) noexcept
+		auto RemoveCallback(CallbackId id) noexcept -> void
 		{
 			std::scoped_lock lock{ callbackMutex };
 
 			for (auto& callbackList : callbacks)
 			{
-				auto erased = std::erase_if(callbackList, 
+				auto erased = std::erase_if(
+					callbackList,
 					[id](const CallbackData& data) { return data.id == id; });
 				if (erased > 0)
 				{
@@ -64,7 +66,7 @@ export namespace PGUI
 			}
 		}
 
-		void ClearCallbacks() noexcept
+		auto ClearCallbacks() noexcept -> void
 		{
 			std::scoped_lock lock{ callbackMutex };
 
@@ -74,7 +76,7 @@ export namespace PGUI
 			}
 		}
 
-		void Invoke(Args... args) const noexcept
+		auto Invoke(Args... args) const noexcept -> void
 		{
 			std::scoped_lock lock{ callbackMutex };
 
@@ -99,7 +101,7 @@ export namespace PGUI
 			}
 		}
 
-		void InvokeAsync(Args... args) const noexcept
+		auto InvokeAsync(Args... args) const noexcept -> void
 		{
 			std::scoped_lock lock{ callbackMutex };
 
@@ -125,11 +127,16 @@ export namespace PGUI
 		}
 
 		Event() noexcept = default;
+
 		~Event() = default;
+
 		Event(Event&&) = default;
-		auto operator=(Event&&) -> Event& = default;
+
+		auto operator=(Event&&) -> Event & = default;
+
 		Event(const Event&) = delete;
-		auto operator=(const Event&) -> Event& = delete;
+
+		auto operator=(const Event&) -> Event & = delete;
 
 		auto operator+=(const CallbackType<Args...> auto& callback) -> Event&
 		{
@@ -143,25 +150,29 @@ export namespace PGUI
 		std::array<std::vector<CallbackData>, 3> callbacks;
 	};
 
-	template <typename ...Args>
+	template <typename... Args>
 	class ScopedCallback final
 	{
 		using EventType = Event<Args...>;
 
 		public:
-		ScopedCallback(EventType& event, CallbackId id) noexcept : 
+		ScopedCallback(EventType& event, CallbackId id) noexcept :
 			event{ event }, id{ id }
 		{
 		}
+
 		~ScopedCallback() noexcept
 		{
 			event.RemoveCallback(id);
 		}
 
 		ScopedCallback(ScopedCallback&&) = default;
-		auto operator=(ScopedCallback&&) -> ScopedCallback& = default;
+
+		auto operator=(ScopedCallback&&) -> ScopedCallback & = default;
+
 		ScopedCallback(const ScopedCallback&) = delete;
-		auto operator=(const ScopedCallback&) -> ScopedCallback& = delete;
+
+		auto operator=(const ScopedCallback&) -> ScopedCallback & = delete;
 
 		private:
 		EventType& event;

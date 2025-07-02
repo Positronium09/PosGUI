@@ -1,14 +1,14 @@
 module;
 #include <cstdint>
-#include <type_traits>
 #include <d2d1_1.h>
+#include <type_traits>
 #include <Windows.h>
 
 export module PGUI.Shape2D:Size;
 
 export namespace PGUI
 {
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	struct Size
 	{
 		T cx = static_cast<T>(0);
@@ -18,24 +18,23 @@ export namespace PGUI
 
 		constexpr Size(const T& cx, const T& cy) noexcept :
 			cx{ cx }, cy{ cy }
-		{
-		}
+		{ }
+
 		explicit constexpr Size(const T& sz) noexcept :
 			cx{ sz }, cy{ sz }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr Size(const SIZE& sz) noexcept :
 			cx{ static_cast<T>(sz.cx) }, cy{ static_cast<T>(sz.cy) }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr Size(const D2D1_SIZE_F& sz) noexcept :
 			cx{ static_cast<T>(sz.width) }, cy{ static_cast<T>(sz.height) }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr Size(const D2D1_SIZE_U& sz) noexcept :
 			cx{ static_cast<T>(sz.width) }, cy{ static_cast<T>(sz.height) }
-		{
-		}
+		{ }
 
 		[[nodiscard]] constexpr auto operator==(const Size<T>& other) const noexcept -> bool = default;
 
@@ -45,6 +44,7 @@ export namespace PGUI
 			cy *= factor;
 			return *this;
 		}
+
 		constexpr auto& operator/=(const T& factor) noexcept
 		{
 			cx /= factor;
@@ -56,12 +56,13 @@ export namespace PGUI
 		{
 			return Size(cx * factor, cy * factor);
 		}
+
 		[[nodiscard]] constexpr auto operator/(T factor) const noexcept
 		{
 			return Size(cx / factor, cy / factor);
 		}
 
-		template<typename U> requires std::is_arithmetic_v<U>
+		template <typename U> requires std::is_arithmetic_v<U>
 		explicit(false) operator Size<U>() const noexcept
 		{
 			return Size<U>{ static_cast<U>(cx), static_cast<U>(cy) };
@@ -71,35 +72,37 @@ export namespace PGUI
 		{
 			return SIZE{ static_cast<LONG>(cx), static_cast<LONG>(cy) };
 		}
+
 		explicit(false) operator D2D1_SIZE_F() const noexcept
 		{
 			return D2D1_SIZE_F{ static_cast<FLOAT>(cx), static_cast<FLOAT>(cy) };
 		}
+
 		explicit(false) operator D2D1_SIZE_U() const noexcept
 		{
 			return D2D1_SIZE_U{ static_cast<UINT32>(cx), static_cast<UINT32>(cy) };
 		}
 	};
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator*(T factor, const Size<T>& v) noexcept
 	{
 		return Size<T>(v.cx * factor, v.cy * factor);
 	}
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator/(T factor, const Size<T>& v) noexcept
 	{
 		return Size<T>(v.cx / factor, v.cy / factor);
 	}
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator*(const Size<T>& v, T factor) noexcept
 	{
 		return Size<T>(v.cx * factor, v.cy * factor);
 	}
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator/(const Size<T>& v, T factor) noexcept
 	{
 		return Size<T>(v.cx / factor, v.cy / factor);

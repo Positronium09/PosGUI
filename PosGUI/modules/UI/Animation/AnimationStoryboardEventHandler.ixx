@@ -1,16 +1,16 @@
 module;
 #include <UIAnimation.h>
 
-export module PGUI.UI.Animation.AnimationStoryboardEventHandler;
+export module PGUI.UI.Animation:AnimationStoryboardEventHandler;
 
 import std;
 
 import PGUI.Event;
-import PGUI.UI.Animation.AnimationEnums;
+import :AnimationInterface;
+import :AnimationEnums;
 
 namespace PGUI::UI::Animation
 {
-	export class Storyboard;
 	class AnimationStoryboardEventHandlerRouter final : public IUIAnimationStoryboardEventHandler2
 	{
 		using StoryboardStatusChangedHandler = std::function<HRESULT(Storyboard, StoryboardStatus, StoryboardStatus)>;
@@ -18,23 +18,31 @@ namespace PGUI::UI::Animation
 
 		public:
 		AnimationStoryboardEventHandlerRouter() noexcept = default;
+
 		AnimationStoryboardEventHandlerRouter(
 			const StoryboardStatusChangedHandler& statusChangedHandler,
 			const StoryboardUpdatedHandler& updatedHandler) noexcept;
 
 		auto __stdcall QueryInterface(const IID& iid, void** obj) -> HRESULT override;
+
 		auto __stdcall AddRef() -> ULONG override;
+
 		auto __stdcall Release() -> ULONG override;
 
-		auto __stdcall OnStoryboardStatusChanged(IUIAnimationStoryboard2* storyboard,
+		auto __stdcall OnStoryboardStatusChanged(
+			IUIAnimationStoryboard2* storyboard,
 			UI_ANIMATION_STORYBOARD_STATUS newStatus,
-			UI_ANIMATION_STORYBOARD_STATUS previousStatus) -> HRESULT override;
+			UI_ANIMATION_STORYBOARD_STATUS previousStatus)->HRESULT override;
+
 		auto __stdcall OnStoryboardUpdated(IUIAnimationStoryboard2* storyboard) -> HRESULT override;
 
-		void SetStatusChangedHandler(const StoryboardStatusChangedHandler& handler) noexcept;
-		void ClearStatusChangedHandler() noexcept;
-		void SetUpdatedHandler(const StoryboardUpdatedHandler& handler) noexcept;
-		void ClearUpdatedHandler() noexcept;
+		auto SetStatusChangedHandler(const StoryboardStatusChangedHandler& handler) noexcept -> void;
+
+		auto ClearStatusChangedHandler() noexcept -> void;
+
+		auto SetUpdatedHandler(const StoryboardUpdatedHandler& handler) noexcept -> void;
+
+		auto ClearUpdatedHandler() noexcept -> void;
 
 		private:
 		std::mutex updateHandlerMutex;
@@ -52,22 +60,29 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationStoryboardEventHandler() noexcept;
 
+		virtual ~AnimationStoryboardEventHandler() = default;
+
 		[[nodiscard]] auto& GetRouter() noexcept { return router; }
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
 
-		virtual void OnStoryBoardStatusChanged(Storyboard storyboard,
-			StoryboardStatus newStatus, StoryboardStatus previousStatus) = 0;
-		virtual void OnStoryBoardUpdated(Storyboard storyboard) = 0;
+		virtual auto OnStoryBoardStatusChanged(
+			Storyboard storyboard,
+			StoryboardStatus newStatus, StoryboardStatus previousStatus) -> void = 0;
+
+		virtual auto OnStoryBoardUpdated(Storyboard storyboard) -> void = 0;
 
 		private:
 		AnimationStoryboardEventHandlerRouter router;
 
-		auto CallStoryBoardStatusChangedHandler(Storyboard storyboard,
-			StoryboardStatus newStatus, StoryboardStatus previousStatus) noexcept -> HRESULT;
+		auto CallStoryBoardStatusChangedHandler(
+			Storyboard storyboard,
+			StoryboardStatus newStatus,
+			StoryboardStatus previousStatus) noexcept -> HRESULT;
+
 		auto CallStoryBoardUpdatedHandler(Storyboard storyboard) noexcept -> HRESULT;
 	};
 
-	class AnimationStoryboardEvent : public AnimationStoryboardEventHandler
+	class AnimationStoryboardEvent final : public AnimationStoryboardEventHandler
 	{
 		public:
 		[[nodiscard]] const auto& StoryboardStatusChanged() const noexcept { return storyboardStatusChangedEvent; }
@@ -76,12 +91,14 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] auto& StoryboardUpdated() noexcept { return storyboardUpdatedEvent; }
 
 		private:
-		Event<Storyboard, 
-			StoryboardStatus, StoryboardStatus> storyboardStatusChangedEvent;
+		Event<Storyboard,
+		      StoryboardStatus, StoryboardStatus> storyboardStatusChangedEvent;
 		Event<Storyboard> storyboardUpdatedEvent;
 
-		void OnStoryBoardStatusChanged(Storyboard storyboard, 
-			StoryboardStatus newStatus, StoryboardStatus previousStatus) override;
-		void OnStoryBoardUpdated(Storyboard storyboard) override;
+		auto OnStoryBoardStatusChanged(
+			Storyboard storyboard,
+			StoryboardStatus newStatus, StoryboardStatus previousStatus) -> void override;
+
+		auto OnStoryBoardUpdated(Storyboard storyboard) -> void override;
 	};
 }

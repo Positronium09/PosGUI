@@ -4,14 +4,15 @@ import std;
 
 export namespace PGUI
 {
-	template<typename T>
+	template <typename T>
 	concept Enumeration = std::is_enum_v<T>;
 
 	using Disabled = std::false_type;
 	using Enabled = std::true_type;
 
 	template <typename T>
-	struct IsEnumFlagEnabled : public Disabled { };
+	struct IsEnumFlagEnabled : Disabled
+	{ };
 
 	template <typename T>
 	concept EnumFlag = Enumeration<T> && IsEnumFlagEnabled<T>::value;
@@ -21,60 +22,68 @@ export namespace PGUI
 	template <
 		EnumFlag EnumFlagType,
 		typename UnderlyingType = UnderlyingType<EnumFlagType>>
-		constexpr auto operator|(EnumFlagType lhs, EnumFlagType rhs) noexcept
+	constexpr auto operator|(EnumFlagType lhs, EnumFlagType rhs) noexcept
 	{
 		return static_cast<EnumFlagType>(
 			static_cast<UnderlyingType>(lhs) | static_cast<UnderlyingType>(rhs)
-			);
+		);
 	}
+
 	constexpr auto& operator|=(EnumFlag auto& lhs, EnumFlag auto rhs) noexcept
 	{
 		lhs = lhs | rhs;
 		return lhs;
 	}
+
 	template <
 		EnumFlag EnumFlagType,
 		typename UnderlyingType = UnderlyingType<EnumFlagType>>
-		constexpr auto operator&(EnumFlagType lhs, EnumFlagType rhs) noexcept
+	constexpr auto operator&(EnumFlagType lhs, EnumFlagType rhs) noexcept
 	{
 		return static_cast<EnumFlagType>(
 			static_cast<UnderlyingType>(lhs) & static_cast<UnderlyingType>(rhs)
-			);
+		);
 	}
+
 	constexpr auto& operator&=(EnumFlag auto& lhs, EnumFlag auto rhs) noexcept
 	{
 		lhs = lhs & rhs;
 		return lhs;
 	}
+
 	template <
 		EnumFlag EnumFlagType,
 		typename UnderlyingType = UnderlyingType<EnumFlagType>>
-		constexpr auto operator^(EnumFlagType lhs, EnumFlagType rhs) noexcept
+	constexpr auto operator^(EnumFlagType lhs, EnumFlagType rhs) noexcept
 	{
 		return static_cast<EnumFlagType>(
 			static_cast<UnderlyingType>(lhs) ^ static_cast<UnderlyingType>(rhs)
-			);
+		);
 	}
+
 	constexpr auto& operator^=(EnumFlag auto& lhs, EnumFlag auto rhs) noexcept
 	{
 		lhs = lhs ^ rhs;
 		return lhs;
 	}
+
 	template <
 		EnumFlag EnumFlagType,
 		typename UnderlyingType = UnderlyingType<EnumFlagType>>
-		constexpr auto operator~(EnumFlagType lhs) noexcept
+	constexpr auto operator~(EnumFlagType lhs) noexcept
 	{
 		return static_cast<EnumFlagType>(
 			~static_cast<UnderlyingType>(lhs));
 	}
+
 	template <
 		EnumFlag EnumFlagType,
 		typename UnderlyingType = UnderlyingType<EnumFlagType>>
-		constexpr auto operator!(EnumFlagType lhs) -> bool
+	constexpr auto operator!(EnumFlagType lhs) -> bool
 	{
 		return !static_cast<UnderlyingType>(lhs);
 	}
+
 	template <EnumFlag EnumFlagType>
 	auto IsFlagSet(EnumFlagType var, EnumFlagType flag)
 	{

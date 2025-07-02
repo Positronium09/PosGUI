@@ -18,32 +18,32 @@ export namespace PGUI::UI::D2D
 	{
 		public:
 		GeometrySink() noexcept = default;
-		GeometrySink(ComPtr<ID2D1GeometrySink> ptr) noexcept :
-			SimplifiedGeometrySink{ ptr }
-		{
-		}
 
-		void AddLine(PointF point)
+		explicit GeometrySink(const ComPtr<ID2D1GeometrySink>& ptr) noexcept :
+			SimplifiedGeometrySink{ ptr }
+		{ }
+
+		auto AddLine(const PointF point) const -> void
 		{
 			Get()->AddLine(point);
 		}
 
-		void AddArc(ArcSegment arcSegment)
+		auto AddArc(const ArcSegment& arcSegment) const -> void
 		{
 			Get()->AddArc(arcSegment);
 		}
 
-		void AddBezier(BezierSegment bezierSegment)
+		auto AddBezier(const BezierSegment& bezierSegment) const -> void
 		{
 			Get()->AddBezier(bezierSegment);
 		}
 
-		void AddQuadraticBezier(QuadraticBezierSegment quadraticBezierSegment)
+		auto AddQuadraticBezier(const QuadraticBezierSegment quadraticBezierSegment) const -> void
 		{
 			Get()->AddQuadraticBezier(quadraticBezierSegment);
 		}
 
-		void AddQuadraticBeziers(std::span<const QuadraticBezierSegment> segments)
+		auto AddQuadraticBeziers(const std::span<const QuadraticBezierSegment> segments) const -> void
 		{
 			Get()->AddQuadraticBeziers(segments.data(), static_cast<UINT32>(segments.size()));
 		}

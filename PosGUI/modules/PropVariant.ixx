@@ -29,14 +29,14 @@ export namespace PGUI
 		Error = 10,
 		Cy = 6,
 		Date = 7,
-		Filetime = 64,
+		FileTime = 64,
 		Clsid = 72,
 		Cf = 71,
 		Bstr = 8,
 		Blob = 65,
 		BlobObject = 70,
-		Lpstr = 30,
-		Lpwstr = 31,
+		LPSTR = 30,
+		LPWSTR = 31,
 		Unknown = 13,
 		Dispatch = 9,
 		Stream = 66,
@@ -51,11 +51,13 @@ export namespace PGUI
 		Variant = 12,
 		TypeMask = 0xfff
 	};
+
 	template <>
-	struct IsEnumFlagEnabled<PropVariantType> : std::true_type { };
+	struct IsEnumFlagEnabled<PropVariantType> : std::true_type
+	{ };
 
 	using PropVariantValue =
-		std::variant <
+	std::variant<
 		std::nullptr_t,
 		CHAR, UCHAR,
 		SHORT, USHORT, INT, UINT,
@@ -87,22 +89,26 @@ export namespace PGUI
 		std::vector<PROPVARIANT>,
 		std::vector<LARGE_INTEGER>, std::vector<ULARGE_INTEGER>,
 		std::vector<LPSTR>, std::vector<LPWSTR>,
-		std::vector<FILETIME>, std::vector<CLIPDATA >> ;
+		std::vector<FILETIME>, std::vector<CLIPDATA>>;
 
 	struct PropVariant final
 	{
 		PropVariant() noexcept;
+
 		explicit(false) PropVariant(PROPVARIANT var) noexcept;
+
 		~PropVariant() noexcept;
 
 		auto operator&() noexcept -> PROPVARIANT*;
+
 		explicit(false) operator PROPVARIANT() const noexcept;
+
 		explicit(false) operator PropVariantValue() const noexcept;
 
 		[[nodiscard]] auto Type() const noexcept { return static_cast<PropVariantType>(var.vt); }
 
 		[[nodiscard]] auto GetValue() const -> PropVariantValue;
 
-		PROPVARIANT var{};
+		PROPVARIANT var{ };
 	};
 }

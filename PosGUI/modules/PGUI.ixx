@@ -15,8 +15,7 @@ export import PGUI.Shape2D;
 export import PGUI.Utils;
 export import PGUI.UI;
 
-
 export namespace PGUI
 {
-	void Init();
+	auto Init() -> void;
 }

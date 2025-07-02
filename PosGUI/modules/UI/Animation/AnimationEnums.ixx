@@ -1,7 +1,7 @@
 module;
 #include <UIAnimation.h>
 
-export module PGUI.UI.Animation.AnimationEnums;
+export module PGUI.UI.Animation:AnimationEnums;
 
 export namespace PGUI::UI::Animation
 {

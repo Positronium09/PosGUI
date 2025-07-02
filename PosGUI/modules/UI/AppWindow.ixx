@@ -7,16 +7,17 @@ import std;
 
 import PGUI.Shape2D;
 import PGUI.Window;
+import PGUI.WindowClass;
 import PGUI.UI.Color;
 import PGUI.UI.Brush;
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ThemeAware;
-import PGUI.UI.Animation.AnimationManager;
+import PGUI.UI.Animation;
 import PGUI.UI.DirectXCompositionWindow;
 
 export namespace PGUI::UI
 {
-	struct AutoStopAnimations : public MessageHooker
+	struct AutoStopAnimations final : MessageHooker
 	{
 		AutoStopAnimations() noexcept
 		{
@@ -39,42 +40,55 @@ export namespace PGUI::UI
 	{
 		public:
 		AppWindow() noexcept;
-		AppWindow(const WindowClassPtr& wndClass) noexcept;
+
+		explicit AppWindow(const WindowClassPtr& wndClass) noexcept;
 
 		[[nodiscard]] auto IsFullScreen() const noexcept { return isFullScreen; }
-		void EnterFullScreenMode() noexcept;
-		void ExitFullScreenMode() noexcept;
+
+		auto EnterFullScreenMode() noexcept -> void;
+
+		auto ExitFullScreenMode() noexcept -> void;
 
 		[[nodiscard]] auto GetMinimumSize() const noexcept -> SizeI { return minSize; }
-		void SetMinimumSize(SizeI size) noexcept { minSize = size; }
+		auto SetMinimumSize(const SizeI size) noexcept -> void { minSize = size; }
 
-		void SetTitle(std::wstring_view title) const noexcept;
+		auto SetTitle(std::wstring_view title) const noexcept -> void;
+
 		[[nodiscard]] auto GetTitle() const noexcept -> std::wstring_view { return titleText; }
 
 		[[nodiscard]] auto IsMaximizable() const noexcept -> bool;
-		void SetMaximizable(bool isMaximizable) const noexcept;
+
+		auto SetMaximizable(bool isMaximizable) const noexcept -> void;
 
 		[[nodiscard]] auto IsMinimizable() const noexcept -> bool;
-		void SetMinimizable(bool isMinimizable) const noexcept;
+
+		auto SetMinimizable(bool isMinimizable) const noexcept -> void;
 
 		[[nodiscard]] auto IsCloseable() const noexcept -> bool;
-		void SetCloseable(bool isCloseable) const noexcept;
+
+		auto SetCloseable(bool isCloseable) const noexcept -> void;
 
 		[[nodiscard]] auto IsAlwaysOnTop() const noexcept -> bool;
-		void SetAlwaysOnTop(bool isAlwaysOnTop) const noexcept;
+
+		auto SetAlwaysOnTop(bool isAlwaysOnTop) const noexcept -> void;
 
 		[[nodiscard]] auto IsResizable() const noexcept -> bool;
-		void SetResizable(bool isResizable) const noexcept;
+
+		auto SetResizable(bool isResizable) const noexcept -> void;
 
 		[[nodiscard]] auto IsAutoStopAnimationsEnabled() const noexcept { return autoStopAnimations; }
-		void SetAutoStopAnimations(bool enable) noexcept;
 
-		void SetBorderColor(RGBA color) const noexcept;
-		void SetCaptionColor(RGBA color) const noexcept;
-		void SetCaptionTextColor(RGBA color) const noexcept;
-		void SetCornerPreference(Theming::CornerPreference cornerPreference) const noexcept;
+		auto SetAutoStopAnimations(bool enable) noexcept -> void;
 
-		void ApplyStyle(const Theming::AppWindowStyle& style) noexcept override;
+		auto SetBorderColor(RGBA color) const noexcept -> void;
+
+		auto SetCaptionColor(RGBA color) const noexcept -> void;
+
+		auto SetCaptionTextColor(RGBA color) const noexcept -> void;
+
+		auto SetCornerPreference(Theming::CornerPreference cornerPreference) const noexcept -> void;
+
+		auto ApplyStyle(const Theming::AppWindowStyle& style) noexcept -> void override;
 
 		private:
 		std::wstring titleText;
@@ -85,10 +99,17 @@ export namespace PGUI::UI
 		SizeI minSize = SizeI{ 300, 300 };
 
 		auto OnNCCreate(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+
 		auto OnSetText(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+
 		[[nodiscard]] auto OnGetText(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
-		[[nodiscard]] auto OnGetTextLength(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
-		[[nodiscard]] auto OnGetMinMaxInfo(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
+
+		[[nodiscard]] auto OnGetTextLength(UINT msg, WPARAM wParam,
+		                                   LPARAM lParam) const noexcept -> MessageHandlerResult;
+
+		[[nodiscard]] auto OnGetMinMaxInfo(UINT msg, WPARAM wParam,
+		                                   LPARAM lParam) const noexcept -> MessageHandlerResult;
+
 		[[nodiscard]] auto OnLButtonDown(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
 	};
 }

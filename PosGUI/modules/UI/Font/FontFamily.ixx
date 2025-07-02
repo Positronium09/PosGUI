@@ -1,5 +1,4 @@
 module;
-#include <Windows.h>
 #include <dwrite_3.h>
 #include <wrl.h>
 
@@ -14,10 +13,12 @@ export namespace PGUI::UI::Font
 	class FontFamily : public ComPtrHolder<IDWriteFontFamily2>
 	{
 		public:
-		FontFamily(ComPtr<IDWriteFontFamily2> family) noexcept;
+		explicit(false) FontFamily(ComPtr<IDWriteFontFamily2> family) noexcept;
 
 		[[nodiscard]] auto GetFamilyNames() const -> LocalizedStrings;
+
 		[[nodiscard]] auto GetFontCount() const noexcept { return Get()->GetFontCount(); }
+
 		[[nodiscard]] auto GetFontSet() const -> FontSet;
 	};
 }

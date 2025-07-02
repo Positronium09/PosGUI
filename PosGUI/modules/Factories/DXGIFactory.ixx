@@ -1,8 +1,8 @@
 module;
 #include <bit>
-#include <wrl.h>
 #include <dxgi1_6.h>
 #include <Windows.h>
+#include <wrl.h>
 
 export module PGUI.Factories:DXGIFactory;
 
@@ -15,10 +15,15 @@ export namespace PGUI::Factories
 	{
 		public:
 		DXGIFactory() = delete;
+
 		DXGIFactory(const DXGIFactory&) = delete;
-		auto operator=(const DXGIFactory&)->DXGIFactory & = delete;
+
+		auto operator=(const DXGIFactory&) -> DXGIFactory& = delete;
+
 		DXGIFactory(DXGIFactory&&) = delete;
-		auto operator=(DXGIFactory&&)->DXGIFactory & = delete;
+
+		auto operator=(DXGIFactory&&) -> DXGIFactory& = delete;
+
 		~DXGIFactory() = default;
 
 		[[nodiscard]] static auto GetFactory()
@@ -27,12 +32,14 @@ export namespace PGUI::Factories
 			{
 				UINT flags = 0;
 
-				#ifdef _DEBUG
+#ifdef _DEBUG
 				flags = DXGI_CREATE_FACTORY_DEBUG;
-				#endif
+#endif
 
-				auto hr = CreateDXGIFactory2(flags,
-					__uuidof(IDXGIFactory7), std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
+				const auto hr = 
+					CreateDXGIFactory2(flags,
+				                       __uuidof(IDXGIFactory7),
+				                       std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
 				ThrowFailed(hr);
 			}
 

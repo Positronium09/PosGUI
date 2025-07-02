@@ -1,10 +1,10 @@
 module;
-#include <winrt/base.h>
-#include <winrt/windows.ui.viewmanagement.h>
-#include <winrt/windows.foundation.h>
-#include <Windows.h>
 #include <dwmapi.h>
+#include <Windows.h>
 #include <wrl.h>
+#include <winrt/base.h>
+// ReSharper disable once CppUnusedIncludeDirective
+#include <winrt/windows.foundation.h>
 
 module PGUI;
 
@@ -12,16 +12,15 @@ import PGUI.Factories;
 import PGUI.UI.Theming.SystemTheme;
 import PGUI.UI.Theming.Theme;
 import PGUI.UI.DirectXCompositionWindow;
-import PGUI.UI.Animation.AnimationManager;
-import PGUI.UI.Animation.AnimationTransitionLibrary;
+import PGUI.UI.Animation;
 
 namespace PGUI
 {
-	void Init()
+	auto Init() -> void
 	{
 		winrt::init_apartment();
 
-		BOOL val = FALSE;
+		auto val = false;
 		SetUserObjectInformationW(GetCurrentProcess(),
 			UOI_TIMERPROC_EXCEPTION_SUPPRESSION,
 			&val, sizeof(val));
@@ -33,12 +32,7 @@ namespace PGUI
 		(void)UI::Animation::AnimationManager::GetInstance();
 		(void)UI::Animation::AnimationTransitionLibrary::GetInstance();
 
-		UI::Theming::SystemTheme::uiSettings.ColorValuesChanged([](
-			const winrt::Windows::UI::ViewManagement::UISettings&,
-			const winrt::Windows::Foundation::IInspectable&)
-		{
-			UI::Theming::SystemTheme::ColorValuesChanged().InvokeAsync();
-		});
+		UI::Theming::SystemTheme::RegisterSystemEventChanges();
 		
 		UI::Theming::ThemeContext::InitializeThemes();
 		if (UI::Theming::SystemTheme::IsDarkMode())
@@ -55,8 +49,8 @@ namespace PGUI
 		);
 
 		auto* awarenessContext = GetDpiAwarenessContextForProcess(nullptr);
-		auto awareness = GetAwarenessFromDpiAwarenessContext(awarenessContext);
-		if (awareness != DPI_AWARENESS_PER_MONITOR_AWARE)
+		if (const auto awareness = GetAwarenessFromDpiAwarenessContext(awarenessContext);
+			awareness != DPI_AWARENESS_PER_MONITOR_AWARE)
 		{
 			SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 		}

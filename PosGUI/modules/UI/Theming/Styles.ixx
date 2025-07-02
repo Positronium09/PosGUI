@@ -1,6 +1,6 @@
 module;
-#include <Windows.h>
 #include <dwmapi.h>
+#include <Windows.h>
 
 export module PGUI.UI.Theming.Styles;
 
@@ -13,10 +13,10 @@ export namespace PGUI::UI::Theming
 {
 	enum CornerPreference
 	{
-		Default = DWM_WINDOW_CORNER_PREFERENCE::DWMWCP_DEFAULT,
-		DontRound = DWM_WINDOW_CORNER_PREFERENCE::DWMWCP_DONOTROUND,
-		Round = DWM_WINDOW_CORNER_PREFERENCE::DWMWCP_ROUND,
-		RoundSmall = DWM_WINDOW_CORNER_PREFERENCE::DWMWCP_ROUNDSMALL
+		Default = DWMWCP_DEFAULT,
+		DontRound = DWMWCP_DONOTROUND,
+		Round = DWMWCP_ROUND,
+		RoundSmall = DWMWCP_ROUNDSMALL
 	};
 
 	struct AppWindowStyle
@@ -25,7 +25,7 @@ export namespace PGUI::UI::Theming
 		RGBA captionColor = Colors::Transparent;
 		RGBA captionTextColor = Colors::Transparent;
 		bool darkMode = SystemTheme::IsDarkMode();
-		CornerPreference cornerPreference = CornerPreference::Default;
+		CornerPreference cornerPreference = Default;
 
 		constexpr auto operator==(const AppWindowStyle&) const noexcept -> bool = default;
 	};

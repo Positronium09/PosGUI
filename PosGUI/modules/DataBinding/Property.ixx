@@ -9,12 +9,8 @@ export namespace PGUI::DataBinding
 	class NullMutex
 	{
 		public:
-		void lock() noexcept
-		{
-		}
-		void unlock() noexcept
-		{
-		}
+		auto lock() noexcept -> void { }
+		auto unlock() noexcept -> void { }
 	};
 
 	template <typename T, typename MutexType = std::mutex>
@@ -24,20 +20,19 @@ export namespace PGUI::DataBinding
 
 		public:
 		Property() noexcept = default;
+
 		explicit(false) Property(const T& value) noexcept :
 			value{ value }
-		{
-		}
+		{ }
 
 		Property(const Property& other) noexcept :
 			value{ other.Get() }
-		{
-		}
+		{ }
 
-		Property(Property&& other) noexcept : 
+		Property(Property&& other) noexcept :
 			value{ std::move(other.Get()) }
-		{
-		}
+		{ }
+
 		virtual ~Property() = default;
 
 		auto operator=(const Property& other) noexcept -> Property&
@@ -65,13 +60,14 @@ export namespace PGUI::DataBinding
 			std::scoped_lock lock{ mutex };
 			return value;
 		}
+
 		[[nodiscard]] auto& Get() noexcept
 		{
 			std::scoped_lock lock{ mutex };
 			return value;
 		}
 
-		virtual void Set(const T& newValue)
+		virtual auto Set(const T& newValue) -> void
 		{
 			{
 				std::scoped_lock lock{ mutex };
@@ -86,7 +82,8 @@ export namespace PGUI::DataBinding
 			}
 			valueChangedEvent.Invoke(Get());
 		}
-		virtual void Set(T&& newValue)
+
+		virtual auto Set(T&& newValue) -> void
 		{
 			{
 				std::scoped_lock lock{ mutex };
@@ -107,7 +104,7 @@ export namespace PGUI::DataBinding
 			return valueChangedEvent.AddCallback(callback);
 		}
 
-		void RemoveObserver(CallbackId id) noexcept
+		auto RemoveObserver(CallbackId id) noexcept -> void
 		{
 			valueChangedEvent.RemoveCallback(id);
 		}
@@ -117,6 +114,7 @@ export namespace PGUI::DataBinding
 			Set(val);
 			return *this;
 		}
+
 		auto operator=(T&& val) noexcept -> Property&
 		{
 			Set(val);
@@ -131,16 +129,19 @@ export namespace PGUI::DataBinding
 			std::scoped_lock lock{ mutex };
 			return value == other.Get();
 		}
+
 		auto operator==(const T& val) const noexcept -> bool
 		{
 			std::scoped_lock lock{ mutex };
 			return value == val;
 		}
+
 		auto operator<=>(const Property& other) const noexcept
 		{
 			std::scoped_lock lock{ mutex };
 			return value <=> other.Get();
 		}
+
 		auto operator<=>(const T& val) const noexcept
 		{
 			std::scoped_lock lock{ mutex };

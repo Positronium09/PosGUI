@@ -15,7 +15,7 @@ import PGUI.EnumFlag;
 export namespace PGUI
 {
 	constexpr auto DEFAULT_SCREEN_DPI = USER_DEFAULT_SCREEN_DPI;
-	
+
 	enum class ReturnFlags
 	{
 		None,
@@ -23,18 +23,19 @@ export namespace PGUI
 		ForceThisResult = 2,
 		NoFurtherHandling = 4
 	};
+
 	template <>
-	struct IsEnumFlagEnabled<ReturnFlags> : Enabled { };
+	struct IsEnumFlagEnabled<ReturnFlags> : Enabled
+	{ };
 
 	struct MessageHandlerResult
 	{
 		LRESULT result;
 		ReturnFlags flags;
 
-		explicit(false) MessageHandlerResult(LRESULT result, ReturnFlags flags = ReturnFlags::None) : 
+		explicit(false) MessageHandlerResult(const LRESULT result, const ReturnFlags flags = ReturnFlags::None) :
 			result{ result }, flags{ flags }
-		{
-		}
+		{ }
 
 		explicit(false) operator LRESULT() const noexcept { return result; }
 	};
@@ -79,8 +80,10 @@ export namespace PGUI
 		TimerNoFG = FLASHW_TIMERNOFG,
 		Tray = FLASHW_TRAY
 	};
+
 	template <>
-	struct IsEnumFlagEnabled<WindowFlashFlags> : Enabled { };
+	struct IsEnumFlagEnabled<WindowFlashFlags> : Enabled
+	{ };
 
 	enum class WindowLongPtrIndex : int
 	{
@@ -136,17 +139,21 @@ export namespace PGUI
 		NoZOrder = SWP_NOZORDER,
 		ShowWindow = SWP_SHOWWINDOW
 	};
+
 	template <>
-	struct IsEnumFlagEnabled<PositionFlags> : Enabled { };
+	struct IsEnumFlagEnabled<PositionFlags> : Enabled
+	{ };
 
 	enum class WindowPlacementFlags
 	{
-		SetMinPosition =  WPF_SETMINPOSITION,
+		SetMinPosition = WPF_SETMINPOSITION,
 		RestoreToMaximized = WPF_RESTORETOMAXIMIZED,
 		AsyncWindowPlacement = WPF_ASYNCWINDOWPLACEMENT
 	};
+
 	template <>
-	struct IsEnumFlagEnabled<WindowPlacementFlags> : Enabled { };
+	struct IsEnumFlagEnabled<WindowPlacementFlags> : Enabled
+	{ };
 
 	namespace InsertAfter
 	{
@@ -164,14 +171,13 @@ export namespace PGUI
 		DWORD style;
 		DWORD exStyle;
 
-		constexpr WindowCreateInfo(std::wstring_view title, 
-			PointI position, SizeI size, 
-			DWORD style, DWORD exStyle) noexcept :
-			title{ title }, 
+		constexpr WindowCreateInfo(const std::wstring_view title,
+		                           const PointI position, const SizeI size,
+		                           const DWORD style, const DWORD exStyle) noexcept :
+			title{ title },
 			position{ position }, size{ size },
 			style{ style }, exStyle{ exStyle }
-		{
-		}
+		{ }
 	};
 
 	struct WindowPlacement
@@ -188,8 +194,7 @@ export namespace PGUI
 			minPosition{ 0, 0 },
 			maxPosition{ 0, 0 },
 			normalPosition{ 0, 0, 0, 0 }
-		{
-		}
+		{ }
 
 		explicit(false) constexpr WindowPlacement(const WINDOWPLACEMENT& placement) noexcept :
 			flags{ static_cast<WindowPlacementFlags>(placement.flags) },
@@ -197,11 +202,11 @@ export namespace PGUI
 			minPosition{ placement.ptMinPosition },
 			maxPosition{ placement.ptMaxPosition },
 			normalPosition{ placement.rcNormalPosition }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr operator WINDOWPLACEMENT() const noexcept
 		{
-			WINDOWPLACEMENT placement{ };
+			WINDOWPLACEMENT placement;
 			placement.length = sizeof(WINDOWPLACEMENT);
 			placement.flags = static_cast<UINT>(flags);
 			placement.showCmd = static_cast<UINT>(showCmd);
@@ -212,7 +217,7 @@ export namespace PGUI
 		}
 	};
 
-	[[nodiscard]] auto GetWindowPtrFromHWND(HWND hWnd) noexcept
+	[[nodiscard]] auto GetWindowPtrFromHWND(const HWND hWnd) noexcept
 	{
 		return std::bit_cast<RawWindowPtr<>>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 	}
@@ -227,25 +232,29 @@ export namespace PGUI
 		[[nodiscard]] const auto& GetHandlers() const noexcept { return messageHandlerMap; }
 
 		protected:
-		void RegisterHandler(UINT msg, const HandlerHWND& handler) { _RegisterHandler(msg, handler); }
-		void RegisterHandler(UINT msg, const Handler& handler) { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const UINT msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
+
 		template <typename T>
-		void RegisterHandler(UINT msg, HandlerHWNDMember<T> func)
+		auto RegisterHandler(UINT msg, HandlerHWNDMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
+
 		template <typename T>
-		void RegisterHandler(UINT msg, HandlerMember<T> func)
+		auto RegisterHandler(UINT msg, HandlerMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
+
 		template <typename T>
-		void RegisterHandler(UINT msg, HandlerHWNDCMember<T> func)
+		auto RegisterHandler(UINT msg, HandlerHWNDCMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
+
 		template <typename T>
-		void RegisterHandler(UINT msg, HandlerCMember<T> func)
+		auto RegisterHandler(UINT msg, HandlerCMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
@@ -256,70 +265,78 @@ export namespace PGUI
 		RawWindowPtr<> hookedWindow = nullptr;
 		MessageHandlerMap messageHandlerMap{ };
 
-		void _RegisterHandler(UINT msg, const HandlerHWND& handler)
+		// ReSharper disable CppInconsistentNaming
+		auto _RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void
 		{
 			messageHandlerMap[msg].push_back(handler);
 		}
-		void _RegisterHandler(UINT msg, const Handler& handler)
+
+		auto _RegisterHandler(const UINT msg, const Handler& handler) -> void
 		{
 			messageHandlerMap[msg].push_back(handler);
 		}
+		// ReSharper restore CppInconsistentNaming
 	};
 
 	using MessageHookers = std::vector<std::reference_wrapper<MessageHooker>>;
 
 	class Window
 	{
+		// ReSharper disable once CppInconsistentNaming
 		friend auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
-		
+
 		public:
 		virtual ~Window();
 
 		Window(const Window&) = delete;
+
 		auto operator=(const Window&) -> Window& = delete;
+
 		Window(Window&&) noexcept = delete;
+
 		auto operator=(Window&&) noexcept -> Window&& = delete;
 
-		template <WindowType T, typename ...Args>
+		template <WindowType T, typename... Args>
 		[[nodiscard]] static auto Create(const WindowCreateInfo& info, Args&&... args)
 		{
 			auto window = std::make_shared<T>(std::forward<Args>(args)...);
 			auto wnd = window.get();
 
 			CreateWindowExW(info.exStyle,
-				wnd->windowClass->ClassName().data(), info.title.data(),
-				info.style,
-				info.position.x, info.position.y,
-				info.size.cx, info.size.cy,
-				nullptr, NULL, GetHInstance(),
-				static_cast<LPVOID>(wnd));
+			                wnd->windowClass->ClassName().data(), info.title.data(),
+			                info.style,
+			                info.position.x, info.position.y,
+			                info.size.cx, info.size.cy,
+			                nullptr, nullptr, GetHInstance(),
+			                static_cast<LPVOID>(wnd));
 
 			if (window->hWnd == NULL)
 			{
-				auto errCode = GetLastError();
+				const auto errCode = GetLastError();
 				LogFailed(LogLevel::Error, errCode);
 				throw Win32Exception{ errCode };
 			}
 
 			return window;
 		}
-		template <WindowType T, typename ...Args>
+
+		template <WindowType T, typename... Args>
 		auto CreateChildWindow(const WindowCreateInfo& info, Args&&... args)
 		{
 			auto window = std::make_shared<T>(std::forward<Args>(args)...);
 			auto wnd = window.get();
 
 			CreateWindowExW(info.exStyle,
-				wnd->windowClass->ClassName().data(), info.title.data(),
-				info.style | WS_CHILD,
-				info.position.x, info.position.y,
-				info.size.cx, info.size.cy,
-				Hwnd(), NULL, GetHInstance(),
-				static_cast<LPVOID>(wnd));
+			                wnd->windowClass->ClassName().data(), info.title.data(),
+			                info.style | WS_CHILD,
+			                info.position.x, info.position.y,
+			                info.size.cx, info.size.cy,
+			                Hwnd(), nullptr, GetHInstance(),
+			                static_cast<LPVOID>(wnd));
 
 			if (window->hWnd == NULL)
 			{
-				auto errCode = GetLastError();
+				const auto errCode = GetLastError();
 				LogFailed(LogLevel::Error, errCode);
 				throw Win32Exception{ errCode };
 			}
@@ -330,6 +347,7 @@ export namespace PGUI
 
 			return std::dynamic_pointer_cast<T>(childWindows.back());
 		}
+
 		template <WindowType T>
 		auto AddChildWindow(const WindowPtr<T>& window)
 		{
@@ -347,9 +365,11 @@ export namespace PGUI
 
 			return wnd;
 		}
-		void RemoveChildWindow(HWND childHwnd);
+
+		auto RemoveChildWindow(HWND childHwnd) -> void;
 
 		[[nodiscard]] auto GetParentWindow() const noexcept -> RawWindowPtr<>;
+
 		template <WindowType T>
 		[[nodiscard]] auto GetParentWindow() const noexcept -> RawWindowPtr<T>
 		{
@@ -360,146 +380,234 @@ export namespace PGUI
 			return std::dynamic_pointer_cast<RawWindowPtr<T>>(GetWindowPtrFromHWND(parentHwnd));
 		}
 
-		void RegisterHandler(UINT msg, const HandlerHWND& handler) { _RegisterHandler(msg, handler); }
-		void RegisterHandler(UINT msg, const Handler& handler) { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const UINT msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
+
 		template <typename T>
-		void RegisterHandler(UINT msg, HandlerHWNDMember<T> func)
+		auto RegisterHandler(UINT msg, HandlerHWNDMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
+
 		template <typename T>
-		void RegisterHandler(UINT msg, HandlerMember<T> func)
+		auto RegisterHandler(UINT msg, HandlerMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
+
 		template <typename T>
-		void RegisterHandler(UINT msg, HandlerHWNDCMember<T> func)
-		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
-		}
-		template <typename T>
-		void RegisterHandler(UINT msg, HandlerCMember<T> func)
+		auto RegisterHandler(UINT msg, HandlerHWNDCMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
 
-		void Hook(MessageHooker& hooker) noexcept;
-		void HookBefore(MessageHooker& hooker) noexcept;
-		void HookAfter(MessageHooker& hooker) noexcept;
-		void UnHook(MessageHooker& hooker) noexcept;
-		void UnHookBefore(MessageHooker& hooker) noexcept;
-		void UnHookAfter(MessageHooker& hooker) noexcept;
+		template <typename T>
+		auto RegisterHandler(UINT msg, HandlerCMember<T> func) -> void
+		{
+			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
+		}
+
+		auto Hook(MessageHooker& hooker) noexcept -> void;
+
+		auto HookBefore(MessageHooker& hooker) noexcept -> void;
+
+		auto HookAfter(MessageHooker& hooker) noexcept -> void;
+
+		auto UnHook(MessageHooker& hooker) noexcept -> void;
+
+		auto UnHookBefore(MessageHooker& hooker) noexcept -> void;
+
+		auto UnHookAfter(MessageHooker& hooker) noexcept -> void;
 
 		auto AddTimer(TimerId id, std::chrono::milliseconds delay,
-			std::optional<TimerCallback> callback = std::nullopt) noexcept -> TimerId;
-		void RemoveTimer(TimerId id) noexcept;
-		[[nodiscard]] auto HasTimer(TimerId id) const noexcept { return timerMap.contains(id); }
+		              std::optional<TimerCallback> callback = std::nullopt) noexcept -> TimerId;
+
+		auto RemoveTimer(TimerId id) noexcept -> void;
+
+		[[nodiscard]] auto HasTimer(const TimerId id) const noexcept { return timerMap.contains(id); }
 
 		[[nodiscard]] auto WindowClass() const noexcept { return windowClass; }
 		[[nodiscard]] auto Hwnd() const noexcept { return hWnd; }
 		[[nodiscard]] auto ParentHwnd() const noexcept { return parentHwnd; }
 
 		[[nodiscard]] const auto& GetChildWindows() const noexcept { return childWindows; }
+
 		[[nodiscard]] auto GetChildWindow(HWND hWnd) const noexcept -> WindowPtr<Window>;
+
 		[[nodiscard]] auto ChildWindowFromPoint(PointL point, UINT flags) const noexcept -> WindowPtr<Window>;
 
-		void AdjustForClientSize(SizeI size) const noexcept;
-		void AdjustForRect(RectI rect) const noexcept;
-		
+		auto AdjustForClientSize(SizeI size) const noexcept -> void;
+
+		auto AdjustForRect(RectI rect) const noexcept -> void;
+
 		[[nodiscard]] auto GetWindowRect() const noexcept -> RectL;
+
 		[[nodiscard]] auto GetClientRect() const noexcept -> RectL;
+
 		[[nodiscard]] auto GetWindowSize() const noexcept -> SizeL;
+
 		[[nodiscard]] auto GetClientSize() const noexcept -> SizeL;
+
 		[[nodiscard]] auto GetPlacement() const noexcept -> WindowPlacement;
 
 		[[nodiscard]] auto ScreenToClient(PointL point) const noexcept -> PointL;
+
 		[[nodiscard]] auto ScreenToClient(RectL rect) const noexcept -> RectL;
+
 		[[nodiscard]] auto ClientToScreen(PointL point) const noexcept -> PointL;
+
 		[[nodiscard]] auto ClientToScreen(RectL rect) const noexcept -> RectL;
-		
+
 		[[nodiscard]] auto GetDPI() const noexcept { return GetDpiForWindow(Hwnd()); }
 
 		[[nodiscard]] auto IsInputEnabled() const noexcept -> bool { return IsWindowEnabled(Hwnd()); }
-		[[nodiscard]] auto IsChild() const noexcept { return static_cast<bool>(GetWindowLongPtrW(Hwnd(), GWL_STYLE) & WS_CHILD); }
-		[[nodiscard]] auto IsChildOf(const WindowPtr<Window>& parent) const noexcept { return parentHwnd == parent->Hwnd(); }
-		[[nodiscard]] auto IsChildOf(HWND hwnd) const noexcept { return parentHwnd == hwnd; }
+
+		[[nodiscard]] auto IsChild() const noexcept
+		{
+			return static_cast<bool>(GetWindowLongPtrW(Hwnd(), GWL_STYLE) & WS_CHILD);
+		}
+
+		[[nodiscard]] auto IsChildOf(const WindowPtr<Window>& parent) const noexcept
+		{
+			return parentHwnd == parent->Hwnd();
+		}
+
+		[[nodiscard]] auto IsChildOf(const HWND hwnd) const noexcept { return parentHwnd == hwnd; }
 		[[nodiscard]] auto IsTopLevel() const noexcept { return !IsChild(); }
 
 		[[nodiscard]] auto IsVisible() const noexcept { return IsWindowVisible(Hwnd()); }
 		[[nodiscard]] auto IsMinimized() const noexcept { return IsIconic(Hwnd()); }
 		[[nodiscard]] auto IsMaximized() const noexcept { return IsZoomed(Hwnd()); }
 
-		void CenterAroundWindow(WindowPtr<> wnd) const noexcept;
-		void CenterAroundWindow(HWND hwnd) const noexcept;
-		void CenterAroundPoint(PointL point) const noexcept;
-		void CenterAroundRect(RectL rect) const noexcept;
-		void CenterAroundParent() const noexcept;
-		void VerticallyCenterAroundParent() const noexcept;
-		void HorizontallyCenterAroundParent() const noexcept;
+		auto CenterAroundWindow(WindowPtr<> wnd) const noexcept -> void;
+
+		auto CenterAroundWindow(HWND hwnd) const noexcept -> void;
+
+		auto CenterAroundPoint(PointL point) const noexcept -> void;
+
+		auto CenterAroundRect(RectL rect) const noexcept -> void;
+
+		auto CenterAroundParent() const noexcept -> void;
+
+		auto VerticallyCenterAroundParent() const noexcept -> void;
+
+		auto HorizontallyCenterAroundParent() const noexcept -> void;
 
 		[[nodiscard]] auto GetStyle() const noexcept -> DWORD
-		{ return static_cast<DWORD>(GetWindowLongPtrW(Hwnd(), GWL_STYLE)); }
-		[[nodiscard]] auto GetExStyle() const noexcept-> DWORD
-		{ return static_cast<DWORD>(GetWindowLongPtrW(Hwnd(), GWL_EXSTYLE)); }
+		{
+			return static_cast<DWORD>(GetWindowLongPtrW(Hwnd(), GWL_STYLE));
+		}
+
+		[[nodiscard]] auto GetExStyle() const noexcept -> DWORD
+		{
+			return static_cast<DWORD>(GetWindowLongPtrW(Hwnd(), GWL_EXSTYLE));
+		}
+
 		[[nodiscard]] auto GetClassStyle() const noexcept { return GetClassLongPtrW(Hwnd(), GCL_STYLE); }
 
 		[[nodiscard]] auto GetTopWindow() const noexcept { return ::GetTopWindow(hWnd); }
-		[[nodiscard]] auto GetWindow(GetWindowIndex index) const noexcept { return ::GetWindow(hWnd, static_cast<UINT>(index)); }
+
+		[[nodiscard]] auto GetWindow(GetWindowIndex index) const noexcept
+		{
+			return ::GetWindow(hWnd, static_cast<UINT>(index));
+		}
+
 		[[nodiscard]] auto GetLastActivePopup() const noexcept { return ::GetLastActivePopup(hWnd); }
-		[[nodiscard]] auto GetLongPtr(WindowLongPtrIndex index) const noexcept { return GetWindowLongPtrW(hWnd, static_cast<UINT>(index)); }
 
-		void ModifyStyle(DWORD add, DWORD remove) const noexcept;
-		void ModifyExStyle(DWORD add, DWORD remove) const noexcept;
-		void AddStyle(DWORD style) const noexcept { ModifyStyle(style, NULL); }
-		void AddExStyle(DWORD style) const noexcept { ModifyExStyle(style, NULL); }
-		void RemoveStyle(DWORD style) const noexcept { ModifyStyle(NULL, style); }
-		void RemoveExStyle(DWORD style) const noexcept { ModifyExStyle(NULL, style); }
+		[[nodiscard]] auto GetLongPtr(WindowLongPtrIndex index) const noexcept
+		{
+			return GetWindowLongPtrW(hWnd, static_cast<UINT>(index));
+		}
 
-		void EnableInput() const noexcept { EnableWindow(Hwnd(), true); }
-		void DisableInput() const noexcept { EnableWindow(Hwnd(), false); }
-		void Show(ShowWindowCommand show = ShowWindowCommand::Show) const noexcept { ShowWindow(hWnd, ToUnderlying(show)); }
-		void Hide() const noexcept { Show(ShowWindowCommand::Hide); }
-		void Minimize() const noexcept { Show(ShowWindowCommand::Minimize); }
-		void Maximize() const noexcept { Show(ShowWindowCommand::Maximize); }
-		void BringToTop() const noexcept { BringWindowToTop(Hwnd()); }
-		void Invalidate(bool erase = true) const noexcept { InvalidateRect(Hwnd(), nullptr, erase); }
-		void Update() const noexcept { UpdateWindow(Hwnd()); }
-		void SetFocus() const noexcept { ::SetFocus(Hwnd()); }
-		void SetForeground() const noexcept { SetForegroundWindow(hWnd); }
-		void SetActive() const noexcept { SetActiveWindow(hWnd); }
-		void Flash(WindowFlashFlags flags, UINT count, std::chrono::milliseconds timeout) const noexcept;
-		void StopFlash() const noexcept;
-		
-		void SetCapture() const noexcept { ::SetCapture(hWnd); }
-		void ReleaseCapture() const noexcept { ::ReleaseCapture(); }
+		auto ModifyStyle(DWORD add, DWORD remove) const noexcept -> void;
 
-		void SetPosition(PointL position, SizeL size, PositionFlags flags, HWND insertAfter = nullptr) const noexcept;
-		void SetPosition(RectL rect, PositionFlags flags, HWND insertAfter = nullptr) const noexcept;
-		void Move(PointL newPos) const noexcept;
-		void Resize(SizeL newSize) const noexcept;
-		void MoveAndResize(RectL newRect) const noexcept;
-		void MoveAndResize(PointL newPos, SizeL newSize) const noexcept;
+		auto ModifyExStyle(DWORD add, DWORD remove) const noexcept -> void;
+
+		auto AddStyle(const DWORD style) const noexcept -> void { ModifyStyle(style, NULL); }
+		auto AddExStyle(const DWORD style) const noexcept -> void { ModifyExStyle(style, NULL); }
+		auto RemoveStyle(const DWORD style) const noexcept -> void { ModifyStyle(NULL, style); }
+		auto RemoveExStyle(const DWORD style) const noexcept -> void { ModifyExStyle(NULL, style); }
+
+		auto EnableInput() const noexcept -> void { EnableWindow(Hwnd(), true); }
+		auto DisableInput() const noexcept -> void { EnableWindow(Hwnd(), false); }
+
+		auto Show(const ShowWindowCommand show = ShowWindowCommand::Show) const noexcept -> void
+		{
+			ShowWindow(hWnd, ToUnderlying(show));
+		}
+
+		auto Hide() const noexcept -> void { Show(ShowWindowCommand::Hide); }
+		auto Minimize() const noexcept -> void { Show(ShowWindowCommand::Minimize); }
+		auto Maximize() const noexcept -> void { Show(ShowWindowCommand::Maximize); }
+		auto BringToTop() const noexcept -> void { BringWindowToTop(Hwnd()); }
+		auto Invalidate(const bool erase = true) const noexcept -> void { InvalidateRect(Hwnd(), nullptr, erase); }
+		auto Update() const noexcept -> void { UpdateWindow(Hwnd()); }
+		auto SetFocus() const noexcept -> void { ::SetFocus(Hwnd()); }
+		auto SetForeground() const noexcept -> void { SetForegroundWindow(hWnd); }
+		auto SetActive() const noexcept -> void { SetActiveWindow(hWnd); }
+
+		auto Flash(WindowFlashFlags flags, UINT count, std::chrono::milliseconds timeout) const noexcept -> void;
+
+		auto StopFlash() const noexcept -> void;
+
+		auto SetCapture() const noexcept -> void { ::SetCapture(hWnd); }
+		// ReSharper disable once CppMemberFunctionMayBeStatic
+		auto ReleaseCapture() const noexcept -> void { ::ReleaseCapture(); }
+
+		auto SetPosition(PointL position, SizeL size, PositionFlags flags,
+		                 HWND insertAfter = nullptr) const noexcept -> void;
+
+		auto SetPosition(RectL rect, PositionFlags flags, HWND insertAfter = nullptr) const noexcept -> void;
+
+		auto Move(PointL newPos) const noexcept -> void;
+
+		auto Resize(SizeL newSize) const noexcept -> void;
+
+		auto MoveAndResize(RectL newRect) const noexcept -> void;
+
+		auto MoveAndResize(PointL newPos, SizeL newSize) const noexcept -> void;
 
 		[[nodiscard]] auto MapPoints(HWND hWndTo, std::span<PointL> points) const noexcept -> std::span<PointL>;
+
 		[[nodiscard]] auto MapPoint(HWND hWndTo, PointL point) const noexcept -> PointL;
+
 		[[nodiscard]] auto MapRects(HWND hWndTo, std::span<RectL> rects) const noexcept -> std::span<RectL>;
+
 		[[nodiscard]] auto MapRect(HWND hWndTo, RectL rect) const noexcept -> RectL;
 
-		void SendMsg(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept { SendMessageW(Hwnd(), msg, wParam, lParam); }
-		void PostMsg(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept { PostMessageW(Hwnd(), msg, wParam, lParam); }
+		auto SendMsg(const UINT msg, const WPARAM wParam, const LPARAM lParam) const noexcept -> void
+		{
+			SendMessageW(Hwnd(), msg, wParam, lParam);
+		}
+
+		auto PostMsg(const UINT msg, const WPARAM wParam, const LPARAM lParam) const noexcept -> void
+		{
+			PostMessageW(Hwnd(), msg, wParam, lParam);
+		}
 
 		protected:
 		explicit Window(const WindowClassPtr& windowClass) noexcept;
+
 		virtual auto OnDpiChanged(UINT dpi, RectL suggestedRect) -> MessageHandlerResult;
 
-		virtual void OnChildAdded(const WindowPtr<Window>&) { /* E_NOTIMPL */ }
-		virtual void OnChildRemoved(HWND) { /* E_NOTIMPL */ }
+		virtual auto OnChildAdded(const WindowPtr<Window>&) -> void
+		{
+			/* E_NOTIMPL */
+		}
+
+		virtual auto OnChildRemoved(HWND) -> void
+		{
+			/* E_NOTIMPL */
+		}
 
 		private:
-		void _RegisterHandler(UINT msg, const HandlerHWND& handler);
-		void _RegisterHandler(UINT msg, const Handler& handler);
+		// ReSharper disable CppInconsistentNaming
+		auto _RegisterHandler(UINT msg, const HandlerHWND& handler) -> void;
+
+		auto _RegisterHandler(UINT msg, const Handler& handler) -> void;
 
 		auto _OnDpiChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		// ReSharper restore CppInconsistentNaming
 
 		MessageHandlerMap messageHandlerMap;
 		ChildWindowList childWindows;

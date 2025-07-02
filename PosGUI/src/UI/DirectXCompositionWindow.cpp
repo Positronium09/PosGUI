@@ -1,15 +1,14 @@
 module;
-#include <dxgi.h>
-#include <dxgi1_2.h>
-#include <dxgi1_6.h>
 #include <d2d1.h>
 #include <d2d1_3.h>
 #include <d3d11.h>
-#include <d3d11_4.h>
 #include <dcomp.h>
 #include <dwrite_3.h>
-#include <wrl.h>
+#include <dxgi.h>
+#include <dxgi1_2.h>
+#include <dxgi1_6.h>
 #include <Windows.h>
+#include <wrl.h>
 
 module PGUI.UI.DirectXCompositionWindow;
 

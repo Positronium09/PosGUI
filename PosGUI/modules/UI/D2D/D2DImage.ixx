@@ -1,5 +1,4 @@
 module;
-#include <wrl.h>
 #include <d2d1_1.h>
 
 export module PGUI.UI.D2D.D2DImage;
@@ -17,9 +16,9 @@ export namespace PGUI::UI::D2D
 
 		public:
 		D2DImage() noexcept = default;
-		D2DImage(ComPtr<Interface> ptr) :
+
+		explicit(false) D2DImage(ComPtr<Interface> ptr) :
 			ComPtrHolder<Interface>{ ptr }
-		{
-		}
+		{ }
 	};
 }

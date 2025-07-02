@@ -1,15 +1,16 @@
 module;
-#include <wrl.h>
 #include <UIAnimation.h>
+#include <wrl.h>
 
-module PGUI.UI.Animation.AnimationTransitionLibrary;
+module PGUI.UI.Animation:AnimationTransitionLibrary;
+import :AnimationTransitionLibrary;
 
 import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Exceptions;
-import PGUI.UI.Animation.AnimationTransition;
+import :AnimationTransition;
 
 namespace PGUI::UI::Animation
 {

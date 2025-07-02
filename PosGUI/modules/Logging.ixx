@@ -25,8 +25,8 @@ export namespace PGUI
 		public:
 		virtual ~Logger() = default;
 
-		static void Log(LogLevel level, std::wstring_view msg, 
-			const std::stacktrace& trace = std::stacktrace::current())
+		static auto Log(const LogLevel level, const std::wstring_view msg,
+			const std::stacktrace& trace = std::stacktrace::current()) -> void
 		{
 			if (level < logLevel)
 			{
@@ -38,12 +38,12 @@ export namespace PGUI
 			}
 		}
 
-		static void SetLogger(Logger* logger_) noexcept { Logger::logger = logger_; }
+		static auto SetLogger(Logger* logger_) noexcept -> void { logger = logger_; }
 		[[nodiscard]] static auto GetLogger() noexcept -> Logger* { return logger; }
-		static void SetLogLevel(LogLevel level) noexcept { logLevel = level; }
+		static auto SetLogLevel(const LogLevel level) noexcept -> void { logLevel = level; }
 		[[nodiscard]] static auto GetLogLevel() noexcept -> LogLevel { return logLevel; }
-		
-		[[nodiscard]] static auto GetLogLevelString(LogLevel level) noexcept -> std::wstring
+
+		[[nodiscard]] static auto GetLogLevelString(const LogLevel level) noexcept -> std::wstring
 		{
 			switch (level)
 			{
@@ -65,24 +65,26 @@ export namespace PGUI
 		}
 
 		protected:
-		virtual void LogImpl(LogLevel logLevel, std::wstring_view msg,
-			const std::stacktrace& trace) = 0;
+		virtual auto LogImpl(
+			LogLevel logLevel, std::wstring_view msg,
+			const std::stacktrace& trace) -> void = 0;
 
 		private:
-		static inline LogLevel logLevel = LogLevel::Info;
+		static inline auto logLevel = LogLevel::Info;
 		static inline Logger* logger = nullptr;
 	};
 
-	class ConsoleLogger : public Logger
+	class ConsoleLogger final : public Logger
 	{
 		public:
-		void LogImpl(LogLevel level, std::wstring_view msg,
-			const std::stacktrace& trace) override
+		auto LogImpl(const LogLevel level, std::wstring_view msg,
+			const std::stacktrace& trace) -> void override
 		{
 			auto logString = GetLogLevelString(level);
 			const auto& entry = trace.at(0);
 
-			auto formatted = std::format(L"[{}] Line {} in {}\n[{}] {}\n", 
+			const auto formatted = std::format(
+				L"[{}] Line {} in {}\n[{}] {}\n",
 				logString, entry.source_line(), StringToWString(entry.source_file()),
 				logString, msg);
 
@@ -90,22 +92,25 @@ export namespace PGUI
 		}
 	};
 
-	void LogFailed(LogLevel level, HRESULT hr, 
-		const std::stacktrace& trace = std::stacktrace::current())
+	auto LogFailed(const LogLevel level, HRESULT hr,
+		const std::stacktrace& trace = std::stacktrace::current()) -> void
 	{
 		if (FAILED(hr))
 		{
-			Logger::Log(level, 
+			Logger::Log(
+				level,
 				std::format(L"{:#x} {}", hr, HresultFromWin32(hr)),
 				trace);
 		}
 	}
-	void LogFailed(LogLevel level, WINERR err,
-		const std::stacktrace& trace = std::stacktrace::current())
+
+	auto LogFailed(const LogLevel level, WINERR err,
+		const std::stacktrace& trace = std::stacktrace::current()) -> void
 	{
 		if (err != ERROR_SUCCESS)
 		{
-			Logger::Log(level, 
+			Logger::Log(
+				level,
 				std::format(L"{:#x} {}", err, WinErrToString(err)),
 				trace);
 		}

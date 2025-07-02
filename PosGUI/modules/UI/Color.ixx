@@ -21,111 +21,112 @@ export namespace PGUI::UI
 	{
 		public:
 		constexpr RGBA() noexcept = default;
-		constexpr RGBA(FLOAT r, FLOAT g, FLOAT b, FLOAT a = 1.0F) noexcept :
+
+		constexpr RGBA(const FLOAT r, const FLOAT g, const FLOAT b, const FLOAT a = 1.0F) noexcept :
 			r{ r }, g{ g }, b{ b }, a{ a }
-		{
-		}
-		constexpr RGBA(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a = 255) noexcept :
-			r{ r / 255.0F }, 
+		{ }
+
+		constexpr RGBA(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const std::uint8_t a = 255) noexcept :
+			r{ r / 255.0F },
 			g{ g / 255.0F },
 			b{ b / 255.0F },
 			a{ a / 255.0F }
-		{
-		}
-		constexpr RGBA(std::uint32_t rgb, FLOAT a = 1.0F) noexcept :
+		{ }
+
+		explicit(false) constexpr RGBA(const std::uint32_t rgb, const FLOAT a = 1.0F) noexcept :
 			r{ ((rgb & 0xff << 16) >> 16) / 255.0F },
 			g{ ((rgb & 0xff << 8) >> 8) / 255.0F },
 			b{ (rgb & 0xff) / 255.0F },
 			a{ a }
-		{
-		}
+		{ }
 
 		template <std::floating_point T>
-		constexpr RGBA(std::span<T, 3> values) : 
-			r{ static_cast<float>(values[0]) }, 
+		explicit constexpr RGBA(std::span<T, 3> values) :
+			r{ static_cast<float>(values[0]) },
 			g{ static_cast<float>(values[1]) },
 			b{ static_cast<float>(values[2]) },
 			a{ 1.0F }
-		{
-		}
+		{ }
+
 		template <std::floating_point T>
-		constexpr RGBA(std::span<T, 4> values) :
+		explicit constexpr RGBA(std::span<T, 4> values) :
 			r{ static_cast<float>(values[0]) },
 			g{ static_cast<float>(values[1]) },
 			b{ static_cast<float>(values[2]) },
 			a{ static_cast<float>(values[3]) }
-		{
-		}
+		{ }
 
 		explicit(false) RGBA(HSL hsl) noexcept;
+
 		explicit(false) RGBA(HSV hsv) noexcept;
 
 		explicit(false) constexpr RGBA(const D2D1_COLOR_F& color) noexcept :
 			r{ color.r }, g{ color.g }, b{ color.b }, a{ color.a }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr RGBA(const winrt::Windows::UI::Color& color) noexcept :
-			r{ color.R / 255.0F }, 
-			g{ color.G / 255.0F }, 
-			b{ color.B / 255.0F }, 
+			r{ color.R / 255.0F },
+			g{ color.G / 255.0F },
+			b{ color.B / 255.0F },
 			a{ color.A / 255.0F }
-		{
-		}
+		{ }
 
 		explicit(false) constexpr operator D2D1_COLOR_F() const noexcept
 		{
 			return D2D1_COLOR_F{ .r = r, .g = g, .b = b, .a = a };
 		}
+
 		explicit(false) constexpr operator WICColor() const noexcept
 		{
 			return static_cast<WICColor>(a * 255) << 24 |
-				static_cast<WICColor>(r * 255) << 16 |
-				static_cast<WICColor>(g * 255) << 8 |
-				static_cast<WICColor>(b * 255);
+			       static_cast<WICColor>(r * 255) << 16 |
+			       static_cast<WICColor>(g * 255) << 8 |
+			       static_cast<WICColor>(b * 255);
 		}
+
 		explicit(false) constexpr operator winrt::Windows::UI::Color() const noexcept
 		{
-			winrt::Windows::UI::Color color{ };
-
-			color.R = static_cast<BYTE>(r / 255.0F);
-			color.G = static_cast<BYTE>(g / 255.0F);
-			color.B = static_cast<BYTE>(b / 255.0F);
-			color.A = static_cast<BYTE>(a / 255.0F);
-
-			return color;
-
+			return winrt::Windows::UI::Color{
+				static_cast<BYTE>(a / 255.0F),
+				static_cast<BYTE>(r / 255.0F),
+				static_cast<BYTE>(g / 255.0F),
+				static_cast<BYTE>(b / 255.0F)
+			};
 		}
+
 		explicit(false) constexpr operator COLORREF() const noexcept
 		{
-			auto R = static_cast<DWORD>(r * 255);
-			auto G = static_cast<DWORD>(g * 255);
-			auto B = static_cast<DWORD>(b * 255);
+			const auto R = static_cast<DWORD>(r * 255);
+			const auto G = static_cast<DWORD>(g * 255);
+			const auto B = static_cast<DWORD>(b * 255);
 
-			return R | (G << 8) | (B << 16);
+			return R | G << 8 | B << 16;
 		}
 
 		[[nodiscard]] constexpr auto operator==(const RGBA& other) const noexcept -> bool = default;
 
-		constexpr void Lighten(FLOAT amount) noexcept
+		constexpr auto Lighten(const FLOAT amount) noexcept -> void
 		{
 			r = std::clamp(r + amount, 0.0F, 1.0F);
 			g = std::clamp(g + amount, 0.0F, 1.0F);
 			b = std::clamp(b + amount, 0.0F, 1.0F);
 		}
-		constexpr void Darken(FLOAT amount) noexcept
+
+		constexpr auto Darken(const FLOAT amount) noexcept -> void
 		{
 			r = std::clamp(r - amount, 0.0F, 1.0F);
 			g = std::clamp(g - amount, 0.0F, 1.0F);
 			b = std::clamp(b - amount, 0.0F, 1.0F);
 		}
 
-		[[nodiscard]] constexpr auto Lightened(FLOAT amount) const noexcept
+		[[nodiscard]] constexpr auto Lightened(const FLOAT amount) const noexcept
 		{
 			auto color = *this;
 			color.Lighten(amount);
 			return color;
 		}
-		[[nodiscard]] constexpr auto Darkened(FLOAT amount) const noexcept
+
+		[[nodiscard]] constexpr auto Darkened(const FLOAT amount) const noexcept
 		{
 			auto color = *this;
 			color.Darken(amount);
@@ -142,10 +143,10 @@ export namespace PGUI::UI
 	{
 		public:
 		constexpr HSL() noexcept = default;
-		constexpr HSL(FLOAT h, FLOAT s, FLOAT l) noexcept : 
+
+		constexpr HSL(const FLOAT h, const FLOAT s, const FLOAT l) noexcept :
 			h{ h }, s{ s }, l{ l }
-		{
-		}
+		{ }
 
 		explicit(false) HSL(const RGBA& rgb) noexcept;
 
@@ -162,10 +163,10 @@ export namespace PGUI::UI
 	{
 		public:
 		constexpr HSV() noexcept = default;
-		constexpr HSV(FLOAT h, FLOAT s, FLOAT v) noexcept : 
+
+		constexpr HSV(const FLOAT h, const FLOAT s, const FLOAT v) noexcept :
 			h{ h }, s{ s }, v{ v }
-		{
-		}
+		{ }
 
 		explicit(false) HSV(const RGBA& rgb) noexcept;
 
@@ -182,10 +183,10 @@ export namespace PGUI::UI
 	{
 		public:
 		constexpr CMYK() noexcept = default;
-		constexpr CMYK(FLOAT c, FLOAT m, FLOAT y, FLOAT k) noexcept :
+
+		constexpr CMYK(const FLOAT c, const FLOAT m, const FLOAT y, const FLOAT k) noexcept :
 			c{ c }, m{ m }, y{ y }, k{ k }
-		{
-		}
+		{ }
 
 		explicit(false) constexpr CMYK(const RGBA& rgb) noexcept
 		{
@@ -209,8 +210,8 @@ export namespace PGUI::UI
 		FLOAT k = 0.0F;
 	};
 
-	[[nodiscard]] constexpr auto WICColorToRGBA(WICColor color) noexcept
+	[[nodiscard]] constexpr auto WICColorToRGBA(const WICColor color) noexcept
 	{
-		return RGBA{ color, ((color & 0xFF000000) >> 24) / 255.0F };	
+		return RGBA{ color, ((color & 0xFF000000) >> 24) / 255.0F };
 	}
 }

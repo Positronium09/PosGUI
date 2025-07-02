@@ -1,5 +1,4 @@
 module;
-#include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.WICBitmapLock;
@@ -17,11 +16,15 @@ export namespace PGUI::UI::Imaging
 	{
 		public:
 		WICBitmapLock() noexcept = default;
-		WICBitmapLock(ComPtr<IWICBitmapLock> bitmapLock) noexcept;
+
+		explicit(false) WICBitmapLock(ComPtr<IWICBitmapLock> bitmapLock) noexcept;
 
 		[[nodiscard]] auto GetSize() const -> SizeU;
+
 		[[nodiscard]] auto GetStride() const -> UINT;
+
 		[[nodiscard]] auto GetDataPointer() const -> std::span<BYTE>;
+
 		[[nodiscard]] auto GetPixelFormat() const -> WICPixelFormatGUID;
 	};
 }

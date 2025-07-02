@@ -25,10 +25,10 @@ export namespace PGUI::DataBinding
 		}
 
 		template <std::invocable<const Type1&> Func1, std::invocable<const Type2&> Func2>
-			requires std::convertible_to<std::invoke_result_t<Func1, const Type1&>, Type2> && 
-					 std::convertible_to<std::invoke_result_t<Func2, const Type2&>, Type1>
-		TwoWayBinder(Property<Type1>& property1, Property<Type2>& property2, 
-			Func1 converter1, Func2 converter2) noexcept :
+			requires std::convertible_to<std::invoke_result_t<Func1, const Type1&>, Type2> &&
+			         std::convertible_to<std::invoke_result_t<Func2, const Type2&>, Type1>
+		TwoWayBinder(Property<Type1>& property1, Property<Type2>& property2,
+		             Func1 converter1, Func2 converter2) noexcept :
 			property1{ property1 }, property2{ property2 }
 		{
 			observer1Id = property1.AddObserver([&property2, &converter1](const auto& value)

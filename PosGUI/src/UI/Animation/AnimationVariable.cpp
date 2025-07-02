@@ -1,15 +1,16 @@
 module;
-#include <wrl.h>
 #include <UIAnimation.h>
+#include <wrl.h>
 
-module PGUI.UI.Animation.AnimationVariable;
+module PGUI.UI.Animation:AnimationVariable;
+import :AnimationVariable;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;
-import PGUI.UI.Animation.Storyboard;
-import PGUI.UI.Animation.AnimationVariableChangeEventHandler;
+import :Storyboard;
+import :AnimationVariableChangeEventHandler;
 
-namespace  PGUI::UI::Animation
+namespace PGUI::UI::Animation
 {
 	AnimationVariable::AnimationVariable(ComPtr<IUIAnimationVariable2> ptr) noexcept : 
 		ComPtrHolder{ ptr }
@@ -19,7 +20,8 @@ namespace  PGUI::UI::Animation
 	auto AnimationVariable::GetStoryboard() const -> Storyboard
 	{
 		ComPtr<IUIAnimationStoryboard2> storyboard;
-		auto hr = Get()->GetCurrentStoryboard(&storyboard); ThrowFailed(hr);
+		auto hr = Get()->GetCurrentStoryboard(&storyboard);
+		ThrowFailed(hr);
 
 		return storyboard;
 	}

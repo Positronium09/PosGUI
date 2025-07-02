@@ -1,7 +1,8 @@
 module;
 #include <UIAnimation.h>
 
-module PGUI.UI.Animation.AnimationManagerEventHandler;
+module PGUI.UI.Animation:AnimationManagerEventHandler;
+import :AnimationManagerEventHandler;
 
 import std;
 
@@ -9,7 +10,7 @@ import PGUI.ComPtr;
 import PGUI.Event;
 import PGUI.Utils;
 import PGUI.Exceptions;
-import PGUI.UI.Animation.AnimationEnums;
+import :AnimationEnums;
 
 namespace PGUI::UI::Animation
 {

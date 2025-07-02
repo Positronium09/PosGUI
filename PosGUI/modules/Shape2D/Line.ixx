@@ -15,47 +15,53 @@ export namespace PGUI::UI
 
 		constexpr Line() noexcept = default;
 
-		constexpr Line(T m, T c) noexcept : 
+		constexpr Line(T m, T c) noexcept :
 			m{ m }, c{ c }
-		{
-		}
+		{ }
+
 		constexpr Line(Point<T> p1, Point<T> p2) noexcept :
 			m{ (p2.y - p1.y) / (p2.x - p1.x) }, c{ p1.y - m * p1.x }
-		{
-		}
-		constexpr Line(LineSegment<T> segment) noexcept :
+		{ }
+
+		explicit constexpr Line(LineSegment<T> segment) noexcept :
 			Line{ segment.start, segment.end }
-		{
-		}
+		{ }
 
 		[[nodiscard]] constexpr auto Slope() const noexcept
 		{
 			return m;
 		}
+
 		[[nodiscard]] constexpr auto YIntercept() const noexcept
 		{
 			return c;
 		}
+
 		[[nodiscard]] constexpr auto XIntercept() const noexcept
 		{
 			return -c / m;
 		}
+
 		[[nodiscard]] constexpr auto IsVertical() const noexcept
 		{
 			return std::isinf(m);
 		}
+
 		[[nodiscard]] constexpr auto IsHorizontal() const noexcept
 		{
 			return m < std::numeric_limits<T>::epsilon();
 		}
+
 		[[nodiscard]] auto IsParallel(const Line& other) const noexcept
 		{
 			return std::abs(m == other.m) < std::numeric_limits<T>::epsilon();
 		}
+
 		[[nodiscard]] auto IsPerpendicular(const Line& other) const noexcept
 		{
 			return std::abs(m * other.m + 1) < std::numeric_limits<T>::epsilon();
 		}
+
 		[[nodiscard]] auto Intersection(const Line& other) const noexcept -> std::expected<Point<T>, std::monostate>
 		{
 			if (IsParallel(other))
@@ -68,9 +74,9 @@ export namespace PGUI::UI
 			}
 			if (other.IsVertical())
 			{
-				return Point<T>{ other.c, m* other.c + c };
+				return Point<T>{ other.c, m * other.c + c };
 			}
-			
+
 			auto x = (other.c - c) / (m - other.m);
 			auto y = m * x + c;
 
@@ -83,6 +89,7 @@ export namespace PGUI::UI
 		{
 			return m * x + c;
 		}
+
 		[[nodiscard]] constexpr auto operator()(Point<T> p) const noexcept
 		{
 			return m * p.x + c;

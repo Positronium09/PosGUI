@@ -48,6 +48,7 @@
     <ClCompile Include="modules\Shape2D\Size.ixx" />
     <ClCompile Include="modules\UI\Animation\Animation.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationEnums.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationInterface.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationManager.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationManagerEventHandler.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationStoryboardEventHandler.ixx" />

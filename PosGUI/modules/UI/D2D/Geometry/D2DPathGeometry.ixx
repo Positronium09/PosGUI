@@ -1,6 +1,5 @@
 module;
 #include <d2d1_1.h>
-#include <wrl.h>
 
 export module PGUI.UI.D2D.D2DPathGeometry;
 
@@ -15,15 +14,20 @@ export namespace PGUI::UI::D2D
 	{
 		public:
 		D2DPathGeometry();
-		D2DPathGeometry(ComPtr<ID2D1PathGeometry1> ptr) noexcept;
+
+		explicit(false) D2DPathGeometry(ComPtr<ID2D1PathGeometry1> ptr) noexcept;
 
 		auto GetFigureCount() -> UINT32;
-		auto GetSegmentCount() -> UINT32;
-		auto Open() -> GeometrySink;
-		void Stream(GeometrySink sink);
-		
-		[[nodiscard]] static auto CreateRoundRectWithPathGeometry(RectF rect,
-			float topLeft, float topRight, float bottomLeft, float bottomRight) -> D2DPathGeometry;
-	};
 
+		auto GetSegmentCount() -> UINT32;
+
+		auto Open() -> GeometrySink;
+
+		auto Stream(GeometrySink sink) -> void;
+
+		[[nodiscard]] static auto CreateRoundRectWithPathGeometry(
+			RectF rect,
+			float topLeft, float topRight, float bottomLeft,
+			float bottomRight) -> D2DPathGeometry;
+	};
 }

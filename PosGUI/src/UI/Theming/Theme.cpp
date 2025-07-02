@@ -3,6 +3,7 @@ module PGUI.UI.Theming.Theme;
 import std;
 
 import PGUI.Event;
+import PGUI.UI.Color;
 import PGUI.UI.Colors;
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.SystemTheme;
@@ -25,6 +26,12 @@ namespace PGUI::UI::Theming
 
 	void ThemeContext::InitializeThemes() noexcept
 	{
+		static auto initialized = false;
+		if (initialized)
+		{
+			return;
+		}
+
 		DarkTheme = Theme{
 			.colorContext{
 				.text = SystemTheme::GetTextColor(),
@@ -38,7 +45,7 @@ namespace PGUI::UI::Theming
 				.captionColor = Colors::Transparent,
 				.captionTextColor = Colors::Transparent,
 				.darkMode = true,
-				.cornerPreference = CornerPreference::Default
+				.cornerPreference = Default
 			}
 		};
 
@@ -55,7 +62,7 @@ namespace PGUI::UI::Theming
 				.captionColor = Colors::Transparent,
 				.captionTextColor = Colors::Transparent,
 				.darkMode = false,
-				.cornerPreference = CornerPreference::Default
+				.cornerPreference = Default
 			}
 		};
 	}

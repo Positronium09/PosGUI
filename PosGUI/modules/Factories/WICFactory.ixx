@@ -1,8 +1,6 @@
 module;
-#include <wrl.h>
-#include <Objbase.h>
-#include <Windows.h>
 #include <wincodec.h>
+#include <wrl.h>
 
 export module PGUI.Factories:WICFactory;
 
@@ -17,23 +15,29 @@ export namespace PGUI::Factories
 	{
 		public:
 		WICFactory() = delete;
+
 		WICFactory(const WICFactory&) = delete;
+
 		auto operator=(const WICFactory&) -> WICFactory& = delete;
+
 		WICFactory(WICFactory&&) = delete;
+
 		auto operator=(WICFactory&&) -> WICFactory& = delete;
+
 		~WICFactory() = default;
 
 		[[nodiscard]] static auto GetFactory()
 		{
 			if (!factory)
 			{
-				auto hr = CoCreateInstance(
+				const auto hr = CoCreateInstance(
 					CLSID_WICImagingFactory,
-					NULL,
+					nullptr,
 					CLSCTX_INPROC_SERVER,
 					__uuidof(IWICImagingFactory2),
 					std::bit_cast<void**>(factory.GetAddressOf())
-				); ThrowFailed(hr);
+				);
+				ThrowFailed(hr);
 			}
 
 			return factory;

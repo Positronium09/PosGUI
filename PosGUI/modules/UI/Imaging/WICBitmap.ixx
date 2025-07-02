@@ -1,5 +1,4 @@
 module;
-#include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.WICBitmap;
@@ -37,17 +36,23 @@ export namespace PGUI::UI::Imaging
 	{
 		public:
 		WICBitmap() noexcept = default;
-		WICBitmap(ComPtr<IWICBitmap> bitmap) noexcept;
+
+		explicit(false) WICBitmap(ComPtr<IWICBitmap> bitmap) noexcept;
+
 		WICBitmap(SizeU size, const WICPixelFormatGUID& pixelFormat, CreateCacheOption cacheOption);
+
 		WICBitmap(HBITMAP hBitmap, AlphaChannelOption alphaOption, HPALETTE hPalette = nullptr);
-		WICBitmap(HICON hIcon);
+
+		explicit WICBitmap(HICON hIcon);
+
 		WICBitmap(BitmapSource<> source, CreateCacheOption cacheOption);
+
 		WICBitmap(BitmapSource<> source, RectU rect);
 
 		[[nodiscard]] auto Lock(RectI rect, LockFlags flags) const noexcept -> WICBitmapLock;
 
-		void SetPalette(Palette palette) noexcept;
+		auto SetPalette(Palette palette) noexcept -> void;
 
-		void SetResolution(double dpiX, double dpiY) noexcept;
+		auto SetResolution(double dpiX, double dpiY) noexcept -> void;
 	};
 }

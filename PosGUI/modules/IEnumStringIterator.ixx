@@ -1,6 +1,6 @@
+// ReSharper disable CppInconsistentNaming
 module;
 #include <wrl.h>
-#include <objbase.h>
 
 export module PGUI.IEnumStringIterator;
 
@@ -32,6 +32,6 @@ export namespace PGUI
 		bool end = false;
 		std::wstring current;
 
-		void MoveNext();
+		auto MoveNext() -> void;
 	};
 }

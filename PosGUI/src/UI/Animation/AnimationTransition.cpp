@@ -1,8 +1,9 @@
 module;
-#include <wrl.h>
 #include <UIAnimation.h>
+#include <wrl.h>
 
-module PGUI.UI.Animation.AnimationTransition;
+module PGUI.UI.Animation:AnimationTransition;
+import :AnimationTransition;
 
 import std;
 

@@ -14,14 +14,14 @@ export namespace PGUI::UI::Font
 	struct FontAxisValue : public DWRITE_FONT_AXIS_VALUE
 	{
 		constexpr FontAxisValue() noexcept = default;
-		constexpr FontAxisValue(DWRITE_FONT_AXIS_VALUE value) noexcept :
+
+		explicit(false) constexpr FontAxisValue(const DWRITE_FONT_AXIS_VALUE value) noexcept :
 			DWRITE_FONT_AXIS_VALUE{ value }
-		{
-		}
-		constexpr FontAxisValue(FontAxisTag _axisTag, float _value) noexcept :
+		{ }
+
+		constexpr FontAxisValue(const FontAxisTag _axisTag, const float _value) noexcept :
 			DWRITE_FONT_AXIS_VALUE{ .axisTag = _axisTag, .value = _value }
-		{
-		}
+		{ }
 
 		explicit(false) constexpr operator DWRITE_FONT_AXIS_VALUE() const noexcept { return *this; }
 	};
@@ -29,14 +29,14 @@ export namespace PGUI::UI::Font
 	struct FontAxisRange : public DWRITE_FONT_AXIS_RANGE
 	{
 		constexpr FontAxisRange() noexcept = default;
-		constexpr FontAxisRange(DWRITE_FONT_AXIS_RANGE range) noexcept :
+
+		explicit(false) constexpr FontAxisRange(const DWRITE_FONT_AXIS_RANGE range) noexcept :
 			DWRITE_FONT_AXIS_RANGE{ range }
-		{
-		}
-		constexpr FontAxisRange(FontAxisTag _axisTag, float _minValue, float _maxValue) noexcept :
+		{ }
+
+		constexpr FontAxisRange(const FontAxisTag _axisTag, const float _minValue, const float _maxValue) noexcept :
 			DWRITE_FONT_AXIS_RANGE{ .axisTag = _axisTag, .minValue = _minValue, .maxValue = _maxValue }
-		{
-		}
+		{ }
 
 		explicit(false) constexpr operator DWRITE_FONT_AXIS_RANGE() const noexcept { return *this; }
 	};
@@ -44,14 +44,14 @@ export namespace PGUI::UI::Font
 	struct TextRange : public DWRITE_TEXT_RANGE
 	{
 		constexpr TextRange() noexcept = default;
-		explicit(false) constexpr TextRange(DWRITE_TEXT_RANGE range) noexcept :
+
+		explicit(false) constexpr TextRange(const DWRITE_TEXT_RANGE range) noexcept :
 			DWRITE_TEXT_RANGE{ range }
-		{
-		}
-		constexpr TextRange(UINT32 _startPosition, UINT32 _length) noexcept :
+		{ }
+
+		constexpr TextRange(const UINT32 _startPosition, const UINT32 _length) noexcept :
 			DWRITE_TEXT_RANGE{ .startPosition = _startPosition, .length = _length }
-		{
-		}
+		{ }
 
 		explicit(false) constexpr operator DWRITE_TEXT_RANGE() const noexcept { return *this; }
 
@@ -63,14 +63,14 @@ export namespace PGUI::UI::Font
 	struct LineSpacing : public DWRITE_LINE_SPACING
 	{
 		constexpr LineSpacing() noexcept = default;
-		constexpr LineSpacing(DWRITE_LINE_SPACING spacing) noexcept :
+
+		explicit(false) constexpr LineSpacing(const DWRITE_LINE_SPACING& spacing) noexcept :
 			DWRITE_LINE_SPACING{ spacing }
-		{
-		}
-		constexpr LineSpacing(LineSpacingMethod method, float height, float baseline) noexcept :
+		{ }
+
+		constexpr LineSpacing(const LineSpacingMethod method, const float height, const float baseline) noexcept :
 			DWRITE_LINE_SPACING{ .method = method, .height = height, .baseline = baseline }
-		{
-		}
+		{ }
 
 		explicit(false) constexpr operator DWRITE_LINE_SPACING() const noexcept { return *this; }
 	};
@@ -79,23 +79,20 @@ export namespace PGUI::UI::Font
 	{
 		constexpr Trimming() noexcept = default;
 
-		Trimming(ComPtr<IDWriteInlineObject> trimmingSign) noexcept :
-			ComPtrHolder<IDWriteInlineObject>{ trimmingSign },
+		explicit(false) Trimming(const ComPtr<IDWriteInlineObject>& trimmingSign) noexcept :
+			ComPtrHolder{ trimmingSign },
 			trimmingOptions{ .granularity = DWRITE_TRIMMING_GRANULARITY_NONE, .delimiter = 0, .delimiterCount = 0 }
-		{
-		}
+		{ }
 
-		Trimming(DWRITE_TRIMMING trimmingOptions) noexcept :
-			ComPtrHolder<IDWriteInlineObject>{ },
+		explicit(false) Trimming(const DWRITE_TRIMMING trimmingOptions) noexcept :
+			ComPtrHolder{ },
 			trimmingOptions{ trimmingOptions }
-		{
-		}
+		{ }
 
-		Trimming(ComPtr<IDWriteInlineObject> trimmingSign, DWRITE_TRIMMING trimmingOptions) noexcept : 
-			ComPtrHolder<IDWriteInlineObject>{ trimmingSign },
+		Trimming(const ComPtr<IDWriteInlineObject>& trimmingSign, const DWRITE_TRIMMING trimmingOptions) noexcept :
+			ComPtrHolder{ trimmingSign },
 			trimmingOptions{ trimmingOptions }
-		{
-		}
+		{ }
 
 		DWRITE_TRIMMING trimmingOptions;
 	};

@@ -15,11 +15,11 @@ export namespace PGUI
 	{
 		public:
 		Exception() noexcept = default;
-		Exception(std::wstring_view message) noexcept : 
+
+		explicit Exception(const std::wstring_view message) noexcept :
 			message{ message }
-		{
-		}
-		
+		{ }
+
 		[[nodiscard]] auto what() const noexcept -> const char* override
 		{
 			return WStringToString(message).c_str();
@@ -29,21 +29,20 @@ export namespace PGUI
 		std::wstring message;
 	};
 
-	class Win32Exception : public Exception
+	class Win32Exception final : public Exception
 	{
 		public:
-		Win32Exception() noexcept : 
+		Win32Exception() noexcept :
 			errorCode{ GetLastError() }
-		{
-		}
-		Win32Exception(WINERR errorCode) noexcept :
-			errorCode{ errorCode }, Exception::Exception{ HResultToString(errorCode) }
-		{
-		}
-		Win32Exception(WINERR errorCode, std::wstring_view message) noexcept :
+		{ }
+
+		explicit Win32Exception(const WINERR errorCode) noexcept :
+			Exception{ HResultToString(errorCode) }, errorCode{ errorCode }
+		{ }
+
+		Win32Exception(const WINERR errorCode, const std::wstring_view message) noexcept :
 			Exception{ message }, errorCode{ errorCode }
-		{
-		}
+		{ }
 
 		[[nodiscard]] auto ErrorCode() const noexcept { return errorCode; }
 
@@ -51,33 +50,34 @@ export namespace PGUI
 		WINERR errorCode = ERROR_SUCCESS;
 	};
 
-	class HResultException : public Exception
+	class HResultException final : public Exception
 	{
 		public:
 		HResultException() noexcept = default;
-		HResultException(HRESULT hresult) noexcept :
-			hresult{ hresult }, Exception::Exception{ HResultToString(hresult) }
-		{
-		}
-		HResultException(HRESULT hresult, std::wstring_view message) noexcept :
+
+		explicit HResultException(const HRESULT hresult) noexcept :
+			Exception{ HResultToString(hresult) }, hresult{ hresult }
+		{ }
+
+		HResultException(const HRESULT hresult, const std::wstring_view message) noexcept :
 			Exception{ message }, hresult{ hresult }
-		{
-		}
+		{ }
 
 		[[nodiscard]] auto HResult() const noexcept { return hresult; }
-		
+
 		private:
 		HRESULT hresult = S_OK;
 	};
 
-	inline void ThrowFailed(HRESULT hr)
+	inline auto ThrowFailed(const HRESULT hr) -> void
 	{
 		if (FAILED(hr))
 		{
 			throw HResultException{ hr };
 		}
 	}
-	inline void ThrowFailed(WINERR wr)
+
+	inline auto ThrowFailed(const WINERR wr) -> void
 	{
 		if (wr != ERROR_SUCCESS)
 		{

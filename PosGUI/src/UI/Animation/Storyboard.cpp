@@ -1,18 +1,19 @@
 module;
-#include <wrl.h>
 #include <UIAnimation.h>
+#include <wrl.h>
 
-module PGUI.UI.Animation.Storyboard;
+module PGUI.UI.Animation:Storyboard;
+import :Storyboard;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;
-import PGUI.UI.Animation.AnimationVariable;
-import PGUI.UI.Animation.AnimationTransition;
-import PGUI.UI.Animation.AnimationStoryboardEventHandler;
+import :AnimationVariable;
+import :AnimationTransition;
+import :AnimationStoryboardEventHandler;
 
 namespace  PGUI::UI::Animation
 {
-	Storyboard::Storyboard(ComPtr<IUIAnimationStoryboard2> ptr) noexcept : 
+	Storyboard::Storyboard(const ComPtr<IUIAnimationStoryboard2>& ptr) noexcept : 
 		ComPtrHolder{ ptr }
 	{
 	}

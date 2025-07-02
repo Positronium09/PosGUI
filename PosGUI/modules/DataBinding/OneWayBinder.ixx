@@ -11,7 +11,7 @@ export namespace PGUI::DataBinding
 	class OneWayBinder
 	{
 		public:
-		OneWayBinder(Property<SourceType>& source, Property<TargetType>& target) noexcept : 
+		OneWayBinder(Property<SourceType>& source, Property<TargetType>& target) noexcept :
 			source{ source }
 		{
 			observerId = source.AddObserver([&target](const auto& value)
@@ -21,9 +21,9 @@ export namespace PGUI::DataBinding
 		}
 
 		template <std::invocable<const SourceType&> Func>
-		requires std::convertible_to<std::invoke_result_t<Func, const SourceType&>, TargetType>
-		OneWayBinder(Property<SourceType>& source, Property<TargetType>& target, 
-			const Func& converter) noexcept :
+			requires std::convertible_to<std::invoke_result_t<Func, const SourceType&>, TargetType>
+		OneWayBinder(Property<SourceType>& source, Property<TargetType>& target,
+		             const Func& converter) noexcept :
 			source{ source }
 		{
 			observerId = source.AddObserver([&target, &converter](const auto& value)

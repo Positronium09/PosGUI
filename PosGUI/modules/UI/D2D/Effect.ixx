@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <d2d1_1.h>
+#include <wrl.h>
 
 export module PGUI.UI.D2D.Effect;
 
@@ -14,14 +14,20 @@ export namespace PGUI::UI::D2D
 	{
 		public:
 		Effect() noexcept = default;
-		Effect(ComPtr<ID2D1Effect> effect) noexcept;
+
+		explicit(false) Effect(ComPtr<ID2D1Effect> effect) noexcept;
 
 		[[nodiscard]] auto GetInput(UINT32 index) const noexcept -> D2DImage<>;
+
 		[[nodiscard]] auto GetInputCount() const noexcept { return Get()->GetInputCount(); }
+
 		[[nodiscard]] auto GetOutput() const noexcept -> D2DImage<>;
-		void SetInput(UINT32 index, D2DImage<> image, bool invalidate) noexcept;
-		void SetInputEffect(UINT32 index, Effect effect, bool invalidate) noexcept;
-		void SetInputCount(UINT32 count);
+
+		auto SetInput(UINT32 index, D2DImage<> image, bool invalidate) noexcept -> void;
+
+		auto SetInputEffect(UINT32 index, Effect effect, bool invalidate) noexcept -> void;
+
+		auto SetInputCount(UINT32 count) -> void;
 
 		auto GetProperties() const noexcept { return D2DProperties{ Get() }; }
 	};

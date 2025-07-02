@@ -1,5 +1,4 @@
 module;
-#include <dwrite_3.h>
 #include <d2d1_3.h>
 
 export module PGUI.UI.D2D.D2DEnums;
@@ -140,8 +139,10 @@ export namespace PGUI::UI::D2D
 export namespace PGUI
 {
 	template <>
-	struct IsEnumFlagEnabled<UI::D2D::DrawTextOptions> : Enabled { };
+	struct IsEnumFlagEnabled<UI::D2D::DrawTextOptions> : Enabled
+	{ };
 
 	template <>
-	struct IsEnumFlagEnabled<UI::D2D::BitmapOptions> : Enabled { };
+	struct IsEnumFlagEnabled<UI::D2D::BitmapOptions> : Enabled
+	{ };
 }

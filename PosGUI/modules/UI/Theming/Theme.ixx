@@ -1,3 +1,6 @@
+module;
+#include <ranges>
+
 export module PGUI.UI.Theming.Theme;
 
 import std;
@@ -6,11 +9,6 @@ import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ColorContext;
 import PGUI.UI.Theming.SystemTheme;
 import PGUI.Event;
-
-namespace PGUI
-{
-	void Init();
-}
 
 export namespace PGUI::UI::Theming
 {
@@ -21,10 +19,11 @@ export namespace PGUI::UI::Theming
 		std::unordered_map<std::type_index, std::any> customStyles{ };
 
 		template <typename T>
-		void AddCustomStyle(const T& style) noexcept
+		auto AddCustomStyle(const T& style) noexcept -> void
 		{
 			customStyles[typeid(T)] = style;
 		}
+
 		template <typename T>
 		[[nodiscard]] const auto& GetCustomStyle() const
 		{
@@ -34,20 +33,22 @@ export namespace PGUI::UI::Theming
 			}
 			return std::any_cast<const T&>(customStyles.at(typeid(T)));
 		}
+
 		template <typename T>
 		[[nodiscard]] auto HasCustomStyle() const noexcept
 		{
 			return customStyles.contains(typeid(T));
 		}
+
 		template <typename T>
-		void RemoveCustomStyle() noexcept
+		auto RemoveCustomStyle() noexcept -> void
 		{
 			customStyles.erase(typeid(T));
 		}
 
 		auto operator==(const Theme& other) const noexcept -> bool
 		{
-			for (const auto& [key, val] : customStyles)
+			for (const auto& key : customStyles | std::views::keys)
 			{
 				if (!other.customStyles.contains(key))
 				{
@@ -56,14 +57,12 @@ export namespace PGUI::UI::Theming
 			}
 
 			return colorContext == other.colorContext &&
-				appWindowStyle == other.appWindowStyle;
+			       appWindowStyle == other.appWindowStyle;
 		}
 	};
 
-	class ThemeContext
+	class ThemeContext final
 	{
-		friend void PGUI::Init();
-
 		public:
 		inline static Theme DarkTheme;
 		inline static Theme LightTheme;
@@ -71,28 +70,29 @@ export namespace PGUI::UI::Theming
 		ThemeContext() = delete;
 
 		[[nodiscard]] static auto GetCurrentTheme() noexcept -> const Theme&;
-		static void ChangeCurrentTheme(const Theme& theme) noexcept;
+
+		static auto ChangeCurrentTheme(const Theme& theme) noexcept -> void;
 
 		[[nodiscard]] static auto& ThemeChangedEvent() noexcept { return themeChangedEvent; }
 
 		[[nodiscard]] static auto& RespondToSystemThemeChange() noexcept { return respondToSystemThemeChange; }
 
 		template <typename Function>
-		static void WithCurrentTheme(const Function& function) noexcept
-			requires std::invocable<Function, const Theme&>
+		static auto WithCurrentTheme(const Function& function) noexcept -> void requires std::invocable<
+			Function, const Theme&>
 		{
 			std::scoped_lock lock{ themeMutex };
 			function(currentTheme);
 		}
+
+		static auto InitializeThemes() noexcept -> void;
+
+		static auto OnSystemThemeChanged() -> void;
 
 		private:
 		inline static std::atomic_bool respondToSystemThemeChange = true;
 		inline static Theme currentTheme{ };
 		inline static Event<const Theme&> themeChangedEvent;
 		inline static std::mutex themeMutex{ };
-
-		static void InitializeThemes() noexcept;
-
-		static void OnSystemThemeChanged();
 	};
 }

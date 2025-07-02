@@ -8,43 +8,43 @@ import std;
 
 export namespace PGUI
 {
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	struct Point
 	{
 		T x = static_cast<T>(0);
 		T y = static_cast<T>(0);
 
-		[[nodiscard]] static auto Distance(Point<T> A, Point<T> B) noexcept
+		[[nodiscard]] static auto Distance(const Point a, const Point b) noexcept
 		{
-			return static_cast<T>(std::sqrt(static_cast<double>(DistanceSqr(A, B))));
+			return static_cast<T>(std::sqrt(static_cast<double>(DistanceSqr(a, b))));
 		}
-		[[nodiscard]] static constexpr auto DistanceSqr(Point<T> A, Point<T> B) noexcept
+
+		[[nodiscard]] static constexpr auto DistanceSqr(Point a, Point b) noexcept
 		{
-			return (A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y);
+			return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 		}
 
 		constexpr Point() noexcept = default;
 
 		constexpr Point(const T& x, const T& y) noexcept :
 			x{ x }, y{ y }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr Point(const POINT& p) noexcept :
 			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr Point(const POINTS& p) noexcept :
 			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr Point(const D2D1_POINT_2F& p) noexcept :
 			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr Point(const D2D1_POINT_2U& p) noexcept :
 			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
-		{
-		}
+		{ }
 
 		constexpr auto& operator+=(const Point& other) noexcept
 		{
@@ -52,69 +52,80 @@ export namespace PGUI
 			y += other.y;
 			return *this;
 		}
+
 		constexpr auto& operator-=(const Point& other) noexcept
 		{
 			x -= other.x;
 			y -= other.y;
 			return *this;
 		}
+
 		constexpr auto& operator*=(const T& factor) noexcept
 		{
 			x *= factor;
 			y *= factor;
 			return *this;
 		}
+
 		constexpr auto& operator/=(const T& factor) noexcept
 		{
 			x /= factor;
 			y /= factor;
 			return *this;
 		}
+
 		[[nodiscard]] constexpr auto operator+(const Point& other) const noexcept
 		{
 			return Point{ x + other.x, y + other.y };
 		}
+
 		[[nodiscard]] constexpr auto operator-(const Point& other) const noexcept
 		{
 			return Point(x - other.x, y - other.y);
 		}
+
 		[[nodiscard]] constexpr auto operator*(T factor) const noexcept
 		{
 			return Point(x * factor, y * factor);
 		}
+
 		[[nodiscard]] constexpr auto operator/(T factor) const noexcept
 		{
 			return Point(x / factor, y / factor);
 		}
+
 		[[nodiscard]] constexpr auto operator-() const noexcept
 		{
 			return Point{ -x, -y };
 		}
+
 		constexpr auto operator+() const noexcept -> Point
 		{
 			return *this;
 		}
 
-		[[nodiscard]] constexpr auto operator==(const Point& other) const noexcept -> bool = default;
+		[[nodiscard]] constexpr auto operator==(const Point&) const noexcept -> bool = default;
 
 		[[nodiscard]] auto Distance(const Point<T>& other) const noexcept
 		{
 			return Point::Distance(*this, other);
 		}
+
 		[[nodiscard]] constexpr auto DistanceSqr(const Point& other) const noexcept
 		{
 			return Point::DistanceSqr(*this, other);
 		}
-		void Rotate(float angleDegrees, Point<T> point = Point<T>{ }) noexcept
+
+		auto Rotate(const float angleDegrees, Point point = Point{ }) noexcept -> void
 		{
 			x -= point.x;
 			y -= point.y;
 
-			long double angleRadians = angleDegrees / 180.0 * std::numbers::pi;
-			long double x_ = x;
-			long double y_ = y;
-			x = (T)(x_ * std::cosl(angleRadians) - y_ * std::sinl(angleRadians));
-			y = (T)(x_ * std::sinl(angleRadians) + y_ * std::cosl(angleRadians));
+			const long double angleRadians = angleDegrees / 180.0 * std::numbers::pi;
+			const long double prevX = x;
+			const long double prevY = y;
+			x = static_cast<T>(prevX * std::cosl(angleRadians) - prevY * std::sinl(angleRadians));
+			y = static_cast<T>(prevX * std::sinl(angleRadians) + prevY * std::cosl(angleRadians));
 
 			x += point.x;
 			y += point.y;
@@ -127,7 +138,7 @@ export namespace PGUI
 			return point;
 		}
 
-		template<typename U> requires std::is_arithmetic_v<U>
+		template <typename U> requires std::is_arithmetic_v<U>
 		explicit(false) constexpr operator Point<U>() const noexcept
 		{
 			return Point<U>{ static_cast<U>(x), static_cast<U>(y) };
@@ -137,39 +148,42 @@ export namespace PGUI
 		{
 			return POINT{ static_cast<LONG>(x), static_cast<LONG>(y) };
 		}
+
 		explicit(false) constexpr operator POINTS() const noexcept
 		{
 			return POINTS{ static_cast<SHORT>(x), static_cast<SHORT>(y) };
 		}
+
 		explicit(false) constexpr operator D2D1_POINT_2F() const noexcept
 		{
 			return D2D1_POINT_2F{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
 		}
+
 		explicit(false) constexpr operator D2D1_POINT_2U() const noexcept
 		{
 			return D2D1_POINT_2U{ static_cast<UINT32>(x), static_cast<UINT32>(y) };
 		}
 	};
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator*(T factor, const Point<T>& v) noexcept
 	{
 		return Point<T>(v.x * factor, v.y * factor);
 	}
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator/(T factor, const Point<T>& v) noexcept
 	{
 		return Point<T>(v.x / factor, v.y / factor);
 	}
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator*(const Point<T>& v, T factor) noexcept
 	{
 		return Point<T>(v.x * factor, v.y * factor);
 	}
 
-	template<typename T> requires std::is_arithmetic_v<T>
+	template <typename T> requires std::is_arithmetic_v<T>
 	[[nodiscard]] constexpr auto operator/(const Point<T>& v, T factor) noexcept
 	{
 		return Point<T>(v.x / factor, v.y / factor);

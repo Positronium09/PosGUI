@@ -1,15 +1,16 @@
 module;
-#include <wrl.h>
 #include <UIAnimation.h>
+#include <wrl.h>
 
-module PGUI.UI.Animation.AnimationManager;
+module PGUI.UI.Animation:AnimationManager;
+import :AnimationManager;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;
-import PGUI.UI.Animation.Storyboard;
-import PGUI.UI.Animation.AnimationVariable;
-import PGUI.UI.Animation.AnimationTransition;
-import PGUI.UI.Animation.AnimationManagerEventHandler;
+import :Storyboard;
+import :AnimationVariable;
+import :AnimationTransition;
+import :AnimationManagerEventHandler;
 
 namespace PGUI::UI::Animation
 {

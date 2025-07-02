@@ -10,17 +10,21 @@ export namespace PGUI
 	class WindowClass;
 
 	using WindowClassPtr = std::shared_ptr<WindowClass>;
-	
+
 	class WindowClass
 	{
 		public:
-		static auto Create(std::wstring_view _className,
+		static auto Create(
+			std::wstring_view className,
 			UINT style = CS_HREDRAW | CS_VREDRAW, HBRUSH backgroundBrush = nullptr,
 			HICON icon = nullptr, HCURSOR cursor = nullptr, HICON smIcon = nullptr) noexcept -> WindowClassPtr;
 
 		WindowClass(const WindowClass&) = delete;
+
 		auto operator=(const WindowClass&) -> WindowClass& = delete;
+
 		WindowClass(WindowClass&&) noexcept = delete;
+
 		auto operator=(WindowClass&&) noexcept -> WindowClass&& = delete;
 
 		~WindowClass() noexcept;
@@ -29,9 +33,9 @@ export namespace PGUI
 		[[nodiscard]] auto GetAtom() const noexcept { return classAtom; }
 
 		protected:
-		WindowClass(std::wstring_view _className,
-			UINT style, HBRUSH backgroundBrush,
-			HICON icon, HCURSOR cursor, HICON smIcon);
+		WindowClass(std::wstring_view className,
+		            UINT style, HBRUSH backgroundBrush,
+		            HICON icon, HCURSOR cursor, HICON smIcon);
 
 		private:
 		std::wstring className;

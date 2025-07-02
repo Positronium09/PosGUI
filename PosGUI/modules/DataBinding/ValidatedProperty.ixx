@@ -7,34 +7,33 @@ import PGUI.DataBinding.Property;
 export namespace PGUI::DataBinding
 {
 	template <typename T, typename Mutex = std::mutex>
-	class ValidatedProperty : public Property<T, Mutex>
+	class ValidatedProperty final : public Property<T, Mutex>
 	{
 		using Validator = std::function<bool(const T&)>;
 
 		public:
 		ValidatedProperty() noexcept = default;
+
 		explicit(false) ValidatedProperty(const T& value) noexcept :
 			Property<T, Mutex>{ value }
-		{
-		}
+		{ }
 
 		ValidatedProperty(const ValidatedProperty& other) noexcept :
 			Property<T, Mutex>{ other }
-		{
-		}
+		{ }
 
 		ValidatedProperty(ValidatedProperty&& other) noexcept :
 			Property<T, Mutex>{ other }
-		{
-		}
-		virtual ~ValidatedProperty() = default;
+		{ }
 
-		void AddValidator(const Validator& validator)
+		~ValidatedProperty() override = default;
+
+		auto AddValidator(const Validator& validator) -> void
 		{
 			validators.push_back(validator);
 		}
 
-		void Set(const T& newValue) override
+		auto Set(const T& newValue) -> void override
 		{
 			auto validated = std::ranges::all_of(validators, [&newValue](const auto& validator)
 			{
@@ -45,7 +44,8 @@ export namespace PGUI::DataBinding
 				Property<T, Mutex>::Set(newValue);
 			}
 		}
-		void Set(T&& newValue) override
+
+		auto Set(T&& newValue) -> void override
 		{
 			auto validated = std::ranges::all_of(validators, [&newValue](const auto& validator)
 			{
@@ -62,27 +62,31 @@ export namespace PGUI::DataBinding
 			Set(val);
 			return *this;
 		}
+
 		auto operator=(T&& val) noexcept -> ValidatedProperty&
 		{
 			Set(val);
 			return *this;
 		}
 
-		explicit(false) operator const T& () const noexcept { return Property<T, Mutex>::Get(); }
-		explicit(false) operator T& () noexcept { return Property<T, Mutex>::Get(); }
+		explicit(false) operator const T&() const noexcept { return Property<T, Mutex>::Get(); }
+		explicit(false) operator T&() noexcept { return Property<T, Mutex>::Get(); }
 
 		auto operator==(const Property<T, Mutex>& other) const noexcept -> bool
 		{
 			return Property<T, Mutex>::operator==(other);
 		}
+
 		auto operator==(const T& val) const noexcept -> bool
 		{
 			return Property<T, Mutex>::operator==(val);
 		}
+
 		auto operator<=>(const Property<T, Mutex>& other) const noexcept
 		{
 			return Property<T, Mutex>::operator<=>(other);
 		}
+
 		auto operator<=>(const T& val) const noexcept
 		{
 			return Property<T, Mutex>::operator<=>(val);
@@ -96,6 +100,7 @@ export namespace PGUI::DataBinding
 			}
 			return *this;
 		}
+
 		auto operator=(const ValidatedProperty& other) noexcept -> ValidatedProperty&
 		{
 			if (this != &other)
@@ -113,6 +118,7 @@ export namespace PGUI::DataBinding
 			}
 			return *this;
 		}
+
 		auto operator=(ValidatedProperty&& other) noexcept -> ValidatedProperty&
 		{
 			if (this != &other)

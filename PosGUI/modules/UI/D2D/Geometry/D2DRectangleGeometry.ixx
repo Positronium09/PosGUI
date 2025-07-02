@@ -4,6 +4,7 @@ module;
 
 export module PGUI.UI.D2D.D2DRectangleGeometry;
 
+import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
 import PGUI.Exceptions;
@@ -15,15 +16,17 @@ export namespace PGUI::UI::D2D
 	{
 		public:
 		constexpr D2DRectangleGeometry() noexcept = default;
-		constexpr D2DRectangleGeometry(ComPtr<ID2D1RectangleGeometry> ptr) noexcept : 
+
+		explicit(false) constexpr D2DRectangleGeometry(const ComPtr<ID2D1RectangleGeometry>& ptr) noexcept :
 			D2DGeometry{ ptr }
-		{
-		}
-		D2DRectangleGeometry(RectF rect)
+		{ }
+
+		explicit D2DRectangleGeometry(const RectF rect)
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			auto hr = factory->CreateRectangleGeometry(rect, GetAddress()); ThrowFailed(hr);
+			const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
+			ThrowFailed(hr);
 		}
 
 		[[nodiscard]] auto GetRect() const noexcept -> RectF

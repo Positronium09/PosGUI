@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <d2d1_1.h>
+#include <wrl.h>
 
 export module PGUI.UI.D2D.D2DProperties;
 
@@ -39,62 +39,77 @@ export namespace PGUI::UI::D2D
 	{
 		public:
 		D2DProperties() noexcept = default;
-		D2DProperties(ComPtr<ID2D1Properties> properties) noexcept;
+
+		explicit(false) D2DProperties(ComPtr<ID2D1Properties> properties) noexcept;
 
 		[[nodiscard]] auto GetPropertyCount() const noexcept { return Get()->GetPropertyCount(); }
-		[[nodiscard]] auto GetPropertyIndex(std::wstring_view name) const noexcept { return Get()->GetPropertyIndex(name.data()); }
-		[[nodiscard]] auto GetPropertyType(UINT32 index) const noexcept { return static_cast<PropertyType>(Get()->GetType(index)); }
-		[[nodiscard]] auto GetValueSize(UINT32 index) const noexcept { return Get()->GetValueSize(index); }
+
+		[[nodiscard]] auto GetPropertyIndex(const std::wstring_view name) const noexcept
+		{
+			return Get()->GetPropertyIndex(name.data());
+		}
+
+		[[nodiscard]] auto GetPropertyType(const UINT32 index) const noexcept
+		{
+			return static_cast<PropertyType>(Get()->GetType(index));
+		}
+
+		[[nodiscard]] auto GetValueSize(const UINT32 index) const noexcept { return Get()->GetValueSize(index); }
 
 		[[nodiscard]] auto GetPropertyName(UINT32 index) const noexcept -> std::wstring;
 
 		[[nodiscard]] auto GetSubProperty(UINT32 index) const noexcept -> D2DProperties;
+
 		[[nodiscard]] auto GetProperty(UINT32 index, std::span<BYTE> bytes) const noexcept -> bool;
 
 		template <typename T>
-		[[nodiscard]] auto GetProperty(UINT32 index) const noexcept -> T
+		[[nodiscard]] auto GetProperty(const UINT32 index) const noexcept -> T
 		{
 			T value{ };
-			auto size = GetValueSize(index);
+			const auto size = GetValueSize(index);
 
 			if (size != sizeof(T))
 			{
 				ThrowFailed(E_INVALIDARG);
 			}
 
-			auto hr = this->Get()->GetValue(index, &value, size); ThrowFailed(hr);
+			auto hr = this->Get()->GetValue(index, &value, size);
+			ThrowFailed(hr);
 			return value;
 		}
+
 		template <typename T>
-		[[nodiscard]] auto GetProperty(std::wstring_view name) const noexcept -> T
+		[[nodiscard]] auto GetProperty(const std::wstring_view name) const noexcept -> T
 		{
-			auto index = GetPropertyIndex(name);
-		
+			const auto index = GetPropertyIndex(name);
+
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
 				ThrowFailed(E_INVALIDARG);
 			}
-			
+
 			return GetProperty<T>(index);
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<bool>(UINT32 index) const noexcept -> bool
+		[[nodiscard]] auto GetProperty<bool>(const UINT32 index) const noexcept -> bool
 		{
 			bool value{ };
-			auto type = GetPropertyType(index);
-			if (type != PropertyType::Bool)
+			if (const auto type = GetPropertyType(index);
+				type != PropertyType::Bool)
 			{
 				ThrowFailed(E_INVALIDARG);
 			}
 
-			auto hr = Get()->GetValue(index, &value); ThrowFailed(hr);
+			const auto hr = Get()->GetValue(index, &value);
+			ThrowFailed(hr);
 			return value;
 		}
+
 		template <>
-		[[nodiscard]] auto GetProperty<bool>(std::wstring_view name) const noexcept -> bool
+		[[nodiscard]] auto GetProperty<bool>(const std::wstring_view name) const noexcept -> bool
 		{
-			auto index = GetPropertyIndex(name);
+			const auto index = GetPropertyIndex(name);
 
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
@@ -105,22 +120,24 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<UINT32>(UINT32 index) const noexcept -> UINT32
+		[[nodiscard]] auto GetProperty<UINT32>(const UINT32 index) const noexcept -> UINT32
 		{
 			UINT32 value{ };
-			auto type = GetPropertyType(index);
-			if (type != PropertyType::UInt32)
+			if (const auto type = GetPropertyType(index); 
+				type != PropertyType::UInt32)
 			{
 				ThrowFailed(E_INVALIDARG);
 			}
 
-			auto hr = Get()->GetValue(index, &value); ThrowFailed(hr);
+			const auto hr = Get()->GetValue(index, &value);
+			ThrowFailed(hr);
 			return value;
 		}
+
 		template <>
-		[[nodiscard]] auto GetProperty<UINT32>(std::wstring_view name) const noexcept -> UINT32
+		[[nodiscard]] auto GetProperty<UINT32>(const std::wstring_view name) const noexcept -> UINT32
 		{
-			auto index = GetPropertyIndex(name);
+			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
 				ThrowFailed(E_INVALIDARG);
@@ -129,22 +146,24 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<INT32>(UINT32 index) const noexcept -> INT32
+		[[nodiscard]] auto GetProperty<INT32>(const UINT32 index) const noexcept -> INT32
 		{
 			INT32 value{ };
-			auto type = GetPropertyType(index);
-			if (type != PropertyType::Int32)
+			if (const auto type = GetPropertyType(index); 
+				type != PropertyType::Int32)
 			{
 				ThrowFailed(E_INVALIDARG);
 			}
 
-			auto hr = Get()->GetValue(index, &value); ThrowFailed(hr);
+			const auto hr = Get()->GetValue(index, &value);
+			ThrowFailed(hr);
 			return value;
 		}
+
 		template <>
-		[[nodiscard]] auto GetProperty<INT32>(std::wstring_view name) const noexcept -> INT32
+		[[nodiscard]] auto GetProperty<INT32>(const std::wstring_view name) const noexcept -> INT32
 		{
-			auto index = GetPropertyIndex(name);
+			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
 				ThrowFailed(E_INVALIDARG);
@@ -153,22 +172,24 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<float>(UINT32 index) const noexcept -> float
+		[[nodiscard]] auto GetProperty<float>(const UINT32 index) const noexcept -> float
 		{
 			FLOAT value{ };
-			auto type = GetPropertyType(index);
-			if (type != PropertyType::Float)
+			if (const auto type = GetPropertyType(index); 
+				type != PropertyType::Float)
 			{
 				ThrowFailed(E_INVALIDARG);
 			}
 
-			auto hr = Get()->GetValue(index, &value); ThrowFailed(hr);
+			const auto hr = Get()->GetValue(index, &value);
+			ThrowFailed(hr);
 			return value;
 		}
+
 		template <>
-		[[nodiscard]] auto GetProperty<float>(std::wstring_view name) const noexcept -> float
+		[[nodiscard]] auto GetProperty<float>(const std::wstring_view name) const noexcept -> float
 		{
-			auto index = GetPropertyIndex(name);
+			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
 				ThrowFailed(E_INVALIDARG);
@@ -177,14 +198,16 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <typename T>
-		void SetProperty(UINT32 index, const T& value)
+		auto SetProperty(UINT32 index, const T& value) -> void
 		{
-			auto hr = this->Get()->SetValue(index, value); ThrowFailed(hr);
+			const auto hr = this->Get()->SetValue(index, value);
+			ThrowFailed(hr);
 		}
+
 		template <typename T>
-		void SetProperty(std::wstring_view name, const T& value)
+		auto SetProperty(const std::wstring_view name, const T& value) -> void
 		{
-			auto index = GetPropertyIndex(name);
+			const auto index = GetPropertyIndex(name);
 
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{

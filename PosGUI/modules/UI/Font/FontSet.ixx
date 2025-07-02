@@ -1,7 +1,5 @@
 module;
-#include <Windows.h>
 #include <dwrite_3.h>
-#include <wrl.h>
 
 export module PGUI.UI.Font.FontSet;
 
@@ -16,10 +14,12 @@ export namespace PGUI::UI::Font
 	class FontSet : public ComPtrHolder<IDWriteFontSet4>
 	{
 		public:
-		FontSet(ComPtr<IDWriteFontSet4> set) noexcept;
+		explicit(false) FontSet(ComPtr<IDWriteFontSet4> set) noexcept;
+
 		[[nodiscard]] auto ConvertWeightStretchStyleToFontAxisValues(
 			FontWeight weight, FontStretch stretch, FontStyle style,
 			float fontSize,
-			std::optional<std::span<const FontAxisValue>> inputValues = std::nullopt) const noexcept -> std::vector<FontAxisValue>;
+			std::optional<std::span<const FontAxisValue>> inputValues = std::nullopt) const noexcept -> std::vector<
+			FontAxisValue>;
 	};
 }

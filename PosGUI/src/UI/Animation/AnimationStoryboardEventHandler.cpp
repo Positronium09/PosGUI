@@ -2,14 +2,15 @@ module;
 #include <wrl.h>
 #include <UIAnimation.h>
 
-module PGUI.UI.Animation.AnimationStoryboardEventHandler;
+module PGUI.UI.Animation:AnimationStoryboardEventHandler;
+import :AnimationStoryboardEventHandler;
 
 import std;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;
-import PGUI.UI.Animation.AnimationEnums;
-import PGUI.UI.Animation.Storyboard;
+import :AnimationEnums;
+import :Storyboard;
 
 namespace PGUI::UI::Animation
 {

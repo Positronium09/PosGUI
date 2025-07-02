@@ -4,6 +4,7 @@ module;
 
 export module PGUI.UI.D2D.D2DEllipseGeometry;
 
+import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
 import PGUI.Exceptions;
@@ -15,15 +16,17 @@ export namespace PGUI::UI::D2D
 	{
 		public:
 		constexpr D2DEllipseGeometry() noexcept = default;
-		constexpr D2DEllipseGeometry(ComPtr<ID2D1EllipseGeometry> ptr) noexcept :
+
+		explicit(false) constexpr D2DEllipseGeometry(const ComPtr<ID2D1EllipseGeometry>& ptr) noexcept :
 			D2DGeometry{ ptr }
-		{
-		}
-		D2DEllipseGeometry(Ellipse ellipse)
+		{ }
+
+		explicit D2DEllipseGeometry(const Ellipse ellipse)
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			auto hr = factory->CreateEllipseGeometry(ellipse, GetAddress()); ThrowFailed(hr);
+			const auto hr = factory->CreateEllipseGeometry(ellipse, GetAddress());
+			ThrowFailed(hr);
 		}
 
 		[[nodiscard]] auto GetEllipse() const noexcept -> Ellipse

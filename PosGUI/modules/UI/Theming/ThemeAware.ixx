@@ -13,7 +13,7 @@ export namespace PGUI::UI::Theming
 		public:
 		virtual ~ThemeAware() noexcept = default;
 
-		virtual void ApplyStyle(const StyleType& style) = 0;
+		virtual auto ApplyStyle(const StyleType& style) -> void = 0;
 
 		protected:
 		ThemeAware() noexcept
@@ -22,12 +22,12 @@ export namespace PGUI::UI::Theming
 				std::bind_front(&ThemeAware::OnThemeChanged, this));
 		}
 
-		void ApplyTheme(const Theme& theme) noexcept
+		auto ApplyTheme(const Theme& theme) noexcept -> void
 		{
 			OnThemeChanged(theme);
 		}
 
-		void ApplyCurrentTheme()
+		auto ApplyCurrentTheme() -> void
 		{
 			ThemeContext::WithCurrentTheme([this](const Theme& theme)
 			{
@@ -35,7 +35,7 @@ export namespace PGUI::UI::Theming
 			});
 		}
 
-		void OnThemeChanged(const Theme& theme)
+		auto OnThemeChanged(const Theme& theme) -> void
 		{
 			if constexpr (std::is_same_v<StyleType, AppWindowStyle>)
 			{

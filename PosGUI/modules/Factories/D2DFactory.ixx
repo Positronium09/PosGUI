@@ -1,8 +1,7 @@
 module;
-#include <d2d1_3.h>
 #include <d2d1.h>
+#include <d2d1_3.h>
 #include <wrl.h>
-#include <Windows.h>
 
 export module PGUI.Factories:D2DFactory;
 
@@ -15,10 +14,15 @@ export namespace PGUI::Factories
 	{
 		public:
 		D2DFactory() = delete;
+
 		D2DFactory(const D2DFactory&) = delete;
-		auto operator=(const D2DFactory&)->D2DFactory & = delete;
+
+		auto operator=(const D2DFactory&) -> D2DFactory& = delete;
+
 		D2DFactory(D2DFactory&&) = delete;
-		auto operator=(D2DFactory&&)->D2DFactory & = delete;
+
+		auto operator=(D2DFactory&&) -> D2DFactory& = delete;
+
 		~D2DFactory() = default;
 
 		[[nodiscard]] static auto GetFactory()
@@ -27,12 +31,13 @@ export namespace PGUI::Factories
 			{
 				D2D1_FACTORY_OPTIONS options{ };
 
-				#ifdef _DEBUG
+#ifdef _DEBUG
 				options.debugLevel = D2D1_DEBUG_LEVEL_ERROR;
-				#endif
+#endif
 
-				auto hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
-					options, factory.GetAddressOf()); ThrowFailed(hr);
+				const auto hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
+				                            options, factory.GetAddressOf());
+				ThrowFailed(hr);
 			}
 
 			return factory;

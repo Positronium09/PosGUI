@@ -1,13 +1,13 @@
 module;
 #include <UIAnimation.h>
 
-export module PGUI.UI.Animation.AnimationManagerEventHandler;
+export module PGUI.UI.Animation:AnimationManagerEventHandler;
 
 import std;
 
 import PGUI.ComPtr;
 import PGUI.Event;
-import PGUI.UI.Animation.AnimationEnums;
+import :AnimationEnums;
 
 namespace PGUI::UI::Animation
 {
@@ -17,17 +17,21 @@ namespace PGUI::UI::Animation
 
 		public:
 		AnimationManagerEventHandlerRouter() noexcept = default;
-		AnimationManagerEventHandlerRouter(const ManagerStatusChangedHandler& handler) noexcept;
+
+		explicit AnimationManagerEventHandlerRouter(const ManagerStatusChangedHandler& handler) noexcept;
 
 		auto __stdcall QueryInterface(const IID& iid, void** obj) -> HRESULT override;
+
 		auto __stdcall AddRef() -> ULONG override;
+
 		auto __stdcall Release() -> ULONG override;
 
 		auto __stdcall OnManagerStatusChanged(UI_ANIMATION_MANAGER_STATUS newStatus,
-			UI_ANIMATION_MANAGER_STATUS previousStatus) -> HRESULT override;
+		                                      UI_ANIMATION_MANAGER_STATUS previousStatus) -> HRESULT override;
 
-		void SetHandler(const ManagerStatusChangedHandler& handler) noexcept;
-		void ClearHandler() noexcept;
+		auto SetHandler(const ManagerStatusChangedHandler& handler) noexcept -> void;
+
+		auto ClearHandler() noexcept -> void;
 
 		private:
 		std::mutex handlerMutex;
@@ -43,9 +47,11 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationManagerEventHandler() noexcept;
 
-		virtual void OnManagerStatusChanged(
-			AnimationManagerStatus newStatus, 
-			AnimationManagerStatus previousStatus) = 0;
+		virtual ~AnimationManagerEventHandler() = default;
+
+		virtual auto OnManagerStatusChanged(
+			AnimationManagerStatus newStatus,
+			AnimationManagerStatus previousStatus) -> void = 0;
 
 		[[nodiscard]] auto& GetRouter() noexcept { return router; }
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
@@ -54,10 +60,10 @@ export namespace PGUI::UI::Animation
 		AnimationManagerEventHandlerRouter router;
 
 		auto CallHandler(AnimationManagerStatus newStatus,
-			AnimationManagerStatus previousStatus) noexcept -> HRESULT;
+		                 AnimationManagerStatus previousStatus) noexcept -> HRESULT;
 	};
 
-	class AnimationManagerEvent : public AnimationManagerEventHandler
+	class AnimationManagerEvent final : public AnimationManagerEventHandler
 	{
 		public:
 		[[nodiscard]] const auto& ManagerStatusChanged() const noexcept { return managerStatusChangedEvent; }
@@ -66,7 +72,7 @@ export namespace PGUI::UI::Animation
 		private:
 		Event<AnimationManagerStatus, AnimationManagerStatus> managerStatusChangedEvent{ };
 
-		void OnManagerStatusChanged(AnimationManagerStatus newStatus, 
-			AnimationManagerStatus previousStatus) override;
+		auto OnManagerStatusChanged(AnimationManagerStatus newStatus,
+		                            AnimationManagerStatus previousStatus) -> void override;
 	};
 }

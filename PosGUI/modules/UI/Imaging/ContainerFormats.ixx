@@ -6,6 +6,7 @@ export module PGUI.UI.Imaging.ContainerFormats;
 export namespace PGUI::UI::Imaging
 {
 	using ContainerFormat = GUID;
+
 	namespace ContainerFormats
 	{
 		const auto& Bmp = GUID_ContainerFormatBmp;

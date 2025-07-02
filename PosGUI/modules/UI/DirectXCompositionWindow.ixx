@@ -1,14 +1,11 @@
 module;
-#include <Windows.h>
-#include <wrl.h>
-#include <dxgi.h>
-#include <dxgi1_2.h>
-#include <dxgi1_6.h>
 #include <d2d1.h>
 #include <d2d1_3.h>
-#include <d3d11.h>
 #include <d3d11_4.h>
 #include <dcomp.h>
+#include <dxgi1_2.h>
+#include <Windows.h>
+#include <wrl.h>
 
 export module PGUI.UI.DirectXCompositionWindow;
 
@@ -20,21 +17,20 @@ import PGUI.ComPtr;
 import PGUI.UI.Clip;
 import PGUI.UI.Graphics;
 
-namespace PGUI
-{
-	extern void Init();
-}
-
 export namespace PGUI::UI
 {
 	class DirectXCompositionWindow :
 		public Window,
 		protected ComPtrHolder<IDXGISwapChain1, IDCompositionTarget, ID2D1DeviceContext7, IDCompositionVisual>
 	{
-		friend void PGUI::Init();
-
 		public:
-		virtual ~DirectXCompositionWindow() override = default;
+		~DirectXCompositionWindow() override = default;
+
+		static auto InitD3D11Device() -> void;
+
+		static auto InitDCompDevice() -> void;
+
+		static auto InitD2D1Device() -> void;
 
 		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
 		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return Get<IDCompositionTarget>(); }
@@ -52,14 +48,22 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto GetGraphics() const noexcept { return Graphics{ GetD2D1DeviceContext() }; }
 
-		virtual void BeginDraw();
+		virtual auto BeginDraw() -> void;
+
 		virtual auto EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG>;
 
-		virtual void CreateDeviceResources() { /* */ }
-		virtual void DiscardDeviceResources() { /* */ }
+		virtual auto CreateDeviceResources() -> void
+		{
+			/* */
+		}
+
+		virtual auto DiscardDeviceResources() -> void
+		{
+			/* */
+		}
 
 		protected:
-		DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept;
+		explicit DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept;
 
 		private:
 		inline static ComPtr<ID3D11Device2> d3d11Device;
@@ -70,15 +74,16 @@ export namespace PGUI::UI
 		HMONITOR currentMonitor;
 		PAINTSTRUCT paintStruct{ };
 
-		void InitSwapChain();
-		void InitD2D1DeviceContext();
-		void InitDirectComposition();
-		static void InitD3D11Device();
-		static void InitDCompDevice();
-		static void InitD2D1Device();
+		auto InitSwapChain() -> void;
+
+		auto InitD2D1DeviceContext() -> void;
+
+		auto InitDirectComposition() -> void;
 
 		auto OnNCCreate(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+
 		auto OnWindowPosChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+
 		auto OnSize(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 	};
 }

@@ -9,7 +9,7 @@ export import :ArithmeticUtils;
 
 export namespace PGUI
 {
-	template <typename T, typename ...Types>
+	template <typename T, typename... Types>
 	concept IsAnyOf = (std::same_as<T, Types> || ...);
 
 	enum class PositioningMode

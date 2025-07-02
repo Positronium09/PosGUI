@@ -1,5 +1,4 @@
 module;
-#include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.BitmapFrameDecode;
@@ -16,12 +15,14 @@ export namespace PGUI::UI::Imaging
 	{
 		public:
 		BitmapFrameDecode() noexcept = default;
-		BitmapFrameDecode(ComPtr<IWICBitmapFrameDecode> frame) noexcept;
+
+		explicit(false) BitmapFrameDecode(ComPtr<IWICBitmapFrameDecode> frame) noexcept;
 
 		[[nodiscard]] auto GetMetadataReader() const -> MetadataReader;
+
 		[[nodiscard]] auto GetThumbnail() const -> BitmapSource<>;
 
 		//TODO Maybe wrap IWICColorContext
-		[[nodiscard]] auto GetColorContexts(UINT count) const->std::vector<ComPtr<IWICColorContext>>;
+		[[nodiscard]] auto GetColorContexts(UINT count) const -> std::vector<ComPtr<IWICColorContext>>;
 	};
 }

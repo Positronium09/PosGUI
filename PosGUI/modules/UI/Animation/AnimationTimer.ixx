@@ -1,25 +1,28 @@
 module;
 #include <UIAnimation.h>
 
-export module PGUI.UI.Animation.AnimationTimer;
+export module PGUI.UI.Animation:AnimationTimer;
 
 import PGUI.ComPtr;
 
-export namespace  PGUI::UI::Animation
+export namespace PGUI::UI::Animation
 {
 	class AnimationTimer : public ComPtrHolder<IUIAnimationTimer>
 	{
 		public:
 		AnimationTimer();
-		AnimationTimer(ComPtr<IUIAnimationTimer> ptr) noexcept;
 
-		void Enable() const;
-		void Disable() const;
+		explicit(false) AnimationTimer(ComPtr<IUIAnimationTimer> ptr) noexcept;
+
+		auto Enable() const -> void;
+
+		auto Disable() const -> void;
 
 		[[nodiscard]] auto IsEnabled() const -> bool;
+
 		[[nodiscard]] auto GetTime() const -> double;
 
-		void SetFrameRateThreshold(UINT32 threshold) const;
+		auto SetFrameRateThreshold(UINT32 threshold) const -> void;
 
 		//TODO SetTimerEventHandler
 		//TODO SetTimerUpdateHandler

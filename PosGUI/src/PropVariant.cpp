@@ -90,7 +90,7 @@ namespace PGUI
 			case Date:
 				return var.date;
 
-			case Filetime:
+		case FileTime:
 				return var.filetime;
 
 			case Clsid:
@@ -106,10 +106,10 @@ namespace PGUI
 			case BlobObject:
 				return var.blob;
 
-			case Lpstr:
+		case LPSTR:
 				return var.pszVal;
 
-			case Lpwstr:
+		case LPWSTR:
 				return var.pwszVal;
 
 			case Unknown:
@@ -280,7 +280,7 @@ namespace PGUI
 						var.cacy.pElems + var.cacy.cElems
 				};
 
-			case Vector | Filetime:
+		case Vector | FileTime:
 				return std::vector<FILETIME>{
 					var.cafiletime.pElems,
 						var.cafiletime.pElems + var.cafiletime.cElems
@@ -298,14 +298,14 @@ namespace PGUI
 						var.caclipdata.pElems + var.caclipdata.cElems
 				};
 
-			case Vector | Lpstr:
+		case Vector | LPSTR:
 				return std::vector<LPSTR>{
 					var.calpstr.pElems,
 						var.calpstr.pElems + var.calpstr.cElems
 				};
 
 			case Vector | Bstr:
-			case Vector | Lpwstr:
+		case Vector | LPWSTR:
 				return std::vector<LPWSTR>{
 					var.calpwstr.pElems,
 						var.calpwstr.pElems + var.calpwstr.cElems

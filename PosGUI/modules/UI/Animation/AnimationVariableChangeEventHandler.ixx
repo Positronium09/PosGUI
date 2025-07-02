@@ -1,39 +1,42 @@
 module;
 #include <UIAnimation.h>
 
-export module PGUI.UI.Animation.AnimationVariableChangeEventHandler;
+export module PGUI.UI.Animation:AnimationVariableChangeEventHandler;
 
 import std;
 
 import PGUI.Event;
-import PGUI.UI.Animation.AnimationEnums;
+import :AnimationInterface;
+import :AnimationEnums;
 
-namespace  PGUI::UI::Animation
+namespace PGUI::UI::Animation
 {
-	export class Storyboard;
-	export class AnimationVariable;
-
 	class AnimationVariableChangeEventHandlerRouter final : public IUIAnimationVariableChangeHandler2
 	{
 		using AnimationVariableChangeHandler = std::function<HRESULT(
-			Storyboard, AnimationVariable, 
+			Storyboard, AnimationVariable,
 			std::span<double>, std::span<double>)>;
 
 		public:
 		AnimationVariableChangeEventHandlerRouter() noexcept = default;
-		AnimationVariableChangeEventHandlerRouter(const AnimationVariableChangeHandler& handler) noexcept;
 
-		auto __stdcall QueryInterface(const IID& iid, void** obj) -> HRESULT override;
-		auto __stdcall AddRef() -> ULONG override;
-		auto __stdcall Release() -> ULONG override;
+		explicit AnimationVariableChangeEventHandlerRouter(const AnimationVariableChangeHandler& handler) noexcept;
 
-		auto __stdcall OnValueChanged(IUIAnimationStoryboard2* storyboard, 
-			IUIAnimationVariable2* variable, 
-			DOUBLE* newValues, DOUBLE* previousValues, 
-			UINT dimension) -> HRESULT override;
+		auto __stdcall QueryInterface(const IID& iid, void** obj)->HRESULT override;
 
-		void SetHandler(const AnimationVariableChangeHandler& handler) noexcept;
-		void ClearHandler() noexcept;
+		auto __stdcall AddRef()->ULONG override;
+
+		auto __stdcall Release()->ULONG override;
+
+		auto __stdcall OnValueChanged(
+			IUIAnimationStoryboard2* storyboard,
+			IUIAnimationVariable2* variable,
+			DOUBLE* newValues, DOUBLE* previousValues,
+			UINT dimension)->HRESULT override;
+
+		auto SetHandler(const AnimationVariableChangeHandler& handler) noexcept -> void;
+
+		auto ClearHandler() noexcept -> void;
 
 		private:
 		std::mutex handlerMutex;
@@ -49,19 +52,24 @@ namespace  PGUI::UI::Animation
 
 		public:
 		AnimationVariableIntegerChangeEventHandlerRouter() noexcept = default;
-		AnimationVariableIntegerChangeEventHandlerRouter(const AnimationIntegerVariableChangeHandler& handler) noexcept;
 
-		auto __stdcall QueryInterface(const IID& iid, void** obj) -> HRESULT override;
-		auto __stdcall AddRef() -> ULONG override;
-		auto __stdcall Release() -> ULONG override;
+		explicit AnimationVariableIntegerChangeEventHandlerRouter(const AnimationIntegerVariableChangeHandler& handler) noexcept;
 
-		auto __stdcall OnIntegerValueChanged(IUIAnimationStoryboard2* storyboard,
+		auto __stdcall QueryInterface(const IID& iid, void** obj)->HRESULT override;
+
+		auto __stdcall AddRef()->ULONG override;
+
+		auto __stdcall Release()->ULONG override;
+
+		auto __stdcall OnIntegerValueChanged(
+			IUIAnimationStoryboard2* storyboard,
 			IUIAnimationVariable2* variable,
 			INT32* newValues, INT32* previousValues,
-			UINT dimension) -> HRESULT override;
+			UINT dimension)->HRESULT override;
 
-		void SetHandler(const AnimationIntegerVariableChangeHandler& handler) noexcept;
-		void ClearHandler() noexcept;
+		auto SetHandler(const AnimationIntegerVariableChangeHandler& handler) noexcept -> void;
+
+		auto ClearHandler() noexcept -> void;
 
 		private:
 		std::mutex handlerMutex;
@@ -70,34 +78,43 @@ namespace  PGUI::UI::Animation
 	};
 }
 
-export namespace  PGUI::UI::Animation
+export namespace PGUI::UI::Animation
 {
 	class AnimationVariableChangeEventHandler
 	{
 		public:
 		AnimationVariableChangeEventHandler() noexcept;
 
+		virtual ~AnimationVariableChangeEventHandler() = default;
+
 		[[nodiscard]] auto& GetRouter() noexcept { return router; }
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
 		[[nodiscard]] auto& GetIntegerRouter() noexcept { return integerRouter; }
 		[[nodiscard]] const auto& GetIntegerRouter() const noexcept { return integerRouter; }
 
-		virtual void OnVariableChanged(Storyboard storyboard, AnimationVariable variable,
-			std::span<double> newValues, std::span<double> previousValues) = 0;
-		virtual void OnVariableIntegerChanged(Storyboard storyboard, AnimationVariable variable,
-			std::span<INT32> newValues, std::span<INT32> previousValues) = 0;
+		virtual auto OnVariableChanged(
+			Storyboard storyboard, AnimationVariable variable,
+			std::span<double> newValues, std::span<double> previousValues) -> void = 0;
+
+		virtual auto OnVariableIntegerChanged(
+			Storyboard storyboard, AnimationVariable variable,
+			std::span<INT32> newValues, std::span<INT32> previousValues) -> void = 0;
 
 		private:
 		AnimationVariableChangeEventHandlerRouter router;
 		AnimationVariableIntegerChangeEventHandlerRouter integerRouter;
 
-		auto CallVariableChanged(Storyboard storyboard, AnimationVariable variable,
+		auto CallVariableChanged(
+			Storyboard storyboard, AnimationVariable variable,
 			std::span<double> newValues, std::span<double> previousValues) noexcept -> HRESULT;
-		auto CallVariableIntegerChanged(Storyboard storyboard, AnimationVariable variable,
-			std::span<INT32> newValues, std::span<INT32> previousValues) noexcept -> HRESULT;
+
+		auto CallVariableIntegerChanged(
+			Storyboard storyboard, AnimationVariable variable,
+			std::span<INT32> newValues,
+			std::span<INT32> previousValues) noexcept -> HRESULT;
 	};
 
-	class AnimationVariableChangeEvent : public AnimationVariableChangeEventHandler
+	class AnimationVariableChangeEvent final : public AnimationVariableChangeEventHandler
 	{
 		public:
 		[[nodiscard]] auto& VariableChanged() noexcept { return variableChangedEvent; }
@@ -106,14 +123,17 @@ export namespace  PGUI::UI::Animation
 		[[nodiscard]] const auto& VariableIntegerChanged() const noexcept { return variableIntegerChangedEvent; }
 
 		private:
-		Event<Storyboard, AnimationVariable, 
+		Event<Storyboard, AnimationVariable,
 			std::span<double>, std::span<double>> variableChangedEvent;
-		Event < Storyboard, AnimationVariable,
+		Event<Storyboard, AnimationVariable,
 			std::span<INT32>, std::span<INT32>> variableIntegerChangedEvent;
 
-		void OnVariableChanged(Storyboard storyboard, AnimationVariable variable, 
-			std::span<double> newValues, std::span<double> previousValues) override;
-		void OnVariableIntegerChanged(Storyboard storyboard, AnimationVariable variable, 
-			std::span<INT32> newValues, std::span<INT32> previousValues) override;
+		auto OnVariableChanged(
+			Storyboard storyboard, AnimationVariable variable,
+			std::span<double> newValues, std::span<double> previousValues) -> void override;
+
+		auto OnVariableIntegerChanged(
+			Storyboard storyboard, AnimationVariable variable,
+			std::span<INT32> newValues, std::span<INT32> previousValues) -> void override;
 	};
 }

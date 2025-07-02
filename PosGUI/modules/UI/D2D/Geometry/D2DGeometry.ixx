@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <d2d1_1.h>
+#include <wrl.h>
 
 export module PGUI.UI.D2D.D2DGeometry;
 
@@ -29,90 +29,115 @@ export namespace PGUI::UI::D2D
 
 		public:
 		constexpr D2DGeometry() noexcept = default;
-		constexpr D2DGeometry(const ComPtr<Interface> geometry) noexcept :
+
+		explicit(false) constexpr D2DGeometry(const ComPtr<Interface>& geometry) noexcept :
 			ComPtrHolder<Interface>{ geometry }
-		{
-		}
+		{ }
 
 		[[nodiscard]] auto GetBounds(const Matrix3x2& worldTransform = Matrix3x2{ })
 		{
 			D2D1_RECT_F bounds{ };
-			auto hr = this->Get()->GetBounds(worldTransform, &bounds); ThrowFailed(hr);
+			auto hr = this->Get()->GetBounds(worldTransform, &bounds);
+			ThrowFailed(hr);
 
 			return bounds;
 		}
-		[[nodiscard]] auto GetWidenedBounds(float strokeWidth,
+
+		[[nodiscard]] auto GetWidenedBounds(
+			float strokeWidth,
 			ComPtr<ID2D1StrokeStyle> strokeStyle = nullptr,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
 			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
 		{
 			D2D1_RECT_F bounds{ };
-			auto hr = this->Get()->GetWidenedBounds(strokeWidth, strokeStyle.Get(), 
-				worldTransform, flatteningTolerance, &bounds); ThrowFailed(hr);
+			auto hr = this->Get()->GetWidenedBounds(
+				strokeWidth, strokeStyle.Get(),
+				worldTransform, flatteningTolerance, &bounds);
+			ThrowFailed(hr);
 
 			return bounds;
 		}
 
-		[[nodiscard]] auto ComputeArea(const Matrix3x2& worldTransform = Matrix3x2{ },
+		[[nodiscard]] auto ComputeArea(
+			const Matrix3x2& worldTransform = Matrix3x2{ },
 			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
 		{
-			float area = 0.0F;
-			auto hr = this->Get()->ComputeArea(worldTransform, 
-				flatteningTolerance, &area); ThrowFailed(hr);
+			auto area = 0.0F;
+			auto hr = this->Get()->ComputeArea(
+				worldTransform,
+				flatteningTolerance, &area);
+			ThrowFailed(hr);
 
 			return area;
 		}
 
-		[[nodiscard]] auto FillContainsPoint(PointF point,
+		[[nodiscard]] auto FillContainsPoint(
+			PointF point,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
 			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) -> bool
 		{
-			BOOL contains = FALSE;
-			auto hr = this->Get()->FillContainsPoint(point, worldTransform, 
-				flatteningTolerance, &contains); ThrowFailed(hr);
-			
+			auto contains = FALSE;
+			auto hr = this->Get()->FillContainsPoint(
+				point, worldTransform,
+				flatteningTolerance, &contains);
+			ThrowFailed(hr);
+
 			return contains;
 		}
-		[[nodiscard]] auto StrokeContainsPoint(PointF point, float strokeWidth,
+
+		[[nodiscard]] auto StrokeContainsPoint(
+			PointF point, float strokeWidth,
 			ComPtr<ID2D1StrokeStyle> strokeStyle = nullptr,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
 			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) -> bool
 		{
-			BOOL contains = FALSE;
-			auto hr = this->Get()->StrokeContainsPoint(point, strokeWidth, strokeStyle.Get(),
-				worldTransform, flatteningTolerance, &contains); ThrowFailed(hr);
+			auto contains = FALSE;
+			auto hr = this->Get()->StrokeContainsPoint(
+				point, strokeWidth, strokeStyle.Get(),
+				worldTransform, flatteningTolerance, &contains);
+			ThrowFailed(hr);
 			return contains;
 		}
 
-		[[nodiscard]] auto ComputeLength(const Matrix3x2& worldTransform = Matrix3x2{ },
+		[[nodiscard]] auto ComputeLength(
+			const Matrix3x2& worldTransform = Matrix3x2{ },
 			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
 		{
-			float length = 0.0F;
-			auto hr = this->Get()->ComputeLength(worldTransform,
-				flatteningTolerance, &length); ThrowFailed(hr);
+			auto length = 0.0F;
+			auto hr = this->Get()->ComputeLength(
+				worldTransform,
+				flatteningTolerance, &length);
+			ThrowFailed(hr);
 
 			return length;
 		}
-		[[nodiscard]] auto ComputePointAtLength(float length,
+
+		[[nodiscard]] auto ComputePointAtLength(
+			float length,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
 			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
 		{
 			D2D1_POINT_2F point;
 			D2D1_POINT_2F unitTangentVector;
 
-			auto hr = this->Get()->ComputePointAtLength(length, worldTransform, flatteningTolerance,
-				&point, &unitTangentVector); ThrowFailed(hr);
+			auto hr = this->Get()->ComputePointAtLength(
+				length, worldTransform, flatteningTolerance,
+				&point, &unitTangentVector);
+			ThrowFailed(hr);
 
 			return PointAndUnitTangent{ .point = point, .unitTangentVector = unitTangentVector };
 		}
 
-		[[nodiscard]] auto CompareWithGeometry(D2DGeometry<> inputGeometry,
+		[[nodiscard]] auto CompareWithGeometry(
+			D2DGeometry<> inputGeometry,
 			const Matrix3x2& inputGeometryTransform = Matrix3x2{ },
 			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
 		{
 			D2D1_GEOMETRY_RELATION relation;
-			auto hr = this->Get()->CompareWithGeometry(inputGeometry.Get(), inputGeometryTransform,
-				flatteningTolerance, &relation); ThrowFailed(hr);
+			auto hr = this->Get()->CompareWithGeometry(
+				inputGeometry.Get(), inputGeometryTransform,
+				flatteningTolerance, &relation);
+			ThrowFailed(hr);
 
 			return static_cast<GeometryRelation>(relation);
 		}

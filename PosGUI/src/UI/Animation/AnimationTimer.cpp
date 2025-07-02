@@ -1,8 +1,9 @@
 module;
-#include <wrl.h>
 #include <UIAnimation.h>
+#include <wrl.h>
 
-module PGUI.UI.Animation.AnimationTimer;
+module PGUI.UI.Animation:AnimationTimer;
+import :AnimationTimer;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;

@@ -21,32 +21,39 @@ export namespace PGUI
 		//using Rect::Rect;
 		constexpr RoundedRect() noexcept = default;
 
-		constexpr RoundedRect(float left, float top, float right, float bottom, float xRadius = 0.0F, float yRadius = 0.0F) noexcept :
+		constexpr RoundedRect(const float left, const float top, const float right, const float bottom,
+			const float xRadius = 0.0F,
+			const float yRadius = 0.0F) noexcept :
 			Rect{ left, top, right, bottom }, xRadius{ xRadius }, yRadius{ yRadius }
-		{
-		}
-		
-		template<typename T> requires std::is_arithmetic_v<T>
-		explicit(false) constexpr RoundedRect(const Rect<T>& rc, float xRadius = 0.0F, float yRadius = 0.0F) noexcept :
+		{ }
+
+		template <typename T> requires std::is_arithmetic_v<T>
+		explicit(false) constexpr RoundedRect(const Rect<T>& rc,
+			const float xRadius = 0.0F, const float yRadius = 0.0F) noexcept :
 			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
-		{
-		}
-		explicit(false) constexpr RoundedRect(const RECT& rc, float xRadius = 0.0F, float yRadius = 0.0F) noexcept :
+		{ }
+
+		explicit(false) constexpr RoundedRect(const RECT& rc,
+			const float xRadius = 0.0F, const float yRadius = 0.0F) noexcept :
 			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
-		{
-		}
-		explicit(false) constexpr RoundedRect(const D2D1_RECT_F& rc, float xRadius = 0.0F, float yRadius = 0.0F) noexcept :
+		{ }
+
+		explicit(false) constexpr RoundedRect(const D2D1_RECT_F& rc,
+			const float xRadius = 0.0F, 
+			const float yRadius = 0.0F) noexcept :
 			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
-		{
-		}
-		explicit(false) constexpr RoundedRect(const D2D1_RECT_U& rc, float xRadius = 0.0F, float yRadius = 0.0F) noexcept :
+		{ }
+
+		explicit(false) constexpr RoundedRect(
+			const D2D1_RECT_U& rc,
+			const float xRadius = 0.0F,
+			const float yRadius = 0.0F) noexcept :
 			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
-		{
-		}
+		{ }
+
 		explicit(false) constexpr RoundedRect(const D2D1_ROUNDED_RECT& rrc) noexcept :
 			Rect<float>{ rrc.rect }, xRadius{ rrc.radiusX }, yRadius{ rrc.radiusY }
-		{
-		}
+		{ }
 
 		[[nodiscard]] constexpr auto operator==(const RoundedRect& other) const noexcept -> bool = default;
 

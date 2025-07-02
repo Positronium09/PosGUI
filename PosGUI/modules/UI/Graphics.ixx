@@ -1,5 +1,4 @@
 module;
-#include <wrl.h>
 #include <d2d1_3.h>
 
 export module PGUI.UI.Graphics;
@@ -12,6 +11,6 @@ export namespace PGUI::UI
 	class Graphics : public D2D::DeviceContext<ID2D1DeviceContext7>
 	{
 		public:
-		Graphics(ComPtr<ID2D1DeviceContext7> deviceContext) noexcept;
+		explicit(false) Graphics(ComPtr<ID2D1DeviceContext7> deviceContext) noexcept;
 	};
 }

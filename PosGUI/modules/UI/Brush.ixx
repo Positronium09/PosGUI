@@ -1,5 +1,4 @@
 module;
-#include <Windows.h>
 #include <d2d1_1.h>
 #include <wrl.h>
 
@@ -20,8 +19,11 @@ export namespace PGUI::UI
 	{
 		public:
 		SolidBrush() noexcept = default;
+
 		explicit SolidBrush(ComPtr<ID2D1SolidColorBrush> brush) noexcept;
+
 		SolidBrush(const ComPtr<ID2D1RenderTarget>& renderTarget, RGBA color);
+
 		~SolidBrush() noexcept = default;
 
 		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
@@ -31,9 +33,13 @@ export namespace PGUI::UI
 	{
 		public:
 		LinearGradientBrush() noexcept = default;
+
 		explicit LinearGradientBrush(ComPtr<ID2D1LinearGradientBrush> brush) noexcept;
-		LinearGradientBrush(const ComPtr<ID2D1RenderTarget>& renderTarget, 
+
+		LinearGradientBrush(
+			const ComPtr<ID2D1RenderTarget>& renderTarget,
 			LinearGradient gradient, std::optional<RectF> referenceRect = std::nullopt);
+
 		~LinearGradientBrush() noexcept = default;
 
 		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
@@ -43,9 +49,13 @@ export namespace PGUI::UI
 	{
 		public:
 		RadialGradientBrush() noexcept = default;
+
 		explicit RadialGradientBrush(ComPtr<ID2D1RadialGradientBrush> brush) noexcept;
-		RadialGradientBrush(const ComPtr<ID2D1RenderTarget>& renderTarget,
+
+		RadialGradientBrush(
+			const ComPtr<ID2D1RenderTarget>& renderTarget,
 			RadialGradient gradient, std::optional<RectF> referenceRect = std::nullopt);
+
 		~RadialGradientBrush() noexcept = default;
 
 		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
@@ -55,12 +65,15 @@ export namespace PGUI::UI
 	{
 		public:
 		BitmapBrush() noexcept = default;
+
 		explicit BitmapBrush(ComPtr<ID2D1BitmapBrush> brush) noexcept;
+
 		BitmapBrush(const ComPtr<ID2D1RenderTarget>& renderTarget,
 			D2D::D2DBitmap bitmap, const D2D::BitmapBrushProperties& bitmapBrushProperties);
+
 		~BitmapBrush() noexcept = default;
 
-		explicit(false) operator ID2D1Brush* () const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
 	};;
 
 	struct LinearGradientBrushParameters
@@ -68,19 +81,22 @@ export namespace PGUI::UI
 		LinearGradient gradient;
 		std::optional<RectF> referenceRect;
 
-		constexpr LinearGradientBrushParameters(LinearGradient gradient,
-			std::optional<RectF> referenceRect = std::nullopt) :
+		explicit(false) constexpr LinearGradientBrushParameters(
+			const LinearGradient& gradient,
+			const std::optional<RectF>& referenceRect = std::nullopt) :
 			gradient{ gradient }, referenceRect{ referenceRect }
 		{
 		}
 	};
+
 	struct RadialGradientBrushParameters
 	{
 		RadialGradient gradient;
 		std::optional<RectF> referenceRect;
 
-		constexpr RadialGradientBrushParameters(RadialGradient gradient,
-			std::optional<RectF> referenceRect = std::nullopt) :
+		explicit(false) constexpr RadialGradientBrushParameters(
+			const RadialGradient& gradient,
+			const std::optional<RectF>& referenceRect = std::nullopt) :
 			gradient{ gradient }, referenceRect{ referenceRect }
 		{
 		}
@@ -91,8 +107,9 @@ export namespace PGUI::UI
 		D2D::D2DBitmap bitmap;
 		D2D::BitmapBrushProperties bitmapBrushProperties;
 
-		BitmapBrushParameters(D2D::D2DBitmap bitmap,
-			D2D::BitmapBrushProperties bitmapBrushProperties = D2D::BitmapBrushProperties{ }) :
+		explicit(false) BitmapBrushParameters(
+			const D2D::D2DBitmap& bitmap,
+			const D2D::BitmapBrushProperties bitmapBrushProperties = D2D::BitmapBrushProperties{ }) :
 			bitmap{ bitmap }, bitmapBrushProperties{ bitmapBrushProperties }
 		{
 		}
@@ -100,7 +117,8 @@ export namespace PGUI::UI
 
 	using EmptyBrush = std::monostate;
 
-	using BrushParameters = std::variant<EmptyBrush, RGBA, BitmapBrushParameters,
+	using BrushParameters = std::variant<
+		EmptyBrush, RGBA, BitmapBrushParameters,
 		LinearGradientBrushParameters, RadialGradientBrushParameters>;
 
 	template <typename T>
@@ -115,20 +133,24 @@ export namespace PGUI::UI
 
 		public:
 		explicit Brush(ComPtr<ID2D1Brush> ptr) noexcept;
+
 		explicit Brush(BrushParameters parameters) noexcept;
+
 		Brush(ComPtr<ID2D1RenderTarget> renderTarget, BrushParameters parameters) noexcept;
 
-		void SetParametersAndCreateBrush(ComPtr<ID2D1RenderTarget> renderTarget, 
-			const BrushParameters& parameters) noexcept;
+		auto SetParametersAndCreateBrush(ComPtr<ID2D1RenderTarget> renderTarget,
+			const BrushParameters& parameters) noexcept -> void;
 
-		void CreateBrush(ComPtr<ID2D1RenderTarget> renderTarget) noexcept;
-		void ReleaseBrush() noexcept;
+		auto CreateBrush(ComPtr<ID2D1RenderTarget> renderTarget) noexcept -> void;
 
-		void SetGradientBrushRect(RectF rect);
+		auto ReleaseBrush() noexcept -> void;
+
+		auto SetGradientBrushRect(RectF rect) -> void;
 
 		[[nodiscard]] auto GetParameters() const noexcept { return parameters; }
 
 		explicit(false) operator ID2D1Brush*() const noexcept;
+
 		explicit(false) operator bool() const noexcept { return !std::holds_alternative<std::monostate>(brush); }
 
 		private:

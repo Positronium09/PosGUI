@@ -4,6 +4,7 @@ module;
 
 export module PGUI.UI.D2D.D2DRoundedRectangleGeometry;
 
+import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
 import PGUI.Exceptions;
@@ -15,15 +16,17 @@ export namespace PGUI::UI::D2D
 	{
 		public:
 		constexpr D2DRoundedRectangleGeometry() noexcept = default;
-		constexpr D2DRoundedRectangleGeometry(ComPtr<ID2D1RoundedRectangleGeometry> ptr) noexcept :
+
+		explicit(false) constexpr D2DRoundedRectangleGeometry(const ComPtr<ID2D1RoundedRectangleGeometry>& ptr) noexcept :
 			D2DGeometry{ ptr }
-		{
-		}
-		D2DRoundedRectangleGeometry(RoundedRect roundedRect)
+		{ }
+
+		explicit D2DRoundedRectangleGeometry(const RoundedRect& roundedRect)
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			auto hr = factory->CreateRoundedRectangleGeometry(roundedRect, GetAddress()); ThrowFailed(hr);
+			const auto hr = factory->CreateRoundedRectangleGeometry(roundedRect, GetAddress());
+			ThrowFailed(hr);
 		}
 
 		[[nodiscard]] auto GetRoundedRect() const noexcept -> RoundedRect

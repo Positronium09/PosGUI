@@ -19,10 +19,9 @@ export namespace PGUI::UI
 		HWND parentHwnd = nullptr;
 		DWORD style{ };
 
-		constexpr DialogCreateInfo(HWND parentHwnd, DWORD style) noexcept : 
+		constexpr DialogCreateInfo(const HWND parentHwnd, const DWORD style) noexcept :
 			parentHwnd{ parentHwnd }, style{ style }
-		{
-		}
+		{ }
 	};
 
 	class Dialog;
@@ -33,8 +32,9 @@ export namespace PGUI::UI
 	class Dialog : public DirectXCompositionWindow
 	{
 		public:
-		template <DialogType  T, typename ...Args>
-		static auto Create(const DialogCreateInfo& dialogInfo,
+		template <DialogType T, typename... Args>
+		static auto Create(
+			const DialogCreateInfo& dialogInfo,
 			const WindowCreateInfo& wndInfo, Args&&... args)
 		{
 			auto style = dialogInfo.style | WS_CAPTION | WS_SYSMENU;
@@ -55,11 +55,13 @@ export namespace PGUI::UI
 			}
 
 			RectI dialogRect{
-				wndInfo.position.x, wndInfo.position.y,
-				wndInfo.position.x + wndInfo.size.cx, wndInfo.position.y + wndInfo.size.cy
+				wndInfo.position.x,
+				wndInfo.position.y,
+				wndInfo.position.x + wndInfo.size.cx,
+				wndInfo.position.y + wndInfo.size.cy
 			};
 
-			auto parent = GetWindowPtrFromHWND(dialogInfo.parentHwnd);
+			const auto parent = GetWindowPtrFromHWND(dialogInfo.parentHwnd);
 
 			dialogRect.CenterAround(parent->GetWindowRect().Center());
 
@@ -76,34 +78,36 @@ export namespace PGUI::UI
 
 			auto window = std::make_shared<T>(std::forward<Args>(args)...);
 
-			CreateWindowExW(exStyle,
+			CreateWindowExW(
+				exStyle,
 				window->WindowClass()->ClassName().data(), wndInfo.title.data(),
 				style,
 				position.x, position.y,
 				size.cx, size.cy,
-				dialogInfo.parentHwnd, NULL, GetHInstance(),
+				dialogInfo.parentHwnd, nullptr, GetHInstance(),
 				static_cast<LPVOID>(window.get()));
 
-			if (window->Hwnd()  == NULL)
+			if (window->Hwnd() == NULL)
 			{
-				auto errCode = GetLastError();
+				const auto errCode = GetLastError();
 				LogFailed(LogLevel::Error, errCode);
 				throw Win32Exception{ errCode };
 			}
 
 			SendMessageW(window->Hwnd(), WM_INITDIALOG,
-				std::bit_cast<WPARAM>(window->Hwnd()),
-				std::bit_cast<LPARAM>(window.get()));
+			             std::bit_cast<WPARAM>(window->Hwnd()),
+			             std::bit_cast<LPARAM>(window.get()));
 
 			//window->CenterAroundParent();
 
 			return window;
 		}
 
-		virtual ~Dialog() = default;
+		~Dialog() override = default;
 
 		protected:
 		Dialog() noexcept;
+
 		explicit Dialog(const WindowClassPtr& wndClass) noexcept;
 
 		private:
@@ -116,6 +120,7 @@ export namespace PGUI::UI
 	{
 		public:
 		ModalDialog() noexcept;
+
 		explicit ModalDialog(const WindowClassPtr& wndClass) noexcept;
 
 		virtual auto RunModal() noexcept -> int;
@@ -123,6 +128,7 @@ export namespace PGUI::UI
 		private:
 		bool shouldClose = false;
 		std::atomic_ref<bool> shouldCloseAtomic = std::atomic_ref(shouldClose);
+
 		auto OnClose(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
 	};
 }

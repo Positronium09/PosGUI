@@ -1,8 +1,6 @@
-module;
-#include <concepts>
-
-
 export module PGUI.Utils;
+
+import std;
 
 export import :WindowsUtils;
 export import :StringUtils;

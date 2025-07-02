@@ -1,10 +1,6 @@
-module;
-#include <any>
-#include <mutex>
-#include <typeindex>
-#include <unordered_map>
-
 module PGUI.UI.Theming.Theme;
+
+import std;
 
 import PGUI.Event;
 import PGUI.UI.Colors;

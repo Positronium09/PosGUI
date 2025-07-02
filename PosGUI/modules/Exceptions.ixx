@@ -1,9 +1,10 @@
 module;
 #include <Windows.h>
-#include <exception>
-#include <string>
 
 export module PGUI.Exceptions;
+
+import std;
+
 import PGUI.Utils;
 
 export namespace PGUI

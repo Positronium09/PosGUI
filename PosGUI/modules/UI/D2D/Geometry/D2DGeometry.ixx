@@ -1,9 +1,10 @@
 module;
-#include <concepts>
 #include <wrl.h>
 #include <d2d1_1.h>
 
 export module PGUI.UI.D2D.D2DGeometry;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

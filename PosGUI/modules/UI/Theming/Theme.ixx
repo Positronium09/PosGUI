@@ -1,13 +1,6 @@
-module;
-#include <any>
-#include <mutex>
-#include <atomic>
-#include <type_traits>
-#include <concepts>
-#include <typeindex>
-#include <unordered_map>
-
 export module PGUI.UI.Theming.Theme;
+
+import std;
 
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ColorContext;

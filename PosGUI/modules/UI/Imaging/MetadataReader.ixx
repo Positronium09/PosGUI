@@ -1,9 +1,10 @@
 module;
-#include <string>
 #include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.MetadataReader;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.PropVariant;

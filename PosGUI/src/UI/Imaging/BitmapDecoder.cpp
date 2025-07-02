@@ -1,14 +1,11 @@
 module;
-#include <optional>
-#include <filesystem>
-#include <string_view>
-#include <stdexcept>
-#include <vector>
 #include <ranges>
 #include <wrl.h>
 #include <wincodec.h>
 
 module PGUI.UI.Imaging.BitmapDecoder;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;
@@ -107,7 +104,7 @@ namespace PGUI::UI::Imaging
 		std::vector<IWICColorContext*> contexts(count);
 		auto hr = Get()->GetColorContexts(count, contexts.data(), nullptr); ThrowFailed(hr);
 		
-		return contexts | std::ranges::views::transform([](auto context)
+		return contexts | std::views::transform([](auto context)
 		{
 			return ComPtr<IWICColorContext>{ context };
 		}) | std::ranges::to<std::vector<ComPtr<IWICColorContext>>>();

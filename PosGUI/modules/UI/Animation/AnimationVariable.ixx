@@ -1,20 +1,17 @@
 module;
 #include <UIAnimation.h>
-#include <utility>
-#include <vector>
-#include <concepts>
-#include <span>
 
 export module PGUI.UI.Animation.AnimationVariable;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.UI.Animation.AnimationEnums;
 
 export namespace  PGUI::UI::Animation
 {
-	class AnimationVariableChangeEventHandler;
-
 	class Storyboard;
+	class AnimationVariableChangeEventHandler;
 
 	class AnimationVariable : public ComPtrHolder<IUIAnimationVariable2>
 	{

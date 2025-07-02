@@ -1,9 +1,6 @@
-module;
-#include <functional>
-#include <type_traits>
-#include <mutex>
-
 export module PGUI.DataBinding.Property;
+
+import std;
 
 import PGUI.Event;
 

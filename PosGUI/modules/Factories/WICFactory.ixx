@@ -1,11 +1,12 @@
 module;
-#include <bit>
 #include <wrl.h>
 #include <Objbase.h>
 #include <Windows.h>
 #include <wincodec.h>
 
 export module PGUI.Factories:WICFactory;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;
@@ -39,6 +40,6 @@ export namespace PGUI::Factories
 		}
 
 		private:
-		static inline ComPtr<IWICImagingFactory2> factory;
+		static inline ComPtr<IWICImagingFactory2> factory = nullptr;
 	};
 }

@@ -1,10 +1,11 @@
 module;
-#include <vector>
 #include <ranges>
 #include <wrl.h>
 #include <wincodec.h>
 
 module PGUI.UI.Imaging.BitmapFrameDecode;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;

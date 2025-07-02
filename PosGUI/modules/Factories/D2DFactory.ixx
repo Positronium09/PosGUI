@@ -39,6 +39,6 @@ export namespace PGUI::Factories
 		}
 
 		private:
-		static inline ComPtr<ID2D1Factory8> factory;
+		static inline ComPtr<ID2D1Factory8> factory = nullptr;
 	};
 }

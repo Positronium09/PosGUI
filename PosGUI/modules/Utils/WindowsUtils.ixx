@@ -1,9 +1,9 @@
 module;
 #include <Windows.h>
-#include <string>
-#include <string_view>
 
 export module PGUI.Utils:WindowsUtils;
+
+import std;
 
 export namespace PGUI
 {

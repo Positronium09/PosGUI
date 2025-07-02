@@ -1,9 +1,10 @@
 module;
 #include <wrl.h>
 #include <wincodec.h>
-#include <stacktrace>
 
 module PGUI.UI.Imaging.WICBitmap;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Factories;

@@ -1,19 +1,19 @@
 module;
 #include <UIAnimation.h>
-#include <span>
 
 export module PGUI.UI.Animation.AnimationManager;
 
+import std;
+
 import PGUI.ComPtr;
 import PGUI.UI.Animation.AnimationEnums;
+import PGUI.UI.Animation.Storyboard;
+import PGUI.UI.Animation.AnimationVariable;
+import PGUI.UI.Animation.AnimationTransition;
+import PGUI.UI.Animation.AnimationManagerEventHandler;
 
 export namespace PGUI::UI::Animation
 {
-	class Storyboard;
-	class AnimationVariable;
-	class AnimationTransition;
-	class AnimationManagerEventHandler;
-
 	class AnimationManager : public ComPtrHolder<IUIAnimationManager2>
 	{
 		public:

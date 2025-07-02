@@ -1,10 +1,10 @@
 module;
-#include <utility>
-#include <optional>
 #include <wrl.h>
 #include <d2d1_3.h>
 
 export module PGUI.UI.D2D.D2DBitmap;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

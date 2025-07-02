@@ -16,16 +16,16 @@ export namespace PGUI
 
 		constexpr Ellipse() noexcept = default;
 
-		constexpr Ellipse(PointF _center, float radius) noexcept :
-			center(_center), xRadius(radius), yRadius(radius)
+		constexpr Ellipse(PointF center, float radius) noexcept :
+			center{ center }, xRadius{ radius }, yRadius{ radius }
 		{
 		}
-		constexpr Ellipse(PointF _center, float _xRadius, float _yRadius) noexcept :
-			center(_center), xRadius(_xRadius), yRadius(_yRadius)
+		constexpr Ellipse(PointF center, float xRadius, float yRadius) noexcept :
+			center{ center }, xRadius{ xRadius }, yRadius{ yRadius }
 		{
 		}
 		explicit(false) constexpr Ellipse(D2D1_ELLIPSE ellipse) noexcept :
-			center(ellipse.point), xRadius(ellipse.radiusX), yRadius(ellipse.radiusY)
+			center{ ellipse.point }, xRadius{ ellipse.radiusX }, yRadius{ ellipse.radiusY }
 		{
 		}
 

@@ -1,10 +1,10 @@
 module;
-#include <memory>
-#include <variant>
 #include <d2d1_3.h>
 #include <wrl.h>
 
 export module PGUI.UI.Clip;
+
+import std;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;

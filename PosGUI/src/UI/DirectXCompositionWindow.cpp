@@ -1,7 +1,4 @@
 module;
-#include <bit>
-#include <array>
-#include <utility>
 #include <dxgi.h>
 #include <dxgi1_2.h>
 #include <dxgi1_6.h>
@@ -15,6 +12,8 @@ module;
 #include <Windows.h>
 
 module PGUI.UI.DirectXCompositionWindow;
+
+import std;
 
 import PGUI.Logging;
 import PGUI.Exceptions;
@@ -102,12 +101,13 @@ namespace PGUI::UI
 	{
 		auto& swapChain = GetSwapChain();
 		auto& dcompTarget = GetDCompositionTarget();
+		auto& visual = GetDCompositionVisual();
 
 		auto hr = dcompDevice->CreateTargetForHwnd(Hwnd(), false,
 			&dcompTarget); ThrowFailed(hr);
 
-		ComPtr<IDCompositionVisual> visual;
-		hr = dcompDevice->CreateVisual(&visual); ThrowFailed(hr);
+		hr = dcompDevice->CreateVisual(&visual);
+		ThrowFailed(hr);
 
 		hr = visual->SetContent(swapChain.Get()); ThrowFailed(hr);
 		hr = dcompTarget->SetRoot(visual.Get()); ThrowFailed(hr);

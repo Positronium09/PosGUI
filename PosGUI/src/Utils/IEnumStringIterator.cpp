@@ -1,10 +1,10 @@
 module;
-#include <string>
-#include <iterator>
 #include <wrl.h>
 #include <objbase.h>
 
 module PGUI.IEnumStringIterator;
+
+import std;
 
 import PGUI.ComPtr;
 

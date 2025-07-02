@@ -1,12 +1,10 @@
 module;
-#include <cmath>
-#include <cstdint>
-#include <numbers>
-#include <type_traits>
 #include <d2d1_1.h>
 #include <Windows.h>
 
 export module PGUI.Shape2D:Point;
+
+import std;
 
 export namespace PGUI
 {
@@ -27,24 +25,24 @@ export namespace PGUI
 
 		constexpr Point() noexcept = default;
 
-		constexpr Point(const T& x_, const T& y_) noexcept :
-			x{ x_ }, y{ y_ }
+		constexpr Point(const T& x, const T& y) noexcept :
+			x{ x }, y{ y }
 		{
 		}
 		explicit(false) constexpr Point(const POINT& p) noexcept :
-			x{ (T)p.x }, y{ (T)p.y }
+			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
 		{
 		}
 		explicit(false) constexpr Point(const POINTS& p) noexcept :
-			x{ (T)p.x }, y{ (T)p.y }
+			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
 		{
 		}
 		explicit(false) constexpr Point(const D2D1_POINT_2F& p) noexcept :
-			x{ (T)p.x }, y{ (T)p.y }
+			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
 		{
 		}
 		explicit(false) constexpr Point(const D2D1_POINT_2U& p) noexcept :
-			x{ (T)p.x }, y{ (T)p.y }
+			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }
 		{
 		}
 

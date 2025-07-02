@@ -1,6 +1,3 @@
-module;
-#include <Windows.h>
-
 export module PGUI;
 
 export import PGUI.Window;

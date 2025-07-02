@@ -3,17 +3,18 @@ module;
 
 export module PGUI.UI.Animation.Storyboard;
 
+import std;
+
 import PGUI.ComPtr;
 import PGUI.UI.Animation.AnimationEnums;
+import PGUI.UI.Animation.AnimationVariable;
+import PGUI.UI.Animation.AnimationTransition;
+import PGUI.UI.Animation.AnimationStoryboardEventHandler;
 
 export namespace  PGUI::UI::Animation
 {
-	class AnimationVariable;
-	class AnimationTransition;
-	class AnimationStoryboardEventHandler;
-
 	using KeyFrame = UI_ANIMATION_KEYFRAME;
-	const auto StartKeyFrame = KeyFrame(-1);
+	const auto StartKeyFrame = reinterpret_cast<KeyFrame>(-1);
 
 	constexpr double RepeatIndefinitely = UI_ANIMATION_REPEAT_INDEFINITELY;
 

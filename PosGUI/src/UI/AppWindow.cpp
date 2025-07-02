@@ -1,12 +1,11 @@
 module;
-#include <bit>
-#include <string>
-#include <string_view>
 #include <dwmapi.h>
 #include <Windows.h>
 #include <strsafe.h>
 
 module PGUI.UI.AppWindow;
+
+import std;
 
 import PGUI.Window;
 import PGUI.UI.Colors;

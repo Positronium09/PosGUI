@@ -1,17 +1,15 @@
 module;
 #include <dwrite_3.h>
-#include <string_view>
-#include <span>
-#include <string>
 
 export module PGUI.UI.TextFormat;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Utils;
 import PGUI.UI.Font.FontCollection;
 import PGUI.UI.Font.FontEnums;
 import PGUI.UI.Font.FontStructs;
-
 
 export namespace PGUI::UI
 {

@@ -1,9 +1,9 @@
 module;
 #include <UIAnimation.h>
-#include <mutex>
-#include <functional>
 
 export module PGUI.UI.Animation.AnimationManagerEventHandler;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Event;

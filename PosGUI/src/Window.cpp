@@ -1,19 +1,15 @@
 module;
 #include <Windows.h>
 #include <dwmapi.h>
-#include <bit>
 #include <ranges>
-#include <variant>
-#include <algorithm>
-#include <vector>
-#include <chrono>
 
 module PGUI.Window;
+
+import std;
 
 import PGUI.Utils;
 import PGUI.Logging;
 import PGUI.Exceptions;
-
 
 namespace PGUI
 {

@@ -1,12 +1,9 @@
 module;
 #include <Windows.h>
-#include <system_error>
-#include <string>
-#include <format>
-#include <string_view>
-#include <stacktrace>
 
 export module PGUI.Logging;
+
+import std;
 
 import PGUI.Utils;
 import PGUI.Exceptions;

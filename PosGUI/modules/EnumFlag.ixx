@@ -1,8 +1,6 @@
-module;
-#include <concepts>
-
 export module PGUI.EnumFlag;
 
+import std;
 
 export namespace PGUI
 {

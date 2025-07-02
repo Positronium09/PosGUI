@@ -2,15 +2,14 @@ module;
 #include <winrt/windows.globalization.h>
 #include <Windows.h>
 #include <dwmapi.h>
-#include <array>
-#include <string>
-#include <string_view>
 
 module PGUI.Utils:WindowsUtils;
+
+import std;
+
 import PGUI.Utils;
 import PGUI.Exceptions;
 import PGUI.Logging;
-
 
 const std::array<std::wstring_view, 1024> messageStrings = {
 		L"WM_NULL",

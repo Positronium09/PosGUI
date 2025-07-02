@@ -1,10 +1,10 @@
 module;
-#include <span>
-#include <stdexcept>
 #include <wrl.h>
 #include <UIAnimation.h>
 
 module PGUI.UI.Animation.AnimationTransitionLibrary;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

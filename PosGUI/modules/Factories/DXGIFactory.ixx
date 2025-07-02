@@ -32,7 +32,8 @@ export namespace PGUI::Factories
 				#endif
 
 				auto hr = CreateDXGIFactory2(flags,
-					__uuidof(IDXGIFactory7), std::bit_cast<void**>((dxgiFactory.GetAddressOf()))); ThrowFailed(hr);
+					__uuidof(IDXGIFactory7), std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
+				ThrowFailed(hr);
 			}
 
 			return dxgiFactory;

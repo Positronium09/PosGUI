@@ -1,9 +1,10 @@
 module;
 #include <dwrite_3.h>
 #include <wrl.h>
-#include <string>
 
 export module PGUI.UI.TextLayout;
+
+import std;
 
 import PGUI.UI.TextFormat;
 import PGUI.ComPtr;

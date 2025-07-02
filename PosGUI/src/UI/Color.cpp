@@ -1,7 +1,4 @@
 module;
-#include <cmath>
-#include <algorithm>
-#include <cstdint>
 #include <d2d1.h>
 #include <wincodec.h>
 #include <Windows.h>
@@ -11,6 +8,8 @@ module;
 #undef CMYK
 
 module PGUI.UI.Color;
+
+import std;
 
 namespace PGUI::UI
 {

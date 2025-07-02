@@ -1,8 +1,6 @@
-module;
-#include <any>
-#include <functional>
-
 export module PGUI.UI.Theming.ThemeAware;
+
+import std;
 
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.Theme;

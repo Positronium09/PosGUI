@@ -16,8 +16,8 @@ export namespace PGUI
 
 		constexpr Size() noexcept = default;
 
-		constexpr Size(const T& cx_, const T& cy_) noexcept :
-			cx{ cx_ }, cy{ cy_ }
+		constexpr Size(const T& cx, const T& cy) noexcept :
+			cx{ cx }, cy{ cy }
 		{
 		}
 		explicit constexpr Size(const T& sz) noexcept :
@@ -25,15 +25,15 @@ export namespace PGUI
 		{
 		}
 		explicit(false) constexpr Size(const SIZE& sz) noexcept :
-			cx{ (T)sz.cx }, cy{ (T)sz.cy }
+			cx{ static_cast<T>(sz.cx) }, cy{ static_cast<T>(sz.cy) }
 		{
 		}
 		explicit(false) constexpr Size(const D2D1_SIZE_F& sz) noexcept :
-			cx{ (T)sz.width }, cy{ (T)sz.height }
+			cx{ static_cast<T>(sz.width) }, cy{ static_cast<T>(sz.height) }
 		{
 		}
 		explicit(false) constexpr Size(const D2D1_SIZE_U& sz) noexcept :
-			cx{ (T)sz.width }, cy{ (T)sz.height }
+			cx{ static_cast<T>(sz.width) }, cy{ static_cast<T>(sz.height) }
 		{
 		}
 
@@ -42,13 +42,13 @@ export namespace PGUI
 		constexpr auto& operator*=(const T& factor) noexcept
 		{
 			cx *= factor;
-			cx *= factor;
+			cy *= factor;
 			return *this;
 		}
 		constexpr auto& operator/=(const T& factor) noexcept
 		{
 			cx /= factor;
-			cx /= factor;
+			cy /= factor;
 			return *this;
 		}
 

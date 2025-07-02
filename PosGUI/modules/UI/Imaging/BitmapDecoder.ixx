@@ -1,12 +1,10 @@
 module;
-#include <vector>
-#include <optional>
-#include <string_view>
-#include <filesystem>
 #include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.BitmapDecoder;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.UI.Imaging.ContainerFormats;

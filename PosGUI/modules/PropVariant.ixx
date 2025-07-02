@@ -1,9 +1,9 @@
 module;
-#include <variant>
-#include <vector>
 #include <Windows.h>
 
 export module PGUI.PropVariant;
+
+import std;
 
 import PGUI.EnumFlag;
 

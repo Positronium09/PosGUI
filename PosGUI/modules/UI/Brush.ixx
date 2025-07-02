@@ -2,11 +2,10 @@ module;
 #include <Windows.h>
 #include <d2d1_1.h>
 #include <wrl.h>
-#include <optional>
-#include <variant>
-#include <concepts>
 
 export module PGUI.UI.Brush;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

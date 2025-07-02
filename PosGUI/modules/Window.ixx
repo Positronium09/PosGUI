@@ -1,18 +1,9 @@
 module;
 #include <Windows.h>
-#include <concepts>
-#include <functional>
-#include <memory>
-#include <string>
-#include <variant>
-#include <bit>
-#include <span>
-#include <vector>
-#include <chrono>
-#include <optional>
-#include <unordered_map>
 
 export module PGUI.Window;
+
+import std;
 
 import PGUI.Utils;
 import PGUI.WindowClass;

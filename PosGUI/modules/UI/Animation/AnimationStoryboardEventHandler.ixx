@@ -1,18 +1,16 @@
 module;
 #include <UIAnimation.h>
-#include <mutex>
-#include <functional>
 
 export module PGUI.UI.Animation.AnimationStoryboardEventHandler;
 
-import PGUI.ComPtr;
+import std;
+
 import PGUI.Event;
 import PGUI.UI.Animation.AnimationEnums;
 
 namespace PGUI::UI::Animation
 {
-	class Storyboard;
-
+	export class Storyboard;
 	class AnimationStoryboardEventHandlerRouter final : public IUIAnimationStoryboardEventHandler2
 	{
 		using StoryboardStatusChangedHandler = std::function<HRESULT(Storyboard, StoryboardStatus, StoryboardStatus)>;
@@ -49,8 +47,6 @@ namespace PGUI::UI::Animation
 
 export namespace PGUI::UI::Animation
 {
-	class Storyboard;
-
 	class AnimationStoryboardEventHandler
 	{
 		public:

@@ -1,8 +1,4 @@
 module;
-#include <span>
-#include <cmath>
-#include <cstdint>
-#include <type_traits>
 #include <d2d1.h>
 #include <wincodec.h>
 #include <Windows.h>
@@ -12,6 +8,8 @@ module;
 #undef CMYK
 
 export module PGUI.UI.Color;
+
+import std;
 
 export namespace PGUI::UI
 {

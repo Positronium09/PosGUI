@@ -1,11 +1,6 @@
-module;
-#include <mutex>
-#include <ranges>
-#include <algorithm>
-#include <functional>
-#include <type_traits>
-
 export module PGUI.DataBinding.ValidatedProperty;
+
+import std;
 
 import PGUI.DataBinding.Property;
 

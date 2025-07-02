@@ -1,11 +1,9 @@
 module;
 #include <Windows.h>
-#include <string>
-#include <memory>
-#include <unordered_map>
 
 export module PGUI.WindowClass;
 
+import std;
 
 export namespace PGUI
 {
@@ -21,7 +19,7 @@ export namespace PGUI
 			HICON icon = nullptr, HCURSOR cursor = nullptr, HICON smIcon = nullptr) noexcept -> WindowClassPtr;
 
 		WindowClass(const WindowClass&) = delete;
-		auto operator=(const WindowClass&)->WindowClass & = delete;
+		auto operator=(const WindowClass&) -> WindowClass& = delete;
 		WindowClass(WindowClass&&) noexcept = delete;
 		auto operator=(WindowClass&&) noexcept -> WindowClass&& = delete;
 

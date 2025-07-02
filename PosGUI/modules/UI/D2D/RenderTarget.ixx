@@ -3,16 +3,10 @@ module;
 #include <d2d1_3.h>
 #include <dwrite_3.h>
 #include <wincodec.h>
-#include <string_view>
-#include <bit>
-#include <span>
-#include <cstddef>
-#include <utility>
-#include <optional>
-#include <concepts>
-#include <type_traits>
 
 export module PGUI.UI.D2D.RenderTarget;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

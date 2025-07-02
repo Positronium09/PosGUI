@@ -1,11 +1,9 @@
 module;
-#include <bit>
-#include <memory>
-#include <concepts>
-#include <stacktrace>
 #include <Windows.h>
 
 export module PGUI.UI.Dialog;
+
+import std;
 
 import PGUI.Window;
 import PGUI.WindowClass;

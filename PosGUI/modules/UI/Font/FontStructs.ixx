@@ -1,13 +1,13 @@
 module;
 #include <dwrite_3.h>
-#include <string_view>
 #include <wrl.h>
 
 export module PGUI.UI.Font.FontStructs;
 
+import std;
+
 import PGUI.UI.Font.FontEnums;
 import PGUI.ComPtr;
-
 
 export namespace PGUI::UI::Font
 {

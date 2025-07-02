@@ -2,12 +2,10 @@ module;
 #include <Windows.h>
 #include <d2d1_3.h>
 #include <dwrite_3.h>
-#include <bit>
-#include <concepts>
-#include <optional>
-#include <type_traits>
 
 export module PGUI.UI.D2D.DeviceContext;
+
+import std;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;

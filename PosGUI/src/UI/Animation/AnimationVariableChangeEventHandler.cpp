@@ -1,12 +1,10 @@
 module;
 #include <wrl.h>
 #include <UIAnimation.h>
-#include <span>
-#include <mutex>
-#include <vector>
-#include <functional>
 
 module PGUI.UI.Animation.AnimationVariableChangeEventHandler;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Event;

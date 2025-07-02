@@ -1,6 +1,6 @@
 module;
 #include <Windows.h>
-#include <winrt//windows.ui.viewmanagement.h>
+#include <winrt/windows.ui.viewmanagement.h>
 
 module PGUI.UI.Theming.SystemTheme;
 

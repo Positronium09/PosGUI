@@ -70,7 +70,7 @@ export namespace PGUI::UI::Colors
 	inline const RGBA Khaki = RGBA{ 0xf0e68c };
 	inline const RGBA Lavender = RGBA{ 0xe6e6fa };
 	inline const RGBA LavenderBlush = RGBA{ 0xfff0f5 };
-	inline const RGBA LawnBreen = RGBA{ 0x7cfc00 };
+	inline const RGBA LawnGreen = RGBA{ 0x7cfc00 };
 	inline const RGBA LemonChiffon = RGBA{ 0xfffacd };
 	inline const RGBA LightBlue = RGBA{ 0xadd8e6 };
 	inline const RGBA LightCoral = RGBA{ 0xf08080 };

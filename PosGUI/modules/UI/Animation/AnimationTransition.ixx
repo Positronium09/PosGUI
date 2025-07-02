@@ -1,8 +1,9 @@
 module;
 #include <UIAnimation.h>
-#include <span>
 
 export module PGUI.UI.Animation.AnimationTransition;
+
+import std;
 
 import PGUI.ComPtr;
 

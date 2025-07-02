@@ -1,11 +1,9 @@
 module;
-#include <bit>
-#include <span>
-#include <cmath>
-#include <concepts>
 #include <Windows.h>
 
 module PGUI.Utils:ArithmeticUtils;
+
+import std;
 
 import PGUI.Shape2D;
 

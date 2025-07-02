@@ -1,9 +1,10 @@
 module;
-#include <vector>
 #include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.BitmapFrameDecode;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.UI.Imaging.BitmapSource;

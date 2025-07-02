@@ -1,8 +1,9 @@
 module;
 #include <d2d1_1.h>
-#include <vector>
 
 export module PGUI.UI.Gradient;
+
+import std;
 
 import PGUI.Shape2D;
 import PGUI.UI.Color;

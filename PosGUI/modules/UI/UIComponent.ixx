@@ -1,9 +1,10 @@
 module;
-#include <utility>
 #include <d2d1_3.h>
 #include <Windows.h>
 
 export module PGUI.UI.UIComponent;
+
+import std;
 
 import PGUI.WindowClass;
 import PGUI.UI.Clip;

@@ -1,10 +1,9 @@
 module;
-#include <concepts>
-#include <tuple>
-#include <bit>
 #include <wrl.h>
 
 export module PGUI.ComPtr;
+
+import std;
 
 import PGUI.Utils;
 import PGUI.Exceptions;

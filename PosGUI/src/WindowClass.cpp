@@ -1,14 +1,12 @@
 module;
 #include <Windows.h>
-#include <string>
-#include <memory>
-#include <unordered_map>
 
 module PGUI.WindowClass;
 
+import std;
+
 import PGUI.Utils;
 import PGUI.Exceptions;
-
 
 namespace PGUI
 {

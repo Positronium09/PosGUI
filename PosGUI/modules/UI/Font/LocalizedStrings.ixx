@@ -1,10 +1,10 @@
 module;
 #include <dwrite_1.h>
 #include <wrl.h>
-#include <expected>
-#include <string>
 
 export module PGUI.UI.Font.LocalizedStrings;
+
+import std;
 
 import PGUI.ComPtr;
 

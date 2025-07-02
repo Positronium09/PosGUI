@@ -1,9 +1,9 @@
 module;
-#include <variant>
-#include <vector>
 #include <Windows.h>
 
 module PGUI.PropVariant;
+
+import std;
 
 namespace PGUI
 {

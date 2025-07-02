@@ -1,17 +1,6 @@
-module;
-#include <vector>
-#include <functional>
-#include <utility>
-#include <array>
-#include <mutex>
-#include <concepts>
-#include <variant>
-#include <ranges>
-#include <future>
-#include <algorithm>
-#include <type_traits>
-
 export module PGUI.Event;
+
+import std;
 
 export namespace PGUI
 {

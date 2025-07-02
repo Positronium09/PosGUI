@@ -1,10 +1,10 @@
 module;
-#include <array>
-#include <span>
 #include <d2d1_3.h>
 #include <wrl.h>
 
 module PGUI.UI.D2D.D2DPathGeometry;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

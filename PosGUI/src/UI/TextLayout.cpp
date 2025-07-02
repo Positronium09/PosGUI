@@ -1,10 +1,10 @@
 module;
 #include <dwrite_3.h>
 #include <wrl.h>
-#include <bit>
-#include <string>
 
 module PGUI.UI.TextLayout;
+
+import std;
 
 import PGUI.UI.TextFormat;
 import PGUI.ComPtr;

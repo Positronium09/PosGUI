@@ -9,9 +9,11 @@ module;
 #include <d3d11.h>
 #include <d3d11_4.h>
 #include <dcomp.h>
-#include <utility>
 
 export module PGUI.UI.DirectXCompositionWindow;
+
+import std;
+
 import PGUI.Window;
 import PGUI.WindowClass;
 import PGUI.ComPtr;
@@ -27,24 +29,26 @@ export namespace PGUI::UI
 {
 	class DirectXCompositionWindow :
 		public Window,
-		protected ComPtrHolder<IDXGISwapChain1, IDCompositionTarget, ID2D1DeviceContext7>
+		protected ComPtrHolder<IDXGISwapChain1, IDCompositionTarget, ID2D1DeviceContext7, IDCompositionVisual>
 	{
 		friend void PGUI::Init();
 
 		public:
-		virtual ~DirectXCompositionWindow() = default;
+		virtual ~DirectXCompositionWindow() override = default;
 
 		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
 		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return Get<IDCompositionTarget>(); }
 		[[nodiscard]] const auto& GetSwapChain() const noexcept { return Get<IDXGISwapChain1>(); }
+		[[nodiscard]] const auto& GetDCompositionVisual() const noexcept { return Get<IDCompositionVisual>(); }
 		[[nodiscard]] auto& GetD2D1DeviceContext() noexcept { return Get<ID2D1DeviceContext7>(); }
 		[[nodiscard]] auto& GetDCompositionTarget() noexcept { return Get<IDCompositionTarget>(); }
 		[[nodiscard]] auto& GetSwapChain() noexcept { return Get<IDXGISwapChain1>(); }
+		[[nodiscard]] auto& GetDCompositionVisual() noexcept { return Get<IDCompositionVisual>(); }
 
-		[[nodiscard]] static auto D3D11Device() noexcept { return d3d11Device; }
-		[[nodiscard]] static auto DXGIDevice() noexcept { return dxgiDevice; }
-		[[nodiscard]] static auto DCompositionDevice() noexcept { return dcompDevice; }
-		[[nodiscard]] static auto D2D1Device() noexcept { return d2d1Device; }
+		[[nodiscard]] static auto& D3D11Device() noexcept { return d3d11Device; }
+		[[nodiscard]] static auto& DXGIDevice() noexcept { return dxgiDevice; }
+		[[nodiscard]] static auto& DCompositionDevice() noexcept { return dcompDevice; }
+		[[nodiscard]] static auto& D2D1Device() noexcept { return d2d1Device; }
 
 		[[nodiscard]] auto GetGraphics() const noexcept { return Graphics{ GetD2D1DeviceContext() }; }
 

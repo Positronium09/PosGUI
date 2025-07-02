@@ -1,14 +1,10 @@
 module;
 #include <dwrite_3.h>
 #include <wrl.h>
-#include <bit>
-#include <span>
-#include <ranges>
-#include <vector>
-#include <optional>
-
 
 module PGUI.UI.Font.FontSet;
+
+import std;
 
 namespace PGUI::UI::Font
 {

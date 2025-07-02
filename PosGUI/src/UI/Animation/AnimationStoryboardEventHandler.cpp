@@ -1,10 +1,10 @@
 module;
 #include <wrl.h>
 #include <UIAnimation.h>
-#include <mutex>
-#include <functional>
 
 module PGUI.UI.Animation.AnimationStoryboardEventHandler;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;

@@ -1,11 +1,10 @@
 module;
-#include <span>
-#include <utility>
-#include <stdexcept>
 #include <d2d1_1.h>
 #include <d2d1_3.h>
 
 export module PGUI.UI.D2D.D2DStructs;
+
+import std;
 
 import PGUI.Shape2D;
 import PGUI.UI.D2D.D2DEnums;

@@ -1,8 +1,6 @@
-module;
-#include <string>
-#include <string_view>
-
 export module PGUI.Utils:StringUtils;
+
+import std;
 
 export namespace PGUI
 {

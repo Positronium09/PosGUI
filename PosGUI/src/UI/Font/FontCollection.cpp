@@ -1,10 +1,10 @@
 module;
 #include <wrl.h>
 #include <dwrite_3.h>
-#include <filesystem>
-#include <string_view>
 
 module PGUI.UI.Font.FontCollection;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Factories;

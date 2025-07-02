@@ -1,9 +1,10 @@
 module;
 #include <wrl.h>
 #include <wincodec.h>
-#include <ranges>
 
 module PGUI.UI.Imaging.Palette;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Factories;

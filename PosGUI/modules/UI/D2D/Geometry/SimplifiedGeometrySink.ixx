@@ -1,11 +1,10 @@
 module;
-#include <bit>
-#include <span>
-#include <concepts>
 #include <d2d1_1.h>
 #include <wrl.h>
 
 export module PGUI.UI.D2D.SimplifiedGeometrySink;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

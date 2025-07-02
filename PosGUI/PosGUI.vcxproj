@@ -163,7 +163,6 @@
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
     <ClCompile Include="src\Utils\IEnumStringIterator.cpp" />
     <ClCompile Include="src\Utils\StringUtils.cpp" />
-    <ClCompile Include="src\Utils\Utils.cpp" />
     <ClCompile Include="src\Utils\WindowsUtils.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\WindowClass.cpp" />
@@ -224,28 +223,28 @@
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)</TargetName>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)</TargetName>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)</TargetName>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)bin\intermediate\$(Configuration)\$(Platform)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)</TargetName>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <ClangTidyChecks>clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,readability-*,performance-*,-readability-identifier-length,-readability-implicit-bool-conversion,-clang-diagnostic-pragma-once-outside-header,-readability-magic-numbers,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-magic-numbers,-clang-diagnostic-switch,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-performance-enum-size,-cppcoreguidelines-narrowing-conversions, -clang-diagnostic-pragma-once-outside-header</ClangTidyChecks>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -262,6 +261,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+      <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -288,6 +289,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+      <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -314,6 +317,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+      <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -340,6 +345,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
+      <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>

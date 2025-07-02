@@ -1,11 +1,10 @@
 module;
 #include <Windows.h>
 #include <dwrite_3.h>
-#include <filesystem>
-#include <string_view>
-#include <expected>
 
 export module PGUI.UI.Font.FontCollection;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.UI.Font.FontFamily;

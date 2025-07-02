@@ -1,8 +1,4 @@
 module;
-
-#include <algorithm>
-#include <cstdint>
-#include <type_traits>
 #include <d2d1_1.h>
 #include <wincodec.h>
 #include <Windows.h>
@@ -11,6 +7,8 @@ module;
 #undef max
 
 export module PGUI.Shape2D:Rect;
+
+import std;
 
 import :Point;
 import :Size;

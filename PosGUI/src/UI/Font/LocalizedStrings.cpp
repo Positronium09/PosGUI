@@ -1,11 +1,12 @@
 module;
 #include <dwrite_1.h>
-#include <expected>
-#include <string>
 #include <wrl.h>
 
 module PGUI.UI.Font.LocalizedStrings;
 
+import std;
+
+import PGUI.ComPtr;
 import PGUI.Logging;
 
 namespace PGUI::UI::Font

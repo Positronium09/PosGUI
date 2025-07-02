@@ -63,9 +63,6 @@
     <ClCompile Include="modules\Utils\Utils.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\Utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\MessageLoop.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -1,19 +1,17 @@
 module;
 #include <UIAnimation.h>
-#include <mutex>
-#include <span>
-#include <functional>
 
 export module PGUI.UI.Animation.AnimationVariableChangeEventHandler;
 
-import PGUI.ComPtr;
+import std;
+
 import PGUI.Event;
 import PGUI.UI.Animation.AnimationEnums;
 
 namespace  PGUI::UI::Animation
 {
-	class Storyboard;
-	class AnimationVariable;
+	export class Storyboard;
+	export class AnimationVariable;
 
 	class AnimationVariableChangeEventHandlerRouter final : public IUIAnimationVariableChangeHandler2
 	{
@@ -74,9 +72,6 @@ namespace  PGUI::UI::Animation
 
 export namespace  PGUI::UI::Animation
 {
-	class Storyboard;
-	class AnimationVariable;
-
 	class AnimationVariableChangeEventHandler
 	{
 		public:

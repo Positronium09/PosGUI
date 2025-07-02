@@ -1,10 +1,10 @@
 module;
-#include <span>
-#include <vector>
 #include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.Palette;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.UI.Color;

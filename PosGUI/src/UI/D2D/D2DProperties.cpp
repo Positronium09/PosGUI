@@ -1,10 +1,10 @@
 module;
-#include <span>
-#include <string>
 #include <wrl.h>
 #include <d2d1_1.h>
 
 module PGUI.UI.D2D.D2DProperties;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Logging;

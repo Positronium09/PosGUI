@@ -5,6 +5,8 @@ module;
 
 export module PGUI.Factories:DWriteFactory;
 
+import std;
+
 import PGUI.ComPtr;
 import PGUI.Exceptions;
 
@@ -25,7 +27,8 @@ export namespace PGUI::Factories
 			if (!directWriteFactory)
 			{
 				auto hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
-					__uuidof(IDWriteFactory8), (IUnknown**)directWriteFactory.GetAddressOf()); ThrowFailed(hr);
+					__uuidof(IDWriteFactory8), std::bit_cast<IUnknown**>(directWriteFactory.GetAddressOf()));
+				ThrowFailed(hr);
 			}
 			return directWriteFactory;
 		}

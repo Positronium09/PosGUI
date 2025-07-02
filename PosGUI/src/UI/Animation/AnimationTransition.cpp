@@ -1,9 +1,10 @@
 module;
 #include <wrl.h>
 #include <UIAnimation.h>
-#include <span>
 
 module PGUI.UI.Animation.AnimationTransition;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;

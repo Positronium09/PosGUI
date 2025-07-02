@@ -1,9 +1,10 @@
 module;
-#include <span>
 #include <wrl.h>
 #include <wincodec.h>
 
 export module PGUI.UI.Imaging.WICBitmapLock;
+
+import std;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;

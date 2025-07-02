@@ -1,17 +1,16 @@
 module;
-#include <cmath>
-#include <span>
-#include <concepts>
 #include <Windows.h>
 
 export module PGUI.Utils:ArithmeticUtils;
+
+import std;
 
 import PGUI.Shape2D;
 
 export namespace PGUI
 {
 	template <std::integral T>
-	[[nodiscard]] constexpr auto sign(T x) noexcept -> int
+	[[nodiscard]] constexpr auto sign(T x) noexcept
 	{
 		if (x == 0)
 		{
@@ -20,7 +19,7 @@ export namespace PGUI
 		return x > 0 ? 1 : -1;
 	}
 	template <std::floating_point T>
-	[[nodiscard]] constexpr auto sign(T x) noexcept -> int
+	[[nodiscard]] constexpr auto sign(T x) noexcept
 	{
 		if (x == 0)
 		{

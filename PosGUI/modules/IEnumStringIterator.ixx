@@ -1,10 +1,10 @@
 module;
-#include <string>
-#include <iterator>
 #include <wrl.h>
 #include <objbase.h>
 
 export module PGUI.IEnumStringIterator;
+
+import std;
 
 import PGUI.ComPtr;
 
@@ -21,12 +21,12 @@ export namespace PGUI
 
 		explicit IEnumStringIterator(ComPtr<IEnumString> enumString, bool isEnd = false) noexcept;
 
-		[[nodiscard]] auto operator*() const -> std::wstring_view;
-		[[nodiscard]] auto operator->() const -> std::wstring_view;
-		[[nodiscard]] auto operator++() -> IEnumStringIterator&;
-		[[nodiscard]] auto operator++(int) -> IEnumStringIterator;
+		auto operator*() const -> std::wstring_view;
+		auto operator->() const -> std::wstring_view;
+		auto operator++() -> IEnumStringIterator&;
+		auto operator++(int) -> IEnumStringIterator;
 
-		[[nodiscard]] auto operator==(const IEnumStringIterator& other) const -> bool;
+		auto operator==(const IEnumStringIterator& other) const -> bool;
 
 		private:
 		bool end = false;

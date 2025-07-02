@@ -1,12 +1,10 @@
 module;
-#include <concepts>
 #include <wrl.h>
 #include <wincodec.h>
-#include <vector>
-#include <utility>
-
 
 export module PGUI.UI.Imaging.BitmapSource;
+
+import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;

@@ -1,9 +1,6 @@
-module;
-#include <functional>
-#include <type_traits>
-#include <concepts>
-
 export module PGUI.DataBinding.OneWayBinder;
+
+import std;
 
 import PGUI.Event;
 import PGUI.DataBinding.Property;

@@ -1,9 +1,9 @@
 module;
-#include <atomic>
-#include <stacktrace>
 #include <Windows.h>
 
 module PGUI.MessageLoop;
+
+import std;
 
 import PGUI.Exceptions;
 import PGUI.Logging;

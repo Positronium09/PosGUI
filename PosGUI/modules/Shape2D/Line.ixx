@@ -1,10 +1,6 @@
-module;
-#include <concepts>
-#include <expected>
-#include <limits>
-#include <cmath>
-
 export module PGUI.Shape2D:Line;
+
+import std;
 
 import :Point;
 import :LineSegment;

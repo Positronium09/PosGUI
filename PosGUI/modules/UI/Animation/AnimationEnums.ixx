@@ -46,7 +46,7 @@ export namespace PGUI::UI::Animation
 		Truncated = UI_ANIMATION_STORYBOARD_TRUNCATED,
 		Finished = UI_ANIMATION_STORYBOARD_FINISHED,
 		Ready = UI_ANIMATION_STORYBOARD_READY,
-		InsufficentPriority = UI_ANIMATION_STORYBOARD_INSUFFICIENT_PRIORITY
+		InsufficientPriority = UI_ANIMATION_STORYBOARD_INSUFFICIENT_PRIORITY
 	};
 
 	enum class AnimationSchedulingResult

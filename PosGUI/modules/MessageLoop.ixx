@@ -1,8 +1,9 @@
 module;
-#include <atomic>
 #include <Windows.h>
 
 export module PGUI.MessageLoop;
+
+import std;
 
 export namespace PGUI
 {

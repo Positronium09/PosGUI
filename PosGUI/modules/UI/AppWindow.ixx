@@ -1,9 +1,9 @@
 module;
-#include <string>
-#include <string_view>
 #include <Windows.h>
 
 export module PGUI.UI.AppWindow;
+
+import std;
 
 import PGUI.Shape2D;
 import PGUI.Window;
@@ -13,7 +13,6 @@ import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ThemeAware;
 import PGUI.UI.Animation.AnimationManager;
 import PGUI.UI.DirectXCompositionWindow;
-
 
 export namespace PGUI::UI
 {

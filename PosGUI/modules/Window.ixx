@@ -266,7 +266,7 @@ export namespace PGUI
 		}
 	};
 
-	using MessageHookers = std::vector<std::reference_wrapper<const MessageHooker>>;
+	using MessageHookers = std::vector<std::reference_wrapper<MessageHooker>>;
 
 	class Window
 	{
@@ -384,7 +384,11 @@ export namespace PGUI
 		}
 
 		void Hook(MessageHooker& hooker) noexcept;
+		void HookBefore(MessageHooker& hooker) noexcept;
+		void HookAfter(MessageHooker& hooker) noexcept;
 		void UnHook(MessageHooker& hooker) noexcept;
+		void UnHookBefore(MessageHooker& hooker) noexcept;
+		void UnHookAfter(MessageHooker& hooker) noexcept;
 
 		auto AddTimer(TimerId id, std::chrono::milliseconds delay,
 			std::optional<TimerCallback> callback = std::nullopt) noexcept -> TimerId;
@@ -500,7 +504,8 @@ export namespace PGUI
 		MessageHandlerMap messageHandlerMap;
 		ChildWindowList childWindows;
 		TimerMap timerMap;
-		MessageHookers hookers;
+		MessageHookers beforeHookers;
+		MessageHookers afterHookers;
 		WindowClassPtr windowClass;
 		HWND hWnd = nullptr;
 		HWND parentHwnd = nullptr;

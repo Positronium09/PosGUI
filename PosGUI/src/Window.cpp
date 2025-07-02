@@ -32,6 +32,33 @@ namespace PGUI
 		{
 			KillTimer(hWnd, id);
 		});
+		timerMap.clear();
+
+		std::ranges::for_each(childWindows,
+			[](const auto& childWindow)
+		{
+			childWindow->parentHwnd = nullptr;
+			childWindow->hWnd = nullptr;
+		});
+		childWindows.clear();
+
+		
+		std::ranges::for_each(beforeHookers,
+			[](auto& hook)
+		{
+			hook.get().hookedWindow = nullptr;
+		});
+		std::ranges::for_each(afterHookers,
+			[](auto& hook)
+		{
+			hook.get().hookedWindow = nullptr;
+		});
+		beforeHookers.clear();
+		afterHookers.clear();
+
+		hWnd = nullptr;
+		parentHwnd = nullptr;
+
 		DestroyWindow(hWnd);
 	}
 
@@ -82,18 +109,74 @@ namespace PGUI
 
 	void Window::Hook(MessageHooker& hooker) noexcept
 	{
+		if (hooker.hookedWindow != nullptr)
+		{
+			hooker.hookedWindow->UnHook(hooker);
+		}
 		hooker.hookedWindow = this;
-		hookers.push_back(hooker);
+		beforeHookers.push_back(hooker);
+		afterHookers.push_back(hooker);
+	}
+
+	void Window::HookBefore(MessageHooker& hooker) noexcept
+	{
+		if (hooker.hookedWindow != nullptr)
+		{
+			hooker.hookedWindow->UnHookBefore(hooker);
+		}
+		hooker.hookedWindow = this;
+		beforeHookers.push_back(hooker);
+	}
+	void Window::HookAfter(MessageHooker& hooker) noexcept
+	{
+		if (hooker.hookedWindow != nullptr)
+		{
+			hooker.hookedWindow->UnHookAfter(hooker);
+		}
+		hooker.hookedWindow = this;
+		afterHookers.push_back(hooker);
 	}
 	void Window::UnHook(MessageHooker& hooker) noexcept
 	{
-		auto [begin, end] = std::ranges::remove_if(hookers, [&hooker](const auto& hook)
+		hooker.hookedWindow = nullptr;
+
+		auto [beforeBegin, beforeEnd] = std::ranges::remove_if(beforeHookers, [&hooker](const auto& hook)
 		{
 			return &hooker == &(hook.get());
 		});
 
+		beforeHookers.erase(beforeBegin, beforeEnd);
+
+		auto [afterBegin, afterEnd] = std::ranges::remove_if(afterHookers, [&hooker](const auto& hook)
+		{
+			return &hooker == &(hook.get());
+		});
+
+		afterHookers.erase(afterBegin, afterEnd);
+	}
+
+	void Window::UnHookBefore(MessageHooker& hooker) noexcept
+	{
 		hooker.hookedWindow = nullptr;
-		hookers.erase(begin, end);
+
+		auto [begin, end] = std::ranges::remove_if(beforeHookers, [&hooker](const auto& hook)
+		{
+			return &hooker == &(hook.get());
+		});
+
+		beforeHookers.erase(begin, end);
+	}
+
+	void Window::UnHookAfter(MessageHooker& hooker) noexcept
+	{
+		hooker.hookedWindow = nullptr;
+
+		auto [begin, end] = std::ranges::remove_if(afterHookers, [&hooker](const auto& hook)
+		{
+			return &hooker == &(hook.get());
+		});
+
+		afterHookers.erase(begin, end);
 	}
 
 	auto Window::AddTimer(TimerId id, std::chrono::milliseconds delay,
@@ -518,7 +601,7 @@ namespace PGUI
 		MessageHandlerResult result{ 0 };
 		bool hookerHandled = false;
 
-		for (const auto& hooker : window->hookers)
+		for (const auto& hooker : window->beforeHookers)
 		{
 			const auto& handlers = hooker.get().GetHandlers();
 			if (!handlers.contains(msg))
@@ -556,27 +639,61 @@ namespace PGUI
 			{
 				return result;
 			}
-			return DefWindowProcW(hWnd, msg, wParam, lParam);
+			result = DefWindowProcW(hWnd, msg, wParam, lParam);
 		}
-		
-		for (const auto& handlerVariant : window->messageHandlerMap.at(msg))
+		else
 		{
-			std::visit([&](const auto& handler)
+			for (const auto& handlerVariant : window->messageHandlerMap.at(msg))
 			{
-				using T = std::decay_t<decltype(handler)>;
-				if constexpr (std::is_same_v<T, HandlerHWND>)
+				std::visit([&](const auto& handler)
 				{
-					result = handler(hWnd, msg, wParam, lParam);
-				}
-				else if constexpr (std::is_same_v<T, Handler>)
-				{
-					result = handler(msg, wParam, lParam);
-				}
-			}, handlerVariant);
+					using T = std::decay_t<decltype(handler)>;
+					if constexpr (std::is_same_v<T, HandlerHWND>)
+					{
+						result = handler(hWnd, msg, wParam, lParam);
+					}
+					else if constexpr (std::is_same_v<T, Handler>)
+					{
+						result = handler(msg, wParam, lParam);
+					}
+				}, handlerVariant);
+			}
+			if (IsFlagSet(result.flags, ReturnFlags::PassToDefProc)) [[unlikely]]
+			{
+				DefWindowProcW(hWnd, msg, wParam, lParam);
+			}
 		}
-		if (IsFlagSet(result.flags, ReturnFlags::PassToDefProc)) [[unlikely]]
+
+		for (const auto& hooker : window->afterHookers)
 		{
-			DefWindowProcW(hWnd, msg, wParam, lParam);
+			const auto& handlers = hooker.get().GetHandlers();
+			if (!handlers.contains(msg))
+			{
+				continue;
+			}
+
+			for (const auto& messageHandlers : handlers.at(msg))
+			{
+				std::visit([&](const auto& handler)
+				{
+					using T = std::decay_t<decltype(handler)>;
+					if constexpr (std::is_same_v<T, HandlerHWND>)
+					{
+						result = handler(hWnd, msg, wParam, lParam);
+					}
+					else if constexpr (std::is_same_v<T, Handler>)
+					{
+						result = handler(msg, wParam, lParam);
+					}
+				}, messageHandlers);
+
+				hookerHandled = true;
+
+				if (IsFlagSet(result.flags, ReturnFlags::ForceThisResult)) [[unlikely]]
+				{
+					return result.result;
+				}
+			}
 		}
 
 		if (msg == WM_NCCREATE) [[unlikely]]

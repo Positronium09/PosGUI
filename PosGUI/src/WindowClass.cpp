@@ -10,6 +10,7 @@ import PGUI.Exceptions;
 
 namespace PGUI
 {
+	// ReSharper disable once CppInconsistentNaming
 	extern auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
 
 	template<typename ...Arg> auto static CreateWindowClassSharedPtr(Arg&&...arg) -> std::shared_ptr<WindowClass>
@@ -22,9 +23,9 @@ namespace PGUI
 	}
 
 
-	WindowClass::WindowClass(std::wstring_view _className, UINT style,
-		HBRUSH backgroundBrush, HICON icon, HCURSOR cursor, HICON smIcon) :
-		className(_className)
+	WindowClass::WindowClass(const std::wstring_view className, const UINT style,
+	                         const HBRUSH backgroundBrush, const HICON icon, const HCURSOR cursor, const HICON smIcon) :
+		className{ className }
 	{
 		WNDCLASSEXW wc = { 0 };
 		wc.cbSize = sizeof(WNDCLASSEXW);
@@ -35,7 +36,7 @@ namespace PGUI
 		wc.hInstance = GetHInstance();
 		wc.hbrBackground = backgroundBrush;
 		wc.lpszMenuName = nullptr;
-		wc.lpszClassName = _className.data();
+		wc.lpszClassName = className.data();
 		wc.hIcon = icon;
 		wc.hCursor = cursor ? cursor : static_cast<HCURSOR>(LoadImageW(nullptr, IDC_ARROW, IMAGE_CURSOR, NULL, NULL, LR_SHARED | LR_DEFAULTSIZE));
 		wc.hIconSm = smIcon;
@@ -56,7 +57,7 @@ namespace PGUI
 
 		if (!atom)
 		{
-			auto windowClass = CreateWindowClassSharedPtr(
+			const auto windowClass = CreateWindowClassSharedPtr(
 				className, style, backgroundBrush,
 				icon, cursor, smIcon);
 

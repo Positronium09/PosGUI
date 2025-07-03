@@ -5,8 +5,6 @@ export module PGUI.PropVariant;
 
 import std;
 
-import PGUI.EnumFlag;
-
 export namespace PGUI
 {
 	enum class PropVariantType
@@ -51,10 +49,7 @@ export namespace PGUI
 		Variant = 12,
 		TypeMask = 0xfff
 	};
-
-	template <>
-	struct IsEnumFlagEnabled<PropVariantType> : std::true_type
-	{ };
+	DEFINE_ENUM_FLAG_OPERATORS(PropVariantType);
 
 	using PropVariantValue =
 	std::variant<

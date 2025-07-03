@@ -12,8 +12,7 @@ namespace PGUI::UI
 {
 	Dialog::Dialog() noexcept :
 		Dialog{ WindowClass::Create(L"PGUI_ModelessDialog") }
-	{
-	}
+	{ }
 
 	Dialog::Dialog(const WindowClassPtr& wndClass) noexcept :
 		DirectXCompositionWindow{ wndClass }
@@ -28,8 +27,8 @@ namespace PGUI::UI
 
 	ModalDialog::ModalDialog() noexcept :
 		ModalDialog{ WindowClass::Create(L"PGUI_ModalDialog") }
-	{
-	}
+	{ }
+
 	ModalDialog::ModalDialog(const WindowClassPtr& wndClass) noexcept :
 		Dialog{ wndClass }
 	{

@@ -60,7 +60,7 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto GetElapsedTime() const -> double;
 
-		auto SetTag(ComPtr<IUnknown> obj, UINT32 id) const -> void;
+		auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const -> void;
 
 		[[nodiscard]] auto GetTag() const -> std::pair<ComPtr<IUnknown>, UINT32>;
 

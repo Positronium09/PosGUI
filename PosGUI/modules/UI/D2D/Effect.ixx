@@ -15,7 +15,7 @@ export namespace PGUI::UI::D2D
 		public:
 		Effect() noexcept = default;
 
-		explicit(false) Effect(ComPtr<ID2D1Effect> effect) noexcept;
+		explicit(false) Effect(const ComPtr<ID2D1Effect>& effect) noexcept;
 
 		[[nodiscard]] auto GetInput(UINT32 index) const noexcept -> D2DImage<>;
 

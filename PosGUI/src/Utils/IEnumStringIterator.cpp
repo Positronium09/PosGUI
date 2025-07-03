@@ -1,6 +1,5 @@
 module;
 #include <wrl.h>
-#include <objbase.h>
 
 module PGUI.IEnumStringIterator;
 
@@ -10,8 +9,8 @@ import PGUI.ComPtr;
 
 namespace PGUI
 {
-	IEnumStringIterator::IEnumStringIterator(ComPtr<IEnumString> enumString, bool isEnd) noexcept
-		: ComPtrHolder{ enumString }, end{ isEnd }
+	IEnumStringIterator::IEnumStringIterator(const ComPtr<IEnumString>& enumString, const bool isEnd) noexcept :
+		ComPtrHolder{ enumString }, end{ isEnd }
 	{
 		MoveNext();
 	}
@@ -20,16 +19,18 @@ namespace PGUI
 	{
 		return current;
 	}
+
 	auto IEnumStringIterator::operator->() const -> std::wstring_view
 	{
 		return current;
 	}
+
 	auto IEnumStringIterator::operator++() -> IEnumStringIterator&
 	{
 		MoveNext();
 		return *this;
 	}
-	
+
 	auto IEnumStringIterator::operator++(int) -> IEnumStringIterator
 	{
 		auto temp = *this;
@@ -46,7 +47,7 @@ namespace PGUI
 		return GetRaw() == other.GetRaw() && end == other.end;
 	}
 
-	void IEnumStringIterator::MoveNext()
+	auto IEnumStringIterator::MoveNext() -> void
 	{
 		if (end)
 		{
@@ -55,9 +56,9 @@ namespace PGUI
 
 		ULONG fetched;
 		LPOLESTR str;
-		
-		auto hr = Get()->Next(1, &str, &fetched);
-		if (hr != S_OK || fetched != 1)
+
+		if (const auto hr = Get()->Next(1, &str, &fetched);
+			hr != S_OK || fetched != 1)
 		{
 			end = true;
 			return;

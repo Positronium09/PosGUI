@@ -14,12 +14,12 @@ export namespace PGUI::UI::Font
 	class FontSet : public ComPtrHolder<IDWriteFontSet4>
 	{
 		public:
-		explicit(false) FontSet(ComPtr<IDWriteFontSet4> set) noexcept;
+		explicit(false) FontSet(const ComPtr<IDWriteFontSet4>& set) noexcept;
 
 		[[nodiscard]] auto ConvertWeightStretchStyleToFontAxisValues(
 			FontWeight weight, FontStretch stretch, FontStyle style,
 			float fontSize,
-			std::optional<std::span<const FontAxisValue>> inputValues = std::nullopt) const noexcept -> std::vector<
+			const std::optional<std::span<const FontAxisValue>>& inputValues = std::nullopt) const noexcept -> std::vector<
 			FontAxisValue>;
 	};
 }

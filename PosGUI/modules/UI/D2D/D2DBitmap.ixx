@@ -18,7 +18,7 @@ export namespace PGUI::UI::D2D
 		public:
 		D2DBitmap() noexcept = default;
 
-		explicit(false) D2DBitmap(ComPtr<ID2D1Bitmap1> bitmap) noexcept;
+		explicit(false) D2DBitmap(const ComPtr<ID2D1Bitmap1>& bitmap) noexcept;
 
 		[[nodiscard]] auto GetSize() const noexcept -> SizeF;
 

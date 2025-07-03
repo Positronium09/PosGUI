@@ -18,7 +18,7 @@ export namespace PGUI::UI::Imaging
 		public:
 		MetadataReader() noexcept = default;
 
-		explicit(false) MetadataReader(ComPtr<IWICMetadataQueryReader> reader) noexcept;
+		explicit(false) MetadataReader(const ComPtr<IWICMetadataQueryReader>& reader) noexcept;
 
 		[[nodiscard]] auto GetContainerFormat() const -> ContainerFormat;
 

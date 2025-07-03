@@ -1,7 +1,7 @@
 module;
 #include <ranges>
-#include <wrl.h>
 #include <wincodec.h>
+#include <wrl.h>
 
 module PGUI.UI.Imaging.BitmapDecoder;
 
@@ -13,56 +13,76 @@ import PGUI.Factories;
 
 namespace PGUI::UI::Imaging
 {
-	BitmapDecoder::BitmapDecoder(ComPtr<IWICBitmapDecoder> decoder) noexcept : 
-		ComPtrHolder<IWICBitmapDecoder>{ decoder }
-	{
-	}
-	BitmapDecoder::BitmapDecoder(const ContainerFormat& containerFormat, std::optional<GUID> vendorGUID)
+	BitmapDecoder::BitmapDecoder(const ComPtr<IWICBitmapDecoder>& decoder) noexcept :
+		ComPtrHolder{ decoder }
+	{ }
+
+	BitmapDecoder::BitmapDecoder(
+		const ContainerFormat& containerFormat,
+		const std::optional<GUID>& vendorGUID)
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		auto hr = factory->CreateDecoder(containerFormat,
-			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, GetAddress()); ThrowFailed(hr);
+		const auto hr = factory->CreateDecoder(
+			containerFormat,
+			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, GetAddress());
+		ThrowFailed(hr);
 	}
-	BitmapDecoder::BitmapDecoder(ULONG_PTR fileHandle, 
-		BitmapDecoderOptions decoderOptions, std::optional<GUID> vendorGUID)
+
+	BitmapDecoder::BitmapDecoder(
+		const ULONG_PTR fileHandle,
+		BitmapDecoderOptions decoderOptions,
+		const std::optional<GUID>& vendorGUID)
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		auto hr = factory->CreateDecoderFromFileHandle(fileHandle,
+		const auto hr = factory->CreateDecoderFromFileHandle(
+			fileHandle,
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<WICDecodeOptions>(decoderOptions), GetAddress()); ThrowFailed(hr);
+			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
+		ThrowFailed(hr);
 	}
-	BitmapDecoder::BitmapDecoder(std::filesystem::path fileName, DesiredAccess desiredAccess,
-		BitmapDecoderOptions decoderOptions, std::optional<GUID> vendorGUID)
+
+	BitmapDecoder::BitmapDecoder(
+		const std::filesystem::path& fileName, DesiredAccess desiredAccess,
+		BitmapDecoderOptions decoderOptions, const std::optional<GUID>& vendorGUID)
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		auto hr = factory->CreateDecoderFromFilename(fileName.c_str(),
+		const auto hr = factory->CreateDecoderFromFilename(
+			fileName.c_str(),
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<DWORD>(desiredAccess), 
-			static_cast<WICDecodeOptions>(decoderOptions), GetAddress()); ThrowFailed(hr);
+			static_cast<DWORD>(desiredAccess),
+			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
+		ThrowFailed(hr);
 	}
-	BitmapDecoder::BitmapDecoder(ComPtr<IStream> stream, BitmapDecoderOptions decoderOptions, 
-		std::optional<GUID> vendorGUID)
+
+	BitmapDecoder::BitmapDecoder(
+		const ComPtr<IStream>& stream, BitmapDecoderOptions decoderOptions,
+		const std::optional<GUID>& vendorGUID)
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		auto hr = factory->CreateDecoderFromStream(stream.Get(),
+		const auto hr = factory->CreateDecoderFromStream(
+			stream.Get(),
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<WICDecodeOptions>(decoderOptions), GetAddress()); ThrowFailed(hr);
+			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
+		ThrowFailed(hr);
 	}
 
-	void BitmapDecoder::Initialize(ComPtr<IStream> stream, BitmapDecoderOptions decoderOptions) const
+	auto BitmapDecoder::Initialize(const ComPtr<IStream>& stream, BitmapDecoderOptions decoderOptions) const -> void
 	{
-		auto hr = Get()->Initialize(stream.Get(), 
-			static_cast<WICDecodeOptions>(decoderOptions)); ThrowFailed(hr);
+		const auto hr = Get()->Initialize(
+			stream.Get(),
+			static_cast<WICDecodeOptions>(decoderOptions));
+		ThrowFailed(hr);
 	}
 
 	auto BitmapDecoder::CopyPalette() -> Palette
 	{
 		Palette palette{ };
-		auto hr = Get()->CopyPalette(palette.GetRaw()); ThrowFailed(hr);
+		const auto hr = Get()->CopyPalette(palette.GetRaw());
+		ThrowFailed(hr);
 
 		return palette;
 	}
@@ -70,7 +90,8 @@ namespace PGUI::UI::Imaging
 	auto BitmapDecoder::GetMetadataReader() const -> MetadataReader
 	{
 		ComPtr<IWICMetadataQueryReader> reader;
-		auto hr = Get()->GetMetadataQueryReader(reader.GetAddressOf()); ThrowFailed(hr);
+		const auto hr = Get()->GetMetadataQueryReader(reader.GetAddressOf());
+		ThrowFailed(hr);
 
 		return reader;
 	}
@@ -78,7 +99,8 @@ namespace PGUI::UI::Imaging
 	auto BitmapDecoder::GetPreview() const -> BitmapSource<>
 	{
 		ComPtr<IWICBitmapSource> preview;
-		auto hr = Get()->GetPreview(preview.GetAddressOf()); ThrowFailed(hr);
+		const auto hr = Get()->GetPreview(preview.GetAddressOf());
+		ThrowFailed(hr);
 
 		return preview;
 	}
@@ -86,24 +108,27 @@ namespace PGUI::UI::Imaging
 	auto BitmapDecoder::GetThumbnail() const -> BitmapSource<>
 	{
 		ComPtr<IWICBitmapSource> thumbnail;
-		auto hr = Get()->GetThumbnail(thumbnail.GetAddressOf()); ThrowFailed(hr);
-		
+		const auto hr = Get()->GetThumbnail(thumbnail.GetAddressOf());
+		ThrowFailed(hr);
+
 		return thumbnail;
 	}
 
 	auto BitmapDecoder::GetContainerFormat() const -> ContainerFormat
 	{
 		GUID format{ };
-		auto hr = Get()->GetContainerFormat(&format); ThrowFailed(hr);
-		
+		const auto hr = Get()->GetContainerFormat(&format);
+		ThrowFailed(hr);
+
 		return format;
 	}
 
-	auto BitmapDecoder::GetColorContexts(UINT count) const -> std::vector<ComPtr<IWICColorContext>>
+	auto BitmapDecoder::GetColorContexts(const UINT count) const -> std::vector<ComPtr<IWICColorContext>>
 	{
 		std::vector<IWICColorContext*> contexts(count);
-		auto hr = Get()->GetColorContexts(count, contexts.data(), nullptr); ThrowFailed(hr);
-		
+		const auto hr = Get()->GetColorContexts(count, contexts.data(), nullptr);
+		ThrowFailed(hr);
+
 		return contexts | std::views::transform([](auto context)
 		{
 			return ComPtr<IWICColorContext>{ context };
@@ -113,12 +138,13 @@ namespace PGUI::UI::Imaging
 	auto BitmapDecoder::GetFrameCount() const -> UINT
 	{
 		UINT count{ };
-		auto hr = Get()->GetFrameCount(&count); ThrowFailed(hr);
+		const auto hr = Get()->GetFrameCount(&count);
+		ThrowFailed(hr);
 
 		return count;
 	}
 
-	auto BitmapDecoder::GetFrame(UINT index) const -> BitmapFrameDecode
+	auto BitmapDecoder::GetFrame(const UINT index) const -> BitmapFrameDecode
 	{
 		if (index > GetFrameCount())
 		{
@@ -127,7 +153,8 @@ namespace PGUI::UI::Imaging
 
 		ComPtr<IWICBitmapFrameDecode> frameDecode;
 
-		auto hr = Get()->GetFrame(index, frameDecode.GetAddressOf()); ThrowFailed(hr);
+		const auto hr = Get()->GetFrame(index, frameDecode.GetAddressOf());
+		ThrowFailed(hr);
 
 		return frameDecode;
 	}
@@ -138,7 +165,7 @@ namespace PGUI::UI::Imaging
 
 		std::vector<BitmapFrameDecode> frames(frameCount);
 
-		for (auto i : std::views::iota(0U, frameCount))
+		for (const auto i : std::views::iota(0U, frameCount))
 		{
 			frames[i] = GetFrame(i);
 		}
@@ -146,11 +173,12 @@ namespace PGUI::UI::Imaging
 		return frames;
 	}
 
-	auto BitmapDecoder::QueryCapabilities(ComPtr<IStream> stream) const -> WICBitmapDecoderCapabilities
+	auto BitmapDecoder::QueryCapabilities(const ComPtr<IStream>& stream) const -> WICBitmapDecoderCapabilities
 	{
 		DWORD capabilities{ };
-		auto hr = Get()->QueryCapability(stream.Get(), &capabilities); ThrowFailed(hr);
-		
+		const auto hr = Get()->QueryCapability(stream.Get(), &capabilities);
+		ThrowFailed(hr);
+
 		return static_cast<WICBitmapDecoderCapabilities>(capabilities);
 	}
 }

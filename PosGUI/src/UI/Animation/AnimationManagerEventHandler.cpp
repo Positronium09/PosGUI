@@ -15,10 +15,9 @@ import :AnimationEnums;
 namespace PGUI::UI::Animation
 {
 	AnimationManagerEventHandlerRouter::AnimationManagerEventHandlerRouter(
-		const ManagerStatusChangedHandler& handler) noexcept : 
+		const ManagerStatusChangedHandler& handler) noexcept :
 		handler{ handler }
-	{
-	}
+	{ }
 
 	auto __stdcall AnimationManagerEventHandlerRouter::QueryInterface(const IID& iid, void** obj) -> HRESULT
 	{
@@ -43,9 +42,10 @@ namespace PGUI::UI::Animation
 	{
 		return InterlockedIncrement(&referenceCount);
 	}
+
 	auto __stdcall AnimationManagerEventHandlerRouter::Release() -> ULONG
 	{
-		auto refCount = InterlockedDecrement(&referenceCount);
+		const auto refCount = InterlockedDecrement(&referenceCount);
 		if (0 == refCount)
 		{
 			delete this;
@@ -54,7 +54,7 @@ namespace PGUI::UI::Animation
 	}
 
 	auto __stdcall AnimationManagerEventHandlerRouter::OnManagerStatusChanged(
-		UI_ANIMATION_MANAGER_STATUS newStatus, 
+		UI_ANIMATION_MANAGER_STATUS newStatus,
 		UI_ANIMATION_MANAGER_STATUS previousStatus) -> HRESULT
 	{
 		std::scoped_lock lock{ handlerMutex };
@@ -69,21 +69,21 @@ namespace PGUI::UI::Animation
 		);
 	}
 
-	void AnimationManagerEventHandlerRouter::SetHandler(const ManagerStatusChangedHandler& newHandler) noexcept
+	auto AnimationManagerEventHandlerRouter::SetHandler(const ManagerStatusChangedHandler& newHandler) noexcept -> void
 	{
 		std::scoped_lock lock{ handlerMutex };
 		handler = newHandler;
 	}
 
-	void AnimationManagerEventHandlerRouter::ClearHandler() noexcept
+	auto AnimationManagerEventHandlerRouter::ClearHandler() noexcept -> void
 	{
 		std::scoped_lock lock{ handlerMutex };
 		handler = nullptr;
 	}
 
 	auto AnimationManagerEventHandler::CallHandler(
-		AnimationManagerStatus newStatus, 
-		AnimationManagerStatus previousStatus) noexcept -> HRESULT
+		const AnimationManagerStatus newStatus,
+		const AnimationManagerStatus previousStatus) noexcept -> HRESULT
 	{
 		try
 		{
@@ -104,13 +104,13 @@ namespace PGUI::UI::Animation
 		}
 	}
 
-	AnimationManagerEventHandler::AnimationManagerEventHandler() noexcept : 
+	AnimationManagerEventHandler::AnimationManagerEventHandler() noexcept :
 		router{ std::bind_front(&AnimationManagerEventHandler::CallHandler, this) }
-	{
-	}
+	{ }
 
-	void AnimationManagerEvent::OnManagerStatusChanged(AnimationManagerStatus newStatus,
-		AnimationManagerStatus previousStatus)
+	auto AnimationManagerEvent::OnManagerStatusChanged(
+		const AnimationManagerStatus newStatus,
+		const AnimationManagerStatus previousStatus) -> void
 	{
 		managerStatusChangedEvent.Invoke(newStatus, previousStatus);
 	}

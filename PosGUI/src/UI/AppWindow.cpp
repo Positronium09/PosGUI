@@ -1,7 +1,7 @@
 module;
 #include <dwmapi.h>
-#include <Windows.h>
 #include <strsafe.h>
+#include <Windows.h>
 
 module PGUI.UI.AppWindow;
 
@@ -15,10 +15,9 @@ namespace PGUI::UI
 {
 	AppWindow::AppWindow() noexcept :
 		AppWindow{ WindowClass::Create(L"PGUI_AppWindow") }
-	{
-	}
+	{ }
 
-	AppWindow::AppWindow(const WindowClassPtr& wndClass) noexcept : 
+	AppWindow::AppWindow(const WindowClassPtr& wndClass) noexcept :
 		DirectXCompositionWindow{ wndClass }
 	{
 		Hook(autoStop);
@@ -30,49 +29,52 @@ namespace PGUI::UI
 		RegisterHandler(WM_LBUTTONDOWN, &AppWindow::OnLButtonDown);
 	}
 
-	void AppWindow::EnterFullScreenMode() noexcept
+	auto AppWindow::EnterFullScreenMode() noexcept -> void
 	{
 		if (isFullScreen)
 		{
 			return;
 		}
-		
+
 		prevPlacement = GetPlacement();
 
-		auto windowStyle = GetStyle();
+		const auto windowStyle = GetStyle();
 
 		MONITORINFO monitorInfo{ };
 		monitorInfo.cbSize = sizeof(MONITORINFO);
 		GetMonitorInfoW(MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTOPRIMARY), &monitorInfo);
 
 		SetWindowLongPtrW(Hwnd(), GWL_STYLE, windowStyle & ~WS_OVERLAPPEDWINDOW);
-		
-		SetPosition(monitorInfo.rcMonitor, PositionFlags::NoOwnerZOrder | PositionFlags::FrameChanged, InsertAfter::Top);
+
+		SetPosition(monitorInfo.rcMonitor,
+		            PositionFlags::NoOwnerZOrder | PositionFlags::FrameChanged,
+		            InsertAfter::Top);
 
 		isFullScreen = true;
 	}
-	void AppWindow::ExitFullScreenMode() noexcept
+
+	auto AppWindow::ExitFullScreenMode() noexcept -> void
 	{
 		if (!isFullScreen)
 		{
 			return;
 		}
 
-		DWORD windowStyle = GetStyle();
+		const auto windowStyle = GetStyle();
 
 		SetWindowLongPtrW(Hwnd(), GWL_STYLE, windowStyle | WS_OVERLAPPEDWINDOW);
-		WINDOWPLACEMENT placement = prevPlacement;
+		const WINDOWPLACEMENT placement = prevPlacement;
 		SetWindowPlacement(Hwnd(), &placement);
 
-		SetPosition(RectL{ }, 
-			PositionFlags::NoMove | PositionFlags::NoSize | 
-			PositionFlags::NoZOrder | PositionFlags::NoOwnerZOrder | 
-			PositionFlags::FrameChanged);
+		SetPosition(RectL{ },
+		            PositionFlags::NoMove | PositionFlags::NoSize |
+		            PositionFlags::NoZOrder | PositionFlags::NoOwnerZOrder |
+		            PositionFlags::FrameChanged);
 
 		isFullScreen = false;
 	}
 
-	void AppWindow::SetTitle(std::wstring_view title) const noexcept
+	auto AppWindow::SetTitle(const std::wstring_view title) const noexcept -> void
 	{
 		SendMsg(WM_SETTEXT, 0, std::bit_cast<LPARAM>(title.data()));
 	}
@@ -81,7 +83,8 @@ namespace PGUI::UI
 	{
 		return GetStyle() & WS_MAXIMIZEBOX;
 	}
-	void AppWindow::SetMaximizable(bool isMaximizable) const noexcept
+
+	auto AppWindow::SetMaximizable(const bool isMaximizable) const noexcept -> void
 	{
 		if (isMaximizable)
 		{
@@ -90,11 +93,13 @@ namespace PGUI::UI
 		}
 		RemoveStyle(WS_MAXIMIZEBOX);
 	}
+
 	auto AppWindow::IsMinimizable() const noexcept -> bool
 	{
 		return GetStyle() & WS_MINIMIZEBOX;
 	}
-	void AppWindow::SetMinimizable(bool isMinimizable) const noexcept
+
+	auto AppWindow::SetMinimizable(const bool isMinimizable) const noexcept -> void
 	{
 		if (isMinimizable)
 		{
@@ -103,16 +108,18 @@ namespace PGUI::UI
 		}
 		RemoveStyle(WS_MINIMIZEBOX);
 	}
+
 	auto AppWindow::IsCloseable() const noexcept -> bool
 	{
-		auto menu = GetSystemMenu(Hwnd(), FALSE);
-		auto state = GetMenuState(menu, SC_CLOSE, MF_BYCOMMAND);
+		const auto menu = GetSystemMenu(Hwnd(), FALSE);
+		const auto state = GetMenuState(menu, SC_CLOSE, MF_BYCOMMAND);
 
 		return (state & MF_GRAYED) || (state & MF_DISABLED);
 	}
-	void AppWindow::SetCloseable(bool isCloseable) const noexcept
+
+	auto AppWindow::SetCloseable(const bool isCloseable) const noexcept -> void
 	{
-		auto menu = GetSystemMenu(Hwnd(), FALSE);
+		const auto menu = GetSystemMenu(Hwnd(), FALSE);
 		if (isCloseable)
 		{
 			EnableMenuItem(menu, SC_CLOSE, MF_ENABLED);
@@ -120,11 +127,13 @@ namespace PGUI::UI
 		}
 		EnableMenuItem(menu, SC_CLOSE, MF_GRAYED | MF_DISABLED);
 	}
+
 	auto AppWindow::IsAlwaysOnTop() const noexcept -> bool
 	{
 		return GetExStyle() & WS_EX_TOPMOST;
 	}
-	void AppWindow::SetAlwaysOnTop(bool isAlwaysOnTop) const noexcept
+
+	auto AppWindow::SetAlwaysOnTop(const bool isAlwaysOnTop) const noexcept -> void
 	{
 		if (isAlwaysOnTop)
 		{
@@ -133,11 +142,13 @@ namespace PGUI::UI
 		}
 		RemoveExStyle(WS_EX_TOPMOST);
 	}
+
 	auto AppWindow::IsResizable() const noexcept -> bool
 	{
 		return GetStyle() & WS_SIZEBOX;
 	}
-	void AppWindow::SetResizable(bool isResizable) const noexcept
+
+	auto AppWindow::SetResizable(const bool isResizable) const noexcept -> void
 	{
 		if (isResizable)
 		{
@@ -147,7 +158,7 @@ namespace PGUI::UI
 		RemoveStyle(WS_SIZEBOX);
 	}
 
-	void AppWindow::SetAutoStopAnimations(bool enable) noexcept
+	auto AppWindow::SetAutoStopAnimations(const bool enable) noexcept -> void
 	{
 		if (autoStopAnimations == enable)
 		{
@@ -163,44 +174,52 @@ namespace PGUI::UI
 		UnHook(autoStop);
 	}
 
-	void AppWindow::SetBorderColor(RGBA color) const noexcept
+	auto AppWindow::SetBorderColor(const RGBA color) const noexcept -> void
 	{
-		COLORREF colorRef = color != Colors::Transparent ? static_cast<COLORREF>(color) : DWMWA_COLOR_DEFAULT;
+		const auto colorRef = color != Colors::Transparent ? static_cast<COLORREF>(color) : DWMWA_COLOR_DEFAULT;
 
-		auto hr = DwmSetWindowAttribute(Hwnd(), 
-			DWMWA_BORDER_COLOR, 
-			&colorRef, 
-			sizeof(colorRef)); LogFailed(LogLevel::Error, hr);
+		const auto hr = DwmSetWindowAttribute(
+			Hwnd(),
+			DWMWA_BORDER_COLOR,
+			&colorRef,
+			sizeof(colorRef));
+		LogFailed(LogLevel::Error, hr);
 	}
 
-	void AppWindow::SetCaptionColor(RGBA color) const noexcept
+	auto AppWindow::SetCaptionColor(const RGBA color) const noexcept -> void
 	{
-		COLORREF colorRef = color != Colors::Transparent ? static_cast<COLORREF>(color) : DWMWA_COLOR_DEFAULT;
-		auto hr = DwmSetWindowAttribute(Hwnd(),
+		const auto colorRef = color != Colors::Transparent ? static_cast<COLORREF>(color) : DWMWA_COLOR_DEFAULT;
+		const auto hr = DwmSetWindowAttribute(
+			Hwnd(),
 			DWMWA_CAPTION_COLOR,
 			&colorRef,
-			sizeof(colorRef)); LogFailed(LogLevel::Error, hr);
+			sizeof(colorRef));
+		LogFailed(LogLevel::Error, hr);
 	}
 
-	void AppWindow::SetCaptionTextColor(RGBA color) const noexcept
+	auto AppWindow::SetCaptionTextColor(const RGBA color) const noexcept -> void
 	{
-		COLORREF colorRef = color != Colors::Transparent ? static_cast<COLORREF>(color) : DWMWA_COLOR_DEFAULT;
-		auto hr = DwmSetWindowAttribute(Hwnd(),
+		const auto colorRef = color != Colors::Transparent ? static_cast<COLORREF>(color) : DWMWA_COLOR_DEFAULT;
+		const auto hr = DwmSetWindowAttribute(
+			Hwnd(),
 			DWMWA_TEXT_COLOR,
 			&colorRef,
-			sizeof(colorRef)); LogFailed(LogLevel::Error, hr);
+			sizeof(colorRef));
+		LogFailed(LogLevel::Error, hr);
 	}
 
-	void AppWindow::SetCornerPreference(Theming::CornerPreference cornerPreference) const noexcept
+	auto AppWindow::SetCornerPreference(Theming::CornerPreference cornerPreference) const noexcept -> void
 	{
-		auto preference = static_cast<DWM_WINDOW_CORNER_PREFERENCE>(cornerPreference);
-		auto hr = DwmSetWindowAttribute(Hwnd(),
+		const auto preference = static_cast<DWM_WINDOW_CORNER_PREFERENCE>(cornerPreference);
+		const auto hr = DwmSetWindowAttribute(
+			Hwnd(),
 			DWMWA_WINDOW_CORNER_PREFERENCE,
 			&preference,
-			sizeof(preference)); LogFailed(LogLevel::Error, hr);
+			sizeof(preference));
+		LogFailed(LogLevel::Error, hr);
 	}
 
-	void AppWindow::ApplyStyle(const Theming::AppWindowStyle& style) noexcept
+	auto AppWindow::ApplyStyle(const Theming::AppWindowStyle& style) noexcept -> void
 	{
 		SetBorderColor(style.borderColor);
 		SetCaptionColor(style.captionColor);
@@ -210,7 +229,7 @@ namespace PGUI::UI
 		EnableDarkTitleBar(Hwnd(), style.darkMode);
 	}
 
-	auto AppWindow::OnNCCreate(UINT /*unused*/, WPARAM /*unused*/, LPARAM lParam) noexcept -> MessageHandlerResult
+	auto AppWindow::OnNCCreate(UINT /*unused*/, WPARAM /*unused*/, const LPARAM lParam) noexcept -> MessageHandlerResult
 	{
 		auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
 
@@ -221,37 +240,50 @@ namespace PGUI::UI
 
 		return { 1, ReturnFlags::PassToDefProc };
 	}
-	auto AppWindow::OnSetText(UINT /*unused*/, WPARAM /*unused*/, LPARAM lParam) noexcept -> MessageHandlerResult
+
+	auto AppWindow::OnSetText(UINT /*unused*/, WPARAM /*unused*/, const LPARAM lParam) noexcept -> MessageHandlerResult
 	{
 		titleText = std::bit_cast<wchar_t*>(lParam);
 
 		return { 1, ReturnFlags::PassToDefProc };
 	}
-	auto AppWindow::OnGetText(UINT /*unused*/, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult
+
+	auto AppWindow::OnGetText(UINT /*unused*/, const WPARAM wParam,
+	                          const LPARAM lParam) const noexcept -> MessageHandlerResult
 	{
-		auto size = std::min(titleText.size() + 1, wParam);
-		StringCchCopyW(std::bit_cast<wchar_t*>(lParam), size, titleText.data());
+		const auto size = std::min(titleText.size() + 1, wParam);
+		const auto hr = StringCchCopyW(std::bit_cast<wchar_t*>(lParam), size, titleText.data());
+		LogFailed(LogLevel::Error, hr);
 
 		return size;
 	}
-	auto AppWindow::OnGetTextLength(UINT /*unused*/, WPARAM /*unused*/, LPARAM /*unused*/) const noexcept -> MessageHandlerResult
+
+	auto AppWindow::OnGetTextLength(
+		UINT /*unused*/, WPARAM /*unused*/,
+		LPARAM /*unused*/) const noexcept -> MessageHandlerResult
 	{
 		return static_cast<LRESULT>(titleText.length());
 	}
-	auto AppWindow::OnGetMinMaxInfo(UINT /*unused*/, WPARAM /*unused*/, LPARAM lParam) const noexcept -> MessageHandlerResult
+
+	auto AppWindow::OnGetMinMaxInfo(
+		UINT /*unused*/, WPARAM /*unused*/,
+		const LPARAM lParam) const noexcept -> MessageHandlerResult
 	{
 		auto* minMaxInfo = std::bit_cast<LPMINMAXINFO>(lParam);
 
-		int frameX = GetSystemMetrics(SM_CXFRAME);
-		int frameY = GetSystemMetrics(SM_CYFRAME);
-		int padding = GetSystemMetrics(SM_CXPADDEDBORDER);
+		const auto frameX = GetSystemMetrics(SM_CXFRAME);
+		const auto frameY = GetSystemMetrics(SM_CYFRAME);
+		const auto padding = GetSystemMetrics(SM_CXPADDEDBORDER);
 		minMaxInfo->ptMinTrackSize.y = minSize.cy + frameY + padding;
 
 		minMaxInfo->ptMinTrackSize.x = minSize.cx + 2 * (frameX + padding);
 
 		return 0;
 	}
-	auto AppWindow::OnLButtonDown(UINT /*unused*/, WPARAM /*unused*/, LPARAM /*unused*/) const noexcept -> MessageHandlerResult
+
+	auto AppWindow::OnLButtonDown(
+		UINT /*unused*/, WPARAM /*unused*/,
+		LPARAM /*unused*/) const noexcept -> MessageHandlerResult
 	{
 		SetFocus();
 

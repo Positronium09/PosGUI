@@ -16,7 +16,7 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationVariable() noexcept = default;
 
-		explicit(false) AnimationVariable(ComPtr<IUIAnimationVariable2> ptr) noexcept;
+		explicit(false) AnimationVariable(const ComPtr<IUIAnimationVariable2>& ptr) noexcept;
 
 		[[nodiscard]] auto GetStoryboard() const -> Storyboard;
 
@@ -56,7 +56,7 @@ export namespace PGUI::UI::Animation
 
 		auto SetRoundingMode(AnimationRoundingMode mode) const -> void;
 
-		auto SetTag(ComPtr<IUnknown> obj, UINT32 id) const -> void;
+		auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const -> void;
 
 		[[nodiscard]] auto GetTag() const -> std::pair<ComPtr<IUnknown>, UINT32>;
 

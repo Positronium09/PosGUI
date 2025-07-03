@@ -33,29 +33,29 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapDecoder() noexcept = default;
 
-		explicit(false) BitmapDecoder(ComPtr<IWICBitmapDecoder> decoder) noexcept;
+		explicit(false) BitmapDecoder(const ComPtr<IWICBitmapDecoder>& decoder) noexcept;
 
 		explicit BitmapDecoder(
 			const ContainerFormat& containerFormat,
-			std::optional<GUID> vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt);
 
 		explicit BitmapDecoder(
 			ULONG_PTR fileHandle,
 			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand,
-			std::optional<GUID> vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt);
 
 		explicit BitmapDecoder(
-			std::filesystem::path fileName,
+			const std::filesystem::path& fileName,
 			DesiredAccess desiredAccess = DesiredAccess::Read,
 			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand,
-			std::optional<GUID> vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt);
 
 		explicit BitmapDecoder(
-			ComPtr<IStream> stream,
+			const ComPtr<IStream>& stream,
 			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand,
-			std::optional<GUID> vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt);
 
-		auto Initialize(ComPtr<IStream> stream,
+		auto Initialize(const ComPtr<IStream>& stream,
 			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand) const
 			-> void;
 
@@ -79,6 +79,6 @@ export namespace PGUI::UI::Imaging
 
 		[[nodiscard]] auto GetAllFrames() const -> std::vector<BitmapFrameDecode>;
 
-		[[nodiscard]] auto QueryCapabilities(ComPtr<IStream> stream) const -> WICBitmapDecoderCapabilities;
+		[[nodiscard]] auto QueryCapabilities(const ComPtr<IStream>& stream) const -> WICBitmapDecoderCapabilities;
 	};
 }

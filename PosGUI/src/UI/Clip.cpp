@@ -10,72 +10,74 @@ import std;
 import PGUI.Window;
 import PGUI.Factories;
 import PGUI.ComPtr;
+import PGUI.Logging;
 import PGUI.Shape2D;
 import PGUI.UI.D2D.D2DPathGeometry;
 
 namespace PGUI::UI
 {
-	RoundedRectangleClip::RoundedRectangleClip(ComPtr<ID2D1RoundedRectangleGeometry> geometry) noexcept : 
+	RoundedRectangleClip::RoundedRectangleClip(const ComPtr<ID2D1RoundedRectangleGeometry>& geometry) noexcept :
 		ComPtrHolder{ geometry }
-	{
-	}
-	RoundedRectangleClip::RoundedRectangleClip(RoundedRect rect) noexcept
+	{ }
+
+	RoundedRectangleClip::RoundedRectangleClip(const RoundedRect& rect) noexcept
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		factory->CreateRoundedRectangleGeometry(rect, GetAddress());
-	}
-	
-	RectangleClip::RectangleClip(ComPtr<ID2D1RectangleGeometry> geometry) noexcept : 
-		ComPtrHolder{ geometry }
-	{
-	}
-	RectangleClip::RectangleClip(RectF rect) noexcept
-	{
-		const auto& factory = Factories::D2DFactory::GetFactory();
-	
-		factory->CreateRectangleGeometry(rect, GetAddress());
+		const auto hr = factory->CreateRoundedRectangleGeometry(rect, GetAddress());
+		LogFailed(LogLevel::Error, hr);
 	}
 
-	EllipseClip::EllipseClip(ComPtr<ID2D1EllipseGeometry> geometry) noexcept : 
+	RectangleClip::RectangleClip(const ComPtr<ID2D1RectangleGeometry>& geometry) noexcept :
 		ComPtrHolder{ geometry }
-	{
-	}
-	EllipseClip::EllipseClip(Ellipse ellipse) noexcept
+	{ }
+
+	RectangleClip::RectangleClip(const RectF rect) noexcept
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		factory->CreateEllipseGeometry(ellipse, GetAddress());
+		const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
+		LogFailed(LogLevel::Error, hr);
 	}
 
-
-	PathClip::PathClip(ComPtr<ID2D1PathGeometry1> geometry) noexcept : 
+	EllipseClip::EllipseClip(const ComPtr<ID2D1EllipseGeometry>& geometry) noexcept :
 		ComPtrHolder{ geometry }
+	{ }
+
+	EllipseClip::EllipseClip(const Ellipse ellipse) noexcept
 	{
+		const auto& factory = Factories::D2DFactory::GetFactory();
+
+		const auto hr = factory->CreateEllipseGeometry(ellipse, GetAddress());
+		LogFailed(LogLevel::Error, hr);
 	}
-	PathClip::PathClip(const D2D::D2DPathGeometry& geometry) noexcept : 
+
+
+	PathClip::PathClip(const ComPtr<ID2D1PathGeometry1>& geometry) noexcept :
+		ComPtrHolder{ geometry }
+	{ }
+
+	PathClip::PathClip(const D2D::D2DPathGeometry& geometry) noexcept :
 		PathClip{ geometry.Get() }
-	{
-	}
+	{ }
 
 
-	RoundCornerClip::RoundCornerClip(ComPtr<ID2D1PathGeometry1> geometry) noexcept : 
+	RoundCornerClip::RoundCornerClip(const ComPtr<ID2D1PathGeometry1>& geometry) noexcept :
 		PathClip{ geometry }
-	{
-	}
-	RoundCornerClip::RoundCornerClip(const D2D::D2DPathGeometry& geometry) noexcept : 
-		PathClip{ geometry }
-	{
-	}
+	{ }
 
-	Clip::Clip(ClipParameters parameters) noexcept : 
+	RoundCornerClip::RoundCornerClip(const D2D::D2DPathGeometry& geometry) noexcept :
+		PathClip{ geometry }
+	{ }
+
+	Clip::Clip(ClipParameters parameters) noexcept :
 		parameters{ parameters }
-	{
-	}
-	void Clip::CreateClip()
+	{ }
+
+	auto Clip::CreateClip() -> void
 	{
 		ReleaseClip();
-		std::visit([this]<typename T>(const T & parameters)
+		std::visit([this]<typename T>(const T& parameters)
 		{
 			if constexpr (std::is_same_v<T, RectangleClipParameters>)
 			{
@@ -103,38 +105,42 @@ namespace PGUI::UI
 			}
 		}, parameters);
 	}
-	void Clip::ReleaseClip() noexcept
+
+	auto Clip::ReleaseClip() noexcept -> void
 	{
 		clip = EmptyClip{ };
 	}
-	void Clip::Clear() noexcept
+
+	auto Clip::Clear() noexcept -> void
 	{
 		ReleaseClip();
 		parameters = EmptyClipParameters{ };
 	}
 
-	void Clip::SetParameters(ClipParameters _parameters) noexcept
+	// ReSharper disable once CppParameterNamesMismatch
+	// ReSharper disable once CppInconsistentNaming
+	auto Clip::SetParameters(const ClipParameters& _parameters) noexcept -> void
 	{
 		if (!std::holds_alternative<RoundedRectangleClipParameters>(_parameters) &&
-			!std::holds_alternative<RoundCornerClipParameters>(_parameters))
+		    !std::holds_alternative<RoundCornerClipParameters>(_parameters))
 		{
 			parameters = _parameters;
 			return;
 		}
 		else if (std::holds_alternative<RoundedRectangleClipParameters>(_parameters))
 		{
-			const auto& params = std::get<RoundedRectangleClipParameters>(_parameters);
-			if (params.rect.xRadius == 0.0f && params.rect.yRadius == 0.0f)
+			if (const auto& params = std::get<RoundedRectangleClipParameters>(_parameters);
+				params.rect.xRadius == 0.0f && params.rect.yRadius == 0.0f)
 			{
-				parameters = RectangleClipParameters{ params.rect };
+				parameters = RectangleClipParameters{ RectF{ params.rect } };
 				return;
 			}
 		}
 
 		const auto& params = std::get<RoundCornerClipParameters>(_parameters);
-		if (params.topLeftRadius != params.topRightRadius || 
-			params.topRightRadius != params.bottomLeftRadius || 
-			params.bottomLeftRadius != params.bottomRightRadius)
+		if (params.topLeftRadius != params.topRightRadius ||
+		    params.topRightRadius != params.bottomLeftRadius ||
+		    params.bottomLeftRadius != params.bottomRightRadius)
 		{
 			parameters = _parameters;
 			return;
@@ -146,12 +152,14 @@ namespace PGUI::UI
 			return;
 		}
 
-		parameters = RoundedRectangleClipParameters{ RoundedRect{ params.rect, params.topLeftRadius, params.topLeftRadius } };
+		parameters = RoundedRectangleClipParameters{
+			RoundedRect{ params.rect, params.topLeftRadius, params.topLeftRadius }
+		};
 	}
 
 	auto Clip::GetGeometry() const noexcept -> D2D::D2DGeometry<>
 	{
-		return std::visit([]<typename T>(const T & clip) -> D2D::D2DGeometry<>
+		return std::visit([]<typename T>(const T& clip) -> D2D::D2DGeometry<>
 		{
 			if constexpr (!std::is_same_v<EmptyClip, T>)
 			{

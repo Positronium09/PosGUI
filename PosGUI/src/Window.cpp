@@ -1,7 +1,7 @@
 module;
-#include <Windows.h>
 #include <dwmapi.h>
 #include <ranges>
+#include <Windows.h>
 
 module PGUI.Window;
 
@@ -19,7 +19,7 @@ namespace PGUI
 		RegisterHandler(WM_DPICHANGED, &Window::_OnDpiChanged);
 	}
 
-	auto Window::OnDpiChanged(UINT /* unused */, RectL suggestedRect) -> MessageHandlerResult
+	auto Window::OnDpiChanged(UINT /* unused */, const RectL suggestedRect) -> MessageHandlerResult
 	{
 		MoveAndResize(suggestedRect);
 		return 0;
@@ -62,33 +62,36 @@ namespace PGUI
 		DestroyWindow(hWnd);
 	}
 
-	void Window::_RegisterHandler(UINT msg, const HandlerHWND& handler)
+	// ReSharper disable CppInconsistentNaming
+	auto Window::_RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void
 	{
 		messageHandlerMap[msg].push_back(handler);
 	}
 
-	void Window::_RegisterHandler(UINT msg, const Handler& handler)
+	auto Window::_RegisterHandler(const UINT msg, const Handler& handler) -> void
 	{
 		messageHandlerMap[msg].push_back(handler);
 	}
 
-	auto Window::_OnDpiChanged(UINT /* unused */, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult
+	auto Window::_OnDpiChanged(UINT /* unused */, const WPARAM wParam, const LPARAM lParam) -> MessageHandlerResult
 	{
 		return OnDpiChanged(LOWORD(wParam), *std::bit_cast<LPRECT>(lParam));
 	}
 
-	void Window::RemoveChildWindow(HWND childHwnd)
+	// ReSharper restore CppInconsistentNaming
+
+	auto Window::RemoveChildWindow(HWND childHwnd) -> void
 	{
-		auto found = std::ranges::find_if(childWindows,
-			[childHwnd](const auto& wnd) 
-		{
-			return wnd->hWnd == childHwnd;
-		});
+		const auto found = std::ranges::find_if(childWindows,
+		                                        [childHwnd](const auto& wnd) 
+		                                        {
+			                                        return wnd->hWnd == childHwnd;
+		                                        });
 		if (found == childWindows.end())
 		{
 			return;
 		}
-		auto& childWindow = *found;
+		const auto& childWindow = *found;
 		childWindows.erase(found);
 
 		SetParent(childHwnd, nullptr);
@@ -107,7 +110,7 @@ namespace PGUI
 		return GetWindowPtrFromHWND(parentHwnd);
 	}
 
-	void Window::Hook(MessageHooker& hooker) noexcept
+	auto Window::Hook(MessageHooker& hooker) noexcept -> void
 	{
 		if (hooker.hookedWindow != nullptr)
 		{
@@ -118,7 +121,7 @@ namespace PGUI
 		afterHookers.push_back(hooker);
 	}
 
-	void Window::HookBefore(MessageHooker& hooker) noexcept
+	auto Window::HookBefore(MessageHooker& hooker) noexcept -> void
 	{
 		if (hooker.hookedWindow != nullptr)
 		{
@@ -127,7 +130,8 @@ namespace PGUI
 		hooker.hookedWindow = this;
 		beforeHookers.push_back(hooker);
 	}
-	void Window::HookAfter(MessageHooker& hooker) noexcept
+
+	auto Window::HookAfter(MessageHooker& hooker) noexcept -> void
 	{
 		if (hooker.hookedWindow != nullptr)
 		{
@@ -136,7 +140,8 @@ namespace PGUI
 		hooker.hookedWindow = this;
 		afterHookers.push_back(hooker);
 	}
-	void Window::UnHook(MessageHooker& hooker) noexcept
+
+	auto Window::UnHook(MessageHooker& hooker) noexcept -> void
 	{
 		hooker.hookedWindow = nullptr;
 
@@ -155,7 +160,7 @@ namespace PGUI
 		afterHookers.erase(afterBegin, afterEnd);
 	}
 
-	void Window::UnHookBefore(MessageHooker& hooker) noexcept
+	auto Window::UnHookBefore(MessageHooker& hooker) noexcept -> void
 	{
 		hooker.hookedWindow = nullptr;
 
@@ -167,7 +172,7 @@ namespace PGUI
 		beforeHookers.erase(begin, end);
 	}
 
-	void Window::UnHookAfter(MessageHooker& hooker) noexcept
+	auto Window::UnHookAfter(MessageHooker& hooker) noexcept -> void
 	{
 		hooker.hookedWindow = nullptr;
 
@@ -179,14 +184,14 @@ namespace PGUI
 		afterHookers.erase(begin, end);
 	}
 
-	auto Window::AddTimer(TimerId id, std::chrono::milliseconds delay,
-		std::optional<TimerCallback> callback) noexcept -> TimerId
+	auto Window::AddTimer(const TimerId id, const std::chrono::milliseconds delay,
+	                      std::optional<TimerCallback> callback) noexcept -> TimerId
 	{
-		if (TimerId setTimerId =
+		if (const auto setTimerId =
 			SetTimer(hWnd, id, static_cast<UINT>(delay.count()), nullptr);
 			setTimerId == 0)
 		{
-			auto error = GetLastError();
+			const auto error = GetLastError();
 			LogFailed(LogLevel::Error, HresultFromWin32(error));
 			return setTimerId;
 		}
@@ -199,17 +204,17 @@ namespace PGUI
 		return id;
 	}
 
-	void Window::RemoveTimer(TimerId id) noexcept
+	auto Window::RemoveTimer(const TimerId id) noexcept -> void
 	{
 		if (!HasTimer(id))
 		{
 			return;
 		}
 
-		if (auto succeeded = KillTimer(hWnd, id);
+		if (const auto succeeded = KillTimer(hWnd, id);
 			succeeded == 0)
 		{
-			if (DWORD error = GetLastError();
+			if (const auto error = GetLastError();
 				error != ERROR_SUCCESS)
 			{
 				LogFailed(LogLevel::Error, HresultFromWin32(error));
@@ -225,7 +230,10 @@ namespace PGUI
 
 	auto Window::GetChildWindow(HWND hwnd) const noexcept -> WindowPtr<Window>
 	{
-		auto result = std::ranges::find_if(childWindows, [hwnd](const auto& wnd) { return wnd.get()->hWnd == hwnd; });
+		const auto result = std::ranges::find_if(childWindows, [hwnd](const auto& wnd)
+		{
+			return wnd.get()->hWnd == hwnd;
+		});
 
 		if (result == childWindows.end())
 		{
@@ -235,10 +243,10 @@ namespace PGUI
 		return *result;
 	}
 
-	auto Window::ChildWindowFromPoint(PointL point, UINT flags) const noexcept -> WindowPtr<Window>
+	auto Window::ChildWindowFromPoint(const PointL point, const UINT flags) const noexcept -> WindowPtr<Window>
 	{
 		WindowPtr<Window> wnd = nullptr;
-		if (HWND hwnd = ChildWindowFromPointEx(hWnd, point, flags);
+		if (const HWND hwnd = ChildWindowFromPointEx(hWnd, point, flags);
 			hwnd != nullptr)
 		{
 			return GetChildWindow(hwnd);
@@ -246,7 +254,7 @@ namespace PGUI
 		return wnd;
 	}
 
-	void Window::AdjustForClientSize(SizeI size) const noexcept
+	auto Window::AdjustForClientSize(const SizeI size) const noexcept -> void
 	{
 		RECT rc;
 		SetRect(&rc, 0, 0, size.cx, size.cy);
@@ -257,11 +265,11 @@ namespace PGUI
 			static_cast<DWORD>(GetWindowLongPtrW(hWnd, GWL_EXSTYLE)),
 			GetDPI());
 
-		RectL r = rc;
+		const RectL r = rc;
 		Resize(r.Size());
 	}
 
-	void Window::AdjustForRect(RectI rect) const noexcept
+	auto Window::AdjustForRect(const RectI rect) const noexcept -> void
 	{
 		RECT rc = rect;
 
@@ -305,15 +313,15 @@ namespace PGUI
 
 		return placement;
 	}
-	
-	auto Window::ScreenToClient(PointL point) const noexcept -> PointL
+
+	auto Window::ScreenToClient(const PointL point) const noexcept -> PointL
 	{
 		POINT p = point;
 		::ScreenToClient(hWnd, &p);
 		return p;
 	}
 
-	auto Window::ScreenToClient(RectL rect) const noexcept -> RectL
+	auto Window::ScreenToClient(const RectL rect) const noexcept -> RectL
 	{
 		RECT rc = rect;
 		::ScreenToClient(hWnd, std::bit_cast<LPPOINT>(&rc));
@@ -321,14 +329,14 @@ namespace PGUI
 		return rc;
 	}
 
-	auto Window::ClientToScreen(PointL point) const noexcept -> PointL
+	auto Window::ClientToScreen(const PointL point) const noexcept -> PointL
 	{
 		POINT p = point;
 		::ClientToScreen(hWnd, &p);
 		return p;
 	}
 
-	auto Window::ClientToScreen(RectL rect) const noexcept -> RectL
+	auto Window::ClientToScreen(const RectL rect) const noexcept -> RectL
 	{
 		RECT rc = rect;
 		::ClientToScreen(hWnd, std::bit_cast<LPPOINT>(&rc));
@@ -336,7 +344,7 @@ namespace PGUI
 		return rc;
 	}
 
-	void Window::CenterAroundWindow(WindowPtr<> wnd) const noexcept
+	auto Window::CenterAroundWindow(WindowPtr<> wnd) const noexcept -> void
 	{
 		if (wnd == nullptr)
 		{
@@ -357,7 +365,8 @@ namespace PGUI
 
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
-	void Window::CenterAroundWindow(HWND hwnd) const noexcept
+
+	auto Window::CenterAroundWindow(const HWND hwnd) const noexcept -> void
 	{
 		if (hwnd == nullptr)
 		{
@@ -367,7 +376,7 @@ namespace PGUI
 		RECT rc;
 		::GetWindowRect(hwnd, &rc);
 
-		RectL rect = rc;
+		const RectL rect = rc;
 		const auto center = rect.Center();
 		const auto centeredWindowRect = GetWindowRect().CenteredAround(center);
 
@@ -382,7 +391,7 @@ namespace PGUI
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
 
-	void Window::CenterAroundPoint(PointL point) const noexcept
+	auto Window::CenterAroundPoint(const PointL point) const noexcept -> void
 	{
 		const auto centeredWindowRect = GetWindowRect().CenteredAround(point);
 
@@ -396,7 +405,8 @@ namespace PGUI
 
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
-	void Window::CenterAroundRect(RectL rect) const noexcept
+
+	auto Window::CenterAroundRect(const RectL rect) const noexcept -> void
 	{
 		const auto center = rect.Center();
 		const auto centeredWindowRect = GetWindowRect().CenteredAround(center);
@@ -412,7 +422,7 @@ namespace PGUI
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
 
-	void Window::CenterAroundParent() const noexcept
+	auto Window::CenterAroundParent() const noexcept -> void
 	{
 		if (parentHwnd == nullptr)
 		{
@@ -427,7 +437,8 @@ namespace PGUI
 
 		SetPosition(centeredClientRect, PositionFlags::NoZOrder);
 	}
-	void Window::VerticallyCenterAroundParent() const noexcept
+
+	auto Window::VerticallyCenterAroundParent() const noexcept -> void
 	{
 		if (parentHwnd == nullptr)
 		{
@@ -445,7 +456,8 @@ namespace PGUI
 
 		SetPosition(centeredClientRect, PositionFlags::NoZOrder);
 	}
-	void Window::HorizontallyCenterAroundParent() const noexcept
+
+	auto Window::HorizontallyCenterAroundParent() const noexcept -> void
 	{
 		if (parentHwnd == nullptr)
 		{
@@ -464,7 +476,7 @@ namespace PGUI
 		SetPosition(centeredClientRect, PositionFlags::NoZOrder);
 	}
 
-	void Window::ModifyStyle(DWORD add, DWORD remove) const noexcept
+	auto Window::ModifyStyle(const DWORD add, const DWORD remove) const noexcept -> void
 	{
 		auto style = GetStyle();
 		style |= add;
@@ -472,7 +484,7 @@ namespace PGUI
 		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 	}
 
-	void Window::ModifyExStyle(DWORD add, DWORD remove) const noexcept
+	auto Window::ModifyExStyle(const DWORD add, const DWORD remove) const noexcept -> void
 	{
 		auto style = GetExStyle();
 		style |= add;
@@ -480,7 +492,8 @@ namespace PGUI
 		SetWindowLongPtrW(hWnd, GWL_EXSTYLE, style);
 	}
 
-	void Window::Flash(WindowFlashFlags flags, UINT count, std::chrono::milliseconds timeout) const noexcept
+	auto Window::Flash(const WindowFlashFlags flags, const UINT count,
+	                   const std::chrono::milliseconds timeout) const noexcept -> void
 	{
 		FLASHWINFO flashInfo{ 
 			.cbSize = sizeof(FLASHWINFO), 
@@ -492,7 +505,7 @@ namespace PGUI
 		FlashWindowEx(&flashInfo);
 	}
 
-	void Window::StopFlash() const noexcept
+	auto Window::StopFlash() const noexcept -> void
 	{
 		FLASHWINFO flashInfo{ 
 			.cbSize = sizeof(FLASHWINFO), 
@@ -504,30 +517,31 @@ namespace PGUI
 		FlashWindowEx(&flashInfo);
 	}
 
-	void Window::SetPosition(PointL position, SizeL size, PositionFlags flags, HWND insertAfter) const noexcept
+	auto Window::SetPosition(const PointL position, const SizeL size, PositionFlags flags,
+	                         const HWND insertAfter) const noexcept -> void
 	{
 		SetWindowPos(hWnd, insertAfter, position.x, position.y,
 			size.cx, size.cy, static_cast<UINT>(flags));
 	}
 
-	void Window::SetPosition(RectL rect, PositionFlags flags, HWND insertAfter) const noexcept
+	auto Window::SetPosition(const RectL rect, const PositionFlags flags, const HWND insertAfter) const noexcept -> void
 	{
 		SetPosition(rect.TopLeft(), rect.Size(), flags, insertAfter);
 	}
 
-	void Window::Move(PointL newPos) const noexcept
+	auto Window::Move(const PointL newPos) const noexcept -> void
 	{
 		SetPosition(newPos, SizeL{ }, 
 			PositionFlags::NoSize | PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
-	void Window::Resize(SizeL newSize) const noexcept
+	auto Window::Resize(const SizeL newSize) const noexcept -> void
 	{
 		SetPosition(PointL{ }, newSize,
 			PositionFlags::NoMove | PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
-	void Window::MoveAndResize(RectL newRect) const noexcept
+	auto Window::MoveAndResize(const RectL newRect) const noexcept -> void
 	{
 		const auto size = newRect.Size();
 
@@ -535,37 +549,38 @@ namespace PGUI
 			PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
-	void Window::MoveAndResize(PointL newPos, SizeL newSize) const noexcept
+	auto Window::MoveAndResize(const PointL newPos, const SizeL newSize) const noexcept -> void
 	{
 		SetPosition(newPos, newSize,
 			PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
-	auto Window::MapPoints(HWND hWndTo, std::span<PointL> points) const noexcept -> std::span<PointL>
+	auto Window::MapPoints(const HWND hWndTo, const std::span<PointL> points) const noexcept -> std::span<PointL>
 	{
 		return PGUI::MapPoints(hWnd, hWndTo, points);
 	}
 
-	auto Window::MapPoint(HWND hWndTo, PointL point) const noexcept -> PointL
+	auto Window::MapPoint(const HWND hWndTo, const PointL point) const noexcept -> PointL
 	{
 		return PGUI::MapPoint(hWnd, hWndTo, point);
 	}
 
-	auto Window::MapRects(HWND hWndTo, std::span<RectL> rects) const noexcept -> std::span<RectL>
+	auto Window::MapRects(const HWND hWndTo, const std::span<RectL> rects) const noexcept -> std::span<RectL>
 	{
 		return PGUI::MapRects(hWnd, hWndTo, rects);
 	}
 
-	auto Window::MapRect(HWND hWndTo, RectL rect) const noexcept -> RectL
+	auto Window::MapRect(const HWND hWndTo, const RectL rect) const noexcept -> RectL
 	{
 		return PGUI::MapRect(hWnd, hWndTo, rect);
 	}
 
+	// ReSharper disable once CppInconsistentNaming
 	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 	{
 		if (msg == WM_NCCREATE) [[unlikely]]
 		{
-			auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
+			const auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
 			auto* window = std::bit_cast<Window*>(createStruct->lpCreateParams);
 
 			window->hWnd = hWnd;
@@ -580,11 +595,11 @@ namespace PGUI
 			return result;
 		}
 
-		RawWindowPtr<Window> window = GetWindowPtrFromHWND(hWnd);
+		const RawWindowPtr<Window> window = GetWindowPtrFromHWND(hWnd);
 
 		if (msg == WM_TIMER)
 		{
-			auto timerId = wParam;
+			const auto timerId = wParam;
 			if (window->timerMap.contains(timerId))
 			{
 				const auto& callback = window->timerMap.at(timerId);
@@ -599,7 +614,7 @@ namespace PGUI
 		}
 
 		MessageHandlerResult result{ 0 };
-		bool hookerHandled = false;
+		auto hookerHandled = false;
 
 		for (const auto& hooker : window->beforeHookers)
 		{
@@ -611,9 +626,9 @@ namespace PGUI
 
 			for (const auto& messageHandlers : handlers.at(msg))
 			{
-				std::visit([&](const auto& handler)
+				std::visit([&]<typename Func>(const Func& handler)
 				{
-					using T = std::decay_t<decltype(handler)>;
+					using T = std::decay_t<Func>;
 					if constexpr (std::is_same_v<T, HandlerHWND>)
 					{
 						result = handler(hWnd, msg, wParam, lParam);
@@ -645,9 +660,9 @@ namespace PGUI
 		{
 			for (const auto& handlerVariant : window->messageHandlerMap.at(msg))
 			{
-				std::visit([&](const auto& handler)
+				std::visit([&]<typename Func>(const Func& handler)
 				{
-					using T = std::decay_t<decltype(handler)>;
+					using T = std::decay_t<Func>;
 					if constexpr (std::is_same_v<T, HandlerHWND>)
 					{
 						result = handler(hWnd, msg, wParam, lParam);
@@ -674,9 +689,9 @@ namespace PGUI
 
 			for (const auto& messageHandlers : handlers.at(msg))
 			{
-				std::visit([&](const auto& handler)
+				std::visit([&]<typename Func>(const Func& handler)
 				{
-					using T = std::decay_t<decltype(handler)>;
+					using T = std::decay_t<Func>;
 					if constexpr (std::is_same_v<T, HandlerHWND>)
 					{
 						result = handler(hWnd, msg, wParam, lParam);
@@ -686,8 +701,6 @@ namespace PGUI
 						result = handler(msg, wParam, lParam);
 					}
 				}, messageHandlers);
-
-				hookerHandled = true;
 
 				if (IsFlagSet(result.flags, ReturnFlags::ForceThisResult)) [[unlikely]]
 				{
@@ -714,7 +727,7 @@ namespace PGUI
 			createStruct->cy = AdjustForDPI(createStruct->cy,
 				static_cast<float>(GetDpiForWindow(hWnd)));
 
-			RectI rect{
+			const RectI rect{
 				PointI{ createStruct->x, createStruct->y },
 				SizeI{ createStruct->cx, createStruct->cy } };
 

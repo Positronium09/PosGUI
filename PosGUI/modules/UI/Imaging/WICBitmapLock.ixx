@@ -17,7 +17,7 @@ export namespace PGUI::UI::Imaging
 		public:
 		WICBitmapLock() noexcept = default;
 
-		explicit(false) WICBitmapLock(ComPtr<IWICBitmapLock> bitmapLock) noexcept;
+		explicit(false) WICBitmapLock(const ComPtr<IWICBitmapLock>& bitmapLock) noexcept;
 
 		[[nodiscard]] auto GetSize() const -> SizeU;
 

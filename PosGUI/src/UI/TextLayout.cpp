@@ -16,390 +16,517 @@ namespace PGUI::UI
 {
 	using namespace Font;
 
-	TextLayout::TextLayout(ComPtr<IDWriteTextLayout4> textLayout) noexcept : 
+	TextLayout::TextLayout(const ComPtr<IDWriteTextLayout4>& textLayout) noexcept :
 		ComPtrHolder{ textLayout }
-	{
-	}
+	{ }
 
-	TextLayout::TextLayout(std::wstring_view text, TextFormat textFormat, SizeF maxSize) noexcept
+	TextLayout::TextLayout(const std::wstring_view text, const TextFormat& textFormat, const SizeF maxSize) noexcept
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
-		auto hr = factory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()),
+		const auto hr = factory->CreateTextLayout(
+			text.data(), static_cast<UINT32>(text.size()),
 			textFormat.GetRawAs<IDWriteTextFormat3, IDWriteTextFormat>(),
-			maxSize.cx, maxSize.cy, 
-			std::bit_cast<IDWriteTextLayout**>(GetAddress())); ThrowFailed(hr);
+			maxSize.cx, maxSize.cy,
+			std::bit_cast<IDWriteTextLayout**>(GetAddress()));
+		LogFailed(LogLevel::Error, hr);
 	}
 
-	void TextLayout::SetTextAlignment(TextAlignment textAlignment) const noexcept
+	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> void
 	{
-		auto hr = Get()->SetTextAlignment(textAlignment); ThrowFailed(hr);
+		const auto hr = Get()->SetTextAlignment(textAlignment);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept
+
+	auto TextLayout::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> void
 	{
-		auto hr = Get()->SetParagraphAlignment(paragraphAlignment); ThrowFailed(hr);
+		const auto hr = Get()->SetParagraphAlignment(paragraphAlignment);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetWordWrapping(WordWrapping wordWrapping) const noexcept
+
+	auto TextLayout::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> void
 	{
-		auto hr = Get()->SetWordWrapping(wordWrapping); ThrowFailed(hr);
+		const auto hr = Get()->SetWordWrapping(wordWrapping);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetReadingDirection(ReadingDirection readingDirection) const noexcept
+
+	auto TextLayout::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> void
 	{
-		auto hr = Get()->SetReadingDirection(readingDirection); ThrowFailed(hr);
+		const auto hr = Get()->SetReadingDirection(readingDirection);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetFlowDirection(FlowDirection flowDirection) const noexcept
+
+	auto TextLayout::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> void
 	{
-		auto hr = Get()->SetFlowDirection(flowDirection); ThrowFailed(hr);
+		const auto hr = Get()->SetFlowDirection(flowDirection);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetIncrementalTabStop(float incrementalTabStop) const noexcept
+
+	auto TextLayout::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> void
 	{
-		auto hr = Get()->SetIncrementalTabStop(incrementalTabStop); ThrowFailed(hr);
+		const auto hr = Get()->SetIncrementalTabStop(incrementalTabStop);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetLineSpacing(LineSpacing lineSpacing) const noexcept
+
+	auto TextLayout::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> void
 	{
-		auto hr = Get()->SetLineSpacing(lineSpacing.method, 
-			lineSpacing.height, lineSpacing.baseline); ThrowFailed(hr);
+		const auto hr = Get()->SetLineSpacing(
+			lineSpacing.method, lineSpacing.height, lineSpacing.baseline);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetMaxWidth(float maxWidth) const noexcept
+
+	auto TextLayout::SetMaxWidth(const float maxWidth) const noexcept -> void
 	{
-		auto hr = Get()->SetMaxWidth(maxWidth); ThrowFailed(hr);
+		const auto hr = Get()->SetMaxWidth(maxWidth);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetMaxHeight(float maxHeight) const noexcept
+
+	auto TextLayout::SetMaxHeight(const float maxHeight) const noexcept -> void
 	{
-		auto hr = Get()->SetMaxHeight(maxHeight); ThrowFailed(hr);
+		const auto hr = Get()->SetMaxHeight(maxHeight);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetMaxSize(SizeF maxSize) const noexcept
+
+	auto TextLayout::SetMaxSize(const SizeF maxSize) const noexcept -> void
 	{
 		SetMaxWidth(maxSize.cx);
 		SetMaxHeight(maxSize.cy);
 	}
-	void TextLayout::SetFontCollection(FontCollection fontCollection, TextRange textRange) const noexcept
+
+	auto TextLayout::SetFontCollection(const FontCollection& fontCollection,
+	                                   const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetFontCollection(
+		const auto hr = Get()->SetFontCollection(
 			fontCollection.GetRawAs<IDWriteFontCollection3, IDWriteFontCollection>(),
-			textRange); ThrowFailed(hr);
+			textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetFontFamilyName(std::wstring_view fontFamilyName, TextRange textRange) const noexcept
+
+	auto TextLayout::SetFontFamilyName(const std::wstring_view fontFamilyName,
+	                                   const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetFontFamilyName(fontFamilyName.data(), textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetFontFamilyName(fontFamilyName.data(), textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetFontWeight(FontWeight fontWeight, TextRange textRange) const noexcept
+
+	auto TextLayout::SetFontWeight(const FontWeight fontWeight, const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetFontWeight(fontWeight, textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetFontWeight(fontWeight, textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetFontStyle(FontStyle fontStyle, TextRange textRange) const noexcept
+
+	auto TextLayout::SetFontStyle(const FontStyle fontStyle, const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetFontStyle(fontStyle, textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetFontStyle(fontStyle, textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetFontStretch(FontStretch fontStretch, TextRange textRange) const noexcept
+
+	auto TextLayout::SetFontStretch(const FontStretch fontStretch, const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetFontStretch(fontStretch, textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetFontStretch(fontStretch, textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetFontSize(float fontSize, TextRange textRange) const noexcept
+
+	auto TextLayout::SetFontSize(const float fontSize, const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetFontSize(fontSize, textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetFontSize(fontSize, textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetUnderline(bool hasUnderline, TextRange textRange) const noexcept
+
+	auto TextLayout::SetUnderline(const bool hasUnderline, const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetUnderline(hasUnderline, textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetUnderline(hasUnderline, textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetStrikethrough(bool hasStrikethrough, TextRange textRange) const noexcept
+
+	auto TextLayout::SetStrikethrough(const bool hasStrikethrough, const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetStrikethrough(hasStrikethrough, textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetStrikethrough(hasStrikethrough, textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetDrawingEffect(ComPtr<IUnknown> drawingEffect, TextRange textRange) const noexcept
+
+	auto TextLayout::SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect,
+	                                  const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetDrawingEffect(drawingEffect.Get(), textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetDrawingEffect(drawingEffect.Get(), textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetInlineObject(ComPtr<IDWriteInlineObject> inlineObject, TextRange textRange) const noexcept
+
+	auto TextLayout::SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject,
+	                                 const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetInlineObject(inlineObject.Get(), textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetInlineObject(inlineObject.Get(), textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetTypography(ComPtr<IDWriteTypography> typography, TextRange textRange) const noexcept
+
+	auto TextLayout::SetTypography(const ComPtr<IDWriteTypography>& typography,
+	                               const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetTypography(typography.Get(), textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetTypography(typography.Get(), textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetLocaleName(std::wstring_view localeName, TextRange textRange) const noexcept
+
+	auto TextLayout::SetLocaleName(const std::wstring_view localeName, const TextRange textRange) const noexcept -> void
 	{
-		auto hr = Get()->SetLocaleName(localeName.data(), textRange); ThrowFailed(hr);
+		const auto hr = Get()->SetLocaleName(localeName.data(), textRange);
+		LogFailed(LogLevel::Error, hr);
 	}
-	void TextLayout::SetTrimming(const Trimming& trimming) const noexcept
+
+	auto TextLayout::SetTrimming(const Trimming& trimming) const noexcept -> void
 	{
 		auto& trimmingOptions = trimming.trimmingOptions;
-		auto hr = Get()->SetTrimming(&trimmingOptions, trimming.GetRaw()); ThrowFailed(hr);
+		const auto hr = Get()->SetTrimming(&trimmingOptions, trimming.GetRaw());
+		LogFailed(LogLevel::Error, hr);
 	}
 
 	auto TextLayout::GetTrimming() const noexcept -> Trimming
 	{
 		Trimming trimming{ };
-		auto hr = Get()->GetTrimming(&trimming.trimmingOptions, 
-			trimming.GetAddress()); ThrowFailed(hr);
+		const auto hr = Get()->GetTrimming(
+			&trimming.trimmingOptions,
+			trimming.GetAddress());
+		LogFailed(LogLevel::Error, hr);
 
 		return trimming;
 	}
+
 	auto TextLayout::GetTextAlignment() const noexcept -> TextAlignment
 	{
 		return Get()->GetTextAlignment();
 	}
+
 	auto TextLayout::GetParagraphAlignment() const noexcept -> ParagraphAlignment
 	{
 		return Get()->GetParagraphAlignment();
 	}
+
 	auto TextLayout::GetWordWrapping() const noexcept -> WordWrapping
 	{
 		return Get()->GetWordWrapping();
 	}
+
 	auto TextLayout::GetReadingDirection() const noexcept -> ReadingDirection
 	{
 		return Get()->GetReadingDirection();
 	}
+
 	auto TextLayout::GetFlowDirection() const noexcept -> FlowDirection
 	{
 		return Get()->GetFlowDirection();
 	}
+
 	auto TextLayout::GetIncrementalTabStop() const noexcept -> float
 	{
 		return Get()->GetIncrementalTabStop();
 	}
+
 	auto TextLayout::GetLineSpacing() const noexcept -> LineSpacing
 	{
 		LineSpacing lineSpacing{ };
-		auto hr = Get()->GetLineSpacing(&lineSpacing.method, 
-			&lineSpacing.height, &lineSpacing.baseline); ThrowFailed(hr);
+		const auto hr = Get()->GetLineSpacing(
+			&lineSpacing.method,
+			&lineSpacing.height, &lineSpacing.baseline);
+		LogFailed(LogLevel::Error, hr);
 
 		return lineSpacing;
 	}
+
 	auto TextLayout::GetMaxWidth() const noexcept -> float
 	{
 		return Get()->GetMaxWidth();
 	}
+
 	auto TextLayout::GetMaxHeight() const noexcept -> float
 	{
 		return Get()->GetMaxHeight();
 	}
+
 	auto TextLayout::GetFontCollection() const noexcept -> FontCollection
 	{
 		FontCollection fontCollection{ nullptr };
-		auto hr = Get()->GetFontCollection(
-			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>()); ThrowFailed(hr);
+		const auto hr = Get()->GetFontCollection(
+			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
+		LogFailed(LogLevel::Error, hr);
 
 		return fontCollection;
 	}
-	auto TextLayout::GetFontCollection(UINT32 position) const noexcept -> FontCollection
+
+	auto TextLayout::GetFontCollection(const UINT32 position) const noexcept -> FontCollection
 	{
 		FontCollection fontCollection{ nullptr };
 
-		auto hr = Get()->GetFontCollection(position, 
-			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>()); ThrowFailed(hr);
-		
+		const auto hr = Get()->GetFontCollection(
+			position, fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
+		LogFailed(LogLevel::Error, hr);
+
 		return fontCollection;
 	}
-	auto TextLayout::GetFontCollection(UINT32 position, TextRange& textRange) const noexcept -> FontCollection
+
+	auto TextLayout::GetFontCollection(const UINT32 position, TextRange& textRange) const noexcept -> FontCollection
 	{
 		FontCollection fontCollection{ nullptr };
-		auto hr = Get()->GetFontCollection(position,
+		const auto hr = Get()->GetFontCollection(
+			position,
 			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>(),
-			&textRange); ThrowFailed(hr);
+			&textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontCollection;
 	}
+
 	auto TextLayout::GetFontFamilyName() const noexcept -> std::wstring
 	{
-		auto length = Get()->GetFontFamilyNameLength();
+		const auto length = Get()->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(length, L'\0');
 
-		auto hr = Get()->GetFontFamilyName(fontFamilyName.data(), length); ThrowFailed(hr);
+		const auto hr = Get()->GetFontFamilyName(fontFamilyName.data(), length);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontFamilyName;
 	}
-	auto TextLayout::GetFontFamilyName(UINT32 position) const noexcept -> std::wstring
+
+	auto TextLayout::GetFontFamilyName(const UINT32 position) const noexcept -> std::wstring
 	{
-		auto length = Get()->GetFontFamilyNameLength();
+		const auto length = Get()->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(length, L'\0');
 
-		auto hr = Get()->GetFontFamilyName(position, fontFamilyName.data(), length); ThrowFailed(hr);
+		const auto hr = Get()->GetFontFamilyName(position, fontFamilyName.data(), length);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontFamilyName;
 	}
-	auto TextLayout::GetFontFamilyName(UINT32 position, TextRange& textRange) const noexcept -> std::wstring
+
+	auto TextLayout::GetFontFamilyName(const UINT32 position, TextRange& textRange) const noexcept -> std::wstring
 	{
-		auto length = Get()->GetFontFamilyNameLength();
+		const auto length = Get()->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(length, L'\0');
 
-		auto hr = Get()->GetFontFamilyName(position, fontFamilyName.data(), length, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetFontFamilyName(position, fontFamilyName.data(), length, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontFamilyName;
 	}
+
 	auto TextLayout::GetFontWeight() const noexcept -> FontWeight
 	{
 		return Get()->GetFontWeight();
 	}
-	auto TextLayout::GetFontWeight(UINT32 position) const noexcept -> FontWeight
+
+	auto TextLayout::GetFontWeight(const UINT32 position) const noexcept -> FontWeight
 	{
 		DWRITE_FONT_WEIGHT fontWeight{ };
-		auto hr = Get()->GetFontWeight(position, &fontWeight); ThrowFailed(hr);
+		const auto hr = Get()->GetFontWeight(position, &fontWeight);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontWeight;
 	}
-	auto TextLayout::GetFontWeight(UINT32 position, TextRange& textRange) const noexcept -> FontWeight
+
+	auto TextLayout::GetFontWeight(const UINT32 position, TextRange& textRange) const noexcept -> FontWeight
 	{
 		DWRITE_FONT_WEIGHT fontWeight{ };
-		auto hr = Get()->GetFontWeight(position, &fontWeight, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetFontWeight(position, &fontWeight, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontWeight;
 	}
+
 	auto TextLayout::GetFontStyle() const noexcept -> FontStyle
 	{
 		return Get()->GetFontStyle();
 	}
-	auto TextLayout::GetFontStyle(UINT32 position) const noexcept -> FontStyle
+
+	auto TextLayout::GetFontStyle(const UINT32 position) const noexcept -> FontStyle
 	{
 		DWRITE_FONT_STYLE fontStyle{ };
-		auto hr = Get()->GetFontStyle(position, &fontStyle); ThrowFailed(hr);
+		const auto hr = Get()->GetFontStyle(position, &fontStyle);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontStyle;
 	}
-	auto TextLayout::GetFontStyle(UINT32 position, TextRange& textRange) const noexcept -> FontStyle
+
+	auto TextLayout::GetFontStyle(const UINT32 position, TextRange& textRange) const noexcept -> FontStyle
 	{
 		DWRITE_FONT_STYLE fontStyle{ };
-		auto hr = Get()->GetFontStyle(position, &fontStyle, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetFontStyle(position, &fontStyle, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontStyle;
 	}
+
 	auto TextLayout::GetFontStretch() const noexcept -> FontStretch
 	{
 		return Get()->GetFontStretch();
 	}
-	auto TextLayout::GetFontStretch(UINT32 position) const noexcept -> FontStretch
+
+	auto TextLayout::GetFontStretch(const UINT32 position) const noexcept -> FontStretch
 	{
 		DWRITE_FONT_STRETCH fontStretch{ };
-		auto hr = Get()->GetFontStretch(position, &fontStretch); ThrowFailed(hr);
+		const auto hr = Get()->GetFontStretch(position, &fontStretch);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontStretch;
 	}
-	auto TextLayout::GetFontStretch(UINT32 position, TextRange& textRange) const noexcept -> FontStretch
+
+	auto TextLayout::GetFontStretch(const UINT32 position, TextRange& textRange) const noexcept -> FontStretch
 	{
 		DWRITE_FONT_STRETCH fontStretch{ };
-		auto hr = Get()->GetFontStretch(position, &fontStretch, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetFontStretch(position, &fontStretch, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontStretch;
 	}
+
 	auto TextLayout::GetFontSize() const noexcept -> float
 	{
 		return Get()->GetFontSize();
 	}
-	auto TextLayout::GetFontSize(UINT32 position) const noexcept -> float
+
+	auto TextLayout::GetFontSize(const UINT32 position) const noexcept -> float
 	{
 		float fontSize{ };
-		auto hr = Get()->GetFontSize(position, &fontSize); ThrowFailed(hr);
+		const auto hr = Get()->GetFontSize(position, &fontSize);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontSize;
 	}
-	auto TextLayout::GetFontSize(UINT32 position, TextRange& textRange) const noexcept -> float
+
+	auto TextLayout::GetFontSize(const UINT32 position, TextRange& textRange) const noexcept -> float
 	{
 		float fontSize{ };
-		auto hr = Get()->GetFontSize(position, &fontSize, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetFontSize(position, &fontSize, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return fontSize;
 	}
-	auto TextLayout::GetUnderline(UINT32 position) const noexcept -> bool
+
+	auto TextLayout::GetUnderline(const UINT32 position) const noexcept -> bool
 	{
 		BOOL underline{ };
-		auto hr = Get()->GetUnderline(position, &underline); ThrowFailed(hr);
+		const auto hr = Get()->GetUnderline(position, &underline);
+		LogFailed(LogLevel::Error, hr);
 
 		return underline;
 	}
-	auto TextLayout::GetUnderline(UINT32 position, TextRange& textRange) const noexcept -> bool
+
+	auto TextLayout::GetUnderline(const UINT32 position, TextRange& textRange) const noexcept -> bool
 	{
 		BOOL underline{ };
-		auto hr = Get()->GetUnderline(position, &underline, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetUnderline(position, &underline, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return underline;
 	}
-	auto TextLayout::GetStrikethrough(UINT32 position) const noexcept -> bool
+
+	auto TextLayout::GetStrikethrough(const UINT32 position) const noexcept -> bool
 	{
 		BOOL strikethrough{ };
-		auto hr = Get()->GetStrikethrough(position, &strikethrough); ThrowFailed(hr);
+		const auto hr = Get()->GetStrikethrough(position, &strikethrough);
+		LogFailed(LogLevel::Error, hr);
 
 		return strikethrough;
 	}
-	auto TextLayout::GetStrikethrough(UINT32 position, TextRange& textRange) const noexcept -> bool
+
+	auto TextLayout::GetStrikethrough(const UINT32 position, TextRange& textRange) const noexcept -> bool
 	{
 		BOOL strikethrough{ };
-		auto hr = Get()->GetStrikethrough(position, &strikethrough, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetStrikethrough(position, &strikethrough, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return strikethrough;
 	}
-	auto TextLayout::GetDrawingEffect(UINT32 position) const noexcept -> ComPtr<IUnknown>
+
+	auto TextLayout::GetDrawingEffect(const UINT32 position) const noexcept -> ComPtr<IUnknown>
 	{
 		ComPtr<IUnknown> drawingEffect;
-		auto hr = Get()->GetDrawingEffect(position, drawingEffect.GetAddressOf(), nullptr); ThrowFailed(hr);
-		
-		return drawingEffect;
-	}
-	auto TextLayout::GetDrawingEffect(UINT32 position, TextRange& textRange) const noexcept -> ComPtr<IUnknown>
-	{
-		ComPtr<IUnknown> drawingEffect;
-		auto hr = Get()->GetDrawingEffect(position, drawingEffect.GetAddressOf(), &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetDrawingEffect(position, drawingEffect.GetAddressOf(), nullptr);
+		LogFailed(LogLevel::Error, hr);
 
 		return drawingEffect;
 	}
-	auto TextLayout::GetInlineObject(UINT32 position) const noexcept -> ComPtr<IDWriteInlineObject>
+
+	auto TextLayout::GetDrawingEffect(const UINT32 position, TextRange& textRange) const noexcept -> ComPtr<IUnknown>
+	{
+		ComPtr<IUnknown> drawingEffect;
+		const auto hr = Get()->GetDrawingEffect(position, drawingEffect.GetAddressOf(), &textRange);
+		LogFailed(LogLevel::Error, hr);
+
+		return drawingEffect;
+	}
+
+	auto TextLayout::GetInlineObject(const UINT32 position) const noexcept -> ComPtr<IDWriteInlineObject>
 	{
 		ComPtr<IDWriteInlineObject> inlineObject;
-		auto hr = Get()->GetInlineObject(position, inlineObject.GetAddressOf(), nullptr); ThrowFailed(hr);
+		const auto hr = Get()->GetInlineObject(position, inlineObject.GetAddressOf(), nullptr);
+		LogFailed(LogLevel::Error, hr);
 
 		return inlineObject;
 	}
-	auto TextLayout::GetInlineObject(UINT32 position, TextRange& textRange) const noexcept -> ComPtr<IDWriteInlineObject>
+
+	auto TextLayout::GetInlineObject(
+		const UINT32 position,
+		TextRange& textRange) const noexcept -> ComPtr<IDWriteInlineObject>
 	{
 		ComPtr<IDWriteInlineObject> inlineObject;
-		auto hr = Get()->GetInlineObject(position, inlineObject.GetAddressOf(), &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetInlineObject(position, inlineObject.GetAddressOf(), &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return inlineObject;
 	}
-	auto TextLayout::GetTypography(UINT32 position) const noexcept -> ComPtr<IDWriteTypography>
+
+	auto TextLayout::GetTypography(const UINT32 position) const noexcept -> ComPtr<IDWriteTypography>
 	{
 		ComPtr<IDWriteTypography> typography;
-		auto hr = Get()->GetTypography(position, typography.GetAddressOf(), nullptr); ThrowFailed(hr);
+		const auto hr = Get()->GetTypography(position, typography.GetAddressOf(), nullptr);
+		LogFailed(LogLevel::Error, hr);
 
 		return typography;
 	}
-	auto TextLayout::GetTypography(UINT32 position, TextRange& textRange) const noexcept -> ComPtr<IDWriteTypography>
+
+	auto TextLayout::GetTypography(const UINT32 position,
+	                               TextRange& textRange) const noexcept -> ComPtr<IDWriteTypography>
 	{
 		ComPtr<IDWriteTypography> typography;
-		auto hr = Get()->GetTypography(position, typography.GetAddressOf(), &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetTypography(position, typography.GetAddressOf(), &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return typography;
 	}
+
 	auto TextLayout::GetLocaleName() const noexcept -> std::wstring
 	{
-		auto length = Get()->GetLocaleNameLength();
+		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
-		auto hr = Get()->GetLocaleName(localeName.data(), length); ThrowFailed(hr);
+		const auto hr = Get()->GetLocaleName(localeName.data(), length);
+		LogFailed(LogLevel::Error, hr);
 
 		return localeName;
 	}
-	auto TextLayout::GetLocaleName(UINT32 position) const noexcept -> std::wstring
+
+	auto TextLayout::GetLocaleName(const UINT32 position) const noexcept -> std::wstring
 	{
-		auto length = Get()->GetLocaleNameLength();
+		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
 
-		auto hr = Get()->GetLocaleName(position, localeName.data(), length); ThrowFailed(hr);
+		const auto hr = Get()->GetLocaleName(position, localeName.data(), length);
+		LogFailed(LogLevel::Error, hr);
 
 		return localeName;
 	}
-	auto TextLayout::GetLocaleName(UINT32 position, TextRange& textRange) const noexcept -> std::wstring
+
+	auto TextLayout::GetLocaleName(const UINT32 position, TextRange& textRange) const noexcept -> std::wstring
 	{
-		auto length = Get()->GetLocaleNameLength();
+		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
-		auto hr = Get()->GetLocaleName(position, localeName.data(), length, &textRange); ThrowFailed(hr);
+		const auto hr = Get()->GetLocaleName(position, localeName.data(), length, &textRange);
+		LogFailed(LogLevel::Error, hr);
 
 		return localeName;
 	}
+
 	auto TextLayout::DetermineMinWidth() const noexcept -> float
 	{
-		FLOAT minWidth = 0.0F;
-		auto hr = Get()->DetermineMinWidth(&minWidth); ThrowFailed(hr);
+		auto minWidth = 0.0F;
+		const auto hr = Get()->DetermineMinWidth(&minWidth);
+		LogFailed(LogLevel::Error, hr);
 
 		return minWidth;
 	}

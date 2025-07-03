@@ -26,8 +26,9 @@ namespace PGUI::UI::Animation
 
 		auto __stdcall Release() -> ULONG override;
 
-		auto __stdcall OnManagerStatusChanged(UI_ANIMATION_MANAGER_STATUS newStatus,
-		                                      UI_ANIMATION_MANAGER_STATUS previousStatus) -> HRESULT override;
+		auto __stdcall OnManagerStatusChanged(
+			UI_ANIMATION_MANAGER_STATUS newStatus,
+			UI_ANIMATION_MANAGER_STATUS previousStatus)->HRESULT override;
 
 		auto SetHandler(const ManagerStatusChangedHandler& handler) noexcept -> void;
 
@@ -72,7 +73,8 @@ export namespace PGUI::UI::Animation
 		private:
 		Event<AnimationManagerStatus, AnimationManagerStatus> managerStatusChangedEvent{ };
 
-		auto OnManagerStatusChanged(AnimationManagerStatus newStatus,
-		                            AnimationManagerStatus previousStatus) -> void override;
+		auto OnManagerStatusChanged(
+			AnimationManagerStatus newStatus,
+			AnimationManagerStatus previousStatus) -> void override;
 	};
 }

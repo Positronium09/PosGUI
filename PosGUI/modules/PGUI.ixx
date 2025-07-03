@@ -3,7 +3,6 @@ export module PGUI;
 export import PGUI.Window;
 export import PGUI.WindowClass;
 export import PGUI.MessageLoop;
-export import PGUI.EnumFlag;
 export import PGUI.Event;
 export import PGUI.Exceptions;
 export import PGUI.IEnumStringIterator;

@@ -10,7 +10,6 @@ import PGUI.WindowClass;
 import PGUI.Shape2D;
 import PGUI.Exceptions;
 import PGUI.Logging;
-import PGUI.EnumFlag;
 
 export namespace PGUI
 {
@@ -23,10 +22,7 @@ export namespace PGUI
 		ForceThisResult = 2,
 		NoFurtherHandling = 4
 	};
-
-	template <>
-	struct IsEnumFlagEnabled<ReturnFlags> : Enabled
-	{ };
+	DEFINE_ENUM_FLAG_OPERATORS(ReturnFlags);
 
 	struct MessageHandlerResult
 	{
@@ -80,10 +76,7 @@ export namespace PGUI
 		TimerNoFG = FLASHW_TIMERNOFG,
 		Tray = FLASHW_TRAY
 	};
-
-	template <>
-	struct IsEnumFlagEnabled<WindowFlashFlags> : Enabled
-	{ };
+	DEFINE_ENUM_FLAG_OPERATORS(WindowFlashFlags);
 
 	enum class WindowLongPtrIndex : int
 	{
@@ -139,10 +132,7 @@ export namespace PGUI
 		NoZOrder = SWP_NOZORDER,
 		ShowWindow = SWP_SHOWWINDOW
 	};
-
-	template <>
-	struct IsEnumFlagEnabled<PositionFlags> : Enabled
-	{ };
+	DEFINE_ENUM_FLAG_OPERATORS(PositionFlags);
 
 	enum class WindowPlacementFlags
 	{
@@ -150,10 +140,7 @@ export namespace PGUI
 		RestoreToMaximized = WPF_RESTORETOMAXIMIZED,
 		AsyncWindowPlacement = WPF_ASYNCWINDOWPLACEMENT
 	};
-
-	template <>
-	struct IsEnumFlagEnabled<WindowPlacementFlags> : Enabled
-	{ };
+	DEFINE_ENUM_FLAG_OPERATORS(WindowPlacementFlags);
 
 	namespace InsertAfter
 	{
@@ -275,6 +262,7 @@ export namespace PGUI
 		{
 			messageHandlerMap[msg].push_back(handler);
 		}
+
 		// ReSharper restore CppInconsistentNaming
 	};
 
@@ -607,6 +595,7 @@ export namespace PGUI
 		auto _RegisterHandler(UINT msg, const Handler& handler) -> void;
 
 		auto _OnDpiChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+
 		// ReSharper restore CppInconsistentNaming
 
 		MessageHandlerMap messageHandlerMap;
@@ -619,5 +608,6 @@ export namespace PGUI
 		HWND parentHwnd = nullptr;
 	};
 
+	// ReSharper disable once CppInconsistentNaming
 	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
 }

@@ -10,9 +10,9 @@ import std;
 import PGUI.ComPtr;
 import PGUI.Exceptions;
 
-namespace  PGUI::UI::Animation
+namespace PGUI::UI::Animation
 {
-	AnimationTransition::AnimationTransition(ComPtr<IUIAnimationTransition2> ptr) noexcept : 
+	AnimationTransition::AnimationTransition(const ComPtr<IUIAnimationTransition2>& ptr) noexcept :
 		ComPtrHolder{ ptr }
 	{
 	}
@@ -20,38 +20,51 @@ namespace  PGUI::UI::Animation
 	auto AnimationTransition::GetDimension() const -> UINT
 	{
 		UINT dimension;
-		auto hr = Get()->GetDimension(&dimension); ThrowFailed(hr);
+		const auto hr = Get()->GetDimension(&dimension);
+		ThrowFailed(hr);
 
 		return dimension;
 	}
+
 	auto AnimationTransition::GetDuration() const -> double
 	{
 		double duration;
-		auto hr = Get()->GetDuration(&duration); ThrowFailed(hr);
+		const auto hr = Get()->GetDuration(&duration);
+		ThrowFailed(hr);
 
 		return duration;
 	}
+
 	auto AnimationTransition::IsDurationKnown() const noexcept -> bool
 	{
 		return Get()->IsDurationKnown() == S_OK;
 	}
 
-	void AnimationTransition::SetInitialValue(double value) const
+	auto AnimationTransition::SetInitialValue(const double value) const -> void
 	{
-		auto hr = Get()->SetInitialValue(value); ThrowFailed(hr);
+		const auto hr = Get()->SetInitialValue(value);
+		ThrowFailed(hr);
 	}
-	void AnimationTransition::SetInitialValue(std::span<const double> values) const
+
+	auto AnimationTransition::SetInitialValue(const std::span<const double> values) const -> void
 	{
-		auto hr = Get()->SetInitialVectorValue(values.data(), 
-			static_cast<UINT>(values.size())); ThrowFailed(hr);
+		const auto hr = Get()->SetInitialVectorValue(
+			values.data(),
+			static_cast<UINT>(values.size()));
+		ThrowFailed(hr);
 	}
-	void AnimationTransition::SetInitialVelocity(double velocity) const
+
+	auto AnimationTransition::SetInitialVelocity(const double velocity) const -> void
 	{
-		auto hr = Get()->SetInitialVelocity(velocity); ThrowFailed(hr);
+		const auto hr = Get()->SetInitialVelocity(velocity);
+		ThrowFailed(hr);
 	}
-	void AnimationTransition::SetInitialVelocity(std::span<const double> velocities) const
+
+	auto AnimationTransition::SetInitialVelocity(const std::span<const double> velocities) const -> void
 	{
-		auto hr = Get()->SetInitialVectorVelocity(velocities.data(),
-			static_cast<UINT>(velocities.size())); ThrowFailed(hr);
+		const auto hr = Get()->SetInitialVectorVelocity(
+			velocities.data(),
+			static_cast<UINT>(velocities.size()));
+		ThrowFailed(hr);
 	}
 }

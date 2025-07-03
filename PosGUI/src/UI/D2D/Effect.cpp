@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <d2d1_1.h>
+#include <wrl.h>
 
 module PGUI.UI.D2D.Effect;
 
@@ -9,12 +9,11 @@ import PGUI.Exceptions;
 
 namespace PGUI::UI::D2D
 {
-	Effect::Effect(ComPtr<ID2D1Effect> effect) noexcept : 
+	Effect::Effect(const ComPtr<ID2D1Effect>& effect) noexcept :
 		ComPtrHolder{ effect }
-	{
-	}
+	{ }
 
-	auto Effect::GetInput(UINT32 index) const noexcept -> D2DImage<>
+	auto Effect::GetInput(const UINT32 index) const noexcept -> D2DImage<>
 	{
 		D2DImage<> image;
 		Get()->GetInput(index, image.GetAddress());
@@ -30,20 +29,25 @@ namespace PGUI::UI::D2D
 		return image;
 	}
 
-	void Effect::SetInput(UINT32 index, D2DImage<> image, bool invalidate) noexcept
+	auto Effect::SetInput(
+		const UINT32 index,
+		D2DImage<> image,
+		const bool invalidate) noexcept -> void
 	{
 		Get()->SetInput(index, image.GetRaw(), invalidate);
 	}
 
-	void Effect::SetInputEffect(UINT32 index, Effect effect, bool invalidate) noexcept
+	auto Effect::SetInputEffect(
+		const UINT32 index,
+		Effect effect,
+		const bool invalidate) noexcept -> void
 	{
 		Get()->SetInputEffect(index, effect.GetRaw(), invalidate);
 	}
 
-	void Effect::SetInputCount(UINT32 count)
+	auto Effect::SetInputCount(const UINT32 count) -> void
 	{
-		auto hr = Get()->SetInputCount(count); ThrowFailed(hr);
+		const auto hr = Get()->SetInputCount(count);
+		ThrowFailed(hr);
 	}
-
-
 }

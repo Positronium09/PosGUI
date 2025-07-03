@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <dwrite_3.h>
+#include <wrl.h>
 
 module PGUI.UI.Font.FontCollection;
 
@@ -18,48 +18,57 @@ namespace PGUI::UI::Font
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 
 		ComPtr<IDWriteFontCollection3> fontCollection;
-		auto hr = factory->GetSystemFontCollection(false,  DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC, 
-			fontCollection.GetAddressOf()); ThrowFailed(hr);
+		const auto hr = factory->GetSystemFontCollection(
+			false, DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC,
+			fontCollection.GetAddressOf());
+		ThrowFailed(hr);
 
 		return fontCollection;
 	}
 
-	auto FontCollection::LoadFontFile(std::filesystem::path filePath) -> FontCollection
+	auto FontCollection::LoadFontFile(const std::filesystem::path& filePath) -> FontCollection
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 		ComPtr<IDWriteFontSetBuilder2> fontSetBuilder;
 
-		auto hr = factory->CreateFontSetBuilder(&fontSetBuilder); ThrowFailed(hr);
+		auto hr = factory->CreateFontSetBuilder(&fontSetBuilder);
+		ThrowFailed(hr);
 
 		ComPtr<IDWriteFontFile> fontFile;
-		hr = factory->CreateFontFileReference(filePath.c_str(), nullptr, &fontFile); ThrowFailed(hr);
+		hr = factory->CreateFontFileReference(filePath.c_str(), nullptr, &fontFile);
+		ThrowFailed(hr);
 
-		fontSetBuilder->AddFontFile(fontFile.Get());
+		hr = fontSetBuilder->AddFontFile(fontFile.Get());
+		ThrowFailed(hr);
 
 		ComPtr<IDWriteFontSet> fontSet;
-		hr = fontSetBuilder->CreateFontSet(&fontSet); ThrowFailed(hr);
+		hr = fontSetBuilder->CreateFontSet(&fontSet);
+		ThrowFailed(hr);
 
 		ComPtr<IDWriteFontCollection1> fontCollection;
-		hr = factory->CreateFontCollectionFromFontSet(fontSet.Get(), &fontCollection); ThrowFailed(hr);
+		hr = factory->CreateFontCollectionFromFontSet(fontSet.Get(), &fontCollection);
+		ThrowFailed(hr);
 
 		ComPtr<IDWriteFontCollection3> fontCollection3;
-		hr = fontCollection.As(&fontCollection3); ThrowFailed(hr);
+		hr = fontCollection.As(&fontCollection3);
+		ThrowFailed(hr);
 
 		return fontCollection3;
 	}
 
-	FontCollection::FontCollection(ComPtr<IDWriteFontCollection3> collection) noexcept :
+	FontCollection::FontCollection(const ComPtr<IDWriteFontCollection3>& collection) noexcept :
 		ComPtrHolder{ collection }
-	{
-	}
+	{ }
 
-	auto FontCollection::FindFontFamilyByName(std::wstring_view fontFamilyName) const noexcept -> std::expected<UINT32, bool>
+	auto FontCollection::FindFontFamilyByName(
+		const std::wstring_view fontFamilyName) const noexcept -> std::expected<UINT32, bool>
 	{
 		auto& ptr = Get();
 
 		UINT32 result;
 		BOOL exists;
-		auto hr = ptr->FindFamilyName(fontFamilyName.data(), &result, &exists); LogFailed(LogLevel::Error, hr);
+		const auto hr = ptr->FindFamilyName(fontFamilyName.data(), &result, &exists);
+		LogFailed(LogLevel::Error, hr);
 
 		if (!exists)
 		{
@@ -69,46 +78,50 @@ namespace PGUI::UI::Font
 		return result;
 	}
 
-	auto FontCollection::GetFontFamily(std::wstring_view fontFamilyName) const noexcept -> FontFamily
+	auto FontCollection::GetFontFamily(
+		const std::wstring_view fontFamilyName) const noexcept -> FontFamily
 	{
-		auto found = FindFontFamilyByName(fontFamilyName);
-		if (found)
+		if (const auto found = FindFontFamilyByName(fontFamilyName))
 		{
 			return GetFontFamily(*found);
 		}
 
 		return FontFamily{ nullptr };
 	}
-	
-	auto FontCollection::GetFontFamily(UINT32 index) const noexcept -> FontFamily
+
+	auto FontCollection::GetFontFamily(const UINT32 index) const noexcept -> FontFamily
 	{
 		auto& ptr = Get();
 
 		ComPtr<IDWriteFontFamily2> family;
-		auto hr = ptr->GetFontFamily(index, family.GetAddressOf()); ThrowFailed(hr);
+		const auto hr = ptr->GetFontFamily(index, family.GetAddressOf());
+		ThrowFailed(hr);
 
 		return family;
 	}
-	
+
 	auto FontCollection::GetFontSet() const -> FontSet
 	{
 		auto& ptr = Get();
 
 		ComPtr<IDWriteFontSet1> fontSet1;
 		ComPtr<IDWriteFontSet4> fontSet;
-		auto hr = ptr->GetFontSet(fontSet1.GetAddressOf()); ThrowFailed(hr);
+		auto hr = ptr->GetFontSet(fontSet1.GetAddressOf());
+		ThrowFailed(hr);
 
-		hr = fontSet1.As(&fontSet);  ThrowFailed(hr);
+		hr = fontSet1.As(&fontSet);
+		ThrowFailed(hr);
 
 		return fontSet;
 	}
-	
+
 	auto FontCollection::GetFontFamilyCount() const noexcept -> UINT32
 	{
 		auto& ptr = Get();
 
 		return ptr->GetFontFamilyCount();
 	}
+
 	auto FontCollection::GetExpirationEvent() const noexcept -> HANDLE
 	{
 		auto& ptr = Get();

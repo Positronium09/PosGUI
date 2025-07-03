@@ -11,7 +11,6 @@ import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.UI.Brush;
 import PGUI.UI.Color;
-import PGUI.EnumFlag;
 import PGUI.Exceptions;
 import PGUI.UI.TextFormat;
 import PGUI.UI.Font.FontEnums;
@@ -80,8 +79,10 @@ export namespace PGUI::UI::D2D
 			return D2DBitmap{ bitmap1 };
 		}
 
-		[[nodiscard]] auto CreateBitmap(SizeU size, std::span<std::byte> sourceData, UINT32 pitch,
-		                                BitmapProperties properties)
+		[[nodiscard]] auto CreateBitmap(
+			SizeU size, 
+			std::span<std::byte> sourceData, 
+			UINT32 pitch, BitmapProperties properties)
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
 			ComPtr<ID2D1Bitmap1> bitmap1;
@@ -93,13 +94,15 @@ export namespace PGUI::UI::D2D
 			return D2DBitmap{ bitmap1 };
 		}
 
-		[[nodiscard]] auto CreateBitmapFromSource(const Imaging::BitmapSource<>& source,
-		                                          std::optional<BitmapProperties> properties)
+		[[nodiscard]] auto CreateBitmapFromSource(
+			const Imaging::BitmapSource<>& source,
+			std::optional<BitmapProperties> properties)
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
 			ComPtr<ID2D1Bitmap1> bitmap1;
-			auto hr = this->Get()->CreateBitmapFromWicBitmap(source.GetRawAs<IWICBitmapSource>(),
-			                                                 properties.has_value() ? &properties : nullptr, &bitmap);
+			auto hr = this->Get()->CreateBitmapFromWicBitmap(
+				source.GetRawAs<IWICBitmapSource>(),
+				properties.has_value() ? &properties : nullptr, &bitmap);
 			ThrowFailed(hr);
 
 			hr = bitmap.As(&bitmap1);

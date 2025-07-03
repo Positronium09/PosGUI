@@ -17,10 +17,10 @@ import :AnimationEnums;
 namespace PGUI::UI::Animation
 {
 	AnimationVariableChangeEventHandlerRouter::AnimationVariableChangeEventHandlerRouter(
-		const AnimationVariableChangeHandler& handler) noexcept : 
+		const AnimationVariableChangeHandler& handler) noexcept :
 		handler{ handler }
-	{
-	}
+	{ }
+
 	auto __stdcall AnimationVariableChangeEventHandlerRouter::QueryInterface(const IID& iid, void** obj) -> HRESULT
 	{
 		if (obj == nullptr)
@@ -44,9 +44,10 @@ namespace PGUI::UI::Animation
 	{
 		return InterlockedIncrement(&referenceCount);
 	}
+
 	auto __stdcall AnimationVariableChangeEventHandlerRouter::Release() -> ULONG
 	{
-		auto refCount = InterlockedDecrement(&referenceCount);
+		const auto refCount = InterlockedDecrement(&referenceCount);
 		if (0 == refCount)
 		{
 			delete this;
@@ -55,8 +56,8 @@ namespace PGUI::UI::Animation
 	}
 
 	auto __stdcall AnimationVariableChangeEventHandlerRouter::OnValueChanged(
-		IUIAnimationStoryboard2* storyboard, IUIAnimationVariable2* variable, 
-		DOUBLE* newValues, DOUBLE* previousValues, UINT dimension) -> HRESULT
+		IUIAnimationStoryboard2* storyboard, IUIAnimationVariable2* variable,
+		DOUBLE* newValues, DOUBLE* previousValues, const UINT dimension) -> HRESULT
 	{
 		std::scoped_lock lock{ handlerMutex };
 		if (!handler)
@@ -64,20 +65,21 @@ namespace PGUI::UI::Animation
 			return E_NOTIMPL;
 		}
 
-		std::span<double> newValueSpan{ newValues, dimension };
-		std::span<double> previousValueSpan{ previousValues, dimension };
+		const std::span newValueSpan{ newValues, dimension };
+		const std::span previousValueSpan{ previousValues, dimension };
 
 		return handler(Storyboard{ storyboard }, AnimationVariable{ variable },
-			newValueSpan, previousValueSpan);
+		               newValueSpan, previousValueSpan);
 	}
 
-	void AnimationVariableChangeEventHandlerRouter::SetHandler(
-		const AnimationVariableChangeHandler& newHandler) noexcept
+	auto AnimationVariableChangeEventHandlerRouter::SetHandler(
+		const AnimationVariableChangeHandler& newHandler) noexcept -> void
 	{
 		std::scoped_lock lock{ handlerMutex };
 		handler = newHandler;
 	}
-	void AnimationVariableChangeEventHandlerRouter::ClearHandler() noexcept
+
+	auto AnimationVariableChangeEventHandlerRouter::ClearHandler() noexcept -> void
 	{
 		std::scoped_lock lock{ handlerMutex };
 		handler = nullptr;
@@ -85,12 +87,12 @@ namespace PGUI::UI::Animation
 
 
 	AnimationVariableIntegerChangeEventHandlerRouter::AnimationVariableIntegerChangeEventHandlerRouter(
-		const AnimationIntegerVariableChangeHandler& handler) noexcept : 
+		const AnimationIntegerVariableChangeHandler& handler) noexcept :
 		handler{ handler }
-	{
-	}
+	{ }
 
-	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::QueryInterface(const IID& iid, void** obj) -> HRESULT
+	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::QueryInterface(
+		const IID& iid, void** obj) -> HRESULT
 	{
 		if (obj == nullptr)
 		{
@@ -113,9 +115,10 @@ namespace PGUI::UI::Animation
 	{
 		return InterlockedIncrement(&referenceCount);
 	}
+
 	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::Release() -> ULONG
 	{
-		auto refCount = InterlockedDecrement(&referenceCount);
+		const auto refCount = InterlockedDecrement(&referenceCount);
 		if (0 == refCount)
 		{
 			delete this;
@@ -124,78 +127,56 @@ namespace PGUI::UI::Animation
 	}
 
 	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::OnIntegerValueChanged(
-		IUIAnimationStoryboard2* storyboard, IUIAnimationVariable2* variable, 
-		INT32* newValues, INT32* previousValues, UINT dimension) -> HRESULT
+		IUIAnimationStoryboard2* storyboard, IUIAnimationVariable2* variable,
+		INT32* newValues, INT32* previousValues, const UINT dimension) -> HRESULT
 	{
 		std::scoped_lock lock{ handlerMutex };
 		if (!handler)
 		{
 			return E_NOTIMPL;
 		}
-		std::span<INT32> newValueSpan{ newValues, dimension };
-		std::span<INT32> previousValueSpan{ previousValues, dimension };
+		const std::span newValueSpan{ newValues, dimension };
+		const std::span previousValueSpan{ previousValues, dimension };
 
 		return handler(Storyboard{ storyboard }, AnimationVariable{ variable },
-			newValueSpan, previousValueSpan);
+		               newValueSpan, previousValueSpan);
 	}
 
-	void AnimationVariableIntegerChangeEventHandlerRouter::SetHandler(
-		const AnimationIntegerVariableChangeHandler& newHandler) noexcept
+	auto AnimationVariableIntegerChangeEventHandlerRouter::SetHandler(
+		const AnimationIntegerVariableChangeHandler& newHandler) noexcept -> void
 	{
 		std::scoped_lock lock{ handlerMutex };
 		handler = newHandler;
 	}
-	void AnimationVariableIntegerChangeEventHandlerRouter::ClearHandler() noexcept
+
+	auto AnimationVariableIntegerChangeEventHandlerRouter::ClearHandler() noexcept -> void
 	{
 		std::scoped_lock lock{ handlerMutex };
 		handler = nullptr;
 	}
 
 
-	AnimationVariableChangeEventHandler::AnimationVariableChangeEventHandler() noexcept : 
+	AnimationVariableChangeEventHandler::AnimationVariableChangeEventHandler() noexcept :
 		router{ std::bind_front(&AnimationVariableChangeEventHandler::CallVariableChanged, this) },
 		integerRouter{ std::bind_front(&AnimationVariableChangeEventHandler::CallVariableIntegerChanged, this) }
-	{
-	}
+	{ }
 
 	auto AnimationVariableChangeEventHandler::CallVariableChanged(
-		Storyboard storyboard, AnimationVariable variable, 
-		std::span<double> newValues, std::span<double> previousValues) noexcept -> HRESULT
+		const Storyboard& storyboard, const AnimationVariable& variable,
+		const std::span<double> newValues, const std::span<double> previousValues) noexcept -> HRESULT
 	{
 		try
 		{
 			OnVariableChanged(storyboard, variable, newValues, previousValues);
 			return S_OK;
 		}
-		catch (const PGUI::HResultException& e)
+		catch (const HResultException& e)
 		{
 			return e.HResult();
 		}
-		catch (const PGUI::Win32Exception& e)
+		catch (const Win32Exception& e)
 		{
-			return PGUI::HresultFromWin32(e.ErrorCode());
-		}
-		catch (const std::exception&)
-		{
-			return E_FAIL;
-		}
-	}
-	auto AnimationVariableChangeEventHandler::CallVariableIntegerChanged(
-		Storyboard storyboard, AnimationVariable variable, 
-		std::span<INT32> newValues, std::span<INT32> previousValues) noexcept -> HRESULT
-	{
-		try
-		{
-			OnVariableIntegerChanged(storyboard, variable, newValues, previousValues);
-			return S_OK;
-		}
-		catch (const PGUI::HResultException& e)
-		{
-			return e.HResult();
-		}
-		catch (const PGUI::Win32Exception& e)
-		{
-			return PGUI::HresultFromWin32(e.ErrorCode());
+			return HresultFromWin32(e.ErrorCode());
 		}
 		catch (const std::exception&)
 		{
@@ -203,15 +184,41 @@ namespace PGUI::UI::Animation
 		}
 	}
 
-	void AnimationVariableChangeEvent::OnVariableChanged(Storyboard storyboard, AnimationVariable variable, 
-		std::span<double> newValues, std::span<double> previousValues)
+	auto AnimationVariableChangeEventHandler::CallVariableIntegerChanged(
+		const Storyboard& storyboard, const AnimationVariable& variable,
+		const std::span<INT32> newValues, const std::span<INT32> previousValues) noexcept -> HRESULT
+	{
+		try
+		{
+			OnVariableIntegerChanged(storyboard, variable, newValues, previousValues);
+			return S_OK;
+		}
+		catch (const HResultException& e)
+		{
+			return e.HResult();
+		}
+		catch (const Win32Exception& e)
+		{
+			return HresultFromWin32(e.ErrorCode());
+		}
+		catch (const std::exception&)
+		{
+			return E_FAIL;
+		}
+	}
+
+	auto AnimationVariableChangeEvent::OnVariableChanged(
+		const Storyboard storyboard, const AnimationVariable variable,
+		const std::span<double> newValues, const std::span<double> previousValues) -> void
 	{
 		variableChangedEvent.Invoke(
-			storyboard, variable, 
+			storyboard, variable,
 			newValues, previousValues);
 	}
-	void AnimationVariableChangeEvent::OnVariableIntegerChanged(Storyboard storyboard, AnimationVariable variable, 
-		std::span<INT32> newValues, std::span<INT32> previousValues)
+
+	auto AnimationVariableChangeEvent::OnVariableIntegerChanged(
+		const Storyboard storyboard, const AnimationVariable variable,
+		const std::span<INT32> newValues, const std::span<INT32> previousValues) -> void
 	{
 		variableIntegerChangedEvent.Invoke(
 			storyboard, variable,

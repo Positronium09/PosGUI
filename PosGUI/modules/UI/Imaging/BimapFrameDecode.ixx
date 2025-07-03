@@ -16,7 +16,7 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapFrameDecode() noexcept = default;
 
-		explicit(false) BitmapFrameDecode(ComPtr<IWICBitmapFrameDecode> frame) noexcept;
+		explicit(false) BitmapFrameDecode(const ComPtr<IWICBitmapFrameDecode>& frame) noexcept;
 
 		[[nodiscard]] auto GetMetadataReader() const -> MetadataReader;
 

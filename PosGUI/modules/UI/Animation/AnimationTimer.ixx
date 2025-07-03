@@ -12,7 +12,7 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationTimer();
 
-		explicit(false) AnimationTimer(ComPtr<IUIAnimationTimer> ptr) noexcept;
+		explicit(false) AnimationTimer(const ComPtr<IUIAnimationTimer>& ptr) noexcept;
 
 		auto Enable() const -> void;
 

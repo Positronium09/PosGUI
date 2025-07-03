@@ -13,7 +13,7 @@ export namespace PGUI::UI::Font
 	class LocalizedStrings : public ComPtrHolder<IDWriteLocalizedStrings>
 	{
 		public:
-		explicit(false) LocalizedStrings(ComPtr<IDWriteLocalizedStrings> strings) noexcept;
+		explicit(false) LocalizedStrings(const ComPtr<IDWriteLocalizedStrings>& strings) noexcept;
 
 		[[nodiscard]] auto FindLocaleName(std::wstring_view name) const noexcept -> std::expected<UINT32, bool>;
 

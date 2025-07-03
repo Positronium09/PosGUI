@@ -40,12 +40,13 @@ export namespace PGUI::UI::Animation
 
 		static auto SetDefaultLongestAcceptableDelay(double delay) -> void;
 
-		[[nodiscard]] static auto GetStoryboardFromTag(ComPtr<IUnknown> obj, UINT32 id) -> Storyboard;
+		[[nodiscard]] static auto GetStoryboardFromTag(const ComPtr<IUnknown>& obj, UINT32 id) -> Storyboard;
 
-		[[nodiscard]] static auto GetAnimationVariableFromTag(ComPtr<IUnknown> obj, UINT32 id) -> AnimationVariable;
+		[[nodiscard]] static auto GetAnimationVariableFromTag(const ComPtr<IUnknown>& obj, UINT32 id) -> AnimationVariable;
 
-		static auto ScheduleTransition(const AnimationVariable& variable,
-		                               AnimationTransition transition, double currentTime) -> void;
+		static auto ScheduleTransition(
+			const AnimationVariable& variable,
+			AnimationTransition transition, double currentTime) -> void;
 
 		auto SetManagerEventHandler(
 			AnimationManagerEventHandler& eventHandler,

@@ -20,7 +20,7 @@ export namespace PGUI::UI
 		public:
 		SolidBrush() noexcept = default;
 
-		explicit SolidBrush(ComPtr<ID2D1SolidColorBrush> brush) noexcept;
+		explicit SolidBrush(const ComPtr<ID2D1SolidColorBrush>& brush) noexcept;
 
 		SolidBrush(const ComPtr<ID2D1RenderTarget>& renderTarget, RGBA color);
 
@@ -34,11 +34,11 @@ export namespace PGUI::UI
 		public:
 		LinearGradientBrush() noexcept = default;
 
-		explicit LinearGradientBrush(ComPtr<ID2D1LinearGradientBrush> brush) noexcept;
+		explicit LinearGradientBrush(const ComPtr<ID2D1LinearGradientBrush>& brush) noexcept;
 
 		LinearGradientBrush(
 			const ComPtr<ID2D1RenderTarget>& renderTarget,
-			LinearGradient gradient, std::optional<RectF> referenceRect = std::nullopt);
+			LinearGradient gradient, const std::optional<RectF>& referenceRect = std::nullopt);
 
 		~LinearGradientBrush() noexcept = default;
 
@@ -50,11 +50,11 @@ export namespace PGUI::UI
 		public:
 		RadialGradientBrush() noexcept = default;
 
-		explicit RadialGradientBrush(ComPtr<ID2D1RadialGradientBrush> brush) noexcept;
+		explicit RadialGradientBrush(const ComPtr<ID2D1RadialGradientBrush>& brush) noexcept;
 
 		RadialGradientBrush(
 			const ComPtr<ID2D1RenderTarget>& renderTarget,
-			RadialGradient gradient, std::optional<RectF> referenceRect = std::nullopt);
+			RadialGradient gradient, const std::optional<RectF>& referenceRect = std::nullopt);
 
 		~RadialGradientBrush() noexcept = default;
 
@@ -66,7 +66,7 @@ export namespace PGUI::UI
 		public:
 		BitmapBrush() noexcept = default;
 
-		explicit BitmapBrush(ComPtr<ID2D1BitmapBrush> brush) noexcept;
+		explicit BitmapBrush(const ComPtr<ID2D1BitmapBrush>& brush) noexcept;
 
 		BitmapBrush(const ComPtr<ID2D1RenderTarget>& renderTarget,
 			D2D::D2DBitmap bitmap, const D2D::BitmapBrushProperties& bitmapBrushProperties);
@@ -132,13 +132,13 @@ export namespace PGUI::UI
 			SolidBrush, LinearGradientBrush, RadialGradientBrush, BitmapBrush>;
 
 		public:
-		explicit Brush(ComPtr<ID2D1Brush> ptr) noexcept;
+		explicit Brush(const ComPtr<ID2D1Brush>& ptr) noexcept;
 
-		explicit Brush(BrushParameters parameters) noexcept;
+		explicit Brush(const BrushParameters& parameters) noexcept;
 
-		Brush(ComPtr<ID2D1RenderTarget> renderTarget, BrushParameters parameters) noexcept;
+		Brush(const ComPtr<ID2D1RenderTarget>& renderTarget, const BrushParameters& parameters) noexcept;
 
-		auto SetParametersAndCreateBrush(ComPtr<ID2D1RenderTarget> renderTarget,
+		auto SetParametersAndCreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget,
 			const BrushParameters& parameters) noexcept -> void;
 
 		auto CreateBrush(ComPtr<ID2D1RenderTarget> renderTarget) noexcept -> void;

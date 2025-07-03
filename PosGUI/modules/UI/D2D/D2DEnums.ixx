@@ -2,7 +2,6 @@ module;
 #include <d2d1_3.h>
 
 export module PGUI.UI.D2D.D2DEnums;
-import PGUI.EnumFlag;
 
 export namespace PGUI::UI::D2D
 {
@@ -14,6 +13,7 @@ export namespace PGUI::UI::D2D
 		EnableColorFont = D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT,
 		DisableColorBitmapSnapping = D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING
 	};
+	DEFINE_ENUM_FLAG_OPERATORS(DrawTextOptions);
 
 	enum class AntiAliasingMode
 	{
@@ -37,6 +37,7 @@ export namespace PGUI::UI::D2D
 		CpuRead = D2D1_BITMAP_OPTIONS_CPU_READ,
 		GdiCompatible = D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
 	};
+	DEFINE_ENUM_FLAG_OPERATORS(BitmapOptions);
 
 	enum class BitmapInterpolationMode
 	{
@@ -134,15 +135,4 @@ export namespace PGUI::UI::D2D
 		InitializeFromBackground = D2D1_LAYER_OPTIONS1_INITIALIZE_FROM_BACKGROUND,
 		IgnoreAlpha = D2D1_LAYER_OPTIONS1_IGNORE_ALPHA
 	};
-}
-
-export namespace PGUI
-{
-	template <>
-	struct IsEnumFlagEnabled<UI::D2D::DrawTextOptions> : Enabled
-	{ };
-
-	template <>
-	struct IsEnumFlagEnabled<UI::D2D::BitmapOptions> : Enabled
-	{ };
 }

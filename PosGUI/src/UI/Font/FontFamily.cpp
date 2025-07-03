@@ -12,27 +12,31 @@ import PGUI.UI.Font.FontSet;
 
 namespace PGUI::UI::Font
 {
-	FontFamily::FontFamily(ComPtr<IDWriteFontFamily2> family) noexcept : 
+	FontFamily::FontFamily(const ComPtr<IDWriteFontFamily2>& family) noexcept :
 		ComPtrHolder{ family }
-	{
-	}
+	{ }
+
 	auto FontFamily::GetFamilyNames() const -> LocalizedStrings
 	{
 		ComPtr<IDWriteLocalizedStrings> strings;
-		
-		auto hr = Get()->GetFamilyNames(strings.GetAddressOf()); ThrowFailed(hr);
+
+		const auto hr = Get()->GetFamilyNames(strings.GetAddressOf());
+		ThrowFailed(hr);
 
 		return strings;
 	}
+
 	auto FontFamily::GetFontSet() const -> FontSet
 	{
 		auto& ptr = Get();
 
 		ComPtr<IDWriteFontSet1> fontSet1;
 		ComPtr<IDWriteFontSet4> fontSet;
-		auto hr = ptr->GetFontSet(fontSet1.GetAddressOf()); ThrowFailed(hr);
+		auto hr = ptr->GetFontSet(fontSet1.GetAddressOf());
+		ThrowFailed(hr);
 
-		hr = fontSet1.As(&fontSet); ThrowFailed(hr);
+		hr = fontSet1.As(&fontSet);
+		ThrowFailed(hr);
 
 		return fontSet;
 	}

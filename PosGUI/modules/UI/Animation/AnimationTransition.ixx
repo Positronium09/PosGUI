@@ -14,7 +14,7 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationTransition() noexcept = default;
 
-		explicit(false) AnimationTransition(ComPtr<IUIAnimationTransition2> ptr) noexcept;
+		explicit(false) AnimationTransition(const ComPtr<IUIAnimationTransition2>& ptr) noexcept;
 
 		[[nodiscard]] auto GetDimension() const -> UINT;
 

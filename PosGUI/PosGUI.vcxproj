@@ -25,7 +25,6 @@
     <ClCompile Include="modules\DataBinding\OneWayBinder.ixx" />
     <ClCompile Include="modules\DataBinding\TwoWayBinder.ixx" />
     <ClCompile Include="modules\DataBinding\ValidatedProperty.ixx" />
-    <ClCompile Include="modules\EnumFlag.ixx" />
     <ClCompile Include="modules\Event.ixx" />
     <ClCompile Include="modules\Exceptions.ixx" />
     <ClCompile Include="modules\Factories\D2DFactory.ixx" />

@@ -16,7 +16,7 @@ export namespace PGUI::UI::Imaging
 		public:
 		FormatConverter() noexcept = default;
 
-		explicit(false) FormatConverter(ComPtr<IWICFormatConverter> converter) noexcept;
+		explicit(false) FormatConverter(const ComPtr<IWICFormatConverter>& converter) noexcept;
 
 		FormatConverter(
 			BitmapSource<> bitmapSource, WICPixelFormatGUID destinationFormat,
@@ -29,10 +29,10 @@ export namespace PGUI::UI::Imaging
 			WICPixelFormatGUID destinationFormat) const -> bool;
 
 		[[nodiscard]] static auto ConvertToD2DBitmap(
-			BitmapSource<> bitmapSource,
+			const BitmapSource<>& bitmapSource,
 			WICBitmapDitherType ditherType = WICBitmapDitherTypeNone,
 			double alphaThresholdPercent = 0.0F,
-			std::optional<Palette> palette = std::nullopt,
+			const std::optional<Palette>& palette = std::nullopt,
 			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) -> FormatConverter;
 	};
 }

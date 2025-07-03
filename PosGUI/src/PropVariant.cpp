@@ -4,6 +4,7 @@ module;
 module PGUI.PropVariant;
 
 import std;
+import PGUI.Logging;
 
 namespace PGUI
 {
@@ -19,12 +20,14 @@ namespace PGUI
 
 	PropVariant::~PropVariant() noexcept
 	{
-		PropVariantClear(&var);
+		const auto hr = PropVariantClear(&var);
+		LogFailed(LogLevel::Error, hr);
 	}
 
 	auto PropVariant::operator&() noexcept -> PROPVARIANT*
 	{
-		PropVariantClear(&var);
+		const auto hr = PropVariantClear(&var);
+		LogFailed(LogLevel::Error, hr);
 
 		return &var;
 	}
@@ -79,7 +82,7 @@ namespace PGUI
 				return var.dblVal;
 
 			case Bool:
-				return (bool)var.boolVal;
+				return static_cast<bool>(var.boolVal);
 
 			case Error:
 				return var.scode;

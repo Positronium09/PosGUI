@@ -15,7 +15,8 @@ namespace PGUI::UI::Theming
 		std::scoped_lock lock{ themeMutex };
 		return currentTheme;
 	}
-	void ThemeContext::ChangeCurrentTheme(const Theme& theme) noexcept
+
+	auto ThemeContext::ChangeCurrentTheme(const Theme& theme) noexcept -> void
 	{
 		{
 			std::scoped_lock lock{ themeMutex };
@@ -24,7 +25,7 @@ namespace PGUI::UI::Theming
 		themeChangedEvent.Invoke(currentTheme);
 	}
 
-	void ThemeContext::InitializeThemes() noexcept
+	auto ThemeContext::InitializeThemes() noexcept -> void
 	{
 		static auto initialized = false;
 		if (initialized)
@@ -67,10 +68,10 @@ namespace PGUI::UI::Theming
 		};
 	}
 
-	void ThemeContext::OnSystemThemeChanged()
+	auto ThemeContext::OnSystemThemeChanged() -> void
 	{
-		if (respondToSystemThemeChange && 
-			(currentTheme == DarkTheme || currentTheme == LightTheme))
+		if (respondToSystemThemeChange &&
+		    (currentTheme == DarkTheme || currentTheme == LightTheme))
 		{
 			InitializeThemes();
 			currentTheme = SystemTheme::IsDarkMode() ? DarkTheme : LightTheme;

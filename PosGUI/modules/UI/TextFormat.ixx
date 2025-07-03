@@ -18,19 +18,19 @@ export namespace PGUI::UI
 	class TextFormat : public ComPtrHolder<IDWriteTextFormat3>
 	{
 		public:
-		explicit(false) TextFormat(ComPtr<IDWriteTextFormat3> textFormat) noexcept;
+		explicit(false) TextFormat(const ComPtr<IDWriteTextFormat3>& textFormat) noexcept;
 
 		TextFormat(
 			std::wstring_view fontFamilyName, float fontSize,
 			FontWeight fontWeight = FontWeights::Normal,
 			FontStyle fontStyle = FontStyles::Normal,
 			FontStretch fontStretch = FontStretches::Normal,
-			FontCollection fontCollection = FontCollection::GetSystemFontCollection(),
+			const FontCollection& fontCollection = FontCollection::GetSystemFontCollection(),
 			std::wstring_view localeName = GetUserLocaleName()) noexcept;
 
 		TextFormat(std::wstring_view fontFamilyName, float fontSize,
 		           std::span<const FontAxisValue> fontAxisValues,
-		           FontCollection fontCollection = FontCollection::GetSystemFontCollection(),
+		           const FontCollection& fontCollection = FontCollection::GetSystemFontCollection(),
 		           std::wstring_view localeName = GetUserLocaleName()) noexcept;
 
 		auto SetFlowDirection(FlowDirection flowDirection) noexcept -> void;
@@ -47,7 +47,7 @@ export namespace PGUI::UI
 
 		auto SetTrimming(const Trimming& trimming) noexcept -> void;
 
-		auto SetLineSpacing(LineSpacing lineSpacing) noexcept -> void;
+		auto SetLineSpacing(const LineSpacing& lineSpacing) noexcept -> void;
 
 		[[nodiscard]] auto GetFlowDirection() const noexcept -> FlowDirection;
 

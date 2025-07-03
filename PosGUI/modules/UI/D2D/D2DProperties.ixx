@@ -40,7 +40,7 @@ export namespace PGUI::UI::D2D
 		public:
 		D2DProperties() noexcept = default;
 
-		explicit(false) D2DProperties(ComPtr<ID2D1Properties> properties) noexcept;
+		explicit(false) D2DProperties(const ComPtr<ID2D1Properties>& properties) noexcept;
 
 		[[nodiscard]] auto GetPropertyCount() const noexcept { return Get()->GetPropertyCount(); }
 

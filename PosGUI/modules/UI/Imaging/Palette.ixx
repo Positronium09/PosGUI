@@ -30,7 +30,7 @@ export namespace PGUI::UI::Imaging
 		public:
 		Palette();
 
-		explicit(false) Palette(ComPtr<IWICPalette> palette) noexcept;
+		explicit(false) Palette(const ComPtr<IWICPalette>& palette) noexcept;
 
 		template <typename T>
 		Palette(BitmapSource<T> source, UINT count, bool addTransparentColor) noexcept

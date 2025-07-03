@@ -13,7 +13,7 @@ export namespace PGUI::UI::Font
 	class FontFamily : public ComPtrHolder<IDWriteFontFamily2>
 	{
 		public:
-		explicit(false) FontFamily(ComPtr<IDWriteFontFamily2> family) noexcept;
+		explicit(false) FontFamily(const ComPtr<IDWriteFontFamily2>& family) noexcept;
 
 		[[nodiscard]] auto GetFamilyNames() const -> LocalizedStrings;
 

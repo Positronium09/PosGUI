@@ -19,7 +19,7 @@ export namespace PGUI
 		using pointer = std::wstring*;
 		using reference = std::wstring&;
 
-		explicit IEnumStringIterator(ComPtr<IEnumString> enumString, bool isEnd = false) noexcept;
+		explicit IEnumStringIterator(const ComPtr<IEnumString>& enumString, bool isEnd = false) noexcept;
 
 		auto operator*() const -> std::wstring_view;
 		auto operator->() const -> std::wstring_view;

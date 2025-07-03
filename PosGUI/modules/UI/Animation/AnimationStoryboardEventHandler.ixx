@@ -75,11 +75,11 @@ export namespace PGUI::UI::Animation
 		AnimationStoryboardEventHandlerRouter router;
 
 		auto CallStoryBoardStatusChangedHandler(
-			Storyboard storyboard,
+			const Storyboard& storyboard,
 			StoryboardStatus newStatus,
 			StoryboardStatus previousStatus) noexcept -> HRESULT;
 
-		auto CallStoryBoardUpdatedHandler(Storyboard storyboard) noexcept -> HRESULT;
+		auto CallStoryBoardUpdatedHandler(const Storyboard& storyboard) noexcept -> HRESULT;
 	};
 
 	class AnimationStoryboardEvent final : public AnimationStoryboardEventHandler

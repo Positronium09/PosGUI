@@ -37,7 +37,7 @@ export namespace PGUI::UI::Imaging
 		public:
 		WICBitmap() noexcept = default;
 
-		explicit(false) WICBitmap(ComPtr<IWICBitmap> bitmap) noexcept;
+		explicit(false) WICBitmap(const ComPtr<IWICBitmap>& bitmap) noexcept;
 
 		WICBitmap(SizeU size, const WICPixelFormatGUID& pixelFormat, CreateCacheOption cacheOption);
 

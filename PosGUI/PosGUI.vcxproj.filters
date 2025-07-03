@@ -108,9 +108,6 @@
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\EnumFlag.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\UI\DirectXCompositionWindow.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>

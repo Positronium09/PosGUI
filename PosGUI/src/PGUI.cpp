@@ -20,7 +20,7 @@ namespace PGUI
 	{
 		winrt::init_apartment();
 
-		auto val = false;
+		auto val = FALSE;
 		SetUserObjectInformationW(GetCurrentProcess(),
 			UOI_TIMERPROC_EXCEPTION_SUPPRESSION,
 			&val, sizeof(val));

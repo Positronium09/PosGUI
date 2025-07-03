@@ -22,7 +22,7 @@ import PGUI.Factories;
 
 namespace PGUI::UI
 {
-	DirectXCompositionWindow::DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept : 
+	DirectXCompositionWindow::DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept :
 		Window{ wndClass }
 	{
 		RegisterHandler(WM_NCCREATE, &DirectXCompositionWindow::OnNCCreate);
@@ -30,7 +30,7 @@ namespace PGUI::UI
 		RegisterHandler(WM_WINDOWPOSCHANGED, &DirectXCompositionWindow::OnWindowPosChanged);
 	}
 
-	void DirectXCompositionWindow::BeginDraw()
+	auto DirectXCompositionWindow::BeginDraw() -> void
 	{
 		CreateDeviceResources();
 
@@ -38,10 +38,11 @@ namespace PGUI::UI
 
 		GetD2D1DeviceContext()->BeginDraw();
 	}
+
 	auto DirectXCompositionWindow::EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG>
 	{
-		D2D1_TAG tag1{ };
-		D2D1_TAG tag2{ };
+		D2D1_TAG tag1;
+		D2D1_TAG tag2;
 		auto hr = GetD2D1DeviceContext()->EndDraw(&tag1, &tag2);
 
 		if (hr == D2DERR_RECREATE_TARGET)
@@ -51,16 +52,17 @@ namespace PGUI::UI
 		}
 		ThrowFailed(hr);
 
-		hr = GetSwapChain()->Present(1, NULL); ThrowFailed(hr);
+		hr = GetSwapChain()->Present(1, NULL);
+		ThrowFailed(hr);
 
 		EndPaint(Hwnd(), &paintStruct);
-		
+
 		return { tag1, tag2 };
 	}
 
-	void DirectXCompositionWindow::InitSwapChain()
+	auto DirectXCompositionWindow::InitSwapChain() -> void
 	{
-		auto dxgiFactory = Factories::DXGIFactory::GetFactory();
+		const auto dxgiFactory = Factories::DXGIFactory::GetFactory();
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc{ };
 		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -70,84 +72,102 @@ namespace PGUI::UI
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
 		swapChainDesc.Width = 1;
 		swapChainDesc.Height = 1;
-		auto hr = dxgiFactory->CreateSwapChainForComposition(dxgiDevice.Get(),
-			&swapChainDesc, nullptr, GetAddress<IDXGISwapChain1>()); ThrowFailed(hr);
+
+		const auto hr = dxgiFactory->CreateSwapChainForComposition(
+			dxgiDevice.Get(),
+			&swapChainDesc, nullptr,
+			GetAddress<IDXGISwapChain1>());
+		ThrowFailed(hr);
 	}
-	void DirectXCompositionWindow::InitD2D1DeviceContext()
+
+	auto DirectXCompositionWindow::InitD2D1DeviceContext() -> void
 	{
 		auto& d2d1Dc = GetD2D1DeviceContext();
-		auto& swapChain = GetSwapChain();
+		const auto& swapChain = GetSwapChain();
 
-		auto hr = d2d1Device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
-			&d2d1Dc); ThrowFailed(hr);
+		auto hr = d2d1Device->CreateDeviceContext(
+			D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
+			&d2d1Dc);
+		ThrowFailed(hr);
 
 		ComPtr<IDXGISurface2> surface;
-		hr = swapChain->GetBuffer(0, IID_PPV_ARGS(surface.GetAddressOf())); ThrowFailed(hr);
+		hr = swapChain->GetBuffer(0, IID_PPV_ARGS(surface.GetAddressOf()));
+		ThrowFailed(hr);
 
-		D2D1_BITMAP_PROPERTIES1 properties = {};
+		D2D1_BITMAP_PROPERTIES1 properties = { };
 		properties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 		properties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		properties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
 
 		ComPtr<ID2D1Bitmap1> bitmap;
-		hr = d2d1Dc->CreateBitmapFromDxgiSurface(surface.Get(),
+		hr = d2d1Dc->CreateBitmapFromDxgiSurface(
+			surface.Get(),
 			properties,
-			&bitmap); ThrowFailed(hr);
+			&bitmap);
+		ThrowFailed(hr);
 
 		d2d1Dc->SetTarget(bitmap.Get());
 	}
-	void DirectXCompositionWindow::InitDirectComposition()
+
+	auto DirectXCompositionWindow::InitDirectComposition() -> void
 	{
-		auto& swapChain = GetSwapChain();
+		const auto& swapChain = GetSwapChain();
 		auto& dcompTarget = GetDCompositionTarget();
 		auto& visual = GetDCompositionVisual();
 
-		auto hr = dcompDevice->CreateTargetForHwnd(Hwnd(), false,
-			&dcompTarget); ThrowFailed(hr);
+		auto hr = dcompDevice->CreateTargetForHwnd(
+			Hwnd(), false,
+			&dcompTarget);
+		ThrowFailed(hr);
 
 		hr = dcompDevice->CreateVisual(&visual);
 		ThrowFailed(hr);
 
-		hr = visual->SetContent(swapChain.Get()); ThrowFailed(hr);
-		hr = dcompTarget->SetRoot(visual.Get()); ThrowFailed(hr);
+		hr = visual->SetContent(swapChain.Get());
+		ThrowFailed(hr);
+		hr = dcompTarget->SetRoot(visual.Get());
+		ThrowFailed(hr);
 
-		hr = dcompDevice->Commit(); ThrowFailed(hr);
+		hr = dcompDevice->Commit();
+		ThrowFailed(hr);
 	}
 
-	void DirectXCompositionWindow::InitD3D11Device()
+	auto DirectXCompositionWindow::InitD3D11Device() -> void
 	{
 		if (d3d11Device)
 		{
 			return;
 		}
 
-		auto dxgiFactory = Factories::DXGIFactory::GetFactory();
+		const auto dxgiFactory = Factories::DXGIFactory::GetFactory();
 		SYSTEM_POWER_STATUS powerStatus{ };
 		GetSystemPowerStatus(&powerStatus);
 
 		auto gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
-		const bool powerSaverOn = powerStatus.SystemStatusFlag == 1;
+		const auto powerSaverOn = powerStatus.SystemStatusFlag == 1;
 		const bool lowBattery = powerStatus.BatteryFlag & (2 | 4);
-		const bool charging = powerStatus.ACLineStatus != 0 || powerStatus.BatteryFlag & 8;
-		const bool hasBattery = powerStatus.BatteryFlag & 128;
+		const auto charging = powerStatus.ACLineStatus != 0 || powerStatus.BatteryFlag & 8;
 
-		if ((powerSaverOn || lowBattery) && (!charging) && hasBattery)
+		if (const bool hasBattery = powerStatus.BatteryFlag & 128;
+			(powerSaverOn || lowBattery) && (!charging) && hasBattery)
 		{
 			gpuPreference = DXGI_GPU_PREFERENCE_MINIMUM_POWER;
 		}
 
 		ComPtr<IDXGIAdapter1> adapter;
-		auto hr = dxgiFactory->EnumAdapterByGpuPreference(0, gpuPreference,
-			IID_PPV_ARGS(adapter.GetAddressOf())); ThrowFailed(hr);
+		auto hr = dxgiFactory->EnumAdapterByGpuPreference(
+			0, gpuPreference,
+			IID_PPV_ARGS(adapter.GetAddressOf()));
+		ThrowFailed(hr);
 
-		auto createDeviceFlags =
-		#ifdef _DEBUG
-		(D3D11_CREATE_DEVICE_FLAG)(D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG);
-		#else
-		D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-		#endif
+		constexpr auto createDeviceFlags =
+#ifdef _DEBUG
+			static_cast<D3D11_CREATE_DEVICE_FLAG>(D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG);
+#else
+			D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#endif
 
-		std::array featureLevels =
+		constexpr std::array featureLevels =
 		{
 			D3D_FEATURE_LEVEL_11_1,
 			D3D_FEATURE_LEVEL_11_0,
@@ -159,43 +179,54 @@ namespace PGUI::UI
 		};
 
 		ComPtr<ID3D11Device> device;
-		
-		hr = D3D11CreateDevice(adapter.Get(),
+
+		hr = D3D11CreateDevice(
+			adapter.Get(),
 			D3D_DRIVER_TYPE_UNKNOWN, nullptr,
 			createDeviceFlags,
 			featureLevels.data(),
+			// ReSharper disable once CppRedundantCastExpression
 			static_cast<UINT>(featureLevels.size()),
 			D3D11_SDK_VERSION,
-			&device, nullptr, nullptr);  ThrowFailed(hr);
-		hr = device.As(&d3d11Device); ThrowFailed(hr);
-		hr = d3d11Device.As(&dxgiDevice); ThrowFailed(hr);
+			&device, nullptr, nullptr);
+		ThrowFailed(hr);
+		hr = device.As(&d3d11Device);
+		ThrowFailed(hr);
+		hr = d3d11Device.As(&dxgiDevice);
+		ThrowFailed(hr);
 	}
-	void DirectXCompositionWindow::InitDCompDevice()
+
+	auto DirectXCompositionWindow::InitDCompDevice() -> void
 	{
 		if (dcompDevice)
 		{
 			return;
 		}
 
-		auto hr = DCompositionCreateDevice(
+		const auto hr = DCompositionCreateDevice(
 			dxgiDevice.Get(),
 			__uuidof(dcompDevice),
-			std::bit_cast<void**>(&dcompDevice)); ThrowFailed(hr);
+			std::bit_cast<void**>(&dcompDevice));
+		ThrowFailed(hr);
 	}
-	void DirectXCompositionWindow::InitD2D1Device()
+
+	auto DirectXCompositionWindow::InitD2D1Device() -> void
 	{
 		if (d2d1Device)
 		{
 			return;
 		}
 
-		auto d2Factory = Factories::D2DFactory::GetFactory();
+		const auto d2Factory = Factories::D2DFactory::GetFactory();
 
-		auto hr = d2Factory->CreateDevice(dxgiDevice.Get(),
-			&d2d1Device); ThrowFailed(hr);
+		const auto hr = d2Factory->CreateDevice(
+			dxgiDevice.Get(),
+			&d2d1Device);
+		ThrowFailed(hr);
 	}
 
-	auto DirectXCompositionWindow::OnNCCreate(UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
+	auto DirectXCompositionWindow::OnNCCreate(
+		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
 	{
 		InitSwapChain();
 		InitD2D1DeviceContext();
@@ -205,17 +236,22 @@ namespace PGUI::UI
 
 		return { 1, ReturnFlags::PassToDefProc };
 	}
-	auto DirectXCompositionWindow::OnWindowPosChanged(UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
+
+	auto DirectXCompositionWindow::OnWindowPosChanged(
+		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
 	{
-		if (auto monitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL); 
+		if (const auto monitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL);
 			monitor != currentMonitor)
 		{
 			currentMonitor = monitor;
 			const auto& factory = Factories::DWriteFactory::GetFactory();
 
 			ComPtr<IDWriteRenderingParams> renderingParams;
-			auto hr = factory->CreateMonitorRenderingParams(currentMonitor, 
-				renderingParams.GetAddressOf()); LogFailed(LogLevel::Error, hr);
+			const auto hr = factory->CreateMonitorRenderingParams(
+				currentMonitor,
+				renderingParams.GetAddressOf());
+
+			LogFailed(LogLevel::Error, hr);
 
 			if (!FAILED(hr))
 			{
@@ -225,9 +261,11 @@ namespace PGUI::UI
 
 		return { 0, ReturnFlags::PassToDefProc };
 	}
-	auto DirectXCompositionWindow::OnSize(UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
+
+	auto DirectXCompositionWindow::OnSize(
+		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
 	{
-		auto& d2d1 = GetD2D1DeviceContext();
+		const auto& d2d1 = GetD2D1DeviceContext();
 		d2d1->SetTarget(nullptr);
 
 		auto size = GetWindowSize();
@@ -237,8 +275,10 @@ namespace PGUI::UI
 			size.cy = 1;
 		}
 
-		auto hr = GetSwapChain()->ResizeBuffers(0, size.cx, size.cy,
-			DXGI_FORMAT_UNKNOWN, NULL); ThrowFailed(hr);
+		const auto hr = GetSwapChain()->ResizeBuffers(
+			0, size.cx, size.cy,
+			DXGI_FORMAT_UNKNOWN, NULL);
+		ThrowFailed(hr);
 
 		DiscardDeviceResources();
 		InitD2D1DeviceContext();

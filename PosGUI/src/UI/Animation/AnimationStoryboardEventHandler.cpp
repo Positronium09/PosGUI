@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <UIAnimation.h>
+#include <wrl.h>
 
 module PGUI.UI.Animation:AnimationStoryboardEventHandler;
 import :AnimationStoryboardEventHandler;
@@ -9,18 +9,18 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Exceptions;
+import PGUI.Utils;
 import :AnimationEnums;
 import :Storyboard;
 
 namespace PGUI::UI::Animation
 {
 	AnimationStoryboardEventHandlerRouter::AnimationStoryboardEventHandlerRouter(
-		const StoryboardStatusChangedHandler& statusChangedHandler, 
-		const StoryboardUpdatedHandler& updatedHandler) noexcept : 
-		statusChangedHandler{ statusChangedHandler },
-		updatedHandler{ updatedHandler }
-	{
-	}
+		const StoryboardStatusChangedHandler& statusChangedHandler,
+		const StoryboardUpdatedHandler& updatedHandler) noexcept :
+		updatedHandler{ updatedHandler },
+		statusChangedHandler{ statusChangedHandler }
+	{ }
 
 	auto __stdcall AnimationStoryboardEventHandlerRouter::QueryInterface(const IID& iid, void** obj) -> HRESULT
 	{
@@ -45,6 +45,7 @@ namespace PGUI::UI::Animation
 	{
 		return InterlockedIncrement(&referenceCount);
 	}
+
 	auto __stdcall AnimationStoryboardEventHandlerRouter::Release() -> ULONG
 	{
 		auto refCount = InterlockedDecrement(&referenceCount);
@@ -56,8 +57,8 @@ namespace PGUI::UI::Animation
 	}
 
 	auto __stdcall AnimationStoryboardEventHandlerRouter::OnStoryboardStatusChanged(
-		IUIAnimationStoryboard2* storyboard, 
-		UI_ANIMATION_STORYBOARD_STATUS newStatus, 
+		IUIAnimationStoryboard2* storyboard,
+		UI_ANIMATION_STORYBOARD_STATUS newStatus,
 		UI_ANIMATION_STORYBOARD_STATUS previousStatus) -> HRESULT
 	{
 		std::scoped_lock lock{ statusChangedHandlerMutex };
@@ -87,55 +88,56 @@ namespace PGUI::UI::Animation
 		);
 	}
 
-	void AnimationStoryboardEventHandlerRouter::SetStatusChangedHandler(
-		const StoryboardStatusChangedHandler& handler) noexcept
+	auto AnimationStoryboardEventHandlerRouter::SetStatusChangedHandler(
+		const StoryboardStatusChangedHandler& handler) noexcept -> void
 	{
 		std::scoped_lock lock{ statusChangedHandlerMutex };
 		statusChangedHandler = handler;
 	}
-	void AnimationStoryboardEventHandlerRouter::ClearStatusChangedHandler() noexcept
+
+	auto AnimationStoryboardEventHandlerRouter::ClearStatusChangedHandler() noexcept -> void
 	{
 		std::scoped_lock lock{ statusChangedHandlerMutex };
 		statusChangedHandler = nullptr;
 	}
 
-	void AnimationStoryboardEventHandlerRouter::SetUpdatedHandler(
-		const StoryboardUpdatedHandler& handler) noexcept
+	auto AnimationStoryboardEventHandlerRouter::SetUpdatedHandler(
+		const StoryboardUpdatedHandler& handler) noexcept -> void
 	{
 		std::scoped_lock lock{ updateHandlerMutex };
 		updatedHandler = handler;
 	}
-	void AnimationStoryboardEventHandlerRouter::ClearUpdatedHandler() noexcept
+
+	auto AnimationStoryboardEventHandlerRouter::ClearUpdatedHandler() noexcept -> void
 	{
 		std::scoped_lock lock{ updateHandlerMutex };
 		updatedHandler = nullptr;
 	}
 
 	AnimationStoryboardEventHandler::AnimationStoryboardEventHandler() noexcept :
-		router{ 
+		router{
 			std::bind_front(&AnimationStoryboardEventHandler::CallStoryBoardStatusChangedHandler, this),
 			std::bind_front(&AnimationStoryboardEventHandler::CallStoryBoardUpdatedHandler, this)
 		}
-	{
-	}
+	{ }
 
 	auto AnimationStoryboardEventHandler::CallStoryBoardStatusChangedHandler(
-		Storyboard storyboard, 
-		StoryboardStatus newStatus, 
-		StoryboardStatus previousStatus) noexcept -> HRESULT
+		const Storyboard& storyboard,
+		const StoryboardStatus newStatus,
+		const StoryboardStatus previousStatus) noexcept -> HRESULT
 	{
 		try
 		{
 			OnStoryBoardStatusChanged(storyboard, newStatus, previousStatus);
 			return S_OK;
 		}
-		catch (const PGUI::HResultException& e)
+		catch (const HResultException& e)
 		{
 			return e.HResult();
 		}
-		catch (const PGUI::Win32Exception& e)
+		catch (const Win32Exception& e)
 		{
-			return PGUI::HresultFromWin32(e.ErrorCode());
+			return HresultFromWin32(e.ErrorCode());
 		}
 		catch (const std::exception&)
 		{
@@ -144,20 +146,20 @@ namespace PGUI::UI::Animation
 	}
 
 	auto AnimationStoryboardEventHandler::CallStoryBoardUpdatedHandler(
-		Storyboard storyboard) noexcept -> HRESULT
+		const Storyboard& storyboard) noexcept -> HRESULT
 	{
 		try
 		{
 			OnStoryBoardUpdated(storyboard);
 			return S_OK;
 		}
-		catch (const PGUI::HResultException& e)
+		catch (const HResultException& e)
 		{
 			return e.HResult();
 		}
-		catch (const PGUI::Win32Exception& e)
+		catch (const Win32Exception& e)
 		{
-			return PGUI::HresultFromWin32(e.ErrorCode());
+			return HresultFromWin32(e.ErrorCode());
 		}
 		catch (const std::exception&)
 		{
@@ -165,12 +167,15 @@ namespace PGUI::UI::Animation
 		}
 	}
 
-	void AnimationStoryboardEvent::OnStoryBoardStatusChanged(Storyboard storyboard,
-		StoryboardStatus newStatus, StoryboardStatus previousStatus)
+	auto AnimationStoryboardEvent::OnStoryBoardStatusChanged(
+		const Storyboard storyboard,
+		const StoryboardStatus newStatus,
+		const StoryboardStatus previousStatus) -> void
 	{
 		storyboardStatusChangedEvent.Invoke(storyboard, newStatus, previousStatus);
 	}
-	void AnimationStoryboardEvent::OnStoryBoardUpdated(Storyboard storyboard)
+
+	auto AnimationStoryboardEvent::OnStoryBoardUpdated(const Storyboard storyboard) -> void
 	{
 		storyboardUpdatedEvent.Invoke(storyboard);
 	}

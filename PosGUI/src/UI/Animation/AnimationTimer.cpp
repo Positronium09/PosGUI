@@ -8,34 +8,38 @@ import :AnimationTimer;
 import PGUI.ComPtr;
 import PGUI.Exceptions;
 
-namespace  PGUI::UI::Animation
+namespace PGUI::UI::Animation
 {
 	AnimationTimer::AnimationTimer()
 	{
-		auto hr = CoCreateInstance(
+		const auto hr = CoCreateInstance(
 			CLSID_UIAnimationTimer,
 			nullptr,
 			CLSCTX_INPROC_SERVER,
 			__uuidof(IUIAnimationTimer),
-			GetVoidAddress()); ThrowFailed(hr);
+			GetVoidAddress());
+		ThrowFailed(hr);
 	}
 
-	AnimationTimer::AnimationTimer(ComPtr<IUIAnimationTimer> ptr) noexcept : 
+	AnimationTimer::AnimationTimer(const ComPtr<IUIAnimationTimer>& ptr) noexcept :
 		ComPtrHolder{ ptr }
+	{ }
+
+	auto AnimationTimer::Enable() const -> void
 	{
+		const auto hr = Get()->Enable();
+		ThrowFailed(hr);
 	}
 
-	void AnimationTimer::Enable() const
+	auto AnimationTimer::Disable() const -> void
 	{
-		auto hr = Get()->Enable(); ThrowFailed(hr);
+		const auto hr = Get()->Disable();
+		ThrowFailed(hr);
 	}
-	void AnimationTimer::Disable() const
-	{
-		auto hr = Get()->Disable(); ThrowFailed(hr);
-	}
+
 	auto AnimationTimer::IsEnabled() const -> bool
 	{
-		auto hr = Get()->IsEnabled();
+		const auto hr = Get()->IsEnabled();
 		if (hr != S_OK || hr == S_FALSE)
 		{
 			ThrowFailed(hr);
@@ -47,13 +51,15 @@ namespace  PGUI::UI::Animation
 	auto AnimationTimer::GetTime() const -> double
 	{
 		double time{ };
-		auto hr = Get()->GetTime(&time); ThrowFailed(hr);
+		const auto hr = Get()->GetTime(&time);
+		ThrowFailed(hr);
 
 		return time;
 	}
 
-	void AnimationTimer::SetFrameRateThreshold(UINT32 threshold) const
+	auto AnimationTimer::SetFrameRateThreshold(const UINT32 threshold) const -> void
 	{
-		auto hr = Get()->SetFrameRateThreshold(threshold); ThrowFailed(hr);
+		const auto hr = Get()->SetFrameRateThreshold(threshold);
+		ThrowFailed(hr);
 	}
 }

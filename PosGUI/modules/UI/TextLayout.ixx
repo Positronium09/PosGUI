@@ -20,9 +20,9 @@ export namespace PGUI::UI
 	class TextLayout : public ComPtrHolder<IDWriteTextLayout4>
 	{
 		public:
-		explicit(false) TextLayout(ComPtr<IDWriteTextLayout4> textLayout) noexcept;
+		explicit(false) TextLayout(const ComPtr<IDWriteTextLayout4>& textLayout) noexcept;
 
-		TextLayout(std::wstring_view text, TextFormat textFormat, SizeF maxSize) noexcept;
+		TextLayout(std::wstring_view text, const TextFormat& textFormat, SizeF maxSize) noexcept;
 
 		auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> void;
 
@@ -36,7 +36,7 @@ export namespace PGUI::UI
 
 		auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> void;
 
-		auto SetLineSpacing(LineSpacing lineSpacing) const noexcept -> void;
+		auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> void;
 
 		auto SetMaxWidth(float maxWidth) const noexcept -> void;
 
@@ -44,7 +44,7 @@ export namespace PGUI::UI
 
 		auto SetMaxSize(SizeF maxSize) const noexcept -> void;
 
-		auto SetFontCollection(FontCollection fontCollection, TextRange textRange) const noexcept -> void;
+		auto SetFontCollection(const FontCollection& fontCollection, TextRange textRange) const noexcept -> void;
 
 		auto SetFontFamilyName(std::wstring_view fontFamilyName, TextRange textRange) const noexcept -> void;
 
@@ -60,13 +60,13 @@ export namespace PGUI::UI
 
 		auto SetStrikethrough(bool hasStrikethrough, TextRange textRange) const noexcept -> void;
 
-		auto SetDrawingEffect(ComPtr<IUnknown> drawingEffect, TextRange textRange) const noexcept -> void;
+		auto SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect, TextRange textRange) const noexcept -> void;
 
 		//? Maybe write a wrapper for IDWriteInlineObject
-		auto SetInlineObject(ComPtr<IDWriteInlineObject> inlineObject, TextRange textRange) const noexcept -> void;
+		auto SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject, TextRange textRange) const noexcept -> void;
 
 		//? Maybe write a wrapper for IDWriteTypography
-		auto SetTypography(ComPtr<IDWriteTypography> typography, TextRange textRange) const noexcept -> void;
+		auto SetTypography(const ComPtr<IDWriteTypography>& typography, TextRange textRange) const noexcept -> void;
 
 		auto SetLocaleName(std::wstring_view localeName, TextRange textRange) const noexcept -> void;
 

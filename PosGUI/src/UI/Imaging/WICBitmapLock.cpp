@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <wincodec.h>
+#include <wrl.h>
 
 module PGUI.UI.Imaging.WICBitmapLock;
 
@@ -14,15 +14,15 @@ import PGUI.UI.Imaging.Palette;
 
 namespace PGUI::UI::Imaging
 {
-	WICBitmapLock::WICBitmapLock(ComPtr<IWICBitmapLock> bitmapLock) noexcept :
+	WICBitmapLock::WICBitmapLock(const ComPtr<IWICBitmapLock>& bitmapLock) noexcept :
 		ComPtrHolder{ bitmapLock }
-	{
-	}
+	{ }
 
 	auto WICBitmapLock::GetSize() const -> SizeU
 	{
 		SizeU size;
-		auto hr = Get()->GetSize(&size.cx, &size.cy); ThrowFailed(hr);
+		const auto hr = Get()->GetSize(&size.cx, &size.cy);
+		ThrowFailed(hr);
 
 		return size;
 	}
@@ -30,8 +30,9 @@ namespace PGUI::UI::Imaging
 	auto WICBitmapLock::GetStride() const -> UINT
 	{
 		UINT stride;
-		auto hr = Get()->GetStride(&stride); ThrowFailed(hr);
-	
+		const auto hr = Get()->GetStride(&stride);
+		ThrowFailed(hr);
+
 		return stride;
 	}
 
@@ -39,15 +40,17 @@ namespace PGUI::UI::Imaging
 	{
 		UINT bufferSize;
 		BYTE* buffer = nullptr;
-		auto hr = Get()->GetDataPointer(&bufferSize, &buffer); ThrowFailed(hr);
-	
+		const auto hr = Get()->GetDataPointer(&bufferSize, &buffer);
+		ThrowFailed(hr);
+
 		return std::span<BYTE>(buffer, bufferSize);
 	}
 
 	auto WICBitmapLock::GetPixelFormat() const -> WICPixelFormatGUID
 	{
 		WICPixelFormatGUID pixelFormat;
-		auto hr = Get()->GetPixelFormat(&pixelFormat); ThrowFailed(hr);
+		const auto hr = Get()->GetPixelFormat(&pixelFormat);
+		ThrowFailed(hr);
 		return pixelFormat;
 	}
 }

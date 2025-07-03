@@ -15,7 +15,7 @@ export namespace PGUI::UI::D2D
 		public:
 		D2DPathGeometry();
 
-		explicit(false) D2DPathGeometry(ComPtr<ID2D1PathGeometry1> ptr) noexcept;
+		explicit(false) D2DPathGeometry(const ComPtr<ID2D1PathGeometry1>& ptr) noexcept;
 
 		auto GetFigureCount() -> UINT32;
 
@@ -23,7 +23,7 @@ export namespace PGUI::UI::D2D
 
 		auto Open() -> GeometrySink;
 
-		auto Stream(GeometrySink sink) -> void;
+		auto Stream(const GeometrySink& sink) -> void;
 
 		[[nodiscard]] static auto CreateRoundRectWithPathGeometry(
 			RectF rect,

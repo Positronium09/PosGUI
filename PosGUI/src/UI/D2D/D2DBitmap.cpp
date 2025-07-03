@@ -1,6 +1,6 @@
 module;
-#include <wrl.h>
 #include <d2d1_3.h>
+#include <wrl.h>
 
 module PGUI.UI.D2D.D2DBitmap;
 
@@ -14,31 +14,34 @@ import PGUI.UI.D2D.RenderTarget;
 
 namespace PGUI::UI::D2D
 {
-	D2DBitmap::D2DBitmap(ComPtr<ID2D1Bitmap1> bitmap) noexcept : 
+	D2DBitmap::D2DBitmap(const ComPtr<ID2D1Bitmap1>& bitmap) noexcept :
 		D2DImage{ bitmap }
-	{
-	}
+	{ }
 
 	auto D2DBitmap::GetSize() const noexcept -> SizeF
 	{
 		return Get()->GetSize();
 	}
+
 	auto D2DBitmap::GetPixelSize() const noexcept -> SizeU
 	{
 		return Get()->GetPixelSize();
 	}
+
 	auto D2DBitmap::GetDpi() const noexcept -> std::pair<float, float>
 	{
-		FLOAT dpiX = 0.0F;
-		FLOAT dpiY = 0.0F;
-		Get()->GetDpi(&dpiX, &dpiY); 
+		auto dpiX = 0.0F;
+		auto dpiY = 0.0F;
+		Get()->GetDpi(&dpiX, &dpiY);
 
 		return std::pair{ dpiX, dpiY };
 	}
+
 	auto D2DBitmap::GetPixelFormat() const noexcept -> D2D1_PIXEL_FORMAT
 	{
 		return Get()->GetPixelFormat();
 	}
+
 	auto D2DBitmap::GetBitmapOptions() const noexcept -> D2D1_BITMAP_OPTIONS
 	{
 		return Get()->GetOptions();
@@ -47,26 +50,30 @@ namespace PGUI::UI::D2D
 	auto D2DBitmap::GetSurface() const noexcept -> ComPtr<IDXGISurface>
 	{
 		ComPtr<IDXGISurface> surface;
-		auto hr = Get()->GetSurface(surface.GetAddressOf()); ThrowFailed(hr);
+		const auto hr = Get()->GetSurface(surface.GetAddressOf());
+		ThrowFailed(hr);
 
 		return surface;
 	}
 
-	auto D2DBitmap::Map(D2D1_MAP_OPTIONS options) const -> MappedRect
+	auto D2DBitmap::Map(const D2D1_MAP_OPTIONS options) const -> MappedRect
 	{
 		D2D1_MAPPED_RECT mappedRect;
 
-		auto hr = Get()->Map(options, &mappedRect); ThrowFailed(hr);
+		const auto hr = Get()->Map(options, &mappedRect);
+		ThrowFailed(hr);
 
 		return MappedRect{ mappedRect, GetPixelSize().cy };
 	}
 
-	void D2DBitmap::Unmap() const
+	auto D2DBitmap::Unmap() const -> void
 	{
-		auto hr = Get()->Unmap(); ThrowFailed(hr);
+		const auto hr = Get()->Unmap();
+		ThrowFailed(hr);
 	}
 
-	void D2DBitmap::CopyFromBitmap(D2DBitmap bitmap, std::optional<PointU> destPoint, std::optional<RectU> srcRect)
+	auto D2DBitmap::CopyFromBitmap(
+		D2DBitmap bitmap, std::optional<PointU> destPoint, std::optional<RectU> srcRect) -> void
 	{
 		D2D1_RECT_U* srcRectPtr = nullptr;
 		if (srcRect.has_value())
@@ -79,9 +86,13 @@ namespace PGUI::UI::D2D
 			destPointPtr = std::bit_cast<D2D1_POINT_2U*>(&destPoint.value());
 		}
 
-		auto hr = Get()->CopyFromBitmap(destPointPtr, bitmap.GetRaw(), srcRectPtr); ThrowFailed(hr);
+		const auto hr = Get()->CopyFromBitmap(
+			destPointPtr, bitmap.GetRaw(), srcRectPtr);
+		ThrowFailed(hr);
 	}
-	void D2DBitmap::CopyFromMemory(const void* source, UINT32 pitch, std::optional<RectU> destRect)
+
+	auto D2DBitmap::CopyFromMemory(
+		const void* source, const UINT32 pitch, std::optional<RectU> destRect) -> void
 	{
 		D2D1_RECT_U* destRectPtr = nullptr;
 		if (destRect.has_value())
@@ -89,6 +100,8 @@ namespace PGUI::UI::D2D
 			destRectPtr = std::bit_cast<D2D1_RECT_U*>(&destRect.value());
 		}
 
-		auto hr = Get()->CopyFromMemory(destRectPtr, source, pitch); ThrowFailed(hr);
+		const auto hr = Get()->CopyFromMemory(
+			destRectPtr, source, pitch);
+		ThrowFailed(hr);
 	}
 }

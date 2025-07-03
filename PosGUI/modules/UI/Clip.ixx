@@ -22,7 +22,7 @@ export namespace PGUI::UI
 {
 	struct RectangleClip : public ComPtrHolder<ID2D1RectangleGeometry>
 	{
-		explicit RectangleClip(ComPtr<ID2D1RectangleGeometry> geometry) noexcept;
+		explicit RectangleClip(const ComPtr<ID2D1RectangleGeometry>& geometry) noexcept;
 
 		explicit RectangleClip(RectF rect) noexcept;
 
@@ -31,16 +31,16 @@ export namespace PGUI::UI
 
 	struct RoundedRectangleClip : public ComPtrHolder<ID2D1RoundedRectangleGeometry>
 	{
-		explicit RoundedRectangleClip(ComPtr<ID2D1RoundedRectangleGeometry> geometry) noexcept;
+		explicit RoundedRectangleClip(const ComPtr<ID2D1RoundedRectangleGeometry>& geometry) noexcept;
 
-		explicit RoundedRectangleClip(RoundedRect rect) noexcept;
+		explicit RoundedRectangleClip(const RoundedRect& rect) noexcept;
 
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
 	};
 
 	struct EllipseClip : public ComPtrHolder<ID2D1EllipseGeometry>
 	{
-		explicit EllipseClip(ComPtr<ID2D1EllipseGeometry> geometry) noexcept;
+		explicit EllipseClip(const ComPtr<ID2D1EllipseGeometry>& geometry) noexcept;
 
 		explicit EllipseClip(Ellipse ellipse) noexcept;
 
@@ -49,7 +49,7 @@ export namespace PGUI::UI
 
 	struct PathClip : public ComPtrHolder<ID2D1PathGeometry1>
 	{
-		explicit PathClip(ComPtr<ID2D1PathGeometry1> geometry) noexcept;
+		explicit PathClip(const ComPtr<ID2D1PathGeometry1>& geometry) noexcept;
 
 		explicit PathClip(const D2D::D2DPathGeometry& geometry) noexcept;
 
@@ -58,7 +58,7 @@ export namespace PGUI::UI
 
 	struct RoundCornerClip : public PathClip
 	{
-		explicit RoundCornerClip(ComPtr<ID2D1PathGeometry1> geometry) noexcept;
+		explicit RoundCornerClip(const ComPtr<ID2D1PathGeometry1>& geometry) noexcept;
 
 		explicit RoundCornerClip(const D2D::D2DPathGeometry& geometry) noexcept;
 
@@ -153,7 +153,7 @@ export namespace PGUI::UI
 		[[nodiscard]] const auto& GetParameters() const noexcept { return parameters; }
 		[[nodiscard]] auto& GetParameters() noexcept { return parameters; }
 
-		auto SetParameters(ClipParameters parameters) noexcept -> void;
+		auto SetParameters(const ClipParameters& parameters) noexcept -> void;
 
 		[[nodiscard]] auto GetGeometry() const noexcept -> D2D::D2DGeometry<ID2D1Geometry>;
 

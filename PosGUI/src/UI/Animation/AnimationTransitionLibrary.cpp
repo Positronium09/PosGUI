@@ -16,12 +16,13 @@ namespace PGUI::UI::Animation
 {
 	AnimationTransitionLibrary::AnimationTransitionLibrary()
 	{
-		auto hr = CoCreateInstance(
+		const auto hr = CoCreateInstance(
 			CLSID_UIAnimationTransitionLibrary2,
 			nullptr,
 			CLSCTX_INPROC_SERVER,
 			__uuidof(IUIAnimationTransitionLibrary2),
-			GetVoidAddress()); ThrowFailed(hr);
+			GetVoidAddress());
+		ThrowFailed(hr);
 	}
 
 	auto AnimationTransitionLibrary::GetInstance() -> const AnimationTransitionLibrary&
@@ -34,66 +35,84 @@ namespace PGUI::UI::Animation
 	}
 
 	auto AnimationTransitionLibrary::AccelerateDecelerateTransition(
-		double duration, double finalValue, 
-		double accelerationRatio, double decelerationRatio) -> AnimationTransition
+		const double duration, const double finalValue,
+		const double accelerationRatio, const double decelerationRatio) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateAccelerateDecelerateTransition(
+		const auto hr = instance->Get()->CreateAccelerateDecelerateTransition(
 			duration, finalValue,
 			accelerationRatio, decelerationRatio,
 			transition.GetAddress()
-		); ThrowFailed(hr);
+		);
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::ConstantTransition(double duration) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::ConstantTransition(const double duration) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateConstantTransition(duration,
-			transition.GetAddress()); ThrowFailed(hr);
+		const auto hr = instance->Get()->CreateConstantTransition(
+			duration,
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::CubicBezierLinearTransition(double duration, double finalValue, 
-		Point<double> p1, Point<double> p2) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::CubicBezierLinearTransition(
+		const double duration, const double finalValue,
+		const Point<double> p1, const Point<double> p2) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateCubicBezierLinearTransition(
+		const auto hr = instance->Get()->CreateCubicBezierLinearTransition(
 			duration, finalValue,
 			p1.x, p1.y, p2.x, p2.y,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::CubicBezierLinearTransition(double duration,
-		std::span<const double> finalValues, Point<double> p1, Point<double> p2) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::CubicBezierLinearTransition(
+		const double duration,
+		const std::span<const double> finalValues,
+		const Point<double> p1, const Point<double> p2) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateCubicBezierLinearVectorTransition(
+		const auto hr = instance->Get()->CreateCubicBezierLinearVectorTransition(
 			duration, finalValues.data(),
 			static_cast<UINT>(finalValues.size()),
 			p1.x, p1.y, p2.x, p2.y,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::CubicTransition(double duration, 
-		double finalValue, double finalVelocity) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::CubicTransition(
+		const double duration,
+		const double finalValue,
+		const double finalVelocity) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateCubicTransition(duration,
+		const auto hr = instance->Get()->CreateCubicTransition(
+			duration,
 			finalValue, finalVelocity,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::CubicTransition(double duration,
-		std::span<const double> finalValues, std::span<const double> finalVelocities) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::CubicTransition(
+		const double duration,
+		const std::span<const double> finalValues, const std::span<const double> finalVelocities) -> AnimationTransition
 	{
 		if (finalValues.size() != finalVelocities.size())
 		{
@@ -102,155 +121,199 @@ namespace PGUI::UI::Animation
 
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateCubicVectorTransition(duration,
+		const auto hr = instance->Get()->CreateCubicVectorTransition(
+			duration,
 			finalValues.data(), finalVelocities.data(),
 			static_cast<UINT>(finalValues.size()),
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::DiscreteTransition(double duration, 
-		double finalValue, double hold) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::DiscreteTransition(
+		const double duration,
+		const double finalValue, const double hold) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateDiscreteTransition(duration,
+		const auto hr = instance->Get()->CreateDiscreteTransition(
+			duration,
 			finalValue, hold,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::DiscreteTransition(double duration,
-		std::span<const double> finalValues, double hold) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::DiscreteTransition(
+		const double duration,
+		const std::span<const double> finalValues, const double hold) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateDiscreteVectorTransition(duration,
+		const auto hr = instance->Get()->CreateDiscreteVectorTransition(
+			duration,
 			finalValues.data(),
-			static_cast<UINT>(finalValues.size()), 
+			static_cast<UINT>(finalValues.size()),
 			hold,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::InstantaneousTransition(double finalValue) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::InstantaneousTransition(const double finalValue) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateInstantaneousTransition(finalValue,
-			transition.GetAddress()); ThrowFailed(hr);
-
-		return transition;
-	}
-	auto AnimationTransitionLibrary::InstantaneousTransition(std::span<const double> finalValues) -> AnimationTransition
-	{
-		AnimationTransition transition{ };
-
-		auto hr = instance->Get()->CreateInstantaneousVectorTransition(
-			finalValues.data(), static_cast<UINT>(finalValues.size()),
-			transition.GetAddress()); ThrowFailed(hr);
-
-		return transition;
-	}
-	auto AnimationTransitionLibrary::LinearTransition(double duration, 
-		double finalValue) -> AnimationTransition
-	{
-		AnimationTransition transition{ };
-
-		auto hr = instance->Get()->CreateLinearTransition(duration, 
+		const auto hr = instance->Get()->CreateInstantaneousTransition(
 			finalValue,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::LinearTransition(double duration,
-		std::span<const double> finalValues) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::InstantaneousTransition(
+		const std::span<const double> finalValues) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateLinearVectorTransition(duration,
+		const auto hr = instance->Get()->CreateInstantaneousVectorTransition(
 			finalValues.data(), static_cast<UINT>(finalValues.size()),
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::LinearTransitionFromSpeed(double speed, 
-		double finalValue) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::LinearTransition(
+		const double duration, const double finalValue) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateLinearTransitionFromSpeed(speed,
+		const auto hr = instance->Get()->CreateLinearTransition(
+			duration,
 			finalValue,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::LinearTransitionFromSpeed(double speed,
-		std::span<const double> finalValues) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::LinearTransition(
+		const double duration,
+		const std::span<const double> finalValues) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateLinearVectorTransitionFromSpeed(speed,
-			finalValues.data(), static_cast<UINT>(finalValues.size()),
-			transition.GetAddress()); ThrowFailed(hr);
+		const auto hr = instance->Get()->CreateLinearVectorTransition(
+			duration,
+			finalValues.data(),
+			static_cast<UINT>(finalValues.size()),
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::ParabolicTransitionFromAcceleration(double finalValue, 
-		double finalVelocity, double acceleration) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::LinearTransitionFromSpeed(
+		const double speed,
+		const double finalValue) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateParabolicTransitionFromAcceleration(
+		const auto hr = instance->Get()->CreateLinearTransitionFromSpeed(
+			speed,
+			finalValue,
+			transition.GetAddress());
+		ThrowFailed(hr);
+
+		return transition;
+	}
+
+	auto AnimationTransitionLibrary::LinearTransitionFromSpeed(
+		const double speed,
+		const std::span<const double> finalValues) -> AnimationTransition
+	{
+		AnimationTransition transition{ };
+
+		const auto hr = instance->Get()->CreateLinearVectorTransitionFromSpeed(
+			speed,
+			finalValues.data(),
+			static_cast<UINT>(finalValues.size()),
+			transition.GetAddress());
+		ThrowFailed(hr);
+
+		return transition;
+	}
+
+	auto AnimationTransitionLibrary::ParabolicTransitionFromAcceleration(
+		const double finalValue,
+		const double finalVelocity, const double acceleration) -> AnimationTransition
+	{
+		AnimationTransition transition{ };
+
+		const auto hr = instance->Get()->CreateParabolicTransitionFromAcceleration(
 			finalValue,
 			finalVelocity,
 			acceleration,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
-	auto AnimationTransitionLibrary::ReversalTransition(double duration) -> AnimationTransition
+
+	auto AnimationTransitionLibrary::ReversalTransition(const double duration) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateReversalTransition(
+		const auto hr = instance->Get()->CreateReversalTransition(
 			duration,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
+
 	auto AnimationTransitionLibrary::SinusoidalTransitionFromRange(
-		double duration, double minimumValue, double maximumValue, 
-		double period, AnimationSlope slope) -> AnimationTransition
+		const double duration, const double minimumValue, const double maximumValue,
+		const double period, AnimationSlope slope) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateSinusoidalTransitionFromRange(
+		const auto hr = instance->Get()->CreateSinusoidalTransitionFromRange(
 			duration, minimumValue, maximumValue,
 			period, static_cast<UI_ANIMATION_SLOPE>(slope),
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
+
 	auto AnimationTransitionLibrary::SinusoidalTransitionFromVelocity(
-		double duration, double period) -> AnimationTransition
+		const double duration, const double period) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateSinusoidalTransitionFromVelocity(
+		const auto hr = instance->Get()->CreateSinusoidalTransitionFromVelocity(
 			duration, period,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}
 
-	auto AnimationTransitionLibrary::SmoothStopTransition(double maximumDuration, double finalValue) -> AnimationTransition
+	auto AnimationTransitionLibrary::SmoothStopTransition(
+		const double maximumDuration, const double finalValue) -> AnimationTransition
 	{
 		AnimationTransition transition{ };
 
-		auto hr = instance->Get()->CreateSmoothStopTransition(
+		const auto hr = instance->Get()->CreateSmoothStopTransition(
 			maximumDuration, finalValue,
-			transition.GetAddress()); ThrowFailed(hr);
+			transition.GetAddress());
+		ThrowFailed(hr);
 
 		return transition;
 	}

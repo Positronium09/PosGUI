@@ -105,11 +105,11 @@ export namespace PGUI::UI::Animation
 		AnimationVariableIntegerChangeEventHandlerRouter integerRouter;
 
 		auto CallVariableChanged(
-			Storyboard storyboard, AnimationVariable variable,
+			const Storyboard& storyboard, const AnimationVariable& variable,
 			std::span<double> newValues, std::span<double> previousValues) noexcept -> HRESULT;
 
 		auto CallVariableIntegerChanged(
-			Storyboard storyboard, AnimationVariable variable,
+			const Storyboard& storyboard, const AnimationVariable& variable,
 			std::span<INT32> newValues,
 			std::span<INT32> previousValues) noexcept -> HRESULT;
 	};

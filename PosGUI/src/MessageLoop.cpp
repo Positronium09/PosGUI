@@ -14,12 +14,12 @@ namespace PGUI
 	{
 		MSG msg{ };
 
-		BOOL ret = 0;
+		int ret;
 		while ((ret = GetMessageW(&msg, nullptr, 0, 0)) != 0)
 		{
 			if (ret == -1)
 			{
-				auto errCode = GetLastError();
+				const auto errCode = GetLastError();
 				LogFailed(LogLevel::Fatal, errCode);
 				return static_cast<int>(errCode);
 			}
@@ -30,13 +30,13 @@ namespace PGUI
 		return static_cast<int>(msg.wParam);
 	}
 
-	//TODO Implemet
+	//TODO Implement
 	auto RunPeekMessageLoop() -> int
 	{
 		throw HResultException{ E_NOTIMPL };
 	}
 
-	auto RunModalMessageLoop(HWND modalDialog, HWND parent, std::atomic_ref<bool> shouldClose) -> int
+	auto RunModalMessageLoop(const HWND modalDialog, const HWND parent, const std::atomic_ref<bool> shouldClose) -> int
 	{
 		ShowWindow(modalDialog, SW_SHOW);
 		if (parent != nullptr)
@@ -45,13 +45,13 @@ namespace PGUI
 		}
 
 		MSG msg{ };
-		BOOL ret = 1;
+		auto ret = 1;
 		while (ret != 0 && !shouldClose.load())
 		{
 			ret = GetMessageW(&msg, nullptr, 0, 0);
 			if (ret == -1)
 			{
-				auto errCode = GetLastError();
+				const auto errCode = GetLastError();
 				LogFailed(LogLevel::Error, errCode);
 				return errCode;
 			}

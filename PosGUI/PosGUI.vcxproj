@@ -35,6 +35,13 @@
     <ClCompile Include="modules\Logging.ixx" />
     <ClCompile Include="modules\MessageLoop.ixx" />
     <ClCompile Include="modules\DataBinding\Property.ixx" />
+    <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
+    <ClCompile Include="modules\UI\Layout\LayoutEnums.ixx" />
+    <ClCompile Include="modules\UI\Layout\LayoutPanel.ixx" />
+    <ClCompile Include="modules\UI\Layout\LayoutStructs.ixx" />
+    <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
+    <ClCompile Include="modules\Window.ixx" />
+    <ClCompile Include="modules\Window\WindowInterface.ixx" />
     <ClCompile Include="modules\PropVariant.ixx" />
     <ClCompile Include="modules\Shape2D\Ellipse.ixx" />
     <ClCompile Include="modules\Shape2D\Line.ixx" />
@@ -118,7 +125,7 @@
     <ClCompile Include="modules\Utils\StringUtils.ixx" />
     <ClCompile Include="modules\Utils\Utils.ixx" />
     <ClCompile Include="modules\Utils\WindowsUtils.ixx" />
-    <ClCompile Include="modules\Window.ixx" />
+    <ClCompile Include="modules\Window\WindowImpl.ixx" />
     <ClCompile Include="modules\WindowClass.ixx" />
     <ClCompile Include="src\MessageLoop.cpp" />
     <ClCompile Include="src\PGUI.cpp" />
@@ -154,6 +161,8 @@
     <ClCompile Include="src\UI\Imaging\Palette.cpp" />
     <ClCompile Include="src\UI\Imaging\WICBitmap.cpp" />
     <ClCompile Include="src\UI\Imaging\WICBitmapLock.cpp" />
+    <ClCompile Include="src\UI\Layout\GridLayout.cpp" />
+    <ClCompile Include="src\UI\Layout\StackLayout.cpp" />
     <ClCompile Include="src\UI\Theming\SystemTheme.cpp" />
     <ClCompile Include="src\UI\TextFormat.cpp" />
     <ClCompile Include="src\UI\Gradient.cpp" />
@@ -270,7 +279,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -300,7 +309,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -326,7 +335,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -356,7 +365,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

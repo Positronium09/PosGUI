@@ -14,16 +14,22 @@ export namespace PGUI::DataBinding
 		public:
 		ValidatedProperty() noexcept = default;
 
+		ValidatedProperty(
+			const T& value, 
+			const std::initializer_list<Validator>& validators) noexcept :
+			Property<T, Mutex>{ value }, validators{ validators }
+		{ }
+
 		explicit(false) ValidatedProperty(const T& value) noexcept :
 			Property<T, Mutex>{ value }
 		{ }
 
 		ValidatedProperty(const ValidatedProperty& other) noexcept :
-			Property<T, Mutex>{ other }
+			Property<T, Mutex>{ other }, validators{ other.validators }
 		{ }
 
 		ValidatedProperty(ValidatedProperty&& other) noexcept :
-			Property<T, Mutex>{ other }
+			Property<T, Mutex>{ std::move(other) }, validators{ std::move(other.validators) }
 		{ }
 
 		~ValidatedProperty() override = default;
@@ -35,11 +41,7 @@ export namespace PGUI::DataBinding
 
 		auto Set(const T& newValue) -> void override
 		{
-			auto validated = std::ranges::all_of(validators, [&newValue](const auto& validator)
-			{
-				return std::invoke(validator, newValue);
-			});
-			if (validated)
+			if (IsValueValid(newValue))
 			{
 				Property<T, Mutex>::Set(newValue);
 			}
@@ -47,11 +49,7 @@ export namespace PGUI::DataBinding
 
 		auto Set(T&& newValue) -> void override
 		{
-			auto validated = std::ranges::all_of(validators, [&newValue](const auto& validator)
-			{
-				return std::invoke(validator, newValue);
-			});
-			if (validated)
+			if (IsValueValid(newValue))
 			{
 				Property<T, Mutex>::Set(newValue);
 			}
@@ -130,5 +128,23 @@ export namespace PGUI::DataBinding
 
 		private:
 		std::vector<Validator> validators{ };
+
+		[[nodiscard]] auto IsValueValid(const T& value) const
+		{
+			return std::ranges::all_of(validators, [&value](const auto& validator)
+			{
+				return std::invoke(validator, value);
+			});
+		}
+		[[nodiscard]] auto IsValueValid(T&& value) const
+		{
+			return std::ranges::all_of(validators, [&value](const auto& validator)
+			{
+				return std::invoke(validator, value);
+			});
+		}
 	};
+
+	template <typename T>
+	using ValidatedPropertyNM = ValidatedProperty<T, NullMutex>;
 }

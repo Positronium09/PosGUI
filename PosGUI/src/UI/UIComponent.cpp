@@ -147,7 +147,7 @@ namespace PGUI::UI
 		if (const auto contains = clip.GetGeometry().FillContainsPoint(point);
 			!contains)
 		{
-			return { HTTRANSPARENT, ReturnFlags::ForceThisResult };
+			return { HTTRANSPARENT, HandlerReturnFlags::ForceThisResult };
 		}
 
 		return defResult;

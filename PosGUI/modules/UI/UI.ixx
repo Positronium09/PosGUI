@@ -17,3 +17,4 @@ export import PGUI.UI.Dialog;
 export import PGUI.UI.UIComponent;
 export import PGUI.UI.Theming;
 export import PGUI.UI.Animation;
+export import PGUI.UI.Layout;

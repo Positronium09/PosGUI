@@ -38,6 +38,20 @@ export namespace PGUI
 
 		[[nodiscard]] constexpr auto operator==(const Size<T>& other) const noexcept -> bool = default;
 
+		constexpr auto& operator+=(const Size& other) noexcept
+		{
+			cx += other.cx;
+			cy += other.cy;
+			return *this;
+		}
+
+		constexpr auto& operator-=(const Size& other) noexcept
+		{
+			cx -= other.cx;
+			cy -= other.cy;
+			return *this;
+		}
+
 		constexpr auto& operator*=(const T& factor) noexcept
 		{
 			cx *= factor;
@@ -52,15 +66,32 @@ export namespace PGUI
 			return *this;
 		}
 
+		[[nodiscard]] constexpr auto operator-() const noexcept
+		{
+			return Size{ -cx, -cy };
+		}
+
+		[[nodiscard]] constexpr auto operator+(const Size& other) const noexcept
+		{
+			return Size{ cx + other.cx, cy + other.cy };
+		}
+
+		[[nodiscard]] constexpr auto operator-(const Size& other) const noexcept
+		{
+			return Size{ cx - other.cx, cy - other.cy };
+		}
+
 		[[nodiscard]] constexpr auto operator*(T factor) const noexcept
 		{
-			return Size(cx * factor, cy * factor);
+			return Size{ cx * factor, cy * factor };
 		}
 
 		[[nodiscard]] constexpr auto operator/(T factor) const noexcept
 		{
-			return Size(cx / factor, cy / factor);
+			return Size{ cx / factor, cy / factor };
 		}
+
+		
 
 		template <typename U> requires std::is_arithmetic_v<U>
 		explicit(false) operator Size<U>() const noexcept

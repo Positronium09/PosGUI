@@ -30,7 +30,7 @@
     <ClCompile Include="modules\Shape2D\Shape2D.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Window.ixx">
+    <ClCompile Include="modules\Window\WindowImpl.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Window.cpp">
@@ -454,6 +454,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Animation\AnimationInterface.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Window\WindowInterface.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Window.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\Layout\LayoutPanel.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\Layout\StackLayout.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\Layout\LayoutEnums.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Layout\StackLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\Layout\LayoutStructs.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\Layout\GridLayout.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Layout\GridLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

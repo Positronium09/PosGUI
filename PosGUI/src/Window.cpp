@@ -3,10 +3,11 @@ module;
 #include <ranges>
 #include <Windows.h>
 
-module PGUI.Window;
+module PGUI.Window:Impl;
 
 import std;
 
+import :Impl;
 import PGUI.Utils;
 import PGUI.Logging;
 import PGUI.Exceptions;
@@ -17,6 +18,7 @@ namespace PGUI
 		windowClass{ windowClass }
 	{
 		RegisterHandler(WM_DPICHANGED, &Window::_OnDpiChanged);
+		RegisterHandler(WM_SIZE, &Window::_OnSize);
 	}
 
 	auto Window::OnDpiChanged(UINT /* unused */, const RectL suggestedRect) -> MessageHandlerResult
@@ -78,15 +80,24 @@ namespace PGUI
 		return OnDpiChanged(LOWORD(wParam), *std::bit_cast<LPRECT>(lParam));
 	}
 
+	auto Window::_OnSize(UINT /* unused */, WPARAM /* unused */, const LPARAM lParam) -> MessageHandlerResult
+	{
+		OnSizeChanged({ HIWORD(lParam), LOWORD(lParam) });
+
+		return 0;
+	}
+
 	// ReSharper restore CppInconsistentNaming
 
 	auto Window::RemoveChildWindow(HWND childHwnd) -> void
 	{
-		const auto found = std::ranges::find_if(childWindows,
-		                                        [childHwnd](const auto& wnd) 
-		                                        {
-			                                        return wnd->hWnd == childHwnd;
-		                                        });
+		const auto found = std::ranges::find_if(
+			childWindows,
+			[childHwnd](const auto& wnd)
+			{
+				return wnd->hWnd == childHwnd;
+			});
+
 		if (found == childWindows.end())
 		{
 			return;
@@ -641,7 +652,7 @@ namespace PGUI
 
 				hookerHandled = true;
 
-				if (IsFlagSet(result.flags, ReturnFlags::ForceThisResult)) [[unlikely]]
+				if (IsFlagSet(result.flags, HandlerReturnFlags::ForceThisResult)) [[unlikely]]
 				{
 					return result.result;
 				}
@@ -673,7 +684,7 @@ namespace PGUI
 					}
 				}, handlerVariant);
 			}
-			if (IsFlagSet(result.flags, ReturnFlags::PassToDefProc)) [[unlikely]]
+			if (IsFlagSet(result.flags, HandlerReturnFlags::PassToDefProc)) [[unlikely]]
 			{
 				DefWindowProcW(hWnd, msg, wParam, lParam);
 			}
@@ -702,7 +713,7 @@ namespace PGUI
 					}
 				}, messageHandlers);
 
-				if (IsFlagSet(result.flags, ReturnFlags::ForceThisResult)) [[unlikely]]
+				if (IsFlagSet(result.flags, HandlerReturnFlags::ForceThisResult)) [[unlikely]]
 				{
 					return result.result;
 				}

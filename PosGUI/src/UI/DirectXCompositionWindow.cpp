@@ -26,8 +26,29 @@ namespace PGUI::UI
 		Window{ wndClass }
 	{
 		RegisterHandler(WM_NCCREATE, &DirectXCompositionWindow::OnNCCreate);
-		RegisterHandler(WM_SIZE, &DirectXCompositionWindow::OnSize);
 		RegisterHandler(WM_WINDOWPOSCHANGED, &DirectXCompositionWindow::OnWindowPosChanged);
+		RegisterHandler(WM_PAINT, &DirectXCompositionWindow::OnPaint);
+	}
+
+	auto DirectXCompositionWindow::OnSizeChanged(SizeL) -> void
+	{
+		const auto& d2d1 = GetD2D1DeviceContext();
+		d2d1->SetTarget(nullptr);
+
+		auto size = GetWindowSize();
+
+		if (size.cy == 0)
+		{
+			size.cy = 1;
+		}
+
+		const auto hr = GetSwapChain()->ResizeBuffers(
+			0, size.cx, size.cy,
+			DXGI_FORMAT_UNKNOWN, NULL);
+		ThrowFailed(hr);
+
+		DiscardDeviceResources();
+		InitD2D1DeviceContext();
 	}
 
 	auto DirectXCompositionWindow::BeginDraw() -> void
@@ -234,7 +255,7 @@ namespace PGUI::UI
 
 		currentMonitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL);
 
-		return { 1, ReturnFlags::PassToDefProc };
+		return { 1, HandlerReturnFlags::PassToDefProc };
 	}
 
 	auto DirectXCompositionWindow::OnWindowPosChanged(
@@ -259,29 +280,13 @@ namespace PGUI::UI
 			}
 		}
 
-		return { 0, ReturnFlags::PassToDefProc };
+		return { 0, HandlerReturnFlags::PassToDefProc };
 	}
 
-	auto DirectXCompositionWindow::OnSize(
+	auto DirectXCompositionWindow::OnPaint(
 		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
 	{
-		const auto& d2d1 = GetD2D1DeviceContext();
-		d2d1->SetTarget(nullptr);
-
-		auto size = GetWindowSize();
-
-		if (size.cy == 0)
-		{
-			size.cy = 1;
-		}
-
-		const auto hr = GetSwapChain()->ResizeBuffers(
-			0, size.cx, size.cy,
-			DXGI_FORMAT_UNKNOWN, NULL);
-		ThrowFailed(hr);
-
-		DiscardDeviceResources();
-		InitD2D1DeviceContext();
+		Draw(GetGraphics());
 
 		return 0;
 	}

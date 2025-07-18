@@ -62,8 +62,15 @@ export namespace PGUI::UI
 			/* */
 		}
 
+		virtual auto Draw(Graphics) -> void
+		{
+			/* E_NOTIMPL */
+		}
+
 		protected:
 		explicit DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept;
+
+		auto OnSizeChanged(SizeL newSize) -> void override;
 
 		private:
 		inline static ComPtr<ID3D11Device2> d3d11Device;
@@ -84,6 +91,6 @@ export namespace PGUI::UI
 
 		auto OnWindowPosChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 
-		auto OnSize(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		auto OnPaint(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 	};
 }

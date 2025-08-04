@@ -107,58 +107,82 @@ namespace PGUI::UI
 
 	auto TextFormat::SetFlowDirection(const FlowDirection flowDirection) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFlowDirection(flowDirection)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set flow direction");
+		return error;
 	}
 
 	auto TextFormat::SetIncrementalTabStop(const float incrementalTabStop) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetIncrementalTabStop(incrementalTabStop)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set incremental tab stop");
+		return error;
 	}
 
 	auto TextFormat::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetParagraphAlignment(paragraphAlignment)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set paragraph alignment");
+		return error;
 	}
 
 	auto TextFormat::SetReadingDirection(const ReadingDirection readingDirection) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetReadingDirection(readingDirection)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set reading direction");
+		return error;
 	}
 
 	auto TextFormat::SetTextAlignment(const TextAlignment textAlignment) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetTextAlignment(textAlignment)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set text alignment");
+		return error;
 	}
 
 	auto TextFormat::SetWordWrapping(const WordWrapping wordWrapping) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetWordWrapping(wordWrapping)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set word wrapping");
+		return error;
 	}
 
 	auto TextFormat::SetTrimming(const Trimming& trimming) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetTrimming(&trimming.trimmingOptions, trimming.GetRaw())
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set trimming");
+		return error;
 	}
 
 	auto TextFormat::SetLineSpacing(const LineSpacing& lineSpacing) noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetLineSpacing(&lineSpacing)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set line spacing");
+		return error;
 	}
 
 	auto TextFormat::GetFlowDirection() const noexcept -> FlowDirection
@@ -174,19 +198,19 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontCollection(fontCollection.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get font collection");
+			return Unexpected{ error };
 		}
 
 		if (const auto hr = fontCollection.As(&fontCollection3);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3");
+			return Unexpected{ error };
 		}
 
 		return fontCollection3;
@@ -202,10 +226,10 @@ namespace PGUI::UI
 		if (const auto hr = ptr->GetFontFamilyName(fontFamilyName.data(), length + 1);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get font family name");
+			return Unexpected{ error };
 		}
 
 		return fontFamilyName;
@@ -246,10 +270,10 @@ namespace PGUI::UI
 		if (const auto hr = ptr->GetLocaleName(localeName.data(), length + 1);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get locale name");
+			return Unexpected{ error };
 		}
 
 		return localeName;
@@ -281,10 +305,10 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetTrimming(&trimming.trimmingOptions, trimming.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get trimming");
+			return Unexpected{ error };
 		}
 
 		return trimming;
@@ -296,10 +320,10 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetLineSpacing(&lineSpacing);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get line spacing");
+			return Unexpected{ error };
 		}
 
 		return lineSpacing;

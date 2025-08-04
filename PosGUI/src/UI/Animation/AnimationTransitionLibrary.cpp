@@ -54,10 +54,15 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddDetail(L"Acceleration Ratio", std::format(L"{:.10F}", accelerationRatio))
+				.AddDetail(L"Deceleration Ratio", std::format(L"{:.10F}", decelerationRatio))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create AccelerateDecelerateTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -72,10 +77,12 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create ConstantTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -93,10 +100,15 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddDetail(L"P1", std::format(L"{}", p1))
+				.AddDetail(L"P2", std::format(L"{}", p2))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create CubicBezierLinearTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -116,10 +128,15 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
+				.AddDetail(L"P1", std::format(L"{}", p1))
+				.AddDetail(L"P2", std::format(L"{}", p2))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create CubicBezierLinearVectorTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -138,10 +155,14 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddDetail(L"Final Velocity", std::format(L"{:.10F}", finalVelocity))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create CubicTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -154,11 +175,12 @@ namespace PGUI::UI::Animation
 	{
 		if (finalValues.size() != finalVelocities.size())
 		{
-			return Unexpected{
-				Error{ std::errc::invalid_argument }
+			Error error{ std::errc::invalid_argument };
+			error
 				.AddTag(ErrorTags::Animation)
-				.SuggestFix(L"finalValues and finalVelocities must have the same number of elements")
-			};
+				.SuggestFix(L"finalValues and finalVelocities must have the same number of elements");
+			Logger::Error(error, L"Failed to create CubicTransition: finalValues and finalVelocities size mismatch");
+			return Unexpected{ error };
 		}
 
 		AnimationTransition transition{ };
@@ -170,10 +192,14 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
+				.AddDetail(L"Final Velocities", std::format(L"{}", finalVelocities))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create CubicVectorTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -191,10 +217,14 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddDetail(L"Hold", std::format(L"{:.10F}", hold))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create DiscreteTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -214,10 +244,14 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
+				.AddDetail(L"Hold", std::format(L"{:.10F}", hold))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create DiscreteVectorTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -233,10 +267,12 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create InstantaneousTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -252,10 +288,12 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create InstantaneousVectorTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -272,10 +310,13 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create LinearTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -294,10 +335,13 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create LinearVectorTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -315,10 +359,13 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Speed", std::format(L"{:.10F}", speed))
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create LinearTransitionFromSpeed");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -337,10 +384,13 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Speed", std::format(L"{:.10F}", speed))
+				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create LinearVectorTransitionFromSpeed");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -359,10 +409,14 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddDetail(L"Final Velocity", std::format(L"{:.10F}", finalVelocity))
+				.AddDetail(L"Acceleration", std::format(L"{:.10F}", acceleration))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create ParabolicTransitionFromAcceleration");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -377,10 +431,12 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create ReversalTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -398,10 +454,15 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Minimum Value", std::format(L"{:.10F}", minimumValue))
+				.AddDetail(L"Maximum Value", std::format(L"{:.10F}", maximumValue))
+				.AddDetail(L"Period", std::format(L"{:.10F}", period))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create SinusoidalTransitionFromRange");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -417,10 +478,13 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
+				.AddDetail(L"Period", std::format(L"{:.10F}", period))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create SinusoidalTransitionFromVelocity");
+			return Unexpected{ error };
 		}
 
 		return transition;
@@ -436,10 +500,13 @@ namespace PGUI::UI::Animation
 			transition.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Maximum Duration", std::format(L"{:.10F}", maximumDuration))
+				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
+				.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to create SmoothStopTransition");
+			return Unexpected{ error };
 		}
 
 		return transition;

@@ -177,16 +177,38 @@ export namespace PGUI
 		}
 
 		template <IsAnyOf<Interfaces...> T, typename U>
-		auto As() const -> Result<ComPtr<U>>
+		auto As() const noexcept -> Result<ComPtr<U>>
 		{
 			ComPtr<U> ptr;
 
 			if (auto hresult = Get<T>().As(&ptr);
 				FAILED(hresult))
 			{
-				return Unexpected{
-					Error{ hresult }
-				};
+				Error error{ hresult };
+				error
+					.AddDetail(L"From", StringToWString(typeid(T).name()))
+					.AddDetail(L"To", StringToWString(typeid(U).name()));
+
+				Logger::Error(error, L"Cannot cast between interfaces");
+				return Unexpected{ error };
+			}
+
+			return ptr;
+		}
+
+		template <IsAnyOf<Interfaces...> T, typename U>
+		auto As(const std::nothrow_t&) const -> Result<ComPtr<U>>
+		{
+			ComPtr<U> ptr;
+
+			if (auto hresult = Get<T>().As(&ptr);
+				FAILED(hresult))
+			{
+				Error error{ hresult };
+				error
+					.AddDetail(L"From", StringToWString(typeid(T).name()))
+					.AddDetail(L"To", StringToWString(typeid(U).name()));
+				throw Exception{ error };
 			}
 
 			return ptr;
@@ -229,3 +251,29 @@ export namespace PGUI
 		std::tuple<ComPtr<Interfaces>...> interfaces{ };
 	};
 }
+
+export template <typename Char>
+struct std::formatter<IID, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+
+		throw std::format_error{ "No format specifiers is supported" };
+	}
+
+	template <typename FormatContext>
+	auto format(const IID& iid, FormatContext& ctx) const
+	{
+		return std::format_to(ctx.out(), "{{{:08X}-{:04X}-{:04X}-{{{:02X}{:02X}}}-{{{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}}}}}",
+			iid.Data1, iid.Data2, iid.Data3,
+			iid.Data4[0], iid.Data4[1],
+			iid.Data4[2], iid.Data4[3], iid.Data4[4], iid.Data4[5], iid.Data4[6], iid.Data4[7]);
+	}
+};

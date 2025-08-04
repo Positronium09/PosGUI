@@ -39,7 +39,12 @@ export namespace PGUI::UI::D2D
 			if (auto hr = this->Get()->CreateEffect(effectID, effect.GetAddress()); 
 				FAILED(hr))
 			{
-				return Unexpected{ hr };
+				Error error{ hr };
+				error
+					.AddTag(ErrorTags::D2D)
+					.AddTag(ErrorTags::Creation);
+				Logger::Error(error, std::format(L"Cannot create effect with IID {}", effectID));
+				return Unexpected{ error };
 			}
 
 			return effect;

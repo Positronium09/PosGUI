@@ -25,10 +25,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetSize(&size.cx, &size.cy);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get size");
+			return Unexpected{ error };
 		}
 
 		return size;
@@ -41,10 +41,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetStride(&stride);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get stride");
+			return Unexpected{ error };
 		}
 
 		return stride;
@@ -58,10 +58,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetDataPointer(&bufferSize, &buffer);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get data pointer");
+			return Unexpected{ error };
 		}
 
 		return std::span(buffer, bufferSize);
@@ -74,10 +74,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetPixelFormat(&pixelFormat);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get pixel format");
+			return Unexpected{ error };
 		}
 
 		return pixelFormat;

@@ -34,72 +34,106 @@ namespace PGUI::UI
 			}
 			.AddTag(ErrorTags::Initialization)
 			.AddDetail(L"Text", text)
-			.AddDetail(L"MaxSize", std::format(L"{}", maxSize))
+			.AddDetail(L"MaxSize", std::format(L"{}", maxSize)),
+			L"Cannot create text layout"
 		);
 	}
 
 	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetTextAlignment(textAlignment)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set text alignment");
+		return error;
 	}
 
 	auto TextLayout::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetParagraphAlignment(paragraphAlignment)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set paragraph alignment");
+		return error;
 	}
 
 	auto TextLayout::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetWordWrapping(wordWrapping)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set word wrapping");
+		return error;
 	}
 
 	auto TextLayout::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetReadingDirection(readingDirection)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set reading direction");
+		return error;
 	}
 
 	auto TextLayout::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFlowDirection(flowDirection)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set flow direction");
+		return error;
 	}
 
 	auto TextLayout::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetIncrementalTabStop(incrementalTabStop)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Incremental Tab Stop", std::format(L"{:.5F}", incrementalTabStop))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set incremental tab stop");
+		return error;
 	}
 
 	auto TextLayout::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetLineSpacing(
 				lineSpacing.method, lineSpacing.height, lineSpacing.baseline)
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set line spacing");
+		return error;
 	}
 
 	auto TextLayout::SetMaxWidth(const float maxWidth) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetMaxWidth(maxWidth)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Max Width", std::format(L"{:.5F}", maxWidth))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set max width");
+		return error;
 	}
 
 	auto TextLayout::SetMaxHeight(const float maxHeight) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetMaxHeight(maxHeight)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Max Width", std::format(L"{:.5F}", maxHeight))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set max height");
+		return error;
 	}
 
 	auto TextLayout::SetMaxSize(const SizeF maxSize) const noexcept -> Error
@@ -115,101 +149,165 @@ namespace PGUI::UI
 	auto TextLayout::SetFontCollection(const FontCollection& fontCollection,
 	                                   const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFontCollection(
 				fontCollection.GetRawAs<IDWriteFontCollection3, IDWriteFontCollection>(),
 				textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set font collection");
+		return error;
 	}
 
 	auto TextLayout::SetFontFamilyName(const std::wstring_view fontFamilyName,
 	                                   const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFontFamilyName(fontFamilyName.data(), textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Font Family Name", fontFamilyName)
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set font family name");
+		return error;
 	}
 
 	auto TextLayout::SetFontWeight(const FontWeight fontWeight, const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFontWeight(fontWeight, textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set font weight");
+		return error;
 	}
 
 	auto TextLayout::SetFontStyle(const FontStyle fontStyle, const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFontStyle(fontStyle, textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set font style");
+		return error;
 	}
 
 	auto TextLayout::SetFontStretch(const FontStretch fontStretch, const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFontStretch(fontStretch, textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set font stretch");
+		return error;
 	}
 
 	auto TextLayout::SetFontSize(const float fontSize, const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetFontSize(fontSize, textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set font size");
+		return error;
 	}
 
 	auto TextLayout::SetUnderline(const bool hasUnderline, const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetUnderline(hasUnderline, textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set underline");
+		return error;
 	}
 
 	auto TextLayout::SetStrikethrough(const bool hasStrikethrough, const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetStrikethrough(hasStrikethrough, textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set strikethrough");
+		return error;
 	}
 
 	auto TextLayout::SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect,
 	                                  const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetDrawingEffect(drawingEffect.Get(), textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set drawing effect");
+		return error;
 	}
 
 	auto TextLayout::SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject,
 	                                 const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetInlineObject(inlineObject.Get(), textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set inline object");
+		return error;
 	}
 
 	auto TextLayout::SetTypography(const ComPtr<IDWriteTypography>& typography,
 	                               const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetTypography(typography.Get(), textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set typography");
+		return error;
 	}
 
 	auto TextLayout::SetLocaleName(const std::wstring_view localeName,
 	                               const TextRange textRange) const noexcept -> Error
 	{
-		return Error{
+		Error error{
 			Get()->SetLocaleName(localeName.data(), textRange)
-		}.AddTag(ErrorTags::Font);
+		};
+		error
+			.AddDetail(L"Text Range", std::format(L"{}", textRange))
+			.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set locale name");
+		return error;
 	}
 
 	auto TextLayout::SetTrimming(const Trimming& trimming) const noexcept -> Error
 	{
 		auto& trimmingOptions = trimming.trimmingOptions;
-		return Error{
+		Error error{
 			Get()->SetTrimming(&trimmingOptions, trimming.GetRaw())
-		}.AddTag(ErrorTags::Font);
+		};
+		error.AddTag(ErrorTags::Font);
+		LogIfFailed(error, L"Cannot set trimming");
+		return error;
 	}
 
 	auto TextLayout::GetTrimming() const noexcept -> Result<Trimming>
@@ -220,10 +318,10 @@ namespace PGUI::UI
 			trimming.GetAddress());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Cannot get trimming");
+			return Unexpected{ error };
 		}
 
 		return trimming;
@@ -267,10 +365,10 @@ namespace PGUI::UI
 			&lineSpacing.height, &lineSpacing.baseline);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Cannot get line spacing");
+			return Unexpected{ error };
 		}
 
 		return lineSpacing;
@@ -293,10 +391,10 @@ namespace PGUI::UI
 			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Cannot get font collection");
+			return Unexpected{ error };
 		}
 
 		return fontCollection;
@@ -309,11 +407,12 @@ namespace PGUI::UI
 			position, fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
+			Error error{ hr };
+			error
 				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Cannot get font collection");
+			return Unexpected{ error };
 		}
 
 		return fontCollection;
@@ -329,14 +428,13 @@ namespace PGUI::UI
 			&textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get font collection");
+			return Unexpected{ error };
 		}
 
 		return fontCollection;
@@ -351,10 +449,10 @@ namespace PGUI::UI
 				fontFamilyName.data(), length);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Cannot get font family name");
+			return Unexpected{ error };
 		}
 
 		return fontFamilyName;
@@ -369,11 +467,12 @@ namespace PGUI::UI
 				position, fontFamilyName.data(), length);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get font family name");
+			return Unexpected{ error };
 		}
 
 		return fontFamilyName;
@@ -389,14 +488,13 @@ namespace PGUI::UI
 				position, fontFamilyName.data(), length, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get font family name");
+			return Unexpected{ error };
 		}
 
 		return fontFamilyName;
@@ -413,11 +511,12 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontWeight(position, &fontWeight);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get font weight");
+			return Unexpected{ error };
 		}
 
 		return fontWeight;
@@ -429,14 +528,13 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontWeight(position, &fontWeight, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get font weight");
+			return Unexpected{ error };
 		}
 
 		return fontWeight;
@@ -453,11 +551,12 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontStyle(position, &fontStyle);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get font style");
+			return Unexpected{ error };
 		}
 
 		return fontStyle;
@@ -469,14 +568,13 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontStyle(position, &fontStyle, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get font style");
+			return Unexpected{ error };
 		}
 
 		return fontStyle;
@@ -493,11 +591,12 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontStretch(position, &fontStretch);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get font stretch");
+			return Unexpected{ error };
 		}
 
 		return fontStretch;
@@ -509,14 +608,13 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontStretch(position, &fontStretch, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get font stretch");
+			return Unexpected{ error };
 		}
 
 		return fontStretch;
@@ -533,11 +631,12 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontSize(position, &fontSize);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get font size");
+			return Unexpected{ error };
 		}
 
 		return fontSize;
@@ -549,14 +648,13 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetFontSize(position, &fontSize, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get font size");
+			return Unexpected{ error };
 		}
 
 		return fontSize;
@@ -584,14 +682,13 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetUnderline(position, &underline, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get underline");
+			return Unexpected{ error };
 		}
 
 		return underline;
@@ -603,11 +700,12 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetStrikethrough(position, &strikethrough);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get strikethrough");
+			return Unexpected{ error };
 		}
 
 		return strikethrough;
@@ -619,14 +717,13 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetStrikethrough(position, &strikethrough, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get strikethrough");
+			return Unexpected{ error };
 		}
 
 		return strikethrough;
@@ -639,11 +736,12 @@ namespace PGUI::UI
 				position, drawingEffect.GetAddressOf(), nullptr);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get drawing effect");
+			return Unexpected{ error };
 		}
 
 		return drawingEffect;
@@ -657,14 +755,13 @@ namespace PGUI::UI
 				position, drawingEffect.GetAddressOf(), &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get drawing effect");
+			return Unexpected{ error };
 		}
 
 		return drawingEffect;
@@ -677,11 +774,12 @@ namespace PGUI::UI
 				position, inlineObject.GetAddressOf(), nullptr);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get inline object");
+			return Unexpected{ error };
 		}
 
 		return inlineObject;
@@ -696,14 +794,13 @@ namespace PGUI::UI
 				position, inlineObject.GetAddressOf(), &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get inline object");
+			return Unexpected{ error };
 		}
 
 		return inlineObject;
@@ -716,11 +813,12 @@ namespace PGUI::UI
 				position, typography.GetAddressOf(), nullptr);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get typography");
+			return Unexpected{ error };
 		}
 
 		return typography;
@@ -734,14 +832,13 @@ namespace PGUI::UI
 				position, typography.GetAddressOf(), &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get typography");
+			return Unexpected{ error };
 		}
 
 		return typography;
@@ -754,10 +851,10 @@ namespace PGUI::UI
 		if (const auto hr = Get()->GetLocaleName(localeName.data(), length);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Cannot get locale name");
+			return Unexpected{ error };
 		}
 
 		return localeName;
@@ -772,11 +869,12 @@ namespace PGUI::UI
 				position, localeName.data(), length);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-				.AddDetail(L"Position", std::to_wstring(position))
-			};
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get locale name");
+			return Unexpected{ error };
 		}
 
 		return localeName;
@@ -790,14 +888,13 @@ namespace PGUI::UI
 				position, localeName.data(), length, &textRange);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
 				.AddDetail(L"Position", std::to_wstring(position))
-				.AddDetail(L"Text Range",
-				           std::format(L"{} {}",
-				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
-			};
+				.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot get locale name");
+			return Unexpected{ error };
 		}
 
 		return localeName;
@@ -809,10 +906,10 @@ namespace PGUI::UI
 		if (const auto hr = Get()->DetermineMinWidth(&minWidth);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Cannot determine minimum width");
+			return Unexpected{ error };
 		}
 
 		return minWidth;

@@ -25,10 +25,11 @@ namespace PGUI::UI::D2D
 		if (const auto hr = factory->CreatePathGeometry(GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create D2DPathGeometry {}",
-			              Error{ hr }
-			              .AddTag(ErrorTags::D2D)
-			              .AddTag(ErrorTags::Creation));
+			Error error{ hr };
+			error
+				.AddTag(ErrorTags::D2D)
+				.AddTag(ErrorTags::Creation);
+			Logger::Error(error, L"Failed to create D2DPathGeometry");
 		}
 	}
 
@@ -43,10 +44,10 @@ namespace PGUI::UI::D2D
 		if (const auto hr = Get()->GetFigureCount(&count);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::D2D)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::D2D);
+			Logger::Error(error, L"Failed to get figure count");
+			return Unexpected{ error };
 		}
 		
 		return count;
@@ -58,10 +59,10 @@ namespace PGUI::UI::D2D
 		if (const auto hr = Get()->GetSegmentCount(&count);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::D2D)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::D2D);
+			Logger::Error(error, L"Failed to get segment count");
+			return Unexpected{ error };
 		}
 		return count;
 	}
@@ -72,18 +73,22 @@ namespace PGUI::UI::D2D
 		if (const auto hr = Get()->Open(sink.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::D2D)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::D2D);
+			Logger::Error(error, L"Failed to open geometry sink");
+			return Unexpected{ error };
 		}
 		return GeometrySink{ sink };
 	}
 
 	auto D2DPathGeometry::Stream(const GeometrySink& sink) noexcept -> Error
 	{
-		const auto hr = Get()->Stream(sink.Get());
-		return Error{ hr }.AddTag(ErrorTags::D2D);
+		Error error{
+			Get()->Stream(sink.Get())
+		};
+		error.AddTag(ErrorTags::D2D);
+		LogIfFailed(error, L"Streaming failed");
+		return error;
 	}
 
 	auto D2DPathGeometry::CreateRoundRectWithPathGeometry(

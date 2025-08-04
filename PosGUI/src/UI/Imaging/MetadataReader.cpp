@@ -24,10 +24,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetContainerFormat(&format);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get container format");
+			return Unexpected{ error };
 		}
 
 		return format;
@@ -39,10 +39,12 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetMetadataByName(name.data(), &value);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Name", name)
+				.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get metadata for name: {}");
+			return Unexpected{ error };
 		}
 
 		return value;
@@ -54,22 +56,17 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetLocation(0, nullptr, &length);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get location length");
+			return Unexpected{ error };
 		}
 
 		std::wstring location(length, L'\0');
 
 		if (const auto hr = Get()->GetLocation(length, location.data(), &length);
 			FAILED(hr))
-		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
-		}
+		{ }
 
 		return location;
 	}
@@ -80,10 +77,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetEnumerator(&enumerator);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get metadata enumerator");
+			return Unexpected{ error };
 		}
 
 		return enumerator;
@@ -91,16 +88,15 @@ namespace PGUI::UI::Imaging
 
 	auto MetadataReader::operator[](const std::wstring_view name) const -> PropVariant
 	{
-		if (const auto metadataResult = GetMetadata(name);
-			metadataResult.has_value())
+		auto metadataResult = GetMetadata(name);
+		if (metadataResult.has_value())
 		{
 			return metadataResult.value();
 		}
 
 		throw Exception{
-			Error{ WINCODEC_ERR_INVALIDPARAMETER }
-			.AddTag(ErrorTags::Imaging)
-		};
+			metadataResult.error()
+		}.SuggestFix(L"operator[] throws use GetMetadata if you want noexcept");
 	}
 
 	auto MetadataReader::cbegin() const -> IEnumStringIterator
@@ -111,9 +107,7 @@ namespace PGUI::UI::Imaging
 			return IEnumStringIterator{ enumeratorResult.value() };
 		}
 
-		throw Exception{
-			enumeratorResult.error()
-		};
+		throw Exception{ enumeratorResult.error() };
 	}
 
 	auto MetadataReader::cend() const -> IEnumStringIterator
@@ -123,9 +117,8 @@ namespace PGUI::UI::Imaging
 		{
 			return IEnumStringIterator{ enumeratorResult.value(), true };
 		}
-		throw Exception{
-			enumeratorResult.error()
-		};
+
+		throw Exception{ enumeratorResult.error() };
 	}
 
 	auto MetadataReader::begin() const -> IEnumStringIterator
@@ -135,9 +128,8 @@ namespace PGUI::UI::Imaging
 		{
 			return IEnumStringIterator{ enumeratorResult.value() };
 		}
-		throw Exception{
-			enumeratorResult.error()
-		};
+
+		throw Exception{ enumeratorResult.error() };
 	}
 
 	auto MetadataReader::end() const -> IEnumStringIterator
@@ -147,8 +139,7 @@ namespace PGUI::UI::Imaging
 		{
 			return IEnumStringIterator{ enumeratorResult.value(), true };
 		}
-		throw Exception{
-			enumeratorResult.error()
-		};
+
+		throw Exception{ enumeratorResult.error() };
 	}
 }

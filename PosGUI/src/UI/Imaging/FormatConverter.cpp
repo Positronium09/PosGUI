@@ -28,10 +28,11 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(
-				L"Cannot create format converted {}",
 				Error{ hr }
 				.AddTag(ErrorTags::Creation)
-				.AddTag(ErrorTags::Imaging));
+				.AddTag(ErrorTags::Imaging),
+				L"Cannot create format converted"
+			);
 			return;
 		}
 
@@ -39,10 +40,11 @@ namespace PGUI::UI::Imaging
 			srcPixelFormat == destinationFormat)
 		{
 			Logger::Error(
-				L"Source and destination pixel formats are the same {}",
 				Error{ E_INVALIDARG }
 				.AddTag(ErrorTags::Creation)
-				.AddTag(ErrorTags::Imaging));
+				.AddTag(ErrorTags::Imaging),
+				L"Source and destination pixel formats are the same"
+			);
 			return;
 		}
 
@@ -54,10 +56,11 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(
-				L"Cannot initialize format converter {}",
 				Error{ E_INVALIDARG }
 				.AddTag(ErrorTags::Creation)
-				.AddTag(ErrorTags::Imaging));
+				.AddTag(ErrorTags::Imaging),
+				L"Cannot initialize format converter"
+			);
 		}
 	}
 
@@ -69,10 +72,13 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->CanConvert(sourceFormat, destinationFormat, &canConvert);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Source Format", std::format(L"{}", sourceFormat))
+				.AddDetail(L"Destination Format", std::format(L"{}", destinationFormat))
+				.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to check if conversion is possible");
+			return Unexpected{ error };
 		}
 
 		return static_cast<bool>(canConvert);
@@ -94,12 +100,22 @@ namespace PGUI::UI::Imaging
 
 		if (!converted.IsInitialized())
 		{
-			return Unexpected{
-				Error{ E_FAIL }
+			Error error{ E_FAIL };
+			error
+				.AddDetail(L"Destination Format", std::format(L"{}", GUID_WICPixelFormat32bppPBGRA))
 				.AddTag(ErrorTags::Imaging)
-				.AddTag(ErrorTags::Creation)
-				.SuggestFix(L"FormatConverted constructor failed look at logs")
-			};
+				.AddTag(ErrorTags::Creation);
+			if (const auto pixelFormat = bitmapSource.GetPixelFormat();
+				pixelFormat.has_value())
+			{
+				error.AddDetail(L"Source Format", std::format(L"{}", *pixelFormat));
+			}
+			else
+			{
+				error.AddDetail(L"Source Format", L"Unknown");
+			}
+			Logger::Error(error, L"Failed to convert bitmap source to D2D bitmap format");
+			return Unexpected{ error };
 		}
 
 		return converted;

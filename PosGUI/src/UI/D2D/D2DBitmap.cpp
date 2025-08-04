@@ -53,10 +53,10 @@ namespace PGUI::UI::D2D
 		if (const auto hr = Get()->GetSurface(surface.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::D2D)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::D2D);
+			Logger::Error(error, L"Cannot get surface");
+			return Unexpected{ error };
 		}
 
 		return surface;
@@ -70,10 +70,10 @@ namespace PGUI::UI::D2D
 				static_cast<D2D1_MAP_OPTIONS>(options), &mappedRect);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::D2D)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::D2D);
+			Logger::Error(error, L"Cannot map bitmap");
+			return Unexpected{ error };
 		}
 
 		return MappedRect{ mappedRect, GetPixelSize().cy };
@@ -81,9 +81,11 @@ namespace PGUI::UI::D2D
 
 	auto D2DBitmap::Unmap() const noexcept -> Error
 	{
-		return Error{
-			Get()->Unmap()
-		}.AddTag(ErrorTags::D2D);
+		const auto hr = Get()->Unmap();
+		Error error{ hr };
+		error.AddTag(ErrorTags::D2D);
+		LogIfFailed(error, L"Cannot Unmap");
+		return error;
 	}
 
 	auto D2DBitmap::CopyFromBitmap(
@@ -102,10 +104,28 @@ namespace PGUI::UI::D2D
 			destPointPtr = std::bit_cast<D2D1_POINT_2U*>(&destPoint.value());
 		}
 
-		return Error{
+		Error error{
 			Get()->CopyFromBitmap(
 				destPointPtr, bitmap.GetRaw(), srcRectPtr)
-		}.AddTag(ErrorTags::D2D);
+		};
+		error
+			.AddDetail(L"Destination Point",
+			           std::format(L"{}",
+			                       destPoint.value_or(PointU{
+				                       static_cast<std::uint32_t>(-1),
+				                       static_cast<std::uint32_t>(-1)
+			                       })))
+			.AddDetail(L"Source Rect",
+			           std::format(L"{}",
+			                       srcRect.value_or(RectU{
+				                       static_cast<std::uint32_t>(-1),
+				                       static_cast<std::uint32_t>(-1),
+				                       static_cast<std::uint32_t>(-1),
+				                       static_cast<std::uint32_t>(-1)
+			                       })))
+			.AddTag(ErrorTags::D2D);
+		LogIfFailed(error, L"Cannot copy from bitmap");
+		return error;
 	}
 
 	auto D2DBitmap::CopyFromMemory(
@@ -118,8 +138,21 @@ namespace PGUI::UI::D2D
 			destRectPtr = std::bit_cast<D2D1_RECT_U*>(&destRect.value());
 		}
 
-		return Error{
+		Error error{
 			Get()->CopyFromMemory(destRectPtr, source, pitch)
-		}.AddTag(ErrorTags::D2D);
+		};
+		error
+			.AddDetail(L"Source pointer", std::format(L"{:p}", source))
+			.AddDetail(L"Pitch", std::to_wstring(pitch))
+			.AddDetail(L"Destination Rect",
+			           std::format(L"{}", destRect.value_or(RectU{
+				                       static_cast<std::uint32_t>(-1),
+				                       static_cast<std::uint32_t>(-1),
+				                       static_cast<std::uint32_t>(-1),
+				                       static_cast<std::uint32_t>(-1)
+			                       })))
+			.AddTag(ErrorTags::D2D);
+		LogIfFailed(error, L"Cannot copy from memory");
+		return error;
 	}
 }

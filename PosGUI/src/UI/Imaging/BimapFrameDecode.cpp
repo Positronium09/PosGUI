@@ -25,9 +25,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetMetadataQueryReader(&reader);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get metadata query reader");
+			return Unexpected{ error };
 		}
 
 		return reader;
@@ -40,9 +41,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetThumbnail(&thumbnail);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get thumbnail");
+			return Unexpected{ error };
 		}
 
 		return thumbnail;
@@ -55,9 +57,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetColorContexts(count, contexts.data(), nullptr);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get color contexts");
+			return Unexpected{ error };
 		}
 
 		return contexts | std::ranges::views::transform([](auto context)

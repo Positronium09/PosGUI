@@ -22,11 +22,11 @@ namespace PGUI::UI::Font
 			fontCollection.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Font)
+			     .AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to get system font collection.");
+			return Unexpected{ error };
 		}
 
 		return fontCollection;
@@ -40,61 +40,77 @@ namespace PGUI::UI::Font
 		auto hr = factory->CreateFontSetBuilder(&fontSetBuilder);
 		if (FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
+				.AddDetail(L"File Path", filePath.wstring())
 				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to create font set builder.");
+			return Unexpected{ error };
 		}
 
 		ComPtr<IDWriteFontFile> fontFile;
 		hr = factory->CreateFontFileReference(filePath.c_str(), nullptr, &fontFile);
 		if (FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
+				.AddDetail(L"File Path", filePath.wstring())
 				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to create font file reference.");
+			return Unexpected{ error };
 		}
 
 		hr = fontSetBuilder->AddFontFile(fontFile.Get());
 		if (FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
+				.AddDetail(L"File Path", filePath.wstring())
 				.AddTag(ErrorTags::Font)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to add font file to font set builder.");
+			return Unexpected{ error };
 		}
 
 		ComPtr<IDWriteFontSet> fontSet;
 		hr = fontSetBuilder->CreateFontSet(&fontSet);
 		if (FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
+				.AddDetail(L"File Path", filePath.wstring())
 				.AddTag(ErrorTags::Font)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to create font set from builder.");
+			return Unexpected{ error };
 		}
 
 		ComPtr<IDWriteFontCollection1> fontCollection;
 		hr = factory->CreateFontCollectionFromFontSet(fontSet.Get(), &fontCollection);
 		if (FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
+				.AddDetail(L"File Path", filePath.wstring())
 				.AddTag(ErrorTags::Font)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to create font collection from font set.");
+			return Unexpected{ error };
 		}
 
 		ComPtr<IDWriteFontCollection3> fontCollection3;
 		hr = fontCollection.As(&fontCollection3);
 		if (FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
+				.AddDetail(L"File Path", filePath.wstring())
 				.AddTag(ErrorTags::Font)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3.");
+			return Unexpected{ error };
 		}
 
 		return fontCollection3;
@@ -115,12 +131,15 @@ namespace PGUI::UI::Font
 		LogIfFailed(
 			Error{ hr }
 			.AddDetail(L"fontFamilName", fontFamilyName)
+			.AddTag(ErrorTags::Font),
+			L"An error occurred while trying to find a font family by name."
 		);
 
 		if (!exists)
 		{
 			return Unexpected{
 				Error{ E_FAIL }
+				.AddDetail(L"Font Family Name", fontFamilyName)
 				.AddTag(ErrorTags::Font)
 			};
 		}
@@ -146,10 +165,12 @@ namespace PGUI::UI::Font
 		if (const auto hr = ptr->GetFontFamily(index, family.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Index", std::to_wstring(index))
+				.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get font family by index.");
+			return Unexpected{ error };
 		}
 
 		return family;
@@ -164,20 +185,24 @@ namespace PGUI::UI::Font
 		if (const auto hr = ptr->GetFontSet(fontSet1.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to get font set.");
+			return Unexpected{ error };
 		}
 
 
 		if (const auto hr = fontSet1.As(&fontSet);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddTag(ErrorTags::Font)
-			};
+				.AddTag(ErrorTags::System);
+			Logger::Error(error, L"Failed to cast font set to IDWriteFontSet4.");
+			return Unexpected{ error };
 		}
 
 

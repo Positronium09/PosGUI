@@ -28,10 +28,12 @@ namespace PGUI::UI::Font
 			&found);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Locale Name", name)
+				.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to find locale name in localized strings.");
+			return Unexpected{ error };
 		}
 
 		return index;
@@ -45,10 +47,12 @@ namespace PGUI::UI::Font
 		if (const auto hr = ptr->GetLocaleNameLength(index, &length);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Index", std::to_wstring(index))
+				.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get locale name length.");
+			return Unexpected{ error };
 		}
 
 		std::wstring name(length, L'\0');
@@ -56,10 +60,12 @@ namespace PGUI::UI::Font
 		if (const auto hr = ptr->GetLocaleName(index, name.data(), length + 1);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Index", std::to_wstring(index))
+				.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get locale name.");
+			return Unexpected{ error };
 		}
 
 		return name;
@@ -73,10 +79,12 @@ namespace PGUI::UI::Font
 		if (const auto hr = ptr->GetStringLength(index, &length);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Index", std::to_wstring(index))
+				.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get string length.");
+			return Unexpected{ error };
 		}
 
 		std::wstring string(length, L'\0');
@@ -84,10 +92,12 @@ namespace PGUI::UI::Font
 		if (const auto hr = ptr->GetString(index, string.data(), length + 1);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Font)
-			};
+			Error error{ hr };
+			error
+				.AddDetail(L"Index", std::to_wstring(index))
+				.AddTag(ErrorTags::Font);
+			Logger::Error(error, L"Failed to get string.");
+			return Unexpected{ error };
 		}
 
 		return string;

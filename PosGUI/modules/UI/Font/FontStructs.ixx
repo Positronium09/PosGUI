@@ -97,3 +97,30 @@ export namespace PGUI::UI::Font
 		DWRITE_TRIMMING trimmingOptions;
 	};
 }
+
+export template <typename Char>
+struct std::formatter<PGUI::UI::Font::TextRange, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+
+		throw std::format_error{ "No format specifiers is supported" };
+	}
+
+	template <typename FormatContext>
+	constexpr auto format(const PGUI::UI::Font::TextRange& textRange, FormatContext& ctx) const
+	{
+		return std::format_to(ctx.out(),
+			"Start {}, End {}, Length {}",
+			textRange.GetStartPosition(),
+			textRange.GetEndPosition(),
+			textRange.GetLength());
+	}
+};

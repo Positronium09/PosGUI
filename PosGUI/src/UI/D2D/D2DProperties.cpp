@@ -24,10 +24,12 @@ namespace PGUI::UI::D2D
 		if (const auto hr = ptr->GetPropertyName(index, name.data(), nameLength + 1);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddDetail(L"Index", std::to_wstring(index))
-			};
+				.AddTag(ErrorTags::D2D);
+			Logger::Error(error, L"Failed to get property name");
+			return Unexpected{ error };
 		}
 
 		return name;
@@ -39,10 +41,12 @@ namespace PGUI::UI::D2D
 		if (const auto hr = Get()->GetSubProperties(index, &subProperty);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
+			Error error{ hr };
+			error
 				.AddDetail(L"Index", std::to_wstring(index))
-			};
+				.AddTag(ErrorTags::D2D);
+			Logger::Error(error, L"Failed to get sub-properties");
+			return Unexpected{ error };
 		}
 
 		return D2DProperties{ subProperty };
@@ -64,15 +68,35 @@ namespace PGUI::UI::D2D
 
 				return false;
 			}
+
 			const auto hr = Get()->GetValue(index, bytes.data(), size);
-			LogIfFailed(Error{ hr });
+
+			if (FAILED(hr))
+			{
+				Error error{ hr };
+				error
+					.AddDetail(L"Index", std::to_wstring(index))
+					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
+					.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to get property value");
+				return false;
+			}
 
 			return hr == S_OK;
 		}
 		else
 		{
 			auto hr = Get()->GetValue(index, bytes.data(), static_cast<UINT32>(bytes.size()));
-			LogIfFailed(Error{ hr });
+			if (FAILED(hr))
+			{
+				Error error{ hr };
+				error
+					.AddDetail(L"Index", std::to_wstring(index))
+					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
+					.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to get property value");
+				return false;
+			}
 
 			return hr == S_OK;
 		}

@@ -20,10 +20,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreatePalette(GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create palette {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation));
+			              .AddTag(ErrorTags::Creation),
+			              L"Failed to create palette");
 		}
 	}
 
@@ -38,10 +38,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreatePalette(GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create palette {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation));
+			              .AddTag(ErrorTags::Creation),
+			              L"Failed to create palette");
 			return;
 		}
 
@@ -50,10 +50,10 @@ namespace PGUI::UI::Imaging
 				addTransparentColor);
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to initialize palette from bitmap {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Initialization));
+			              .AddTag(ErrorTags::Creation),
+			              L"Failed to initialize palette from bitmap");
 		}
 	}
 
@@ -77,10 +77,10 @@ namespace PGUI::UI::Imaging
 				static_cast<UINT>(wicColors.size()));
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to initialize palette from bitmap {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Initialization));
+			              .AddTag(ErrorTags::Creation),
+			              L"Failed to initialize palette from colors");
 		}
 	}
 
@@ -90,10 +90,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetType(&type);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get palette type");
+			return Unexpected{ error };
 		}
 
 		return static_cast<PaletteType>(type);
@@ -105,10 +105,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetColorCount(&count);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get color count");
+			return Unexpected{ error };
 		}
 
 		return count;
@@ -123,10 +123,10 @@ namespace PGUI::UI::Imaging
 			if (const auto hr = Get()->GetColors(count, wicColors.data(), &written);
 				FAILED(hr))
 			{
-				return Unexpected{
-					Error{ hr }
-					.AddTag(ErrorTags::Imaging)
-				};
+				Error error{ hr };
+				error.AddTag(ErrorTags::Imaging);
+				Logger::Error(error, L"Failed to get colors from palette");
+				return Unexpected{ error };
 			}
 
 			return wicColors | std::ranges::views::transform([](auto color)
@@ -142,10 +142,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->IsBlackWhite(&isBlackWhite);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to check black and white");
+			return Unexpected{ error };
 		}
 
 		return static_cast<bool>(isBlackWhite);
@@ -157,10 +157,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->IsGrayscale(&isGrayscale);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to check grayscale");
+			return Unexpected{ error };
 		}
 
 		return static_cast<bool>(isGrayscale);
@@ -172,10 +172,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->HasAlpha(&hasAlpha);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to check alpha channel presence");
+			return Unexpected{ error };
 		}
 
 		return static_cast<bool>(hasAlpha);

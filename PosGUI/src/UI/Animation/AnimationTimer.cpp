@@ -39,12 +39,7 @@ namespace PGUI::UI::Animation
 			Get()->Enable()
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Enable failed {}", error);
-		}
-
+		LogIfFailed(error, L"Enable failed");
 		return error;
 	}
 
@@ -54,12 +49,7 @@ namespace PGUI::UI::Animation
 			Get()->Disable()
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Disable failed {}", error);
-		}
-
+		LogIfFailed(error, L"Disable failed");
 		return error;
 	}
 
@@ -68,10 +58,10 @@ namespace PGUI::UI::Animation
 		const auto hr = Get()->IsEnabled();
 		if (hr != S_OK || hr == S_FALSE)
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to check if animation timer is enabled");
+			return Unexpected{ error };
 		}
 
 		return hr == S_OK;
@@ -83,10 +73,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetTime(&time);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get animation timer time");
+			return Unexpected{ error };
 		}
 
 		return time;
@@ -98,12 +88,7 @@ namespace PGUI::UI::Animation
 			Get()->SetFrameRateThreshold(threshold)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetFrameRateThreshold failed {}", error);
-		}
-
+		LogIfFailed(error, L"Set frame rate threshold failed");
 		return error;
 	}
 }

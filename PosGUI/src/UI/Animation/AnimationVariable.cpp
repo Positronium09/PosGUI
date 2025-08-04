@@ -23,10 +23,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetCurrentStoryboard(&storyboard);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get current storyboard for animation variable");
+			return Unexpected{ error };
 		}
 	
 		return storyboard;
@@ -38,10 +38,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetDimension(&dimension);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get dimension of animation variable");
+			return Unexpected{ error };
 		}
 
 		return dimension;
@@ -53,10 +53,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetPreviousIntegerValue(&previousValue);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get previous integer value of animation variable");
+			return Unexpected{ error };
 		}
 
 		return previousValue;
@@ -71,16 +71,13 @@ namespace PGUI::UI::Animation
 			if (const auto hr = Get()->GetPreviousIntegerVectorValue(previousValues.data(), dim);
 				FAILED(hr))
 			{
-				return Unexpected{
-					Error{ hr }
-					.AddTag(ErrorTags::Animation)
-				};
+				Error error{ hr };
+				error.AddTag(ErrorTags::Animation);
+				Logger::Error(error, L"Failed to get previous integer vector value of animation variable");
+				return Unexpected{ error };
 			}
 
 			return previousValues;
-		}).or_else([this](const Error& err) -> Result<std::vector<INT32>>
-		{
-			return Unexpected{ err };
 		});
 	}
 
@@ -90,10 +87,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetIntegerValue(&value);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get integer value of animation variable");
+			return Unexpected{ error };
 		}
 
 		return value;
@@ -108,15 +105,14 @@ namespace PGUI::UI::Animation
 			if (const auto hr = Get()->GetIntegerVectorValue(values.data(), dim);
 				FAILED(hr))
 			{
-				return Unexpected{
-					Error{ hr }
-					.AddTag(ErrorTags::Animation)
-				};
+				Error error{ hr };
+				error
+					.AddDetail(L"Dimension", std::to_wstring(dim))
+					.AddTag(ErrorTags::Animation);
+				Logger::Error(error, L"Failed to get integer vector value of animation variable");
+				return Unexpected{ error };
 			}
 			return values;
-		}).or_else([this](const Error& err) -> Result<std::vector<INT32>>
-		{
-			return Unexpected{ err };
 		});
 	}
 
@@ -126,10 +122,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetFinalIntegerValue(&finalValue);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get final integer value of animation variable");
+			return Unexpected{ error };
 		}
 
 		return finalValue;
@@ -144,15 +140,14 @@ namespace PGUI::UI::Animation
 			if (const auto hr = Get()->GetFinalIntegerVectorValue(finalValues.data(), dim);
 				FAILED(hr))
 			{
-				return Unexpected{
-					Error{ hr }
-					.AddTag(ErrorTags::Animation)
-				};
+				Error error{ hr };
+				error
+					.AddDetail(L"Dimension", std::to_wstring(dim))
+					.AddTag(ErrorTags::Animation);
+				Logger::Error(error, L"Failed to get final integer vector value of animation variable");
+				return Unexpected{ error };
 			}
 			return finalValues;
-		}).or_else([this](const Error& err) -> Result<std::vector<INT32>>
-		{
-			return Unexpected{ err };
 		});
 	}
 
@@ -162,10 +157,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetPreviousValue(&previousValue);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get previous value of animation variable");
+			return Unexpected{ error };
 		}
 
 		return previousValue;
@@ -180,15 +175,14 @@ namespace PGUI::UI::Animation
 			if (const auto hr = Get()->GetPreviousVectorValue(previousValues.data(), dim);
 				FAILED(hr))
 			{
-				return Unexpected{
-					Error{ hr }
-					.AddTag(ErrorTags::Animation)
-				};
+				Error error{ hr };
+				error
+					.AddDetail(L"Dimension", std::to_wstring(dim))
+					.AddTag(ErrorTags::Animation);
+				Logger::Error(error, L"Failed to get previous vector value of animation variable");
+				return Unexpected{ error };
 			}
 			return previousValues;
-		}).or_else([this](const Error& err) -> Result<std::vector<double>>
-		{
-			return Unexpected{ err };
 		});
 	}
 
@@ -198,10 +192,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetValue(&value);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get value of animation variable");
+			return Unexpected{ error };
 		}
 
 		return value;
@@ -216,15 +210,14 @@ namespace PGUI::UI::Animation
 			if (const auto hr = Get()->GetVectorValue(values.data(), dim);
 				FAILED(hr))
 			{
-				return Unexpected{
-					Error{ hr }
-					.AddTag(ErrorTags::Animation)
-				};
+				Error error{ hr };
+				error
+					.AddDetail(L"Dimension", std::to_wstring(dim))
+					.AddTag(ErrorTags::Animation);
+				Logger::Error(error, L"Failed to get vector value of animation variable");
+				return Unexpected{ error };
 			}
 			return values;
-		}).or_else([this](const Error& err) -> Result<std::vector<double>>
-		{
-			return Unexpected{ err };
 		});
 	}
 
@@ -234,10 +227,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetFinalValue(&finalValue);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get final value of animation variable");
+			return Unexpected{ error };
 		}
 
 		return finalValue;
@@ -252,15 +245,14 @@ namespace PGUI::UI::Animation
 			if (const auto hr = Get()->GetFinalVectorValue(finalValues.data(), dim);
 				FAILED(hr))
 			{
-				return Unexpected{
-					Error{ hr }
-					.AddTag(ErrorTags::Animation)
-				};
+				Error error{ hr };
+				error
+					.AddDetail(L"Dimension", std::to_wstring(dim))
+					.AddTag(ErrorTags::Animation);
+				Logger::Error(error, L"Failed to get final vector value of animation variable");
+				return Unexpected{ error };
 			}
 			return finalValues;
-		}).or_else([this](const Error& err) -> Result<std::vector<double>>
-		{
-			return Unexpected{ err };
 		});
 	}
 
@@ -270,12 +262,7 @@ namespace PGUI::UI::Animation
 			Get()->SetLowerBound(bound)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Failed to set lower bound");
-		}
-
+		LogIfFailed(error, L"Failed to set lower bound");
 		return error;
 	}
 
@@ -287,12 +274,7 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(bounds.size()))
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Failed to set lower bound");
-		}
-
+		LogIfFailed(error, L"Failed to set lower bound vector");
 		return error;
 	}
 
@@ -302,12 +284,7 @@ namespace PGUI::UI::Animation
 			Get()->SetUpperBound(bound)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Failed to set upper bound");
-		}
-
+		LogIfFailed(error, L"Failed to set upper bound");
 		return error;
 	}
 
@@ -319,12 +296,7 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(bounds.size()))
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Failed to set upper bound");
-		}
-
+		LogIfFailed(error, L"Failed to set upper bound vector");
 		return error;
 	}
 
@@ -335,12 +307,7 @@ namespace PGUI::UI::Animation
 				static_cast<UI_ANIMATION_ROUNDING_MODE>(mode))
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Failed to set rounding mode");
-		}
-
+		LogIfFailed(error, L"Failed to set rounding mode");
 		return error;
 	}
 
@@ -350,12 +317,7 @@ namespace PGUI::UI::Animation
 			Get()->SetTag(obj.Get(), id)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Failed to set tag");
-		}
-
+		LogIfFailed(error, L"Failed to set tag");
 		return error;
 	}
 
@@ -366,10 +328,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetTag(&obj, &tag);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get tag");
+			return Unexpected{ error };
 		}
 
 		return std::make_pair(obj, tag);
@@ -381,26 +343,26 @@ namespace PGUI::UI::Animation
 	{
 		const auto& ptr = Get();
 
-		auto hr = ptr->SetVariableChangeHandler(
+		if (const auto hr = ptr->SetVariableChangeHandler(
 			&handler.GetRouter(),
-			registerForNext
-		);
-		if (FAILED(hr))
+			registerForNext);
+			FAILED(hr))
 		{
-			Logger::Error(L"Failed to set variable change handler");
-			return Error{ hr }
-				.AddTag(ErrorTags::Animation);
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to set variable change handler");
+			return error;
 		}
 
-		hr = ptr->SetVariableIntegerChangeHandler(
+		if (const auto hr = ptr->SetVariableIntegerChangeHandler(
 			&handler.GetIntegerRouter(),
-			registerForNext
-		);
-		if (FAILED(hr))
+			registerForNext);
+			FAILED(hr))
 		{
-			Logger::Error(L"Failed to set variable integer change handler");
-			return Error{ hr }
-				.AddTag(ErrorTags::Animation);
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to set variable integer change handler");
+			return error;
 		}
 
 		return Error{ S_OK }.AddTag(ErrorTags::Animation);
@@ -410,20 +372,22 @@ namespace PGUI::UI::Animation
 	{
 		const auto& ptr = Get();
 
-		auto hr = ptr->SetVariableChangeHandler(nullptr, registerForNext);
-		if (FAILED(hr))
+		if (const auto hr = ptr->SetVariableChangeHandler(nullptr, registerForNext);
+			FAILED(hr))
 		{
-			Logger::Error(L"Failed to clear variable change handler");
-			return Error{ hr }
-				.AddTag(ErrorTags::Animation);
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to clear variable change handler");
+			return error;
 		}
 
-		hr = ptr->SetVariableIntegerChangeHandler(nullptr, registerForNext);
-		if (FAILED(hr))
+		if (const auto hr = ptr->SetVariableIntegerChangeHandler(nullptr, registerForNext);
+			FAILED(hr))
 		{
-			Logger::Error(L"Failed to clear variable integer change handler");
-			return Error{ hr }
-				.AddTag(ErrorTags::Animation);
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to clear variable integer change handler");
+			return error;
 		}
 
 		return Error{ S_OK }.AddTag(ErrorTags::Animation);

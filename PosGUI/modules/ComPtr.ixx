@@ -177,7 +177,7 @@ export namespace PGUI
 		}
 
 		template <IsAnyOf<Interfaces...> T, typename U>
-		auto As() const noexcept -> Result<ComPtr<U>>
+		auto As(const std::nothrow_t&) const noexcept -> Result<ComPtr<U>>
 		{
 			ComPtr<U> ptr;
 
@@ -188,7 +188,6 @@ export namespace PGUI
 				error
 					.AddDetail(L"From", StringToWString(typeid(T).name()))
 					.AddDetail(L"To", StringToWString(typeid(U).name()));
-
 				Logger::Error(error, L"Cannot cast between interfaces");
 				return Unexpected{ error };
 			}
@@ -197,7 +196,7 @@ export namespace PGUI
 		}
 
 		template <IsAnyOf<Interfaces...> T, typename U>
-		auto As(const std::nothrow_t&) const -> Result<ComPtr<U>>
+		auto As() const -> ComPtr<U>
 		{
 			ComPtr<U> ptr;
 

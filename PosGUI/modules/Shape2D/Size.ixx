@@ -1,10 +1,10 @@
 module;
-#include <cstdint>
 #include <d2d1_1.h>
-#include <type_traits>
 #include <Windows.h>
 
 export module PGUI.Shape2D:Size;
+
+import std;
 
 export namespace PGUI
 {
@@ -144,3 +144,32 @@ export namespace PGUI
 	using SizeL = Size<long>;
 	using SizeU = Size<std::uint32_t>;
 }
+
+export template <typename T, typename Char>
+struct std::formatter<PGUI::Size<T>, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No formatting args supported for Size<T>" };
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::Size<T>& size, FormatContext& ctx) const
+	{
+		if constexpr (std::floating_point<T>)
+		{
+			return std::format_to(ctx.out(), "cx: {:.5f}, cy: {:.5f}", size.cx, size.cy);
+		}
+		else
+		{
+			return std::format_to(ctx.out(), "cx: {}, cy: {}", size.cx, size.cy);
+		}
+	}
+};

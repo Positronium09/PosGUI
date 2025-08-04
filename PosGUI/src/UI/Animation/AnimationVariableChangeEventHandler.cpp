@@ -9,7 +9,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Event;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import :Storyboard;
 import :AnimationVariable;
 import :AnimationEnums;
@@ -170,13 +170,9 @@ namespace PGUI::UI::Animation
 			OnVariableChanged(storyboard, variable, newValues, previousValues);
 			return S_OK;
 		}
-		catch (const HResultException& e)
+		catch (const Exception& exception)
 		{
-			return e.HResult();
-		}
-		catch (const Win32Exception& e)
-		{
-			return HresultFromWin32(e.ErrorCode());
+			return exception.HResult();
 		}
 		catch (const std::exception&)
 		{
@@ -193,13 +189,9 @@ namespace PGUI::UI::Animation
 			OnVariableIntegerChanged(storyboard, variable, newValues, previousValues);
 			return S_OK;
 		}
-		catch (const HResultException& e)
+		catch (const Exception& exception)
 		{
-			return e.HResult();
-		}
-		catch (const Win32Exception& e)
-		{
-			return HresultFromWin32(e.ErrorCode());
+			return exception.HResult();
 		}
 		catch (const std::exception&)
 		{

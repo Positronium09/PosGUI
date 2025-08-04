@@ -6,60 +6,104 @@ module PGUI.UI.Animation:AnimationTimer;
 import :AnimationTimer;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI::Animation
 {
 	AnimationTimer::AnimationTimer()
 	{
-		const auto hr = CoCreateInstance(
+		if (const auto hr = CoCreateInstance(
 			CLSID_UIAnimationTimer,
 			nullptr,
 			CLSCTX_INPROC_SERVER,
 			__uuidof(IUIAnimationTimer),
 			GetVoidAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::Initialization)
+				.AddTag(ErrorTags::Animation),
+				L"Cannot create animation timer"
+			};
+		}
 	}
 
 	AnimationTimer::AnimationTimer(const ComPtr<IUIAnimationTimer>& ptr) noexcept :
 		ComPtrHolder{ ptr }
 	{ }
 
-	auto AnimationTimer::Enable() const -> void
+	auto AnimationTimer::Enable() const noexcept -> Error
 	{
-		const auto hr = Get()->Enable();
-		ThrowFailed(hr);
+		Error error{
+			Get()->Enable()
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Enable failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationTimer::Disable() const -> void
+	auto AnimationTimer::Disable() const noexcept -> Error
 	{
-		const auto hr = Get()->Disable();
-		ThrowFailed(hr);
+		Error error{
+			Get()->Disable()
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Disable failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationTimer::IsEnabled() const -> bool
+	auto AnimationTimer::IsEnabled() const noexcept -> Result<bool>
 	{
 		const auto hr = Get()->IsEnabled();
 		if (hr != S_OK || hr == S_FALSE)
 		{
-			ThrowFailed(hr);
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
 		}
 
 		return hr == S_OK;
 	}
 
-	auto AnimationTimer::GetTime() const -> double
+	auto AnimationTimer::GetTime() const noexcept -> Result<double>
 	{
 		double time{ };
-		const auto hr = Get()->GetTime(&time);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetTime(&time);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return time;
 	}
 
-	auto AnimationTimer::SetFrameRateThreshold(const UINT32 threshold) const -> void
+	auto AnimationTimer::SetFrameRateThreshold(const UINT32 threshold) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFrameRateThreshold(threshold);
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetFrameRateThreshold(threshold)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetFrameRateThreshold failed {}", error);
+		}
+
+		return error;
 	}
 }

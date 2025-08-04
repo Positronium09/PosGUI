@@ -5,6 +5,7 @@ module;
 export module PGUI.UI.Font.FontFamily;
 
 import PGUI.ComPtr;
+import PGUI.ErrorHandling;
 import PGUI.UI.Font.LocalizedStrings;
 import PGUI.UI.Font.FontSet;
 
@@ -15,10 +16,10 @@ export namespace PGUI::UI::Font
 		public:
 		explicit(false) FontFamily(const ComPtr<IDWriteFontFamily2>& family) noexcept;
 
-		[[nodiscard]] auto GetFamilyNames() const -> LocalizedStrings;
+		[[nodiscard]] auto GetFamilyNames() const noexcept -> Result<LocalizedStrings>;
 
 		[[nodiscard]] auto GetFontCount() const noexcept { return Get()->GetFontCount(); }
 
-		[[nodiscard]] auto GetFontSet() const -> FontSet;
+		[[nodiscard]] auto GetFontSet() const noexcept -> Result<FontSet>;
 	};
 }

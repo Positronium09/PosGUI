@@ -7,7 +7,7 @@ module;
 export module PGUI.Factories:DXGIFactory;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::Factories
 {
@@ -37,9 +37,10 @@ export namespace PGUI::Factories
 #endif
 
 				const auto hr = 
-					CreateDXGIFactory2(flags,
-				                       __uuidof(IDXGIFactory7),
-				                       std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
+					CreateDXGIFactory2(
+						flags,
+						__uuidof(IDXGIFactory7),
+						std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
 				ThrowFailed(hr);
 			}
 

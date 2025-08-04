@@ -128,3 +128,27 @@ export namespace PGUI
 
 	using LineSegmentF = LineSegment<float>;
 }
+
+export template <typename T, typename Char>
+struct std::formatter<PGUI::LineSegment<T>, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No formatting args supported for LineSegment<T>" };
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::LineSegment<T>& line, FormatContext& ctx) const
+	{
+		return std::format_to(
+			ctx.out(),
+			"Start: ({}), End: ({})", line.start, line.end);
+	}
+};

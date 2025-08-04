@@ -7,7 +7,7 @@ export module PGUI.Factories:DWriteFactory;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::Factories
 {

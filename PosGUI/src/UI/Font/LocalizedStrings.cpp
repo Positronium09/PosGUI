@@ -7,8 +7,7 @@ module PGUI.UI.Font.LocalizedStrings;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI::Font
 {
@@ -16,54 +15,80 @@ namespace PGUI::UI::Font
 		ComPtrHolder{ strings }
 	{ }
 
-	auto LocalizedStrings::FindLocaleName(const std::wstring_view name) const noexcept -> std::expected<UINT32, bool>
+	auto LocalizedStrings::FindLocaleName(
+		const std::wstring_view name) const noexcept -> Result<UINT32>
 	{
 		UINT32 index = 0;
 		auto found = FALSE;
 
 		auto& ptr = Get();
 
-		const auto hr = ptr->FindLocaleName(
+		if (const auto hr = ptr->FindLocaleName(
 			name.data(), &index,
 			&found);
-		LogFailed(LogLevel::Error, hr);
-
-		if (!found)
+			FAILED(hr))
 		{
-			return std::unexpected{ false };
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
 		}
 
 		return index;
 	}
 
-	auto LocalizedStrings::GetLocaleName(const UINT32 index) const -> std::wstring
+	auto LocalizedStrings::GetLocaleName(const UINT32 index) const noexcept -> Result<std::wstring>
 	{
 		auto& ptr = Get();
 
 		UINT32 length = 0;
-		auto hr = ptr->GetLocaleNameLength(index, &length);
-		ThrowFailed(hr);
+		if (const auto hr = ptr->GetLocaleNameLength(index, &length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		std::wstring name(length, L'\0');
 
-		hr = ptr->GetLocaleName(index, name.data(), length + 1);
-		ThrowFailed(hr);
+		if (const auto hr = ptr->GetLocaleName(index, name.data(), length + 1);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return name;
 	}
 
-	auto LocalizedStrings::GetString(const UINT32 index) const -> std::wstring
+	auto LocalizedStrings::GetString(const UINT32 index) const noexcept -> Result<std::wstring>
 	{
 		auto& ptr = Get();
 
 		UINT32 length = 0;
-		auto hr = ptr->GetStringLength(index, &length);
-		ThrowFailed(hr);
+		if (const auto hr = ptr->GetStringLength(index, &length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		std::wstring string(length, L'\0');
 
-		hr = ptr->GetString(index, string.data(), length + 1);
-		ThrowFailed(hr);
+		if (const auto hr = ptr->GetString(index, string.data(), length + 1);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return string;
 	}

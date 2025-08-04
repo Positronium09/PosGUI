@@ -6,6 +6,7 @@ export module PGUI.UI.Imaging.FormatConverter;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.BitmapSource;
 import PGUI.UI.Imaging.Palette;
 
@@ -22,17 +23,17 @@ export namespace PGUI::UI::Imaging
 			BitmapSource<> bitmapSource, WICPixelFormatGUID destinationFormat,
 			WICBitmapDitherType ditherType = WICBitmapDitherTypeNone,
 			double alphaThresholdPercent = 0.0F, std::optional<Palette> palette = std::nullopt,
-			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom);
+			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) noexcept;
 
 		[[nodiscard]] auto CanConvert(
 			WICPixelFormatGUID sourceFormat,
-			WICPixelFormatGUID destinationFormat) const -> bool;
+			WICPixelFormatGUID destinationFormat) const noexcept -> Result<bool>;
 
 		[[nodiscard]] static auto ConvertToD2DBitmap(
 			const BitmapSource<>& bitmapSource,
 			WICBitmapDitherType ditherType = WICBitmapDitherTypeNone,
 			double alphaThresholdPercent = 0.0F,
 			const std::optional<Palette>& palette = std::nullopt,
-			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) -> FormatConverter;
+			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) noexcept -> Result<FormatConverter>;
 	};
 }

@@ -6,7 +6,7 @@ module;
 export module PGUI.Factories:D2DFactory;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::Factories
 {

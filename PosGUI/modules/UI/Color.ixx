@@ -22,8 +22,14 @@ export namespace PGUI::UI
 		public:
 		constexpr RGBA() noexcept = default;
 
-		constexpr RGBA(const FLOAT r, const FLOAT g, const FLOAT b, const FLOAT a = 1.0F) noexcept :
+		constexpr RGBA(const float r, const float g, const float b, const float a = 1.0F) noexcept :
 			r{ r }, g{ g }, b{ b }, a{ a }
+		{ }
+		constexpr RGBA(const double r, const double g, const double b, const double a = 1.0F) noexcept :
+			r{ static_cast<float>(r) },
+			g{ static_cast<float>(g) },
+			b{ static_cast<float>(b) },
+			a{ static_cast<float>(a) }
 		{ }
 
 		constexpr RGBA(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const std::uint8_t a = 255) noexcept :
@@ -215,3 +221,103 @@ export namespace PGUI::UI
 		return RGBA{ color, ((color & 0xFF000000) >> 24) / 255.0F };
 	}
 }
+
+export template <typename Char>
+struct std::formatter<PGUI::UI::RGBA, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+
+		outFloating = false;
+
+		const auto current = *iter;
+
+		if (current == 'f' || current == 'F')
+		{
+			outFloating = true;
+		}
+		else if (
+			current == 'h' || current == 'H' ||
+			current == 'x' || current == 'X')
+		{
+			outHex = true;
+		}
+		else if (current == 'n' || current == 'N')
+		{
+			outNumber = true;
+		}
+		else if (
+			current == 'e' || current == 'E' ||
+			current == 'b' || current == 'B' ||
+			current == '8')
+		{
+			outEightBit = true;
+		}
+		else
+		{
+			throw std::format_error{ "Unknown format specifier" };
+		}
+
+		std::advance(iter, 1);
+		if (iter != end && *iter != '}')
+		{
+			throw std::format_error{ "Only one format specifier is allowed" };
+		}
+		if (!outFloating && !outHex && !outNumber && !outEightBit)
+		{
+			throw std::format_error{ "No format specifier is specified" };
+		}
+
+		return iter;
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::UI::RGBA& color, FormatContext& ctx) const
+	{
+		if (outFloating)
+		{
+			return std::format_to(ctx.out(), 
+				"r: {:.3F}, g: {:.3F}, b: {:.3F}, a: {:.3F}", 
+				color.r, color.g, color.b, color.a);
+		}
+		if (outHex)
+		{
+			return std::format_to(ctx.out(), 
+				"#{:02X}{:02X}{:02X}{:02X}", 
+				static_cast<int>(color.r * 255), 
+				static_cast<int>(color.g * 255), 
+				static_cast<int>(color.b * 255), 
+				static_cast<int>(color.a * 255));
+		}
+		if (outNumber)
+		{
+			return std::format_to(ctx.out(), "{}",
+				static_cast<int>(color.a * 255) <<  24 |
+				static_cast<int>(color.r * 255) << 16 |
+				static_cast<int>(color.g * 255) << 8 |
+				static_cast<int>(color.b * 255));
+		}
+		if (outEightBit)
+		{
+			return std::format_to(ctx.out(), "r: {}, g: {}, b: {}, a: {}", 
+				static_cast<int>(color.r * 255), 
+				static_cast<int>(color.g * 255), 
+				static_cast<int>(color.b * 255), 
+				static_cast<int>(color.a * 255));
+		}
+
+		std::unreachable();
+	}
+
+	bool outFloating = true;
+	bool outHex = false;
+	bool outNumber = false;
+	bool outEightBit = false;
+};

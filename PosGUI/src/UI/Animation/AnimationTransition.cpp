@@ -8,7 +8,7 @@ import :AnimationTransition;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI::Animation
 {
@@ -17,20 +17,32 @@ namespace PGUI::UI::Animation
 	{
 	}
 
-	auto AnimationTransition::GetDimension() const -> UINT
+	auto AnimationTransition::GetDimension() const noexcept -> Result<UINT>
 	{
 		UINT dimension;
-		const auto hr = Get()->GetDimension(&dimension);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetDimension(&dimension);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return dimension;
 	}
 
-	auto AnimationTransition::GetDuration() const -> double
+	auto AnimationTransition::GetDuration() const noexcept -> Result<double>
 	{
 		double duration;
-		const auto hr = Get()->GetDuration(&duration);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetDuration(&duration);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return duration;
 	}
@@ -40,31 +52,67 @@ namespace PGUI::UI::Animation
 		return Get()->IsDurationKnown() == S_OK;
 	}
 
-	auto AnimationTransition::SetInitialValue(const double value) const -> void
+	auto AnimationTransition::SetInitialValue(const double value) const noexcept -> Error
 	{
-		const auto hr = Get()->SetInitialValue(value);
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetInitialValue(value)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetInitialValue failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationTransition::SetInitialValue(const std::span<const double> values) const -> void
+	auto AnimationTransition::SetInitialValue(const std::span<const double> values) const noexcept -> Error
 	{
-		const auto hr = Get()->SetInitialVectorValue(
-			values.data(),
-			static_cast<UINT>(values.size()));
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetInitialVectorValue(
+				values.data(),
+				static_cast<UINT>(values.size()))
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetInitialValue failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationTransition::SetInitialVelocity(const double velocity) const -> void
+	auto AnimationTransition::SetInitialVelocity(const double velocity) const noexcept -> Error
 	{
-		const auto hr = Get()->SetInitialVelocity(velocity);
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetInitialVelocity(velocity)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetInitialVelocity failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationTransition::SetInitialVelocity(const std::span<const double> velocities) const -> void
+	auto AnimationTransition::SetInitialVelocity(const std::span<const double> velocities) const noexcept -> Error
 	{
-		const auto hr = Get()->SetInitialVectorVelocity(
-			velocities.data(),
-			static_cast<UINT>(velocities.size()));
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetInitialVectorVelocity(
+				velocities.data(),
+				static_cast<UINT>(velocities.size()))
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetInitialVelocity failed {}", error);
+		}
+
+		return error;
 	}
 }

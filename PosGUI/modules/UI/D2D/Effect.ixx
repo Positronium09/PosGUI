@@ -5,6 +5,7 @@ module;
 export module PGUI.UI.D2D.Effect;
 
 import PGUI.ComPtr;
+import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DImage;
 import PGUI.UI.D2D.D2DProperties;
 
@@ -27,7 +28,7 @@ export namespace PGUI::UI::D2D
 
 		auto SetInputEffect(UINT32 index, Effect effect, bool invalidate) noexcept -> void;
 
-		auto SetInputCount(UINT32 count) -> void;
+		auto SetInputCount(UINT32 count) noexcept -> Error;
 
 		auto GetProperties() const noexcept { return D2DProperties{ Get() }; }
 	};

@@ -17,7 +17,7 @@ export namespace PGUI
 
 	[[nodiscard]] auto HresultFromWin32(DWORD errCode) noexcept -> HRESULT;
 
-	auto MsgToText(UINT msg) noexcept -> std::wstring_view;
+	auto WindowMsgToText(UINT msg) noexcept -> std::wstring_view;
 
 	auto EnableDarkTitleBar(HWND hWnd, bool enable = true) noexcept -> void;
 

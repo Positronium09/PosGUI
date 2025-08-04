@@ -63,3 +63,28 @@ export namespace PGUI
 		}
 	};
 }
+
+export template <typename Char>
+struct std::formatter<PGUI::RoundedRect, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No formatting args supported for RoundedRect" };
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::RoundedRect& rect, FormatContext& ctx) const
+	{
+		return std::format_to(
+			ctx.out(),
+			"Rect: (top: {:.5f}, left: {:.5f}, bottom: {:.5f}, right: {:.5f}), Radii: (x: {:.5f}, y: {:.5f})",
+			rect.top, rect.left, rect.bottom, rect.right, rect.xRadius, rect.yRadius);
+	}
+};

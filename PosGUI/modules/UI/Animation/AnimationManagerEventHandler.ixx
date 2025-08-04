@@ -30,7 +30,7 @@ namespace PGUI::UI::Animation
 			UI_ANIMATION_MANAGER_STATUS newStatus,
 			UI_ANIMATION_MANAGER_STATUS previousStatus)->HRESULT override;
 
-		auto SetHandler(const ManagerStatusChangedHandler& handler) noexcept -> void;
+		auto SetHandler(const ManagerStatusChangedHandler& newHandler) noexcept -> void;
 
 		auto ClearHandler() noexcept -> void;
 

@@ -6,6 +6,7 @@ export module PGUI.UI.Imaging.BitmapFrameDecode;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.BitmapSource;
 import PGUI.UI.Imaging.MetadataReader;
 
@@ -18,11 +19,12 @@ export namespace PGUI::UI::Imaging
 
 		explicit(false) BitmapFrameDecode(const ComPtr<IWICBitmapFrameDecode>& frame) noexcept;
 
-		[[nodiscard]] auto GetMetadataReader() const -> MetadataReader;
+		[[nodiscard]] auto GetMetadataReader() const noexcept -> Result<MetadataReader>;
 
-		[[nodiscard]] auto GetThumbnail() const -> BitmapSource<>;
+		[[nodiscard]] auto GetThumbnail() const noexcept -> Result<BitmapSource<>>;
 
 		//TODO Maybe wrap IWICColorContext
-		[[nodiscard]] auto GetColorContexts(UINT count) const -> std::vector<ComPtr<IWICColorContext>>;
+		[[nodiscard]] auto GetColorContexts(
+			UINT count) const noexcept -> Result<std::vector<ComPtr<IWICColorContext>>>;
 	};
 }

@@ -89,7 +89,7 @@ export namespace PGUI::UI
 
 		auto OnNCCreate(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 
-		auto OnWindowPosChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		auto OnWindowPosChanged(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
 
 		auto OnPaint(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 	};

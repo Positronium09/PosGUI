@@ -8,7 +8,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Factories;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.BitmapSource;
 
 namespace PGUI::UI::Imaging
@@ -20,75 +20,124 @@ namespace PGUI::UI::Imaging
 	WICBitmap::WICBitmap(
 		const SizeU size,
 		const WICPixelFormatGUID& pixelFormat,
-		CreateCacheOption cacheOption)
+		CreateCacheOption cacheOption) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		const auto hr = factory->CreateBitmap(
+		if (const auto hr = factory->CreateBitmap(
 			size.cx, size.cy, pixelFormat,
 			static_cast<WICBitmapCreateCacheOption>(cacheOption),
 			GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(
+				L"Failed to create WICBitmap {}",
+				Error{ hr }
+				.AddDetail(L"Size", std::format(L"{}", size))
+				.AddTag(ErrorTags::Creation)
+				.AddTag(ErrorTags::Imaging));
+		}
 	}
 
-	WICBitmap::WICBitmap(const HBITMAP hBitmap, AlphaChannelOption alphaOption, const HPALETTE hPalette)
+	WICBitmap::WICBitmap(
+		const HBITMAP hBitmap,
+		AlphaChannelOption alphaOption,
+		const HPALETTE hPalette) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		const auto hr = factory->CreateBitmapFromHBITMAP(
+		if (const auto hr = factory->CreateBitmapFromHBITMAP(
 			hBitmap, hPalette,
 			static_cast<WICBitmapAlphaChannelOption>(alphaOption),
 			GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(
+				L"Failed to create WICBitmap from HBITMAP {}",
+				Error{ hr }
+				.AddTag(ErrorTags::Creation)
+				.AddTag(ErrorTags::Imaging));
+		}
 	}
 
-	WICBitmap::WICBitmap(const HICON hIcon)
+	WICBitmap::WICBitmap(const HICON hIcon) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		const auto hr = factory->CreateBitmapFromHICON(hIcon, GetAddress());
-		ThrowFailed(hr);
+
+		if (const auto hr = factory->CreateBitmapFromHICON(hIcon, GetAddress());
+			FAILED(hr))
+		{
+			Logger::Error(
+				L"Failed to create WICBitmap from HICON {}",
+				Error{ hr }
+				.AddTag(ErrorTags::Creation)
+				.AddTag(ErrorTags::Imaging));
+		}
 	}
 
-	WICBitmap::WICBitmap(BitmapSource<> source, CreateCacheOption cacheOption)
+	WICBitmap::WICBitmap(BitmapSource<> source, CreateCacheOption cacheOption) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		const auto hr = factory->CreateBitmapFromSource(
+		if (const auto hr = factory->CreateBitmapFromSource(
 			source.GetRaw(),
 			static_cast<WICBitmapCreateCacheOption>(cacheOption),
 			GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(
+				L"Failed to create WICBitmap from BitmapSource {}",
+				Error{ hr }
+				.AddTag(ErrorTags::Creation)
+				.AddTag(ErrorTags::Imaging));
+		}
 	}
 
-	WICBitmap::WICBitmap(BitmapSource<> source, RectU rect)
+	WICBitmap::WICBitmap(BitmapSource<> source, const RectU rect) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		auto size = rect.Size();
+		const auto size = rect.Size();
 
-		const auto hr = factory->CreateBitmapFromSourceRect(
+		if (const auto hr = factory->CreateBitmapFromSourceRect(
 			source.GetRaw(),
 			rect.left, rect.right, size.cx, size.cy,
 			GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(
+				L"Failed to create WICBitmap from BitmapSource {}",
+				Error{ hr }
+				.AddTag(ErrorTags::Creation)
+				.AddTag(ErrorTags::Imaging));
+		}
 	}
 
-	auto WICBitmap::Lock(const RectI rect, LockFlags flags) const noexcept -> WICBitmapLock
+	auto WICBitmap::Lock(const RectI rect, LockFlags flags) const noexcept -> Result<WICBitmapLock>
 	{
 		const WICRect wicRect = rect;
 		ComPtr<IWICBitmapLock> lock;
 
-		const auto hr = Get()->Lock(&wicRect, static_cast<DWORD>(flags), &lock);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->Lock(&wicRect, static_cast<DWORD>(flags), &lock);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddDetail(L"Rect", std::format(L"{}", rect))
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return lock;
 	}
 
-	auto WICBitmap::SetPalette(Palette palette) noexcept -> void
+	auto WICBitmap::SetPalette(Palette palette) noexcept -> Error
 	{
-		const auto hr = Get()->SetPalette(palette.GetRaw());
-		ThrowFailed(hr);
+		return Error{
+			Get()->SetPalette(palette.GetRaw())
+		}.AddTag(ErrorTags::Imaging);
 	}
 
-	auto WICBitmap::SetResolution(const double dpiX, const double dpiY) noexcept -> void
+	auto WICBitmap::SetResolution(const double dpiX, const double dpiY) noexcept -> Error
 	{
-		const auto hr = this->Get()->SetResolution(dpiX, dpiY);
-		ThrowFailed(hr);
+		return Error{
+			Get()->SetResolution(dpiX, dpiY)
+		}.AddTag(ErrorTags::Imaging);
 	}
 }

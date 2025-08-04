@@ -9,7 +9,7 @@ import std;
 import PGUI.ComPtr;
 import PGUI.Event;
 import PGUI.Utils;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import :AnimationEnums;
 
 namespace PGUI::UI::Animation
@@ -90,13 +90,9 @@ namespace PGUI::UI::Animation
 			OnManagerStatusChanged(newStatus, previousStatus);
 			return S_OK;
 		}
-		catch (const PGUI::HResultException& e)
+		catch (const Exception& exception)
 		{
-			return e.HResult();
-		}
-		catch (const PGUI::Win32Exception& e)
-		{
-			return PGUI::HresultFromWin32(e.ErrorCode());
+			return exception.HResult();
 		}
 		catch (const std::exception&)
 		{

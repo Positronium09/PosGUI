@@ -4,7 +4,7 @@ module;
 module PGUI.PropVariant;
 
 import std;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 
 namespace PGUI
 {
@@ -21,13 +21,13 @@ namespace PGUI
 	PropVariant::~PropVariant() noexcept
 	{
 		const auto hr = PropVariantClear(&var);
-		LogFailed(LogLevel::Error, hr);
+		LogIfFailed(Error{ hr });
 	}
 
 	auto PropVariant::operator&() noexcept -> PROPVARIANT*
 	{
 		const auto hr = PropVariantClear(&var);
-		LogFailed(LogLevel::Error, hr);
+		LogIfFailed(Error{ hr });
 
 		return &var;
 	}
@@ -321,4 +321,3 @@ namespace PGUI
 		}
 	}
 }
-

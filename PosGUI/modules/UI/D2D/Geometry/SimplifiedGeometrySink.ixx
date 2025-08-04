@@ -8,7 +8,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.Factories;
 import PGUI.UI.D2D.D2DEnums;
 import PGUI.UI.D2D.D2DStructs;
@@ -39,10 +39,9 @@ export namespace PGUI::UI::D2D
 			this->Get()->EndFigure(static_cast<D2D1_FIGURE_END>(figureEnd));
 		}
 
-		auto Close() -> void
+		auto Close() noexcept -> Error
 		{
-			auto hr = this->Get()->Close();
-			ThrowFailed(hr);
+			return Error{ this->Get()->Close() }.AddTag(ErrorTags::D2D);
 		}
 
 		auto SetFillMode(FillMode fillMode) noexcept -> void
@@ -55,13 +54,13 @@ export namespace PGUI::UI::D2D
 			this->Get()->SetSegmentFlags(static_cast<D2D1_PATH_SEGMENT>(segmentFlags));
 		}
 
-		auto AddLines(std::span<const PointF> points) noexcept -> void
+		auto AddLines(const std::span<const PointF> points) noexcept -> void
 		{
 			this->Get()->AddLines(std::bit_cast<const D2D1_POINT_2F*>(points.data()),
 			                      static_cast<UINT32>(points.size()));
 		}
 
-		auto AddBeziers(std::span<const BezierSegment> beziers) noexcept -> void
+		auto AddBeziers(const std::span<const BezierSegment> beziers) noexcept -> void
 		{
 			this->Get()->AddBeziers(static_cast<const D2D1_BEZIER_SEGMENT*>(beziers.data()),
 			                        static_cast<UINT32>(beziers.size()));

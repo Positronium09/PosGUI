@@ -11,7 +11,7 @@ import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.UI.Brush;
 import PGUI.UI.Color;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.TextFormat;
 import PGUI.UI.Font.FontEnums;
 import PGUI.UI.TextLayout;
@@ -67,67 +67,127 @@ export namespace PGUI::UI::D2D
 			return Brush{ this->template GetAs<ID2D1RenderTarget>(), parameters };
 		}
 
-		[[nodiscard]] auto CreateBitmap(SizeU size, BitmapProperties properties)
+		[[nodiscard]] auto CreateBitmap(SizeU size, BitmapProperties properties) noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
 			ComPtr<ID2D1Bitmap1> bitmap1;
 			auto hr = this->Get()->CreateBitmap(size, properties, &bitmap);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddDetail(L"Size", std::format(L"{}", size))
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 
 			hr = bitmap.As(&bitmap1);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddDetail(L"Size", std::format(L"{}", size))
+					.AddTag(ErrorTags::Creation)
+				};
+			}
+
 			return D2DBitmap{ bitmap1 };
 		}
 
 		[[nodiscard]] auto CreateBitmap(
-			SizeU size, 
-			std::span<std::byte> sourceData, 
-			UINT32 pitch, BitmapProperties properties)
+			SizeU size,
+			std::span<std::byte> sourceData,
+			UINT32 pitch, BitmapProperties properties) noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
 			ComPtr<ID2D1Bitmap1> bitmap1;
 			auto hr = this->Get()->CreateBitmap(size, sourceData.data(), pitch, properties, &bitmap);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddDetail(L"Size", std::format(L"{}", size))
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 
 			hr = bitmap.As(&bitmap1);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddDetail(L"Size", std::format(L"{}", size))
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 			return D2DBitmap{ bitmap1 };
 		}
 
 		[[nodiscard]] auto CreateBitmapFromSource(
 			const Imaging::BitmapSource<>& source,
-			std::optional<BitmapProperties> properties)
+			std::optional<BitmapProperties> properties) noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
 			ComPtr<ID2D1Bitmap1> bitmap1;
 			auto hr = this->Get()->CreateBitmapFromWicBitmap(
 				source.GetRawAs<IWICBitmapSource>(),
 				properties.has_value() ? &properties : nullptr, &bitmap);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 
 			hr = bitmap.As(&bitmap1);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 			return D2DBitmap{ bitmap1 };
 		}
 
-		[[nodiscard]] auto CreateBitmapFromSource(const Imaging::BitmapSource<>& source)
+		[[nodiscard]] auto CreateBitmapFromSource(const Imaging::BitmapSource<>& source) noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
 			ComPtr<ID2D1Bitmap1> bitmap1;
 			auto hr = this->Get()->CreateBitmapFromWicBitmap(source.GetRawAs<IWICBitmapSource>(), &bitmap);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 
 			hr = bitmap.As(&bitmap1);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 			return D2DBitmap{ bitmap1 };
 		}
 
-		[[nodiscard]] auto CreateLayer(SizeF size = SizeF{ })
+		[[nodiscard]] auto CreateLayer(SizeF size = SizeF{ }) noexcept -> Result<D2DLayer>
 		{
 			ComPtr<ID2D1Layer> layer;
 
-			auto hr = this->Get()->CreateLayer(size, &layer);
-			ThrowFailed(hr);
+			if (auto hr = this->Get()->CreateLayer(size, &layer); 
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddDetail(L"Size", std::format(L"{}", size))
+					.AddTag(ErrorTags::Creation)
+				};
+			}
 			return D2DLayer{ layer };
 		}
 

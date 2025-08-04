@@ -8,7 +8,7 @@ import :AnimationStoryboardEventHandler;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.Utils;
 import :AnimationEnums;
 import :Storyboard;
@@ -131,13 +131,9 @@ namespace PGUI::UI::Animation
 			OnStoryBoardStatusChanged(storyboard, newStatus, previousStatus);
 			return S_OK;
 		}
-		catch (const HResultException& e)
+		catch (const Exception& exception)
 		{
-			return e.HResult();
-		}
-		catch (const Win32Exception& e)
-		{
-			return HresultFromWin32(e.ErrorCode());
+			return exception.HResult();
 		}
 		catch (const std::exception&)
 		{
@@ -153,13 +149,9 @@ namespace PGUI::UI::Animation
 			OnStoryBoardUpdated(storyboard);
 			return S_OK;
 		}
-		catch (const HResultException& e)
+		catch (const Exception& exception)
 		{
-			return e.HResult();
-		}
-		catch (const Win32Exception& e)
-		{
-			return HresultFromWin32(e.ErrorCode());
+			return exception.HResult();
 		}
 		catch (const std::exception&)
 		{

@@ -9,7 +9,7 @@ import std;
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DGeometry;
 import PGUI.UI.D2D.GeometrySink;
 import PGUI.UI.D2D.SimplifiedGeometrySink;
@@ -18,46 +18,72 @@ import PGUI.UI.D2D.D2DStructs;
 
 namespace PGUI::UI::D2D
 {
-	D2DPathGeometry::D2DPathGeometry()
+	D2DPathGeometry::D2DPathGeometry() noexcept
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		const auto hr = factory->CreatePathGeometry(GetAddress());
-		ThrowFailed(hr);
+		if (const auto hr = factory->CreatePathGeometry(GetAddress());
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create D2DPathGeometry {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::D2D)
+			              .AddTag(ErrorTags::Creation));
+		}
 	}
 
 	D2DPathGeometry::D2DPathGeometry(const ComPtr<ID2D1PathGeometry1>& ptr) noexcept :
 		D2DGeometry{ ptr }
 	{ }
 
-	auto D2DPathGeometry::GetFigureCount() -> UINT32
+	auto D2DPathGeometry::GetFigureCount() noexcept -> Result<UINT32>
 	{
 		UINT32 count = 0;
-		const auto hr = Get()->GetFigureCount(&count);
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->GetFigureCount(&count);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::D2D)
+			};
+		}
+		
 		return count;
 	}
 
-	auto D2DPathGeometry::GetSegmentCount() -> UINT32
+	auto D2DPathGeometry::GetSegmentCount() noexcept -> Result<UINT32>
 	{
 		UINT32 count = 0;
-		const auto hr = Get()->GetSegmentCount(&count);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetSegmentCount(&count);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::D2D)
+			};
+		}
 		return count;
 	}
 
-	auto D2DPathGeometry::Open() -> GeometrySink
+	auto D2DPathGeometry::Open() noexcept -> Result<GeometrySink>
 	{
 		ComPtr<ID2D1GeometrySink> sink;
-		const auto hr = Get()->Open(sink.GetAddressOf());
-		ThrowFailed(hr);
+		if (const auto hr = Get()->Open(sink.GetAddressOf());
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::D2D)
+			};
+		}
 		return GeometrySink{ sink };
 	}
 
-	auto D2DPathGeometry::Stream(const GeometrySink& sink) -> void
+	auto D2DPathGeometry::Stream(const GeometrySink& sink) noexcept -> Error
 	{
 		const auto hr = Get()->Stream(sink.Get());
-		ThrowFailed(hr);
+		return Error{ hr }.AddTag(ErrorTags::D2D);
 	}
 
 	auto D2DPathGeometry::CreateRoundRectWithPathGeometry(
@@ -65,10 +91,19 @@ namespace PGUI::UI::D2D
 		const float topLeft,
 		const float topRight,
 		const float bottomLeft,
-		const float bottomRight) -> D2DPathGeometry
+		const float bottomRight) noexcept -> Result<D2DPathGeometry>
 	{
 		D2DPathGeometry pathGeometry;
-		auto sink = pathGeometry.Open();
+		auto sinkResult = pathGeometry.Open();
+
+		if (!sinkResult.has_value())
+		{
+			return Unexpected{
+				sinkResult.error()
+			};
+		}
+
+		auto& sink = sinkResult.value();
 
 		std::array<PointF, 2> points;
 		PointF& point1 = points[0];
@@ -144,7 +179,14 @@ namespace PGUI::UI::D2D
 		}
 
 		sink.EndFigure(FigureEnd::Closed);
-		sink.Close();
+
+		if (auto error = sink.Close();
+			error.IsFailure())
+		{
+			return Unexpected{
+				error
+			};
+		}
 
 		return pathGeometry;
 	}

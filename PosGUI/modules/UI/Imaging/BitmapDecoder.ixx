@@ -7,6 +7,7 @@ export module PGUI.UI.Imaging.BitmapDecoder;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.ContainerFormats;
 import PGUI.UI.Imaging.Palette;
 import PGUI.UI.Imaging.BitmapSource;
@@ -37,48 +38,47 @@ export namespace PGUI::UI::Imaging
 
 		explicit BitmapDecoder(
 			const ContainerFormat& containerFormat,
-			const std::optional<GUID>& vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt) noexcept;
 
 		explicit BitmapDecoder(
 			ULONG_PTR fileHandle,
 			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand,
-			const std::optional<GUID>& vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt) noexcept;
 
 		explicit BitmapDecoder(
 			const std::filesystem::path& fileName,
 			DesiredAccess desiredAccess = DesiredAccess::Read,
 			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand,
-			const std::optional<GUID>& vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt) noexcept;
 
 		explicit BitmapDecoder(
 			const ComPtr<IStream>& stream,
 			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand,
-			const std::optional<GUID>& vendorGUID = std::nullopt);
+			const std::optional<GUID>& vendorGUID = std::nullopt) noexcept;
 
 		auto Initialize(const ComPtr<IStream>& stream,
-			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand) const
-			-> void;
-
-		[[nodiscard]] auto CopyPalette() -> Palette;
+			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand) const noexcept -> Error;
 
 		//TODO GetDecoderInfo
 
-		[[nodiscard]] auto GetMetadataReader() const -> MetadataReader;
+		[[nodiscard]] auto CopyPalette() noexcept -> Result<Palette>;
 
-		[[nodiscard]] auto GetPreview() const -> BitmapSource<>;
+		[[nodiscard]] auto GetMetadataReader() const noexcept -> Result<MetadataReader>;
 
-		[[nodiscard]] auto GetThumbnail() const -> BitmapSource<>;
+		[[nodiscard]] auto GetPreview() const noexcept -> Result<BitmapSource<>>;
 
-		[[nodiscard]] auto GetContainerFormat() const -> ContainerFormat;
+		[[nodiscard]] auto GetThumbnail() const noexcept -> Result<BitmapSource<>>;
 
-		[[nodiscard]] auto GetColorContexts(UINT count) const -> std::vector<ComPtr<IWICColorContext>>;
+		[[nodiscard]] auto GetContainerFormat() const noexcept -> Result<ContainerFormat>;
 
-		[[nodiscard]] auto GetFrameCount() const -> UINT;
+		[[nodiscard]] auto GetColorContexts(UINT count) const noexcept -> Result<std::vector<ComPtr<IWICColorContext>>>;
 
-		[[nodiscard]] auto GetFrame(UINT index = 0U) const -> BitmapFrameDecode;
+		[[nodiscard]] auto GetFrameCount() const noexcept -> Result<UINT>;
 
-		[[nodiscard]] auto GetAllFrames() const -> std::vector<BitmapFrameDecode>;
+		[[nodiscard]] auto GetFrame(UINT index = 0U) const noexcept -> Result<BitmapFrameDecode>;
 
-		[[nodiscard]] auto QueryCapabilities(const ComPtr<IStream>& stream) const -> WICBitmapDecoderCapabilities;
+		[[nodiscard]] auto GetAllFrames() const noexcept -> Result<std::vector<BitmapFrameDecode>>;
+
+		[[nodiscard]] auto QueryCapabilities(const ComPtr<IStream>& stream) const noexcept -> Result<WICBitmapDecoderCapabilities>;
 	};
 }

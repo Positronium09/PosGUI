@@ -5,7 +5,7 @@ module;
 module PGUI.UI.D2D.Effect;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI::D2D
 {
@@ -45,9 +45,10 @@ namespace PGUI::UI::D2D
 		Get()->SetInputEffect(index, effect.GetRaw(), invalidate);
 	}
 
-	auto Effect::SetInputCount(const UINT32 count) -> void
+	auto Effect::SetInputCount(const UINT32 count) noexcept -> Error
 	{
-		const auto hr = Get()->SetInputCount(count);
-		ThrowFailed(hr);
+		return Error{
+			Get()->SetInputCount(count)
+		}.AddTag(ErrorTags::D2D);
 	}
 }

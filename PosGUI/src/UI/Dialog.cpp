@@ -6,7 +6,6 @@ module PGUI.UI.Dialog;
 import PGUI.Window;
 import PGUI.WindowClass;
 import PGUI.MessageLoop;
-import PGUI.Logging;
 
 namespace PGUI::UI
 {

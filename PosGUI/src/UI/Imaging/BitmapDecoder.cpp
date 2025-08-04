@@ -8,7 +8,7 @@ module PGUI.UI.Imaging.BitmapDecoder;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.Factories;
 
 namespace PGUI::UI::Imaging
@@ -19,115 +19,184 @@ namespace PGUI::UI::Imaging
 
 	BitmapDecoder::BitmapDecoder(
 		const ContainerFormat& containerFormat,
-		const std::optional<GUID>& vendorGUID)
+		const std::optional<GUID>& vendorGUID) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		const auto hr = factory->CreateDecoder(
+		if (const auto hr = factory->CreateDecoder(
 			containerFormat,
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create decoder {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Creation)
+			              .AddTag(ErrorTags::Imaging));
+		}
 	}
 
 	BitmapDecoder::BitmapDecoder(
 		const ULONG_PTR fileHandle,
 		BitmapDecoderOptions decoderOptions,
-		const std::optional<GUID>& vendorGUID)
+		const std::optional<GUID>& vendorGUID) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		const auto hr = factory->CreateDecoderFromFileHandle(
+
+		if (const auto hr = factory->CreateDecoderFromFileHandle(
 			fileHandle,
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create decoder {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Creation)
+			              .AddTag(ErrorTags::Imaging));
+		}
 	}
 
 	BitmapDecoder::BitmapDecoder(
 		const std::filesystem::path& fileName, DesiredAccess desiredAccess,
-		BitmapDecoderOptions decoderOptions, const std::optional<GUID>& vendorGUID)
+		BitmapDecoderOptions decoderOptions,
+		const std::optional<GUID>& vendorGUID) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		const auto hr = factory->CreateDecoderFromFilename(
+		if (const auto hr = factory->CreateDecoderFromFilename(
 			fileName.c_str(),
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
 			static_cast<DWORD>(desiredAccess),
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create decoder {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Creation)
+			              .AddTag(ErrorTags::Imaging));
+		}
 	}
 
 	BitmapDecoder::BitmapDecoder(
 		const ComPtr<IStream>& stream, BitmapDecoderOptions decoderOptions,
-		const std::optional<GUID>& vendorGUID)
+		const std::optional<GUID>& vendorGUID) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		const auto hr = factory->CreateDecoderFromStream(
+		if (const auto hr = factory->CreateDecoderFromStream(
 			stream.Get(),
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create decoder {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Creation)
+			              .AddTag(ErrorTags::Imaging));
+		}
 	}
 
-	auto BitmapDecoder::Initialize(const ComPtr<IStream>& stream, BitmapDecoderOptions decoderOptions) const -> void
+	auto BitmapDecoder::Initialize(
+		const ComPtr<IStream>& stream,
+		BitmapDecoderOptions decoderOptions) const noexcept -> Error
 	{
-		const auto hr = Get()->Initialize(
+		return Error{
+			Get()->Initialize(
 			stream.Get(),
-			static_cast<WICDecodeOptions>(decoderOptions));
-		ThrowFailed(hr);
+			static_cast<WICDecodeOptions>(decoderOptions))
+		};
 	}
 
-	auto BitmapDecoder::CopyPalette() -> Palette
+	auto BitmapDecoder::CopyPalette() noexcept -> Result<Palette>
 	{
 		Palette palette{ };
-		const auto hr = Get()->CopyPalette(palette.GetRaw());
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->CopyPalette(palette.GetRaw());
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return palette;
 	}
 
-	auto BitmapDecoder::GetMetadataReader() const -> MetadataReader
+	auto BitmapDecoder::GetMetadataReader() const noexcept -> Result<MetadataReader>
 	{
 		ComPtr<IWICMetadataQueryReader> reader;
-		const auto hr = Get()->GetMetadataQueryReader(reader.GetAddressOf());
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->GetMetadataQueryReader(reader.GetAddressOf());
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return reader;
 	}
 
-	auto BitmapDecoder::GetPreview() const -> BitmapSource<>
+	auto BitmapDecoder::GetPreview() const noexcept -> Result<BitmapSource<>>
 	{
 		ComPtr<IWICBitmapSource> preview;
-		const auto hr = Get()->GetPreview(preview.GetAddressOf());
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetPreview(preview.GetAddressOf());
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return preview;
 	}
 
-	auto BitmapDecoder::GetThumbnail() const -> BitmapSource<>
+	auto BitmapDecoder::GetThumbnail() const noexcept -> Result<BitmapSource<>>
 	{
 		ComPtr<IWICBitmapSource> thumbnail;
-		const auto hr = Get()->GetThumbnail(thumbnail.GetAddressOf());
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetThumbnail(thumbnail.GetAddressOf());
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return thumbnail;
 	}
 
-	auto BitmapDecoder::GetContainerFormat() const -> ContainerFormat
+	auto BitmapDecoder::GetContainerFormat() const noexcept -> Result<ContainerFormat>
 	{
 		GUID format{ };
-		const auto hr = Get()->GetContainerFormat(&format);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetContainerFormat(&format);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return format;
 	}
 
-	auto BitmapDecoder::GetColorContexts(const UINT count) const -> std::vector<ComPtr<IWICColorContext>>
+	auto BitmapDecoder::GetColorContexts(
+		const UINT count) const noexcept -> Result<std::vector<ComPtr<IWICColorContext>>>
 	{
 		std::vector<IWICColorContext*> contexts(count);
-		const auto hr = Get()->GetColorContexts(count, contexts.data(), nullptr);
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->GetColorContexts(count, contexts.data(), nullptr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return contexts | std::views::transform([](auto context)
 		{
@@ -135,49 +204,80 @@ namespace PGUI::UI::Imaging
 		}) | std::ranges::to<std::vector<ComPtr<IWICColorContext>>>();
 	}
 
-	auto BitmapDecoder::GetFrameCount() const -> UINT
+	auto BitmapDecoder::GetFrameCount() const noexcept -> Result<UINT>
 	{
 		UINT count{ };
-		const auto hr = Get()->GetFrameCount(&count);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetFrameCount(&count);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return count;
 	}
 
-	auto BitmapDecoder::GetFrame(const UINT index) const -> BitmapFrameDecode
+	auto BitmapDecoder::GetFrame(const UINT index) const noexcept -> Result<BitmapFrameDecode>
 	{
-		if (index > GetFrameCount())
+		if (const auto frameCountResult = GetFrameCount();
+			!frameCountResult.has_value())
 		{
-			throw std::out_of_range{ "index is out of range" };
+			return Unexpected{
+				Error{ std::errc::invalid_argument }
+				.AddDetail(L"Frame Index", std::to_wstring(index))
+				.AddDetail(L"Frame Count", std::to_wstring(frameCountResult.value()))
+			};
 		}
 
 		ComPtr<IWICBitmapFrameDecode> frameDecode;
 
-		const auto hr = Get()->GetFrame(index, frameDecode.GetAddressOf());
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetFrame(index, frameDecode.GetAddressOf());
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return frameDecode;
 	}
 
-	auto BitmapDecoder::GetAllFrames() const -> std::vector<BitmapFrameDecode>
+	auto BitmapDecoder::GetAllFrames() const noexcept -> Result<std::vector<BitmapFrameDecode>>
 	{
-		const auto frameCount = GetFrameCount();
-
-		std::vector<BitmapFrameDecode> frames(frameCount);
-
-		for (const auto i : std::views::iota(0U, frameCount))
+		return GetFrameCount().and_then([this](const auto& frameCount) -> Result<std::vector<BitmapFrameDecode>>
 		{
-			frames[i] = GetFrame(i);
-		}
+			std::vector<BitmapFrameDecode> frames(frameCount);
 
-		return frames;
+			for (const auto i : std::views::iota(0U, frameCount))
+			{
+				auto frameResult = GetFrame(i);
+				if (!frameResult.has_value())
+				{
+					return Unexpected{ frameResult.error() };
+				}
+				frames[i] = frameResult.value();
+			}
+
+			return frames;
+		});
 	}
 
-	auto BitmapDecoder::QueryCapabilities(const ComPtr<IStream>& stream) const -> WICBitmapDecoderCapabilities
+	auto BitmapDecoder::QueryCapabilities(
+		const ComPtr<IStream>& stream) const noexcept -> Result<WICBitmapDecoderCapabilities>
 	{
 		DWORD capabilities{ };
-		const auto hr = Get()->QueryCapability(stream.Get(), &capabilities);
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->QueryCapability(stream.Get(), &capabilities);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return static_cast<WICBitmapDecoderCapabilities>(capabilities);
 	}

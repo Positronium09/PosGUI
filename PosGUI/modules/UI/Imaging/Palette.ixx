@@ -8,7 +8,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.UI.Color;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.Factories;
 import PGUI.UI.Imaging.BitmapSource;
 
@@ -28,7 +28,7 @@ export namespace PGUI::UI::Imaging
 	class Palette : public ComPtrHolder<IWICPalette>
 	{
 		public:
-		Palette();
+		Palette() noexcept;
 
 		explicit(false) Palette(const ComPtr<IWICPalette>& palette) noexcept;
 
@@ -38,26 +38,33 @@ export namespace PGUI::UI::Imaging
 			const auto& factory = Factories::WICFactory::GetFactory();
 
 			auto hr = factory->CreatePalette(GetAddress());
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to create palette");
+				return;
+			}
 
 			hr = InitializeFromBitmap(source.Get(), count, addTransparentColor);
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to initialize palette from bitmap");
+			}
 		}
 
-		Palette(PaletteType paletteType, bool addTransparentColor);
+		Palette(PaletteType paletteType, bool addTransparentColor) noexcept;
 
-		explicit Palette(std::span<RGBA> colors);
+		explicit Palette(std::span<RGBA> colors) noexcept;
 
-		[[nodiscard]] auto GetType() const -> PaletteType;
+		[[nodiscard]] auto GetType() const noexcept -> Result<PaletteType>;
 
-		[[nodiscard]] auto GetColorCount() const -> UINT;
+		[[nodiscard]] auto GetColorCount() const noexcept -> Result<UINT>;
 
-		[[nodiscard]] auto GetColors() const -> std::vector<RGBA>;
+		[[nodiscard]] auto GetColors() const noexcept -> Result<std::vector<RGBA>>;
 
-		[[nodiscard]] auto IsBlackWhite() const -> bool;
+		[[nodiscard]] auto IsBlackWhite() const noexcept -> Result<bool>;
 
-		[[nodiscard]] auto IsGrayscale() const -> bool;
+		[[nodiscard]] auto IsGrayscale() const noexcept -> Result<bool>;
 
-		[[nodiscard]] auto HasAlpha() const -> bool;
+		[[nodiscard]] auto HasAlpha() const noexcept -> Result<bool>;
 	};
 }

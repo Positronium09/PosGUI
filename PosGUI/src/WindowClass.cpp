@@ -6,7 +6,7 @@ module PGUI.WindowClass;
 import std;
 
 import PGUI.Utils;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 namespace PGUI
 {
@@ -45,7 +45,11 @@ namespace PGUI
 
 		if (!classAtom)
 		{
-			throw Win32Exception{ };
+			throw Exception{
+				Error{ GetLastError() }
+				.AddDetail(L"Class name", className)
+				.AddDetail(L"Style", std::format(L"{:b}", style))
+			};
 		}
 	}
 
@@ -55,15 +59,17 @@ namespace PGUI
 		WNDCLASSEXW w{ };
 		auto atom = static_cast<ATOM>(GetClassInfoExW(GetHInstance(), className.data(), &w));
 
-		if (!atom)
+		if (atom != NULL)
 		{
-			const auto windowClass = CreateWindowClassSharedPtr(
-				className, style, backgroundBrush,
-				icon, cursor, smIcon);
-
-			atom = windowClass->GetAtom();
-			registeredClasses[atom] = windowClass;
+			return registeredClasses[atom];
 		}
+
+		const auto windowClass = CreateWindowClassSharedPtr(
+			className, style, backgroundBrush,
+			icon, cursor, smIcon);
+
+		atom = windowClass->GetAtom();
+		registeredClasses[atom] = windowClass;
 
 		return registeredClasses[atom];
 	}

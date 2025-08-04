@@ -9,7 +9,7 @@ import std;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.D2D.RenderTarget;
 import PGUI.UI.D2D.D2DStructs;
 import PGUI.UI.D2D.D2DEnums;
@@ -33,11 +33,14 @@ export namespace PGUI::UI::D2D
 
 		~DeviceContext() noexcept = default;
 
-		auto CreateEffect(const IID& effectID) const
+		auto CreateEffect(const IID& effectID) const noexcept -> Result<Effect>
 		{
 			Effect effect{ };
-			auto hr = this->Get()->CreateEffect(effectID, effect.GetAddress());
-			ThrowFailed(hr);
+			if (auto hr = this->Get()->CreateEffect(effectID, effect.GetAddress()); 
+				FAILED(hr))
+			{
+				return Unexpected{ hr };
+			}
 
 			return effect;
 		}

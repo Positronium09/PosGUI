@@ -8,8 +8,7 @@ import std;
 import PGUI.Utils;
 import PGUI.WindowClass;
 import PGUI.Shape2D;
-import PGUI.Exceptions;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 import :WindowInterface;
 
 export namespace PGUI
@@ -300,8 +299,17 @@ export namespace PGUI
 			if (window->hWnd == NULL)
 			{
 				const auto errCode = GetLastError();
-				LogFailed(LogLevel::Error, errCode);
-				throw Win32Exception{ errCode };
+				Error error{
+					errCode
+				};
+				error
+					.AddTag(ErrorTags::Window)
+					.AddTag(ErrorTags::Creation);
+				Logger::Error(
+					error,
+					L"Window creation failed"
+				);
+				throw Exception{ errCode };
 			}
 
 			return window;
@@ -324,8 +332,18 @@ export namespace PGUI
 			if (window->hWnd == NULL)
 			{
 				const auto errCode = GetLastError();
-				LogFailed(LogLevel::Error, errCode);
-				throw Win32Exception{ errCode };
+				Error error{
+					errCode
+				};
+				error
+					.AddTag(ErrorTags::Window)
+					.AddTag(ErrorTags::Creation);
+				Logger::Error(
+					error,
+					L"Window creation failed"
+				);
+
+				throw Exception{ errCode };
 			}
 
 			childWindows.push_back(window);
@@ -407,7 +425,7 @@ export namespace PGUI
 		auto UnHookAfter(MessageHooker& hooker) noexcept -> void;
 
 		auto AddTimer(TimerId id, std::chrono::milliseconds delay,
-		              std::optional<TimerCallback> callback = std::nullopt) noexcept -> TimerId;
+		              const std::optional<TimerCallback>& callback = std::nullopt) noexcept -> TimerId;
 
 		auto RemoveTimer(TimerId id) noexcept -> void;
 

@@ -9,7 +9,7 @@ import std;
 
 import PGUI.Window;
 import PGUI.UI.Colors;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI
 {
@@ -183,7 +183,16 @@ namespace PGUI::UI
 			DWMWA_BORDER_COLOR,
 			&colorRef,
 			sizeof(colorRef));
-		LogFailed(LogLevel::Error, hr);
+
+		LogIfFailed(
+			LogLevel::Warning,
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Window)
+			.AddTag(ErrorTags::System)
+			.SuggestFix(L"Border color change is not supported on Win10")
+		);
 	}
 
 	auto AppWindow::SetCaptionColor(const RGBA color) const noexcept -> void
@@ -194,7 +203,16 @@ namespace PGUI::UI
 			DWMWA_CAPTION_COLOR,
 			&colorRef,
 			sizeof(colorRef));
-		LogFailed(LogLevel::Error, hr);
+
+		LogIfFailed(
+			LogLevel::Warning,
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Window)
+			.AddTag(ErrorTags::System)
+			.SuggestFix(L"Caption color change is not supported on Win10")
+		);
 	}
 
 	auto AppWindow::SetCaptionTextColor(const RGBA color) const noexcept -> void
@@ -205,7 +223,16 @@ namespace PGUI::UI
 			DWMWA_TEXT_COLOR,
 			&colorRef,
 			sizeof(colorRef));
-		LogFailed(LogLevel::Error, hr);
+
+		LogIfFailed(
+			LogLevel::Warning,
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Window)
+			.AddTag(ErrorTags::System)
+			.SuggestFix(L"Border color change is not supported on Win10")
+		);
 	}
 
 	auto AppWindow::SetCornerPreference(Theming::CornerPreference cornerPreference) const noexcept -> void
@@ -216,7 +243,16 @@ namespace PGUI::UI
 			DWMWA_WINDOW_CORNER_PREFERENCE,
 			&preference,
 			sizeof(preference));
-		LogFailed(LogLevel::Error, hr);
+
+		LogIfFailed(
+			LogLevel::Warning,
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Window)
+			.AddTag(ErrorTags::System)
+			.SuggestFix(L"Border color change is not supported on Win10")
+		);
 	}
 
 	auto AppWindow::ApplyStyle(const Theming::AppWindowStyle& style) noexcept -> void
@@ -253,7 +289,17 @@ namespace PGUI::UI
 	{
 		const auto size = std::min(titleText.size() + 1, wParam);
 		const auto hr = StringCchCopyW(std::bit_cast<wchar_t*>(lParam), size, titleText.data());
-		LogFailed(LogLevel::Error, hr);
+
+		LogIfFailed(
+			LogLevel::Warning,
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::WindowMessage)
+			.AddDetail(L"New Title Size", std::to_wstring(size))
+			.AddDetail(L"New Title", std::bit_cast<wchar_t*>(lParam)),
+			L"Cannot copy title string"
+		);
 
 		return size;
 	}

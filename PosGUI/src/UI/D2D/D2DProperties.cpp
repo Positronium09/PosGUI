@@ -7,7 +7,7 @@ module PGUI.UI.D2D.D2DProperties;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI::D2D
 {
@@ -15,23 +15,35 @@ namespace PGUI::UI::D2D
 		ComPtrHolder{ properties }
 	{ }
 
-	auto D2DProperties::GetPropertyName(const UINT32 index) const noexcept -> std::wstring
+	auto D2DProperties::GetPropertyName(const UINT32 index) const noexcept -> Result<std::wstring>
 	{
 		auto& ptr = Get();
-		const auto nameLength = ptr->GetPropertyNameLength(index) + 1;
+		const auto nameLength = ptr->GetPropertyNameLength(index);
 
 		std::wstring name(nameLength, L'\0');
-		const auto hr = ptr->GetPropertyName(index, name.data(), nameLength);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = ptr->GetPropertyName(index, name.data(), nameLength + 1);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddDetail(L"Index", std::to_wstring(index))
+			};
+		}
 
 		return name;
 	}
 
-	auto D2DProperties::GetSubProperty(const UINT32 index) const noexcept -> D2DProperties
+	auto D2DProperties::GetSubProperty(const UINT32 index) const noexcept -> Result<D2DProperties>
 	{
 		ComPtr<ID2D1Properties> subProperty;
-		const auto hr = Get()->GetSubProperties(index, &subProperty);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetSubProperties(index, &subProperty);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddDetail(L"Index", std::to_wstring(index))
+			};
+		}
 
 		return D2DProperties{ subProperty };
 	}
@@ -43,17 +55,25 @@ namespace PGUI::UI::D2D
 			const auto size = GetValueSize(index);
 			if (size > bytes.size())
 			{
-				LogFailed(LogLevel::Error, E_INVALIDARG);
+				Logger::Error(
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Index", std::to_wstring(index))
+					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
+					.AddDetail(L"Value Size", std::to_wstring(size)),
+					L"Value size is bigger than the given span");
+
 				return false;
 			}
 			const auto hr = Get()->GetValue(index, bytes.data(), size);
-			LogFailed(LogLevel::Error, hr);
+			LogIfFailed(Error{ hr });
+
 			return hr == S_OK;
 		}
 		else
 		{
 			auto hr = Get()->GetValue(index, bytes.data(), static_cast<UINT32>(bytes.size()));
-			LogFailed(LogLevel::Error, hr);
+			LogIfFailed(Error{ hr });
+
 			return hr == S_OK;
 		}
 	}

@@ -6,7 +6,7 @@ export module PGUI.ComPtr;
 import std;
 
 import PGUI.Utils;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 export namespace PGUI
 {
@@ -177,23 +177,34 @@ export namespace PGUI
 		}
 
 		template <IsAnyOf<Interfaces...> T, typename U>
-		auto As() const
+		auto As() const -> Result<ComPtr<U>>
 		{
 			ComPtr<U> ptr;
-			auto hresult = Get<T>().As(&ptr);
-			ThrowFailed(hresult);
+
+			if (auto hresult = Get<T>().As(&ptr);
+				FAILED(hresult))
+			{
+				return Unexpected{
+					Error{ hresult }
+				};
+			}
 
 			return ptr;
 		}
 
 		template <IsAnyOf<Interfaces...> T, IsAnyOf<Interfaces...> U>
-		auto AsAssign() -> void
+		auto AsAssign() noexcept -> Error
 		{
 			ComPtr<U> ptr;
-			auto hresult = Get<T>().As(&ptr);
-			ThrowFailed(hresult);
+			auto error = Error{ Get<T>().As(&ptr) };
 
-			Set(ptr);
+			if (error.IsSuccess())
+			{
+				Set(ptr);
+			}
+
+			return error;
+
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
@@ -203,13 +214,13 @@ export namespace PGUI
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
-		explicit(false) constexpr operator ComPtr<T>() const
+		explicit(false) constexpr operator ComPtr<T>() const noexcept
 		{
 			return Get<T>();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
-		explicit(false) constexpr operator T*() const
+		explicit(false) constexpr operator T*() const noexcept
 		{
 			return Get<ComPtr<T>>().Get();
 		}

@@ -10,7 +10,7 @@ import std;
 import PGUI.Window;
 import PGUI.Factories;
 import PGUI.ComPtr;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 import PGUI.Shape2D;
 import PGUI.UI.D2D.D2DPathGeometry;
 
@@ -25,7 +25,13 @@ namespace PGUI::UI
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
 		const auto hr = factory->CreateRoundedRectangleGeometry(rect, GetAddress());
-		LogFailed(LogLevel::Error, hr);
+		LogIfFailed(
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Creation)
+			.AddDetail(L"rect", std::format(L"{}", rect))
+		);
 	}
 
 	RectangleClip::RectangleClip(const ComPtr<ID2D1RectangleGeometry>& geometry) noexcept :
@@ -37,7 +43,13 @@ namespace PGUI::UI
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
 		const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
-		LogFailed(LogLevel::Error, hr);
+		LogIfFailed(
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Creation)
+			.AddDetail(L"rect", std::format(L"{}", rect))
+		);
 	}
 
 	EllipseClip::EllipseClip(const ComPtr<ID2D1EllipseGeometry>& geometry) noexcept :
@@ -49,7 +61,13 @@ namespace PGUI::UI
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
 		const auto hr = factory->CreateEllipseGeometry(ellipse, GetAddress());
-		LogFailed(LogLevel::Error, hr);
+		LogIfFailed(
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Creation)
+			.AddDetail(L"ellipse", std::format(L"{}", ellipse))
+		);
 	}
 
 
@@ -97,11 +115,14 @@ namespace PGUI::UI
 			}
 			else if constexpr (std::is_same_v<T, RoundCornerClipParameters>)
 			{
-				auto path = D2D::D2DPathGeometry::CreateRoundRectWithPathGeometry(
+				auto pathResult = D2D::D2DPathGeometry::CreateRoundRectWithPathGeometry(
 					parameters.rect, parameters.topLeftRadius,
 					parameters.topRightRadius, parameters.bottomLeftRadius,
 					parameters.bottomRightRadius);
-				clip = RoundCornerClip{ path };
+				if (pathResult.has_value())
+				{
+					clip = RoundCornerClip{ pathResult.value() };
+				}
 			}
 		}, parameters);
 	}
@@ -127,7 +148,7 @@ namespace PGUI::UI
 			parameters = _parameters;
 			return;
 		}
-		else if (std::holds_alternative<RoundedRectangleClipParameters>(_parameters))
+		if (std::holds_alternative<RoundedRectangleClipParameters>(_parameters))
 		{
 			if (const auto& params = std::get<RoundedRectangleClipParameters>(_parameters);
 				params.rect.xRadius == 0.0f && params.rect.yRadius == 0.0f)

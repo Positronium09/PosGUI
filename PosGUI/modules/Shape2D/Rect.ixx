@@ -263,3 +263,38 @@ export namespace PGUI
 	using RectL = Rect<long>;
 	using RectU = Rect<std::uint32_t>;
 }
+
+export template <typename T, typename Char>
+struct std::formatter<PGUI::Rect<T>, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No formatting args supported for Rect<T>" };
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::Rect<T>& rect, FormatContext& ctx) const
+	{
+		if constexpr (std::floating_point<T>)
+		{
+			return std::format_to(
+				ctx.out(), 
+				"top: {:.5f}, left: {:.5f}, bottom: {:.5f}, right: {:.5f}", 
+				rect.top, rect.left, rect.bottom, rect.right);
+		}
+		else
+		{
+			return std::format_to(
+				ctx.out(),
+				"top: {}, left: {}, bottom: {}, right: {}",
+				rect.top, rect.left, rect.bottom, rect.right);
+		}
+	}
+};

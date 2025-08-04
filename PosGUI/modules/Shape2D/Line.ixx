@@ -5,7 +5,7 @@ import std;
 import :Point;
 import :LineSegment;
 
-export namespace PGUI::UI
+export namespace PGUI
 {
 	template <typename T> requires std::floating_point<T>
 	struct Line
@@ -98,3 +98,27 @@ export namespace PGUI::UI
 
 	using LineF = Line<float>;
 }
+
+export template <typename T, typename Char>
+struct std::formatter<PGUI::Line<T>, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No formatting args supported for Line<T>" };
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::Line<T>& line, FormatContext& ctx) const
+	{
+		return std::format_to(
+			ctx.out(),
+			"m: {}, c: {}", line.m, line.c);
+	}
+};

@@ -7,8 +7,8 @@ import std;
 
 import PGUI.Window;
 import PGUI.WindowClass;
-import PGUI.Logging;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
+import PGUI.ErrorHandling;
 import PGUI.Shape2D;
 import PGUI.UI.DirectXCompositionWindow;
 
@@ -90,8 +90,12 @@ export namespace PGUI::UI
 			if (window->Hwnd() == NULL)
 			{
 				const auto errCode = GetLastError();
-				LogFailed(LogLevel::Error, errCode);
-				throw Win32Exception{ errCode };
+
+				throw Exception{
+					Error{ errCode }
+					.AddTag(ErrorTags::Window)
+					.AddTag(ErrorTags::Creation)
+				};
 			}
 
 			SendMessageW(window->Hwnd(), WM_INITDIALOG,

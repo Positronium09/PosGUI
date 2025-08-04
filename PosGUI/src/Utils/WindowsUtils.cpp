@@ -8,8 +8,7 @@ module PGUI.Utils:WindowsUtils;
 import std;
 
 import PGUI.Utils;
-import PGUI.Exceptions;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 
 // ReSharper disable StringLiteralTypo
 constexpr std::array<std::wstring_view, 1024> messageStrings = {
@@ -1068,7 +1067,7 @@ namespace PGUI
 				localeName.data(), LOCALE_NAME_MAX_LENGTH);
 			ret == 0)
 		{
-			throw Win32Exception{ };
+			throw Exception{ GetLastError() }.AddTag(ErrorTags::System);
 		}
 
 		return localeName;
@@ -1084,7 +1083,7 @@ namespace PGUI
 		return HRESULT_FROM_WIN32(errCode);
 	}
 
-	auto MsgToText(const UINT msg) noexcept -> std::wstring_view
+	auto WindowMsgToText(const UINT msg) noexcept -> std::wstring_view
 	{
 		if (msg >= messageStrings.size())
 		{
@@ -1101,7 +1100,13 @@ namespace PGUI
 		{
 			hr = DwmSetWindowAttribute(hWnd, 19, &var, sizeof(var));
 		}
-		LogFailed(LogLevel::Warning, hr);
+
+		LogIfFailed(
+			Error{ hr }
+			.AddTag(ErrorTags::Window)
+			.AddTag(ErrorTags::System)
+			.SuggestFix(L"System may not support DWMWA_USE_IMMERSIVE_DARK_MODE (Also tried value 19)")
+		);
 	}
 
 	auto HResultToString(const HRESULT hresult) noexcept -> std::wstring

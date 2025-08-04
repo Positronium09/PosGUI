@@ -9,8 +9,7 @@ import std;
 
 import :Impl;
 import PGUI.Utils;
-import PGUI.Logging;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 namespace PGUI
 {
@@ -196,14 +195,19 @@ namespace PGUI
 	}
 
 	auto Window::AddTimer(const TimerId id, const std::chrono::milliseconds delay,
-	                      std::optional<TimerCallback> callback) noexcept -> TimerId
+	                      const std::optional<TimerCallback>& callback) noexcept -> TimerId
 	{
 		if (const auto setTimerId =
 			SetTimer(hWnd, id, static_cast<UINT>(delay.count()), nullptr);
 			setTimerId == 0)
 		{
 			const auto error = GetLastError();
-			LogFailed(LogLevel::Error, HresultFromWin32(error));
+
+			Logger::Error(
+				Error{ error }
+				.AddTag(ErrorTags::Window)
+			);
+
 			return setTimerId;
 		}
 
@@ -228,7 +232,11 @@ namespace PGUI
 			if (const auto error = GetLastError();
 				error != ERROR_SUCCESS)
 			{
-				LogFailed(LogLevel::Error, HresultFromWin32(error));
+				Logger::Error(
+					Error{ error }
+					.AddTag(ErrorTags::Window)
+				);
+
 				return;
 			}
 		}

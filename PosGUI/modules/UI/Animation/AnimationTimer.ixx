@@ -4,6 +4,7 @@ module;
 export module PGUI.UI.Animation:AnimationTimer;
 
 import PGUI.ComPtr;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::UI::Animation
 {
@@ -14,15 +15,15 @@ export namespace PGUI::UI::Animation
 
 		explicit(false) AnimationTimer(const ComPtr<IUIAnimationTimer>& ptr) noexcept;
 
-		auto Enable() const -> void;
+		auto Enable() const noexcept -> Error;
 
-		auto Disable() const -> void;
+		auto Disable() const noexcept -> Error;
 
-		[[nodiscard]] auto IsEnabled() const -> bool;
+		[[nodiscard]] auto IsEnabled() const noexcept -> Result<bool>;
 
-		[[nodiscard]] auto GetTime() const -> double;
+		[[nodiscard]] auto GetTime() const noexcept -> Result<double>;
 
-		auto SetFrameRateThreshold(UINT32 threshold) const -> void;
+		auto SetFrameRateThreshold(UINT32 threshold) const noexcept -> Error;
 
 		//TODO SetTimerEventHandler
 		//TODO SetTimerUpdateHandler

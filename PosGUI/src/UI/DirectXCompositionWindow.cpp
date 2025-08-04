@@ -14,8 +14,7 @@ module PGUI.UI.DirectXCompositionWindow;
 
 import std;
 
-import PGUI.Logging;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.Utils;
 import PGUI.UI.D2D.RenderTarget;
 import PGUI.Factories;
@@ -41,11 +40,23 @@ namespace PGUI::UI
 		{
 			size.cy = 1;
 		}
+		if (size.cx == 0)
+		{
+			size.cx = 1;
+		}
 
-		const auto hr = GetSwapChain()->ResizeBuffers(
+		if (const auto hr = GetSwapChain()->ResizeBuffers(
 			0, size.cx, size.cy,
 			DXGI_FORMAT_UNKNOWN, NULL);
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddDetail(L"Window Size", std::format(L"{}", size))
+				.AddTag(ErrorTags::Window)
+				.AddTag(ErrorTags::DirectX)
+			};
+		}
 
 		DiscardDeviceResources();
 		InitD2D1DeviceContext();
@@ -69,12 +80,25 @@ namespace PGUI::UI
 		if (hr == D2DERR_RECREATE_TARGET)
 		{
 			DiscardDeviceResources();
-			hr = S_OK;
 		}
-		ThrowFailed(hr);
+		else if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"D2D1DeviceContext::EndDraw failed"
+			};
+		}
 
-		hr = GetSwapChain()->Present(1, NULL);
-		ThrowFailed(hr);
+		if (hr = GetSwapChain()->Present(1, NULL);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"SwapChain::Present failed"
+			};
+		}
 
 		EndPaint(Hwnd(), &paintStruct);
 
@@ -94,11 +118,19 @@ namespace PGUI::UI
 		swapChainDesc.Width = 1;
 		swapChainDesc.Height = 1;
 
-		const auto hr = dxgiFactory->CreateSwapChainForComposition(
+		if (const auto hr = dxgiFactory->CreateSwapChainForComposition(
 			dxgiDevice.Get(),
 			&swapChainDesc, nullptr,
 			GetAddress<IDXGISwapChain1>());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot create swap chain"
+			};
+		}
+		
 	}
 
 	auto DirectXCompositionWindow::InitD2D1DeviceContext() -> void
@@ -109,11 +141,25 @@ namespace PGUI::UI
 		auto hr = d2d1Device->CreateDeviceContext(
 			D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
 			&d2d1Dc);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot create D2D1DeviceContext"
+			};
+		}
 
 		ComPtr<IDXGISurface2> surface;
 		hr = swapChain->GetBuffer(0, IID_PPV_ARGS(surface.GetAddressOf()));
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot get swap chain buffer"
+			};
+		}
 
 		D2D1_BITMAP_PROPERTIES1 properties = { };
 		properties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
@@ -125,7 +171,14 @@ namespace PGUI::UI
 			surface.Get(),
 			properties,
 			&bitmap);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot create bitmap from DXGI surface"
+			};
+		}
 
 		d2d1Dc->SetTarget(bitmap.Get());
 	}
@@ -139,30 +192,74 @@ namespace PGUI::UI
 		auto hr = dcompDevice->CreateTargetForHwnd(
 			Hwnd(), false,
 			&dcompTarget);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot create DComposition target for window"
+			};
+		}
 
 		hr = dcompDevice->CreateVisual(&visual);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot create DComposition visual"
+			};
+		}
 
 		hr = visual->SetContent(swapChain.Get());
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot set content for DComposition visual"
+			};
+		}
+
 		hr = dcompTarget->SetRoot(visual.Get());
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot set root for DComposition target"
+			};
+		}
 
 		hr = dcompDevice->Commit();
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX),
+				L"Cannot commit DComposition device"
+			};
+		}
 	}
 
 	auto DirectXCompositionWindow::InitD3D11Device() -> void
 	{
 		if (d3d11Device)
 		{
+			Logger::Info(L"DirectXCompositionWindow::InitD3D11Device called, but D3D11 device already initialized");
 			return;
 		}
 
 		const auto dxgiFactory = Factories::DXGIFactory::GetFactory();
 		SYSTEM_POWER_STATUS powerStatus{ };
-		GetSystemPowerStatus(&powerStatus);
+		if (const auto ret = GetSystemPowerStatus(&powerStatus);
+			ret == 0)
+		{
+			Logger::Error(
+				L"Cannot get system power status {}",
+				Error{ GetLastError() }
+			);
+		}
 
 		auto gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
 		const auto powerSaverOn = powerStatus.SystemStatusFlag == 1;
@@ -179,7 +276,15 @@ namespace PGUI::UI
 		auto hr = dxgiFactory->EnumAdapterByGpuPreference(
 			0, gpuPreference,
 			IID_PPV_ARGS(adapter.GetAddressOf()));
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX)
+				.AddTag(ErrorTags::Initialization),
+				L"Cannot enumerate DXGI adapters"
+			};
+		}
 
 		constexpr auto createDeviceFlags =
 #ifdef _DEBUG
@@ -210,40 +315,85 @@ namespace PGUI::UI
 			static_cast<UINT>(featureLevels.size()),
 			D3D11_SDK_VERSION,
 			&device, nullptr, nullptr);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX)
+				.AddTag(ErrorTags::Initialization),
+				L"Cannot create D3D11 device"
+			};
+		}
+
 		hr = device.As(&d3d11Device);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX)
+				.AddTag(ErrorTags::Initialization),
+				L"Cannot query D3D11Device2 interface"
+			};
+		}
+
 		hr = d3d11Device.As(&dxgiDevice);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX)
+				.AddTag(ErrorTags::Initialization),
+				L"Cannot query IDXGIDevice4 interface"
+			};
+		}
 	}
 
 	auto DirectXCompositionWindow::InitDCompDevice() -> void
 	{
 		if (dcompDevice)
 		{
+			Logger::Info(
+				L"DirectXCompositionWindow::InitDCompDevice called, but DirectComposition device already initialized");
 			return;
 		}
 
-		const auto hr = DCompositionCreateDevice(
+		if (const auto hr = DCompositionCreateDevice(
 			dxgiDevice.Get(),
 			__uuidof(dcompDevice),
 			std::bit_cast<void**>(&dcompDevice));
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX)
+				.AddTag(ErrorTags::Initialization),
+				L"Cannot create DirectComposition device"
+			};
+		}
 	}
 
 	auto DirectXCompositionWindow::InitD2D1Device() -> void
 	{
 		if (d2d1Device)
 		{
+			Logger::Info(L"DirectXCompositionWindow::InitD2D1Device called, but D2D1 device already initialized");
 			return;
 		}
 
 		const auto d2Factory = Factories::D2DFactory::GetFactory();
 
-		const auto hr = d2Factory->CreateDevice(
+		if (const auto hr = d2Factory->CreateDevice(
 			dxgiDevice.Get(),
 			&d2d1Device);
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::DirectX)
+				.AddTag(ErrorTags::Initialization),
+				L"Cannot create D2D1 device"
+			};
+		}
 	}
 
 	auto DirectXCompositionWindow::OnNCCreate(
@@ -259,7 +409,7 @@ namespace PGUI::UI
 	}
 
 	auto DirectXCompositionWindow::OnWindowPosChanged(
-		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
+		const UINT msg, WPARAM /* unused */, LPARAM /* unused */) noexcept -> MessageHandlerResult
 	{
 		if (const auto monitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL);
 			monitor != currentMonitor)
@@ -272,7 +422,15 @@ namespace PGUI::UI
 				currentMonitor,
 				renderingParams.GetAddressOf());
 
-			LogFailed(LogLevel::Error, hr);
+			LogIfFailed(
+				Error{
+					hr
+				}
+				.AddTag(ErrorTags::Window)
+				.AddTag(ErrorTags::WindowMessage)
+				.AddDetail(L"Window Message", WindowMsgToText(msg)),
+				L"Cannot create IDWriteRenderingParams with CreateMonitorRenderingParams"
+			);
 
 			if (!FAILED(hr))
 			{

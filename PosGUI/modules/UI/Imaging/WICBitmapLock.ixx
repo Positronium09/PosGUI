@@ -19,12 +19,12 @@ export namespace PGUI::UI::Imaging
 
 		explicit(false) WICBitmapLock(const ComPtr<IWICBitmapLock>& bitmapLock) noexcept;
 
-		[[nodiscard]] auto GetSize() const -> SizeU;
+		[[nodiscard]] auto GetSize() const noexcept -> Result<SizeU>;
 
-		[[nodiscard]] auto GetStride() const -> UINT;
+		[[nodiscard]] auto GetStride() const noexcept -> Result<UINT>;
 
-		[[nodiscard]] auto GetDataPointer() const -> std::span<BYTE>;
+		[[nodiscard]] auto GetDataPointer() const noexcept -> Result<std::span<BYTE>>;
 
-		[[nodiscard]] auto GetPixelFormat() const -> WICPixelFormatGUID;
+		[[nodiscard]] auto GetPixelFormat() const noexcept -> Result<WICPixelFormatGUID>;
 	};
 }

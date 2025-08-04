@@ -13,100 +13,171 @@ import PGUI.UI.Color;
 
 namespace PGUI::UI::Imaging
 {
-	Palette::Palette()
+	Palette::Palette() noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		const auto hr = factory->CreatePalette(GetAddress());
-		ThrowFailed(hr);
+		if (const auto hr = factory->CreatePalette(GetAddress());
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create palette {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Imaging)
+			              .AddTag(ErrorTags::Creation));
+		}
 	}
 
 	Palette::Palette(const ComPtr<IWICPalette>& palette) noexcept :
 		ComPtrHolder{ palette }
 	{ }
 
-	Palette::Palette(PaletteType paletteType, const bool addTransparentColor)
+	Palette::Palette(PaletteType paletteType, const bool addTransparentColor) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		auto hr = factory->CreatePalette(GetAddress());
-		ThrowFailed(hr);
+		if (const auto hr = factory->CreatePalette(GetAddress());
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create palette {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Imaging)
+			              .AddTag(ErrorTags::Creation));
+			return;
+		}
 
-		hr = Get()->InitializePredefined(static_cast<WICBitmapPaletteType>(paletteType),
-		                                 addTransparentColor);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->InitializePredefined(
+				static_cast<WICBitmapPaletteType>(paletteType),
+				addTransparentColor);
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to initialize palette from bitmap {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Imaging)
+			              .AddTag(ErrorTags::Initialization));
+		}
 	}
 
-	Palette::Palette(std::span<RGBA> colors)
+	Palette::Palette(std::span<RGBA> colors) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		auto hr = factory->CreatePalette(GetAddress());
-		ThrowFailed(hr);
+		if (const auto hr = factory->CreatePalette(GetAddress());
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to create palette {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Imaging)
+			              .AddTag(ErrorTags::Creation));
+		}
 
 		auto wicColors = colors | std::ranges::to<std::vector<WICColor>>();
 
-		hr = Get()->InitializeCustom(
-			wicColors.data(),
-			static_cast<UINT>(wicColors.size()));
-		ThrowFailed(hr);
+		if (const auto hr = Get()->InitializeCustom(
+				wicColors.data(),
+				static_cast<UINT>(wicColors.size()));
+			FAILED(hr))
+		{
+			Logger::Error(L"Failed to initialize palette from bitmap {}",
+			              Error{ hr }
+			              .AddTag(ErrorTags::Imaging)
+			              .AddTag(ErrorTags::Initialization));
+		}
 	}
 
-	auto Palette::GetType() const -> PaletteType
+	auto Palette::GetType() const noexcept -> Result<PaletteType>
 	{
 		WICBitmapPaletteType type{ };
-		const auto hr = Get()->GetType(&type);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetType(&type);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return static_cast<PaletteType>(type);
 	}
 
-	auto Palette::GetColorCount() const -> UINT
+	auto Palette::GetColorCount() const noexcept -> Result<UINT>
 	{
 		UINT count{ };
-		const auto hr = Get()->GetColorCount(&count);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetColorCount(&count);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return count;
 	}
 
-	auto Palette::GetColors() const -> std::vector<RGBA>
+	auto Palette::GetColors() const noexcept -> Result<std::vector<RGBA>>
 	{
-		auto count = GetColorCount();
-		std::vector<WICColor> wicColors(count);
-		const auto hr = Get()->GetColors(count, wicColors.data(), &count);
-		ThrowFailed(hr);
-
-		return wicColors | std::ranges::views::transform([](auto color)
+		return GetColorCount().and_then([this](const auto count) -> Result<std::vector<RGBA>>
 		{
-			return WICColorToRGBA(color);
-		}) | std::ranges::to<std::vector<RGBA>>();
+			std::vector<WICColor> wicColors(count);
+			UINT written = 0;
+			if (const auto hr = Get()->GetColors(count, wicColors.data(), &written);
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Imaging)
+				};
+			}
+
+			return wicColors | std::ranges::views::transform([](auto color)
+			{
+				return WICColorToRGBA(color);
+			}) | std::ranges::to<std::vector<RGBA>>();
+		});
 	}
 
-	auto Palette::IsBlackWhite() const -> bool
+	auto Palette::IsBlackWhite() const noexcept -> Result<bool>
 	{
 		BOOL isBlackWhite{ };
-		const auto hr = Get()->IsBlackWhite(&isBlackWhite);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->IsBlackWhite(&isBlackWhite);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
-		return isBlackWhite;
+		return static_cast<bool>(isBlackWhite);
 	}
 
-	auto Palette::IsGrayscale() const -> bool
+	auto Palette::IsGrayscale() const noexcept -> Result<bool>
 	{
 		BOOL isGrayscale{ };
-		const auto hr = Get()->IsGrayscale(&isGrayscale);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->IsGrayscale(&isGrayscale);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
-		return isGrayscale;
+		return static_cast<bool>(isGrayscale);
 	}
 
-	auto Palette::HasAlpha() const -> bool
+	auto Palette::HasAlpha() const noexcept -> Result<bool>
 	{
 		BOOL hasAlpha{ };
-		const auto hr = Get()->HasAlpha(&hasAlpha);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->HasAlpha(&hasAlpha);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
-		return hasAlpha;
+		return static_cast<bool>(hasAlpha);
 	}
 }

@@ -5,8 +5,8 @@ module PGUI.MessageLoop;
 
 import std;
 
-import PGUI.Exceptions;
-import PGUI.Logging;
+import PGUI.Utils;
+import PGUI.ErrorHandling;
 
 namespace PGUI
 {
@@ -20,7 +20,16 @@ namespace PGUI
 			if (ret == -1)
 			{
 				const auto errCode = GetLastError();
-				LogFailed(LogLevel::Fatal, errCode);
+
+				Logger::Critical(
+					Error{ errCode }
+					.AddTag(ErrorTags::WindowMessage)
+					.AddTag(ErrorTags::Logging)
+					.AddDetail(L"Message", WindowMsgToText(msg.message))
+					.AddDetail(L"wParam", std::to_wstring(msg.wParam))
+					.AddDetail(L"lParam", std::to_wstring(msg.lParam))
+				);
+
 				return static_cast<int>(errCode);
 			}
 			TranslateMessage(&msg);
@@ -33,7 +42,7 @@ namespace PGUI
 	//TODO Implement
 	auto RunPeekMessageLoop() -> int
 	{
-		throw HResultException{ E_NOTIMPL };
+		throw Exception{ E_NOTIMPL };
 	}
 
 	auto RunModalMessageLoop(const HWND modalDialog, const HWND parent, const std::atomic_ref<bool> shouldClose) -> int
@@ -52,8 +61,17 @@ namespace PGUI
 			if (ret == -1)
 			{
 				const auto errCode = GetLastError();
-				LogFailed(LogLevel::Error, errCode);
-				return errCode;
+
+				Logger::Critical(
+					Error{ errCode }
+					.AddTag(ErrorTags::WindowMessage)
+					.AddTag(ErrorTags::Logging)
+					.AddDetail(L"Message", WindowMsgToText(msg.message))
+					.AddDetail(L"wParam", std::to_wstring(msg.wParam))
+					.AddDetail(L"lParam", std::to_wstring(msg.lParam))
+				);
+
+				return static_cast<int>(errCode);
 			}
 
 			if (!IsDialogMessageW(modalDialog, &msg))

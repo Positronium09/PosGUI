@@ -7,7 +7,7 @@ module PGUI.UI.Imaging.MetadataReader;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.PropVariant;
 import PGUI.IEnumStringIterator;
 import PGUI.UI.Imaging.ContainerFormats;
@@ -18,68 +18,137 @@ namespace PGUI::UI::Imaging
 		ComPtrHolder{ reader }
 	{ }
 
-	auto MetadataReader::GetContainerFormat() const -> ContainerFormat
+	auto MetadataReader::GetContainerFormat() const noexcept -> Result<ContainerFormat>
 	{
 		ContainerFormat format;
-		const auto hr = Get()->GetContainerFormat(&format);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetContainerFormat(&format);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return format;
 	}
 
-	auto MetadataReader::GetMetadata(const std::wstring_view name) const -> PropVariant
+	auto MetadataReader::GetMetadata(const std::wstring_view name) const noexcept -> Result<PropVariant>
 	{
 		PropVariant value;
-		const auto hr = Get()->GetMetadataByName(name.data(), &value);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetMetadataByName(name.data(), &value);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return value;
 	}
 
-	auto MetadataReader::Location() const -> std::wstring
+	auto MetadataReader::Location() const noexcept -> Result<std::wstring>
 	{
 		UINT length = 0;
-		auto hr = Get()->GetLocation(0, nullptr, &length);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetLocation(0, nullptr, &length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		std::wstring location(length, L'\0');
 
-		hr = Get()->GetLocation(length, location.data(), &length);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetLocation(length, location.data(), &length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
+
 		return location;
 	}
 
-	auto MetadataReader::GetEnumerator() const -> ComPtr<IEnumString>
+	auto MetadataReader::GetEnumerator() const noexcept -> Result<ComPtr<IEnumString>>
 	{
 		ComPtr<IEnumString> enumerator;
-		const auto hr = Get()->GetEnumerator(&enumerator);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetEnumerator(&enumerator);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return enumerator;
 	}
 
-	auto MetadataReader::operator[](const std::wstring_view name) const noexcept -> PropVariant
+	auto MetadataReader::operator[](const std::wstring_view name) const -> PropVariant
 	{
-		return GetMetadata(name);
+		if (const auto metadataResult = GetMetadata(name);
+			metadataResult.has_value())
+		{
+			return metadataResult.value();
+		}
+
+		throw Exception{
+			Error{ WINCODEC_ERR_INVALIDPARAMETER }
+			.AddTag(ErrorTags::Imaging)
+		};
 	}
 
-	auto MetadataReader::cbegin() const noexcept -> IEnumStringIterator
+	auto MetadataReader::cbegin() const -> IEnumStringIterator
 	{
-		return IEnumStringIterator{ GetEnumerator() };
+		const auto enumeratorResult = GetEnumerator();
+		if (enumeratorResult.has_value())
+		{
+			return IEnumStringIterator{ enumeratorResult.value() };
+		}
+
+		throw Exception{
+			enumeratorResult.error()
+		};
 	}
 
-	auto MetadataReader::cend() const noexcept -> IEnumStringIterator
+	auto MetadataReader::cend() const -> IEnumStringIterator
 	{
-		return IEnumStringIterator{ GetEnumerator(), true };
+		const auto enumeratorResult = GetEnumerator();
+		if (enumeratorResult.has_value())
+		{
+			return IEnumStringIterator{ enumeratorResult.value(), true };
+		}
+		throw Exception{
+			enumeratorResult.error()
+		};
 	}
 
-	auto MetadataReader::begin() const noexcept -> IEnumStringIterator
+	auto MetadataReader::begin() const -> IEnumStringIterator
 	{
-		return IEnumStringIterator{ GetEnumerator() };
+		const auto enumeratorResult = GetEnumerator();
+		if (enumeratorResult.has_value())
+		{
+			return IEnumStringIterator{ enumeratorResult.value() };
+		}
+		throw Exception{
+			enumeratorResult.error()
+		};
 	}
 
-	auto MetadataReader::end() const noexcept -> IEnumStringIterator
+	auto MetadataReader::end() const -> IEnumStringIterator
 	{
-		return IEnumStringIterator{ GetEnumerator(), true };
+		const auto enumeratorResult = GetEnumerator();
+		if (enumeratorResult.has_value())
+		{
+			return IEnumStringIterator{ enumeratorResult.value(), true };
+		}
+		throw Exception{
+			enumeratorResult.error()
+		};
 	}
 }

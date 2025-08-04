@@ -5,8 +5,9 @@ export module PGUI.UI.Imaging.WICBitmap;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;
-import PGUI.UI.Imaging.BitmapSource;
+import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.Palette;
+import PGUI.UI.Imaging.BitmapSource;
 import PGUI.UI.Imaging.WICBitmapLock;
 
 export namespace PGUI::UI::Imaging
@@ -39,20 +40,22 @@ export namespace PGUI::UI::Imaging
 
 		explicit(false) WICBitmap(const ComPtr<IWICBitmap>& bitmap) noexcept;
 
-		WICBitmap(SizeU size, const WICPixelFormatGUID& pixelFormat, CreateCacheOption cacheOption);
+		WICBitmap(SizeU size, 
+			const WICPixelFormatGUID& pixelFormat, 
+			CreateCacheOption cacheOption) noexcept;
 
-		WICBitmap(HBITMAP hBitmap, AlphaChannelOption alphaOption, HPALETTE hPalette = nullptr);
+		WICBitmap(HBITMAP hBitmap, AlphaChannelOption alphaOption, HPALETTE hPalette = nullptr) noexcept;
 
-		explicit WICBitmap(HICON hIcon);
+		explicit WICBitmap(HICON hIcon) noexcept;
 
-		WICBitmap(BitmapSource<> source, CreateCacheOption cacheOption);
+		WICBitmap(BitmapSource<> source, CreateCacheOption cacheOption) noexcept;
 
-		WICBitmap(BitmapSource<> source, RectU rect);
+		WICBitmap(BitmapSource<> source, RectU rect) noexcept;
 
-		[[nodiscard]] auto Lock(RectI rect, LockFlags flags) const noexcept -> WICBitmapLock;
+		[[nodiscard]] auto Lock(RectI rect, LockFlags flags) const noexcept -> Result<WICBitmapLock>;
 
-		auto SetPalette(Palette palette) noexcept -> void;
+		auto SetPalette(Palette palette) noexcept -> Error;
 
-		auto SetResolution(double dpiX, double dpiY) noexcept -> void;
+		auto SetResolution(double dpiX, double dpiY) noexcept -> Error;
 	};
 }

@@ -20,22 +20,22 @@ export namespace PGUI::UI::Imaging
 
 		explicit(false) MetadataReader(const ComPtr<IWICMetadataQueryReader>& reader) noexcept;
 
-		[[nodiscard]] auto GetContainerFormat() const -> ContainerFormat;
+		[[nodiscard]] auto GetContainerFormat() const noexcept -> Result<ContainerFormat>;
 
-		[[nodiscard]] auto GetMetadata(std::wstring_view name) const -> PropVariant;
+		[[nodiscard]] auto GetMetadata(std::wstring_view name) const noexcept -> Result<PropVariant>;
 
-		[[nodiscard]] auto Location() const -> std::wstring;
+		[[nodiscard]] auto Location() const noexcept -> Result<std::wstring>;
 
-		[[nodiscard]] auto GetEnumerator() const -> ComPtr<IEnumString>;
+		[[nodiscard]] auto GetEnumerator() const noexcept -> Result<ComPtr<IEnumString>>;
 
-		[[nodiscard]] auto operator[](std::wstring_view name) const noexcept -> PropVariant;
+		[[nodiscard]] auto operator[](std::wstring_view name) const -> PropVariant;
 
-		[[nodiscard]] auto cbegin() const noexcept -> IEnumStringIterator;
+		[[nodiscard]] auto cbegin() const -> IEnumStringIterator;
 
-		[[nodiscard]] auto cend() const noexcept -> IEnumStringIterator;
+		[[nodiscard]] auto cend() const -> IEnumStringIterator;
 
-		[[nodiscard]] auto begin() const noexcept -> IEnumStringIterator;
+		[[nodiscard]] auto begin() const -> IEnumStringIterator;
 
-		[[nodiscard]] auto end() const noexcept -> IEnumStringIterator;
+		[[nodiscard]] auto end() const -> IEnumStringIterator;
 	};
 }

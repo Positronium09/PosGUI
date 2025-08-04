@@ -6,7 +6,7 @@ module PGUI.UI.Animation:AnimationManager;
 import :AnimationManager;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import :Storyboard;
 import :AnimationVariable;
 import :AnimationTransition;
@@ -16,13 +16,21 @@ namespace PGUI::UI::Animation
 {
 	AnimationManager::AnimationManager()
 	{
-		const auto hr = CoCreateInstance(
+		if (const auto hr = CoCreateInstance(
 			CLSID_UIAnimationManager2,
 			nullptr,
 			CLSCTX_INPROC_SERVER,
 			__uuidof(IUIAnimationManager2),
 			GetVoidAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddTag(ErrorTags::Initialization)
+				.AddTag(ErrorTags::Animation),
+				L"Cannot create animation manager"
+			};
+		}
 	}
 
 	auto AnimationManager::GetInstance() -> const AnimationManager&
@@ -34,142 +42,279 @@ namespace PGUI::UI::Animation
 		return *instance;
 	}
 
-	auto AnimationManager::AbandonAllStoryboards() -> void
+	auto AnimationManager::AbandonAllStoryboards() noexcept -> Error
 	{
-		const auto hr = instance->Get()->AbandonAllStoryboards();
-		ThrowFailed(hr);
+		Error error{
+			instance->Get()->AbandonAllStoryboards()
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"AbandonAllStoryboards failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationManager::Pause() -> void
+	auto AnimationManager::Pause() noexcept -> Error
 	{
-		const auto hr = instance->Get()->Pause();
-		ThrowFailed(hr);
+		Error error{
+			instance->Get()->Pause()
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Pause failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationManager::Resume() -> void
+	auto AnimationManager::Resume() noexcept -> Error
 	{
-		const auto hr = instance->Get()->Resume();
-		ThrowFailed(hr);
+		Error error{
+			instance->Get()->Resume()
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Resume failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationManager::Shutdown() -> void
+	auto AnimationManager::Shutdown() noexcept -> Error
 	{
-		const auto hr = instance->Get()->Shutdown();
-		ThrowFailed(hr);
+		Error error{
+			instance->Get()->Shutdown()
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Shutdown failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationManager::Update(const double timeNow) -> AnimationUpdateResult
+	auto AnimationManager::Update(const double timeNow) noexcept -> Result<AnimationUpdateResult>
 	{
 		UI_ANIMATION_UPDATE_RESULT result;
-		const auto hr = instance->Get()->Update(timeNow, &result);
-		ThrowFailed(hr);
+		if (const auto hr = instance->Get()->Update(timeNow, &result);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+
+			Logger::Error(L"Update failed with Error: {}", error);
+			return Unexpected{ error };
+		}
 
 		return static_cast<AnimationUpdateResult>(result);
 	}
 
-	auto AnimationManager::CreateAnimationVariable(const double initialValue) -> AnimationVariable
+	auto AnimationManager::CreateAnimationVariable(const double initialValue) noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
-		const auto hr = instance->Get()->CreateAnimationVariable(initialValue, variable.GetAddress());
-		ThrowFailed(hr);
+		if (const auto hr = instance->Get()->CreateAnimationVariable(initialValue, variable.GetAddress());
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+
+			Logger::Error(L"CreateAnimationVariable failed with Error: {}", error);
+			return Unexpected{ error };
+		}
 
 		return variable;
 	}
 
-	auto AnimationManager::CreateAnimationVariable(const std::span<const double> initialValues) -> AnimationVariable
+	auto AnimationManager::CreateAnimationVariable(
+		const std::span<const double> initialValues) noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
-		const auto hr = instance->Get()->CreateAnimationVectorVariable(
+
+		if (const auto hr = instance->Get()->CreateAnimationVectorVariable(
 			initialValues.data(),
 			static_cast<UINT>(initialValues.size()),
 			variable.GetAddress());
-		ThrowFailed(hr);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+
+			Logger::Error(L"CreateAnimationVariable failed with Error: {}", error);
+			return Unexpected{ error };
+		}
+		
 
 		return variable;
 	}
 
-	auto AnimationManager::CreateStoryboard() -> Storyboard
+	auto AnimationManager::CreateStoryboard() noexcept -> Result<Storyboard>
 	{
 		Storyboard storyboard;
-		const auto hr = instance->Get()->CreateStoryboard(storyboard.GetAddress());
-		ThrowFailed(hr);
+
+		if (const auto hr = instance->Get()->CreateStoryboard(storyboard.GetAddress());
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(L"CreateStoryboard failed with Error: {}", error);
+			return Unexpected{ error };
+		}
 
 		return storyboard;
 	}
 
-	auto AnimationManager::GetStatus() -> AnimationManagerStatus
+	auto AnimationManager::GetStatus() noexcept -> Result<AnimationManagerStatus>
 	{
 		UI_ANIMATION_MANAGER_STATUS status;
-		const auto hr = instance->Get()->GetStatus(&status);
-		ThrowFailed(hr);
+		if (const auto hr = instance->Get()->GetStatus(&status);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(L"GetStatus failed with Error: {}", error);
+			return Unexpected{ error };
+		}
 
 		return static_cast<AnimationManagerStatus>(status);
 	}
 
-	auto AnimationManager::EstimateNextEventTime() -> double
+	auto AnimationManager::EstimateNextEventTime() noexcept -> Result<double>
 	{
 		double nextEventTime;
-		const auto hr = instance->Get()->EstimateNextEventTime(&nextEventTime);
-		ThrowFailed(hr);
+		if (const auto hr = instance->Get()->EstimateNextEventTime(&nextEventTime);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(L"EstimateNextEventTime failed with Error: {}", error);
+			return Unexpected{ error };
+		}
 
 		return nextEventTime;
 	}
 
-	auto AnimationManager::SetAnimationMode(AnimationMode mode) -> void
+	auto AnimationManager::SetAnimationMode(AnimationMode mode) noexcept -> Error
 	{
-		const auto hr = instance->Get()->SetAnimationMode(static_cast<UI_ANIMATION_MODE>(mode));
-		ThrowFailed(hr);
+		Error error{
+			instance->Get()->SetAnimationMode(static_cast<UI_ANIMATION_MODE>(mode))
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetAnimationMode failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationManager::SetDefaultLongestAcceptableDelay(const double delay) -> void
+	auto AnimationManager::SetDefaultLongestAcceptableDelay(const double delay) noexcept -> Error
 	{
-		const auto hr = instance->Get()->SetDefaultLongestAcceptableDelay(delay);
-		ThrowFailed(hr);
+		Error error{
+			instance->Get()->SetDefaultLongestAcceptableDelay(delay)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetDefaultLongestAcceptableDelay failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationManager::GetStoryboardFromTag(const ComPtr<IUnknown>& obj, const UINT32 id) -> Storyboard
+	auto AnimationManager::GetStoryboardFromTag(
+		const ComPtr<IUnknown>& obj, const UINT32 id) noexcept -> Result<Storyboard>
 	{
 		Storyboard storyboard;
-		const auto hr = instance->Get()->GetStoryboardFromTag(obj.Get(), id, storyboard.GetAddress());
-		ThrowFailed(hr);
+		if (const auto hr = instance->Get()->GetStoryboardFromTag(obj.Get(), id, storyboard.GetAddress());
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(L"GetStoryboardFromTag failed with Error: {}", error);
+			return Unexpected{ error };
+		}
 
 		return storyboard;
 	}
 
 	auto AnimationManager::GetAnimationVariableFromTag(
 		const ComPtr<IUnknown>& obj,
-		const UINT32 id) -> AnimationVariable
+		const UINT32 id) noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
-		const auto hr = instance->Get()->GetVariableFromTag(obj.Get(), id, variable.GetAddress());
-		ThrowFailed(hr);
+		if (const auto hr = instance->Get()->GetVariableFromTag(obj.Get(), id, variable.GetAddress());
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(L"GetAnimationVariableFromTag failed with Error: {}", error);
+			return Unexpected{ error };
+		}
 
 		return variable;
 	}
 
 	auto AnimationManager::ScheduleTransition(
 		const AnimationVariable& variable,
-		AnimationTransition transition, const double currentTime) -> void
+		AnimationTransition transition, const double currentTime) noexcept -> Error
 	{
-		const auto hr = instance->Get()->ScheduleTransition(
-			variable.GetRaw(),
-			transition.GetRaw(),
-			currentTime);
-		ThrowFailed(hr);
+		Error error{
+			instance->Get()->ScheduleTransition(
+				variable.GetRaw(),
+				transition.GetRaw(),
+				currentTime)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"ScheduleTransition failed {}", error);
+		}
+
+		return error;
 	}
 
 	auto AnimationManager::SetManagerEventHandler(
-		AnimationManagerEventHandler& eventHandler, const bool registerForNext) const -> void
+		AnimationManagerEventHandler& eventHandler, const bool registerForNext) const noexcept -> Error
 	{
-		const auto hr = Get()->SetManagerEventHandler(
+		Error error{
+			Get()->SetManagerEventHandler(
 			&eventHandler.GetRouter(),
-			registerForNext);
-		ThrowFailed(hr);
+			registerForNext)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetManagerEventHandler failed {}", error);
+		}
+
+		return error;
 	}
 
-	auto AnimationManager::ClearManagerEventHandler(const bool registerForNext) const -> void
+	auto AnimationManager::ClearManagerEventHandler(const bool registerForNext) const noexcept -> Error
 	{
-		const auto hr = Get()->SetManagerEventHandler(nullptr, registerForNext);
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetManagerEventHandler(nullptr, registerForNext)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"SetManagerEventHandler failed {}", error);
+		}
+
+		return error;
 	}
 }

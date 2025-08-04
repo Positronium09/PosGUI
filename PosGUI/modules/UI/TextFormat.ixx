@@ -7,6 +7,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Utils;
+import PGUI.ErrorHandling;
 import PGUI.UI.Font.FontCollection;
 import PGUI.UI.Font.FontEnums;
 import PGUI.UI.Font.FontStructs;
@@ -25,35 +26,35 @@ export namespace PGUI::UI
 			FontWeight fontWeight = FontWeights::Normal,
 			FontStyle fontStyle = FontStyles::Normal,
 			FontStretch fontStretch = FontStretches::Normal,
-			const FontCollection& fontCollection = FontCollection::GetSystemFontCollection(),
+			const FontCollection& fontCollection = FontCollection{ nullptr },
 			std::wstring_view localeName = GetUserLocaleName()) noexcept;
 
 		TextFormat(std::wstring_view fontFamilyName, float fontSize,
 		           std::span<const FontAxisValue> fontAxisValues,
-		           const FontCollection& fontCollection = FontCollection::GetSystemFontCollection(),
+					const FontCollection& fontCollection = FontCollection{ nullptr },
 		           std::wstring_view localeName = GetUserLocaleName()) noexcept;
 
-		auto SetFlowDirection(FlowDirection flowDirection) noexcept -> void;
+		auto SetFlowDirection(FlowDirection flowDirection) noexcept -> Error;
 
-		auto SetIncrementalTabStop(float incrementalTabStop) noexcept -> void;
+		auto SetIncrementalTabStop(float incrementalTabStop) noexcept -> Error;
 
-		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) noexcept -> void;
+		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) noexcept -> Error;
 
-		auto SetReadingDirection(ReadingDirection readingDirection) noexcept -> void;
+		auto SetReadingDirection(ReadingDirection readingDirection) noexcept -> Error;
 
-		auto SetTextAlignment(TextAlignment textAlignment) noexcept -> void;
+		auto SetTextAlignment(TextAlignment textAlignment) noexcept -> Error;
 
-		auto SetWordWrapping(WordWrapping wordWrapping) noexcept -> void;
+		auto SetWordWrapping(WordWrapping wordWrapping) noexcept -> Error;
 
-		auto SetTrimming(const Trimming& trimming) noexcept -> void;
+		auto SetTrimming(const Trimming& trimming) noexcept -> Error;
 
-		auto SetLineSpacing(const LineSpacing& lineSpacing) noexcept -> void;
+		auto SetLineSpacing(const LineSpacing& lineSpacing) noexcept -> Error;
 
 		[[nodiscard]] auto GetFlowDirection() const noexcept -> FlowDirection;
 
-		[[nodiscard]] auto GetFontCollection() const noexcept -> FontCollection;
+		[[nodiscard]] auto GetFontCollection() const noexcept -> Result<FontCollection>;
 
-		[[nodiscard]] auto GetFontFamilyName() const noexcept -> std::wstring;
+		[[nodiscard]] auto GetFontFamilyName() const noexcept -> Result<std::wstring>;
 
 		[[nodiscard]] auto GetFontSize() const noexcept -> float;
 
@@ -65,7 +66,7 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto GetIncrementalTabStop() const noexcept -> float;
 
-		[[nodiscard]] auto GetLocaleName() const noexcept -> std::wstring;
+		[[nodiscard]] auto GetLocaleName() const noexcept -> Result<std::wstring>;
 
 		[[nodiscard]] auto GetParagraphAlignment() const noexcept -> ParagraphAlignment;
 
@@ -75,8 +76,8 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto GetWordWrapping() const noexcept -> WordWrapping;
 
-		[[nodiscard]] auto GetTrimming() const noexcept -> Trimming;
+		[[nodiscard]] auto GetTrimming() const noexcept -> Result<Trimming>;
 
-		[[nodiscard]] auto GetLineSpacing() const noexcept -> LineSpacing;
+		[[nodiscard]] auto GetLineSpacing() const noexcept -> Result<LineSpacing>;
 	};
 }

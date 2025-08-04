@@ -22,7 +22,7 @@ export namespace PGUI::UI
 
 		explicit SolidBrush(const ComPtr<ID2D1SolidColorBrush>& brush) noexcept;
 
-		SolidBrush(const ComPtr<ID2D1RenderTarget>& renderTarget, RGBA color);
+		SolidBrush(const ComPtr<ID2D1RenderTarget>& renderTarget, RGBA color) noexcept;
 
 		~SolidBrush() noexcept = default;
 
@@ -38,7 +38,7 @@ export namespace PGUI::UI
 
 		LinearGradientBrush(
 			const ComPtr<ID2D1RenderTarget>& renderTarget,
-			LinearGradient gradient, const std::optional<RectF>& referenceRect = std::nullopt);
+			LinearGradient gradient, const std::optional<RectF>& referenceRect = std::nullopt) noexcept;
 
 		~LinearGradientBrush() noexcept = default;
 
@@ -54,7 +54,7 @@ export namespace PGUI::UI
 
 		RadialGradientBrush(
 			const ComPtr<ID2D1RenderTarget>& renderTarget,
-			RadialGradient gradient, const std::optional<RectF>& referenceRect = std::nullopt);
+			RadialGradient gradient, const std::optional<RectF>& referenceRect = std::nullopt) noexcept;
 
 		~RadialGradientBrush() noexcept = default;
 
@@ -69,7 +69,7 @@ export namespace PGUI::UI
 		explicit BitmapBrush(const ComPtr<ID2D1BitmapBrush>& brush) noexcept;
 
 		BitmapBrush(const ComPtr<ID2D1RenderTarget>& renderTarget,
-			D2D::D2DBitmap bitmap, const D2D::BitmapBrushProperties& bitmapBrushProperties);
+			D2D::D2DBitmap bitmap, const D2D::BitmapBrushProperties& bitmapBrushProperties) noexcept;
 
 		~BitmapBrush() noexcept = default;
 
@@ -139,7 +139,7 @@ export namespace PGUI::UI
 		Brush(const ComPtr<ID2D1RenderTarget>& renderTarget, const BrushParameters& parameters) noexcept;
 
 		auto SetParametersAndCreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget,
-			const BrushParameters& parameters) noexcept -> void;
+			const BrushParameters& params) noexcept -> void;
 
 		auto CreateBrush(ComPtr<ID2D1RenderTarget> renderTarget) noexcept -> void;
 

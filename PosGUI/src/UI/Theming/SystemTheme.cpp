@@ -5,8 +5,7 @@ module;
 module PGUI.UI.Theming.SystemTheme;
 
 import PGUI.UI.Color;
-import PGUI.Exceptions;
-import PGUI.Logging;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI::Theming
 {
@@ -21,7 +20,7 @@ namespace PGUI::UI::Theming
 				L"AppsUseLightTheme", RRF_RT_DWORD, nullptr, &value, &size);
 			status != ERROR_SUCCESS)
 		{
-			Logger::Log(LogLevel::Error, L"Failed to read AppsUseLightTheme");
+			Logger::Error(Error{ status }, L"Cannot read AppsUseLightTheme registry key");
 		}
 
 		return !value;
@@ -38,7 +37,11 @@ namespace PGUI::UI::Theming
 		}
 		catch (winrt::hresult_error& error)
 		{
-			throw HResultException{ error.code() };
+			throw Exception{
+				Error{
+					static_cast<HRESULT>(error.code().value)
+				}.AddTag(ErrorTags::System)
+			};
 		}
 	}
 }

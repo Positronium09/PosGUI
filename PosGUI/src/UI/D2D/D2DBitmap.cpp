@@ -8,7 +8,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DImage;
 import PGUI.UI.D2D.RenderTarget;
 
@@ -47,61 +47,79 @@ namespace PGUI::UI::D2D
 		return Get()->GetOptions();
 	}
 
-	auto D2DBitmap::GetSurface() const noexcept -> ComPtr<IDXGISurface>
+	auto D2DBitmap::GetSurface() const noexcept -> Result<ComPtr<IDXGISurface>>
 	{
 		ComPtr<IDXGISurface> surface;
-		const auto hr = Get()->GetSurface(surface.GetAddressOf());
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetSurface(surface.GetAddressOf());
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::D2D)
+			};
+		}
 
 		return surface;
 	}
 
-	auto D2DBitmap::Map(const D2D1_MAP_OPTIONS options) const -> MappedRect
+	auto D2DBitmap::Map(const MapOptions options) const noexcept -> Result<MappedRect>
 	{
 		D2D1_MAPPED_RECT mappedRect;
 
-		const auto hr = Get()->Map(options, &mappedRect);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->Map(
+				static_cast<D2D1_MAP_OPTIONS>(options), &mappedRect);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::D2D)
+			};
+		}
 
 		return MappedRect{ mappedRect, GetPixelSize().cy };
 	}
 
-	auto D2DBitmap::Unmap() const -> void
+	auto D2DBitmap::Unmap() const noexcept -> Error
 	{
-		const auto hr = Get()->Unmap();
-		ThrowFailed(hr);
+		return Error{
+			Get()->Unmap()
+		}.AddTag(ErrorTags::D2D);
 	}
 
 	auto D2DBitmap::CopyFromBitmap(
-		D2DBitmap bitmap, std::optional<PointU> destPoint, std::optional<RectU> srcRect) -> void
+		D2DBitmap bitmap,
+		std::optional<PointU> destPoint,
+		std::optional<RectU> srcRect) noexcept -> Error
 	{
-		D2D1_RECT_U* srcRectPtr = nullptr;
+		const D2D1_RECT_U* srcRectPtr = nullptr;
 		if (srcRect.has_value())
 		{
 			srcRectPtr = std::bit_cast<D2D1_RECT_U*>(&srcRect.value());
 		}
-		D2D1_POINT_2U* destPointPtr = nullptr;
+		const D2D1_POINT_2U* destPointPtr = nullptr;
 		if (destPoint.has_value())
 		{
 			destPointPtr = std::bit_cast<D2D1_POINT_2U*>(&destPoint.value());
 		}
 
-		const auto hr = Get()->CopyFromBitmap(
-			destPointPtr, bitmap.GetRaw(), srcRectPtr);
-		ThrowFailed(hr);
+		return Error{
+			Get()->CopyFromBitmap(
+				destPointPtr, bitmap.GetRaw(), srcRectPtr)
+		}.AddTag(ErrorTags::D2D);
 	}
 
 	auto D2DBitmap::CopyFromMemory(
-		const void* source, const UINT32 pitch, std::optional<RectU> destRect) -> void
+		const void* source, const UINT32 pitch,
+		std::optional<RectU> destRect) noexcept -> Error
 	{
-		D2D1_RECT_U* destRectPtr = nullptr;
+		const D2D1_RECT_U* destRectPtr = nullptr;
 		if (destRect.has_value())
 		{
 			destRectPtr = std::bit_cast<D2D1_RECT_U*>(&destRect.value());
 		}
 
-		const auto hr = Get()->CopyFromMemory(
-			destRectPtr, source, pitch);
-		ThrowFailed(hr);
+		return Error{
+			Get()->CopyFromMemory(destRectPtr, source, pitch)
+		}.AddTag(ErrorTags::D2D);
 	}
 }

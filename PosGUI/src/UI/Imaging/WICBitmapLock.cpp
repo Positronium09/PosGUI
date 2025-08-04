@@ -8,7 +8,7 @@ import std;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.BitmapSource;
 import PGUI.UI.Imaging.Palette;
 
@@ -18,39 +18,68 @@ namespace PGUI::UI::Imaging
 		ComPtrHolder{ bitmapLock }
 	{ }
 
-	auto WICBitmapLock::GetSize() const -> SizeU
+	auto WICBitmapLock::GetSize() const noexcept -> Result<SizeU>
 	{
 		SizeU size;
-		const auto hr = Get()->GetSize(&size.cx, &size.cy);
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->GetSize(&size.cx, &size.cy);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return size;
 	}
 
-	auto WICBitmapLock::GetStride() const -> UINT
+	auto WICBitmapLock::GetStride() const noexcept -> Result<UINT>
 	{
 		UINT stride;
-		const auto hr = Get()->GetStride(&stride);
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->GetStride(&stride);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
 
 		return stride;
 	}
 
-	auto WICBitmapLock::GetDataPointer() const -> std::span<BYTE>
+	auto WICBitmapLock::GetDataPointer() const noexcept -> Result<std::span<BYTE>>
 	{
 		UINT bufferSize;
 		BYTE* buffer = nullptr;
-		const auto hr = Get()->GetDataPointer(&bufferSize, &buffer);
-		ThrowFailed(hr);
 
-		return std::span<BYTE>(buffer, bufferSize);
+		if (const auto hr = Get()->GetDataPointer(&bufferSize, &buffer);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
+
+		return std::span(buffer, bufferSize);
 	}
 
-	auto WICBitmapLock::GetPixelFormat() const -> WICPixelFormatGUID
+	auto WICBitmapLock::GetPixelFormat() const noexcept -> Result<WICPixelFormatGUID>
 	{
 		WICPixelFormatGUID pixelFormat;
-		const auto hr = Get()->GetPixelFormat(&pixelFormat);
-		ThrowFailed(hr);
+
+		if (const auto hr = Get()->GetPixelFormat(&pixelFormat);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Imaging)
+			};
+		}
+
 		return pixelFormat;
 	}
 }

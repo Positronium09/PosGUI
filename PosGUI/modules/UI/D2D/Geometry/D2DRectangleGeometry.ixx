@@ -7,7 +7,7 @@ export module PGUI.UI.D2D.D2DRectangleGeometry;
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DGeometry;
 
 export namespace PGUI::UI::D2D
@@ -25,8 +25,12 @@ export namespace PGUI::UI::D2D
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
-			ThrowFailed(hr);
+			if (const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
+				FAILED(hr))
+			{
+				Logger::Error(L"Failed to create rectangle geometry with rect {}", rect);
+			}
+			
 		}
 
 		[[nodiscard]] auto GetRect() const noexcept -> RectF

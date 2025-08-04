@@ -3,6 +3,8 @@ module;
 
 export module PGUI.Shape2D:Ellipse;
 
+import std;
+
 import :Point;
 
 export namespace PGUI
@@ -36,3 +38,27 @@ export namespace PGUI
 		}
 	};
 }
+
+export template <typename Char>
+struct std::formatter<PGUI::Ellipse, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No formatting args supported for Ellipse" };
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::Ellipse& ellipse, FormatContext& ctx) const
+	{
+		return std::format_to(
+			ctx.out(), "Center: ({}), Radii: (x: {}, y: {})", 
+			ellipse.center, ellipse.xRadius, ellipse.yRadius);
+	}
+};

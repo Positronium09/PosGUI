@@ -7,8 +7,7 @@ export module PGUI.UI.D2D.D2DProperties;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Logging;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::UI::D2D
 {
@@ -56,143 +55,200 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] auto GetValueSize(const UINT32 index) const noexcept { return Get()->GetValueSize(index); }
 
-		[[nodiscard]] auto GetPropertyName(UINT32 index) const noexcept -> std::wstring;
+		[[nodiscard]] auto GetPropertyName(UINT32 index) const noexcept -> Result<std::wstring>;
 
-		[[nodiscard]] auto GetSubProperty(UINT32 index) const noexcept -> D2DProperties;
+		[[nodiscard]] auto GetSubProperty(UINT32 index) const noexcept -> Result<D2DProperties>;
 
 		[[nodiscard]] auto GetProperty(UINT32 index, std::span<BYTE> bytes) const noexcept -> bool;
 
 		template <typename T>
-		[[nodiscard]] auto GetProperty(const UINT32 index) const noexcept -> T
+		[[nodiscard]] auto GetProperty(const UINT32 index) const noexcept -> Result<T>
 		{
 			T value{ };
 			const auto size = GetValueSize(index);
 
 			if (size != sizeof(T))
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Index", std::to_wstring(index))
+					.AddDetail(L"sizeof T", std::to_wstring(sizeof(T)))
+					.AddDetail(L"Size of value at index", std::to_wstring(size))
+				};
 			}
 
-			auto hr = this->Get()->GetValue(index, &value, size);
-			ThrowFailed(hr);
+			if (const auto hr = this->Get()->GetValue(index, &value, size);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr }
+					.AddDetail(L"Index", std::to_wstring(index))
+				};
+			}
 			return value;
 		}
 
 		template <typename T>
-		[[nodiscard]] auto GetProperty(const std::wstring_view name) const noexcept -> T
+		[[nodiscard]] auto GetProperty(const std::wstring_view name) const noexcept -> Result<T>
 		{
 			const auto index = GetPropertyIndex(name);
 
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Property Name", name)
+				};
 			}
 
 			return GetProperty<T>(index);
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<bool>(const UINT32 index) const noexcept -> bool
+		[[nodiscard]] auto GetProperty<bool>(const UINT32 index) const noexcept -> Result<bool>
 		{
 			bool value{ };
 			if (const auto type = GetPropertyType(index);
 				type != PropertyType::Bool)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+						Error{ E_INVALIDARG }
+						.AddDetail(L"Index", std::to_wstring(index))
+				};
 			}
 
-			const auto hr = Get()->GetValue(index, &value);
-			ThrowFailed(hr);
+			if (const auto hr = this->Get()->GetValue(index, &value);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr }
+					.AddDetail(L"Index", std::to_wstring(index))
+				};
+			}
 			return value;
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<bool>(const std::wstring_view name) const noexcept -> bool
+		[[nodiscard]] auto GetProperty<bool>(const std::wstring_view name) const noexcept -> Result<bool>
 		{
 			const auto index = GetPropertyIndex(name);
 
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+						Error{ E_INVALIDARG }
+						.AddDetail(L"Name", name)
+				};
 			}
 
 			return GetProperty<bool>(index);
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<UINT32>(const UINT32 index) const noexcept -> UINT32
+		[[nodiscard]] auto GetProperty<UINT32>(const UINT32 index) const noexcept -> Result<UINT32>
 		{
 			UINT32 value{ };
-			if (const auto type = GetPropertyType(index); 
-				type != PropertyType::UInt32)
+			if (const auto type = GetPropertyType(index);
+				type != PropertyType::Bool)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+						Error{ E_INVALIDARG }
+						.AddDetail(L"Index", std::to_wstring(index))
+				};
 			}
 
-			const auto hr = Get()->GetValue(index, &value);
-			ThrowFailed(hr);
+			if (const auto hr = this->Get()->GetValue(index, &value);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr }
+					.AddDetail(L"Index", std::to_wstring(index))
+				};
+			}
 			return value;
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<UINT32>(const std::wstring_view name) const noexcept -> UINT32
+		[[nodiscard]] auto GetProperty<UINT32>(const std::wstring_view name) const noexcept -> Result<UINT32>
 		{
 			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Name", name)
+				};
 			}
 			return GetProperty<UINT32>(index);
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<INT32>(const UINT32 index) const noexcept -> INT32
+		[[nodiscard]] auto GetProperty<INT32>(const UINT32 index) const noexcept -> Result<INT32>
 		{
 			INT32 value{ };
 			if (const auto type = GetPropertyType(index); 
 				type != PropertyType::Int32)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Index", std::to_wstring(index))
+				};
 			}
 
-			const auto hr = Get()->GetValue(index, &value);
-			ThrowFailed(hr);
+			if (const auto hr = Get()->GetValue(index, &value);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr }
+					.AddDetail(L"Index", std::to_wstring(index))
+				};
+			}
 			return value;
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<INT32>(const std::wstring_view name) const noexcept -> INT32
+		[[nodiscard]] auto GetProperty<INT32>(const std::wstring_view name) const noexcept -> Result<INT32>
 		{
 			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Name", name)
+				};
 			}
 			return GetProperty<INT32>(index);
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<float>(const UINT32 index) const noexcept -> float
+		[[nodiscard]] auto GetProperty<float>(const UINT32 index) const noexcept -> Result<float>
 		{
 			FLOAT value{ };
 			if (const auto type = GetPropertyType(index); 
 				type != PropertyType::Float)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Index", std::to_wstring(index))
+				};
 			}
 
-			const auto hr = Get()->GetValue(index, &value);
-			ThrowFailed(hr);
+			if (const auto hr = Get()->GetValue(index, &value);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr }
+					.AddDetail(L"Index", std::to_wstring(index))
+				};
+			}
 			return value;
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<float>(const std::wstring_view name) const noexcept -> float
+		[[nodiscard]] auto GetProperty<float>(const std::wstring_view name) const noexcept -> Result<float>
 		{
 			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
-				ThrowFailed(E_INVALIDARG);
+				return Unexpected{
+					Error{ E_INVALIDARG }
+					.AddDetail(L"Name", name)
+				};
 			}
 			return GetProperty<float>(index);
 		}
@@ -200,8 +256,13 @@ export namespace PGUI::UI::D2D
 		template <typename T>
 		auto SetProperty(UINT32 index, const T& value) -> void
 		{
-			const auto hr = this->Get()->SetValue(index, value);
-			ThrowFailed(hr);
+			if (const auto hr = this->Get()->SetValue(index, value);
+				FAILED(hr))
+			{
+				Logger::Log(
+					L"Set property at index {} with value {}",
+					index, value);
+			}
 		}
 
 		template <typename T>
@@ -211,7 +272,9 @@ export namespace PGUI::UI::D2D
 
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
 			{
-				ThrowFailed(E_INVALIDARG);
+				Logger::Log(
+					L"Set property with name {} with value {}",
+					name, value);
 			}
 			SetValue(index, value);
 		}

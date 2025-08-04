@@ -8,8 +8,7 @@ import std;
 
 import PGUI.UI.TextFormat;
 import PGUI.ComPtr;
-import PGUI.Logging;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.Factories;
 
 namespace PGUI::UI
@@ -28,163 +27,204 @@ namespace PGUI::UI
 			textFormat.GetRawAs<IDWriteTextFormat3, IDWriteTextFormat>(),
 			maxSize.cx, maxSize.cy,
 			std::bit_cast<IDWriteTextLayout**>(GetAddress()));
-		LogFailed(LogLevel::Error, hr);
+
+		LogIfFailed(
+			Error{
+				hr
+			}
+			.AddTag(ErrorTags::Initialization)
+			.AddDetail(L"Text", text)
+			.AddDetail(L"MaxSize", std::format(L"{}", maxSize))
+		);
 	}
 
-	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> void
+	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Error
 	{
-		const auto hr = Get()->SetTextAlignment(textAlignment);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetTextAlignment(textAlignment)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> void
+	auto TextLayout::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> Error
 	{
-		const auto hr = Get()->SetParagraphAlignment(paragraphAlignment);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetParagraphAlignment(paragraphAlignment)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> void
+	auto TextLayout::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> Error
 	{
-		const auto hr = Get()->SetWordWrapping(wordWrapping);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetWordWrapping(wordWrapping)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> void
+	auto TextLayout::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> Error
 	{
-		const auto hr = Get()->SetReadingDirection(readingDirection);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetReadingDirection(readingDirection)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> void
+	auto TextLayout::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFlowDirection(flowDirection);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetFlowDirection(flowDirection)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> void
+	auto TextLayout::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> Error
 	{
-		const auto hr = Get()->SetIncrementalTabStop(incrementalTabStop);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetIncrementalTabStop(incrementalTabStop)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> void
+	auto TextLayout::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Error
 	{
-		const auto hr = Get()->SetLineSpacing(
-			lineSpacing.method, lineSpacing.height, lineSpacing.baseline);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetLineSpacing(
+				lineSpacing.method, lineSpacing.height, lineSpacing.baseline)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetMaxWidth(const float maxWidth) const noexcept -> void
+	auto TextLayout::SetMaxWidth(const float maxWidth) const noexcept -> Error
 	{
-		const auto hr = Get()->SetMaxWidth(maxWidth);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetMaxWidth(maxWidth)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetMaxHeight(const float maxHeight) const noexcept -> void
+	auto TextLayout::SetMaxHeight(const float maxHeight) const noexcept -> Error
 	{
-		const auto hr = Get()->SetMaxHeight(maxHeight);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetMaxHeight(maxHeight)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetMaxSize(const SizeF maxSize) const noexcept -> void
+	auto TextLayout::SetMaxSize(const SizeF maxSize) const noexcept -> Error
 	{
-		SetMaxWidth(maxSize.cx);
-		SetMaxHeight(maxSize.cy);
+		if (const auto error = SetMaxWidth(maxSize.cx);
+			error.IsFailure())
+		{
+			return error;
+		}
+		return SetMaxHeight(maxSize.cy);
 	}
 
 	auto TextLayout::SetFontCollection(const FontCollection& fontCollection,
-	                                   const TextRange textRange) const noexcept -> void
+	                                   const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFontCollection(
-			fontCollection.GetRawAs<IDWriteFontCollection3, IDWriteFontCollection>(),
-			textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetFontCollection(
+				fontCollection.GetRawAs<IDWriteFontCollection3, IDWriteFontCollection>(),
+				textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
 	auto TextLayout::SetFontFamilyName(const std::wstring_view fontFamilyName,
-	                                   const TextRange textRange) const noexcept -> void
+	                                   const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFontFamilyName(fontFamilyName.data(), textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetFontFamilyName(fontFamilyName.data(), textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetFontWeight(const FontWeight fontWeight, const TextRange textRange) const noexcept -> void
+	auto TextLayout::SetFontWeight(const FontWeight fontWeight, const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFontWeight(fontWeight, textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetFontWeight(fontWeight, textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetFontStyle(const FontStyle fontStyle, const TextRange textRange) const noexcept -> void
+	auto TextLayout::SetFontStyle(const FontStyle fontStyle, const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFontStyle(fontStyle, textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetFontStyle(fontStyle, textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetFontStretch(const FontStretch fontStretch, const TextRange textRange) const noexcept -> void
+	auto TextLayout::SetFontStretch(const FontStretch fontStretch, const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFontStretch(fontStretch, textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetFontStretch(fontStretch, textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetFontSize(const float fontSize, const TextRange textRange) const noexcept -> void
+	auto TextLayout::SetFontSize(const float fontSize, const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetFontSize(fontSize, textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetFontSize(fontSize, textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetUnderline(const bool hasUnderline, const TextRange textRange) const noexcept -> void
+	auto TextLayout::SetUnderline(const bool hasUnderline, const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetUnderline(hasUnderline, textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetUnderline(hasUnderline, textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetStrikethrough(const bool hasStrikethrough, const TextRange textRange) const noexcept -> void
+	auto TextLayout::SetStrikethrough(const bool hasStrikethrough, const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetStrikethrough(hasStrikethrough, textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetStrikethrough(hasStrikethrough, textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
 	auto TextLayout::SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect,
-	                                  const TextRange textRange) const noexcept -> void
+	                                  const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetDrawingEffect(drawingEffect.Get(), textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetDrawingEffect(drawingEffect.Get(), textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
 	auto TextLayout::SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject,
-	                                 const TextRange textRange) const noexcept -> void
+	                                 const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetInlineObject(inlineObject.Get(), textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetInlineObject(inlineObject.Get(), textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
 	auto TextLayout::SetTypography(const ComPtr<IDWriteTypography>& typography,
-	                               const TextRange textRange) const noexcept -> void
+	                               const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetTypography(typography.Get(), textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetTypography(typography.Get(), textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetLocaleName(const std::wstring_view localeName, const TextRange textRange) const noexcept -> void
+	auto TextLayout::SetLocaleName(const std::wstring_view localeName,
+	                               const TextRange textRange) const noexcept -> Error
 	{
-		const auto hr = Get()->SetLocaleName(localeName.data(), textRange);
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetLocaleName(localeName.data(), textRange)
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::SetTrimming(const Trimming& trimming) const noexcept -> void
+	auto TextLayout::SetTrimming(const Trimming& trimming) const noexcept -> Error
 	{
 		auto& trimmingOptions = trimming.trimmingOptions;
-		const auto hr = Get()->SetTrimming(&trimmingOptions, trimming.GetRaw());
-		LogFailed(LogLevel::Error, hr);
+		return Error{
+			Get()->SetTrimming(&trimmingOptions, trimming.GetRaw())
+		}.AddTag(ErrorTags::Font);
 	}
 
-	auto TextLayout::GetTrimming() const noexcept -> Trimming
+	auto TextLayout::GetTrimming() const noexcept -> Result<Trimming>
 	{
 		Trimming trimming{ };
-		const auto hr = Get()->GetTrimming(
+		if (const auto hr = Get()->GetTrimming(
 			&trimming.trimmingOptions,
 			trimming.GetAddress());
-		LogFailed(LogLevel::Error, hr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return trimming;
 	}
@@ -219,13 +259,19 @@ namespace PGUI::UI
 		return Get()->GetIncrementalTabStop();
 	}
 
-	auto TextLayout::GetLineSpacing() const noexcept -> LineSpacing
+	auto TextLayout::GetLineSpacing() const noexcept -> Result<LineSpacing>
 	{
 		LineSpacing lineSpacing{ };
-		const auto hr = Get()->GetLineSpacing(
+		if (const auto hr = Get()->GetLineSpacing(
 			&lineSpacing.method,
 			&lineSpacing.height, &lineSpacing.baseline);
-		LogFailed(LogLevel::Error, hr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return lineSpacing;
 	}
@@ -240,68 +286,118 @@ namespace PGUI::UI
 		return Get()->GetMaxHeight();
 	}
 
-	auto TextLayout::GetFontCollection() const noexcept -> FontCollection
+	auto TextLayout::GetFontCollection() const noexcept -> Result<FontCollection>
 	{
 		FontCollection fontCollection{ nullptr };
-		const auto hr = Get()->GetFontCollection(
+		if (const auto hr = Get()->GetFontCollection(
 			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
-		LogFailed(LogLevel::Error, hr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return fontCollection;
 	}
 
-	auto TextLayout::GetFontCollection(const UINT32 position) const noexcept -> FontCollection
+	auto TextLayout::GetFontCollection(const UINT32 position) const noexcept -> Result<FontCollection>
 	{
 		FontCollection fontCollection{ nullptr };
-
-		const auto hr = Get()->GetFontCollection(
+		if (const auto hr = Get()->GetFontCollection(
 			position, fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
-		LogFailed(LogLevel::Error, hr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return fontCollection;
 	}
 
-	auto TextLayout::GetFontCollection(const UINT32 position, TextRange& textRange) const noexcept -> FontCollection
+	auto TextLayout::GetFontCollection(const UINT32 position,
+	                                   TextRange& textRange) const noexcept -> Result<FontCollection>
 	{
 		FontCollection fontCollection{ nullptr };
-		const auto hr = Get()->GetFontCollection(
+		if (const auto hr = Get()->GetFontCollection(
 			position,
 			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>(),
 			&textRange);
-		LogFailed(LogLevel::Error, hr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return fontCollection;
 	}
 
-	auto TextLayout::GetFontFamilyName() const noexcept -> std::wstring
+	auto TextLayout::GetFontFamilyName() const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(length, L'\0');
 
-		const auto hr = Get()->GetFontFamilyName(fontFamilyName.data(), length);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontFamilyName(
+				fontFamilyName.data(), length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return fontFamilyName;
 	}
 
-	auto TextLayout::GetFontFamilyName(const UINT32 position) const noexcept -> std::wstring
+	auto TextLayout::GetFontFamilyName(const UINT32 position) const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(length, L'\0');
 
-		const auto hr = Get()->GetFontFamilyName(position, fontFamilyName.data(), length);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontFamilyName(
+				position, fontFamilyName.data(), length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return fontFamilyName;
 	}
 
-	auto TextLayout::GetFontFamilyName(const UINT32 position, TextRange& textRange) const noexcept -> std::wstring
+	auto TextLayout::GetFontFamilyName(const UINT32 position,
+	                                   TextRange& textRange) const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(length, L'\0');
 
-		const auto hr = Get()->GetFontFamilyName(position, fontFamilyName.data(), length, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontFamilyName(
+				position, fontFamilyName.data(), length, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return fontFamilyName;
 	}
@@ -311,20 +407,37 @@ namespace PGUI::UI
 		return Get()->GetFontWeight();
 	}
 
-	auto TextLayout::GetFontWeight(const UINT32 position) const noexcept -> FontWeight
+	auto TextLayout::GetFontWeight(const UINT32 position) const noexcept -> Result<FontWeight>
 	{
 		DWRITE_FONT_WEIGHT fontWeight{ };
-		const auto hr = Get()->GetFontWeight(position, &fontWeight);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontWeight(position, &fontWeight);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return fontWeight;
 	}
 
-	auto TextLayout::GetFontWeight(const UINT32 position, TextRange& textRange) const noexcept -> FontWeight
+	auto TextLayout::GetFontWeight(const UINT32 position, TextRange& textRange) const noexcept -> Result<FontWeight>
 	{
 		DWRITE_FONT_WEIGHT fontWeight{ };
-		const auto hr = Get()->GetFontWeight(position, &fontWeight, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontWeight(position, &fontWeight, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return fontWeight;
 	}
@@ -334,20 +447,37 @@ namespace PGUI::UI
 		return Get()->GetFontStyle();
 	}
 
-	auto TextLayout::GetFontStyle(const UINT32 position) const noexcept -> FontStyle
+	auto TextLayout::GetFontStyle(const UINT32 position) const noexcept -> Result<FontStyle>
 	{
 		DWRITE_FONT_STYLE fontStyle{ };
-		const auto hr = Get()->GetFontStyle(position, &fontStyle);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontStyle(position, &fontStyle);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return fontStyle;
 	}
 
-	auto TextLayout::GetFontStyle(const UINT32 position, TextRange& textRange) const noexcept -> FontStyle
+	auto TextLayout::GetFontStyle(const UINT32 position, TextRange& textRange) const noexcept -> Result<FontStyle>
 	{
 		DWRITE_FONT_STYLE fontStyle{ };
-		const auto hr = Get()->GetFontStyle(position, &fontStyle, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontStyle(position, &fontStyle, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return fontStyle;
 	}
@@ -357,20 +487,37 @@ namespace PGUI::UI
 		return Get()->GetFontStretch();
 	}
 
-	auto TextLayout::GetFontStretch(const UINT32 position) const noexcept -> FontStretch
+	auto TextLayout::GetFontStretch(const UINT32 position) const noexcept -> Result<FontStretch>
 	{
 		DWRITE_FONT_STRETCH fontStretch{ };
-		const auto hr = Get()->GetFontStretch(position, &fontStretch);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontStretch(position, &fontStretch);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return fontStretch;
 	}
 
-	auto TextLayout::GetFontStretch(const UINT32 position, TextRange& textRange) const noexcept -> FontStretch
+	auto TextLayout::GetFontStretch(const UINT32 position, TextRange& textRange) const noexcept -> Result<FontStretch>
 	{
 		DWRITE_FONT_STRETCH fontStretch{ };
-		const auto hr = Get()->GetFontStretch(position, &fontStretch, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontStretch(position, &fontStretch, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return fontStretch;
 	}
@@ -380,153 +527,293 @@ namespace PGUI::UI
 		return Get()->GetFontSize();
 	}
 
-	auto TextLayout::GetFontSize(const UINT32 position) const noexcept -> float
+	auto TextLayout::GetFontSize(const UINT32 position) const noexcept -> Result<float>
 	{
 		float fontSize{ };
-		const auto hr = Get()->GetFontSize(position, &fontSize);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontSize(position, &fontSize);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return fontSize;
 	}
 
-	auto TextLayout::GetFontSize(const UINT32 position, TextRange& textRange) const noexcept -> float
+	auto TextLayout::GetFontSize(const UINT32 position, TextRange& textRange) const noexcept -> Result<float>
 	{
 		float fontSize{ };
-		const auto hr = Get()->GetFontSize(position, &fontSize, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetFontSize(position, &fontSize, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return fontSize;
 	}
 
-	auto TextLayout::GetUnderline(const UINT32 position) const noexcept -> bool
+	auto TextLayout::GetUnderline(const UINT32 position) const noexcept -> Result<bool>
 	{
 		BOOL underline{ };
-		const auto hr = Get()->GetUnderline(position, &underline);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetUnderline(position, &underline);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return underline;
 	}
 
-	auto TextLayout::GetUnderline(const UINT32 position, TextRange& textRange) const noexcept -> bool
+	auto TextLayout::GetUnderline(const UINT32 position, TextRange& textRange) const noexcept -> Result<bool>
 	{
 		BOOL underline{ };
-		const auto hr = Get()->GetUnderline(position, &underline, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetUnderline(position, &underline, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return underline;
 	}
 
-	auto TextLayout::GetStrikethrough(const UINT32 position) const noexcept -> bool
+	auto TextLayout::GetStrikethrough(const UINT32 position) const noexcept -> Result<bool>
 	{
 		BOOL strikethrough{ };
-		const auto hr = Get()->GetStrikethrough(position, &strikethrough);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetStrikethrough(position, &strikethrough);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return strikethrough;
 	}
 
-	auto TextLayout::GetStrikethrough(const UINT32 position, TextRange& textRange) const noexcept -> bool
+	auto TextLayout::GetStrikethrough(const UINT32 position, TextRange& textRange) const noexcept -> Result<bool>
 	{
 		BOOL strikethrough{ };
-		const auto hr = Get()->GetStrikethrough(position, &strikethrough, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetStrikethrough(position, &strikethrough, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return strikethrough;
 	}
 
-	auto TextLayout::GetDrawingEffect(const UINT32 position) const noexcept -> ComPtr<IUnknown>
+	auto TextLayout::GetDrawingEffect(const UINT32 position) const noexcept -> Result<ComPtr<IUnknown>>
 	{
 		ComPtr<IUnknown> drawingEffect;
-		const auto hr = Get()->GetDrawingEffect(position, drawingEffect.GetAddressOf(), nullptr);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetDrawingEffect(
+				position, drawingEffect.GetAddressOf(), nullptr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return drawingEffect;
 	}
 
-	auto TextLayout::GetDrawingEffect(const UINT32 position, TextRange& textRange) const noexcept -> ComPtr<IUnknown>
+	auto TextLayout::GetDrawingEffect(const UINT32 position,
+	                                  TextRange& textRange) const noexcept -> Result<ComPtr<IUnknown>>
 	{
 		ComPtr<IUnknown> drawingEffect;
-		const auto hr = Get()->GetDrawingEffect(position, drawingEffect.GetAddressOf(), &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetDrawingEffect(
+				position, drawingEffect.GetAddressOf(), &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return drawingEffect;
 	}
 
-	auto TextLayout::GetInlineObject(const UINT32 position) const noexcept -> ComPtr<IDWriteInlineObject>
+	auto TextLayout::GetInlineObject(const UINT32 position) const noexcept -> Result<ComPtr<IDWriteInlineObject>>
 	{
 		ComPtr<IDWriteInlineObject> inlineObject;
-		const auto hr = Get()->GetInlineObject(position, inlineObject.GetAddressOf(), nullptr);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetInlineObject(
+				position, inlineObject.GetAddressOf(), nullptr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return inlineObject;
 	}
 
 	auto TextLayout::GetInlineObject(
 		const UINT32 position,
-		TextRange& textRange) const noexcept -> ComPtr<IDWriteInlineObject>
+		TextRange& textRange) const noexcept -> Result<ComPtr<IDWriteInlineObject>>
 	{
 		ComPtr<IDWriteInlineObject> inlineObject;
-		const auto hr = Get()->GetInlineObject(position, inlineObject.GetAddressOf(), &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetInlineObject(
+				position, inlineObject.GetAddressOf(), &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return inlineObject;
 	}
 
-	auto TextLayout::GetTypography(const UINT32 position) const noexcept -> ComPtr<IDWriteTypography>
+	auto TextLayout::GetTypography(const UINT32 position) const noexcept -> Result<ComPtr<IDWriteTypography>>
 	{
 		ComPtr<IDWriteTypography> typography;
-		const auto hr = Get()->GetTypography(position, typography.GetAddressOf(), nullptr);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetTypography(
+				position, typography.GetAddressOf(), nullptr);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return typography;
 	}
 
 	auto TextLayout::GetTypography(const UINT32 position,
-	                               TextRange& textRange) const noexcept -> ComPtr<IDWriteTypography>
+	                               TextRange& textRange) const noexcept -> Result<ComPtr<IDWriteTypography>>
 	{
 		ComPtr<IDWriteTypography> typography;
-		const auto hr = Get()->GetTypography(position, typography.GetAddressOf(), &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetTypography(
+				position, typography.GetAddressOf(), &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return typography;
 	}
 
-	auto TextLayout::GetLocaleName() const noexcept -> std::wstring
+	auto TextLayout::GetLocaleName() const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
-		const auto hr = Get()->GetLocaleName(localeName.data(), length);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetLocaleName(localeName.data(), length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return localeName;
 	}
 
-	auto TextLayout::GetLocaleName(const UINT32 position) const noexcept -> std::wstring
+	auto TextLayout::GetLocaleName(const UINT32 position) const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
 
-		const auto hr = Get()->GetLocaleName(position, localeName.data(), length);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetLocaleName(
+				position, localeName.data(), length);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+			};
+		}
 
 		return localeName;
 	}
 
-	auto TextLayout::GetLocaleName(const UINT32 position, TextRange& textRange) const noexcept -> std::wstring
+	auto TextLayout::GetLocaleName(const UINT32 position, TextRange& textRange) const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
-		const auto hr = Get()->GetLocaleName(position, localeName.data(), length, &textRange);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->GetLocaleName(
+				position, localeName.data(), length, &textRange);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+				.AddDetail(L"Position", std::to_wstring(position))
+				.AddDetail(L"Text Range",
+				           std::format(L"{} {}",
+				                       textRange.GetStartPosition(), textRange.GetEndPosition()))
+			};
+		}
 
 		return localeName;
 	}
 
-	auto TextLayout::DetermineMinWidth() const noexcept -> float
+	auto TextLayout::DetermineMinWidth() const noexcept -> Result<float>
 	{
 		auto minWidth = 0.0F;
-		const auto hr = Get()->DetermineMinWidth(&minWidth);
-		LogFailed(LogLevel::Error, hr);
+		if (const auto hr = Get()->DetermineMinWidth(&minWidth);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Font)
+			};
+		}
 
 		return minWidth;
 	}

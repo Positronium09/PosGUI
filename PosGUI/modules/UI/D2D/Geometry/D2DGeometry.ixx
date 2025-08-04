@@ -8,7 +8,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DEnums;
 import PGUI.UI.D2D.D2DStructs;
 
@@ -34,39 +34,51 @@ export namespace PGUI::UI::D2D
 			ComPtrHolder<Interface>{ geometry }
 		{ }
 
-		[[nodiscard]] auto GetBounds(const Matrix3x2& worldTransform = Matrix3x2{ })
+		[[nodiscard]] auto GetBounds(const Matrix3x2& worldTransform = Matrix3x2{ }) noexcept -> Result<RectF>
 		{
 			D2D1_RECT_F bounds{ };
-			auto hr = this->Get()->GetBounds(worldTransform, &bounds);
-			ThrowFailed(hr);
 
-			return bounds;
+			if (auto hr = this->Get()->GetBounds(worldTransform, &bounds);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
+
+			return RectF{ bounds };
 		}
 
 		[[nodiscard]] auto GetWidenedBounds(
 			float strokeWidth,
-			ComPtr<ID2D1StrokeStyle> strokeStyle = nullptr,
+			const ComPtr<ID2D1StrokeStyle>& strokeStyle = nullptr,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
-			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
+			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) noexcept -> Result<RectF>
 		{
 			D2D1_RECT_F bounds{ };
-			auto hr = this->Get()->GetWidenedBounds(
+
+			if (auto hr = this->Get()->GetWidenedBounds(
 				strokeWidth, strokeStyle.Get(),
 				worldTransform, flatteningTolerance, &bounds);
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
+			
 
-			return bounds;
+			return RectF{ bounds };
 		}
 
 		[[nodiscard]] auto ComputeArea(
 			const Matrix3x2& worldTransform = Matrix3x2{ },
-			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
+			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) noexcept -> Result<float>
 		{
 			auto area = 0.0F;
-			auto hr = this->Get()->ComputeArea(
+			if (auto hr = this->Get()->ComputeArea(
 				worldTransform,
 				flatteningTolerance, &area);
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return area;
 		}
@@ -74,40 +86,50 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto FillContainsPoint(
 			PointF point,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
-			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) -> bool
+			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) noexcept -> Result<bool>
 		{
 			auto contains = FALSE;
-			auto hr = this->Get()->FillContainsPoint(
+			if (auto hr = this->Get()->FillContainsPoint(
 				point, worldTransform,
 				flatteningTolerance, &contains);
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return contains;
 		}
 
 		[[nodiscard]] auto StrokeContainsPoint(
 			PointF point, float strokeWidth,
-			ComPtr<ID2D1StrokeStyle> strokeStyle = nullptr,
+			const ComPtr<ID2D1StrokeStyle>& strokeStyle = nullptr,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
-			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) -> bool
+			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) noexcept -> Result<bool>
 		{
 			auto contains = FALSE;
-			auto hr = this->Get()->StrokeContainsPoint(
+			if (auto hr = this->Get()->StrokeContainsPoint(
 				point, strokeWidth, strokeStyle.Get(),
 				worldTransform, flatteningTolerance, &contains);
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
+
 			return contains;
 		}
 
 		[[nodiscard]] auto ComputeLength(
 			const Matrix3x2& worldTransform = Matrix3x2{ },
-			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
+			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) noexcept -> Result<float>
 		{
 			auto length = 0.0F;
-			auto hr = this->Get()->ComputeLength(
+			if (auto hr = this->Get()->ComputeLength(
 				worldTransform,
 				flatteningTolerance, &length);
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return length;
 		}
@@ -115,15 +137,18 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto ComputePointAtLength(
 			float length,
 			const Matrix3x2& worldTransform = Matrix3x2{ },
-			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
+			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) noexcept -> Result<PointAndUnitTangent>
 		{
 			D2D1_POINT_2F point;
 			D2D1_POINT_2F unitTangentVector;
 
-			auto hr = this->Get()->ComputePointAtLength(
+			if (auto hr = this->Get()->ComputePointAtLength(
 				length, worldTransform, flatteningTolerance,
 				&point, &unitTangentVector);
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return PointAndUnitTangent{ .point = point, .unitTangentVector = unitTangentVector };
 		}
@@ -131,13 +156,16 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto CompareWithGeometry(
 			D2DGeometry<> inputGeometry,
 			const Matrix3x2& inputGeometryTransform = Matrix3x2{ },
-			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE)
+			float flatteningTolerance = DEFAULT_FLATTENING_TOLERANCE) noexcept -> Result<GeometryRelation>
 		{
 			D2D1_GEOMETRY_RELATION relation;
-			auto hr = this->Get()->CompareWithGeometry(
+			if (auto hr = this->Get()->CompareWithGeometry(
 				inputGeometry.Get(), inputGeometryTransform,
 				flatteningTolerance, &relation);
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return static_cast<GeometryRelation>(relation);
 		}

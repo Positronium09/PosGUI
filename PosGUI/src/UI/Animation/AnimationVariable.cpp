@@ -6,7 +6,7 @@ module PGUI.UI.Animation:AnimationVariable;
 import :AnimationVariable;
 
 import PGUI.ComPtr;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 import :Storyboard;
 import :AnimationVariableChangeEventHandler;
 
@@ -16,218 +16,416 @@ namespace PGUI::UI::Animation
 		ComPtrHolder{ ptr }
 	{ }
 
-	auto AnimationVariable::GetStoryboard() const -> Storyboard
+	auto AnimationVariable::GetStoryboard() const noexcept -> Result<Storyboard>
 	{
 		ComPtr<IUIAnimationStoryboard2> storyboard;
-		const auto hr = Get()->GetCurrentStoryboard(&storyboard);
-		ThrowFailed(hr);
 
+		if (const auto hr = Get()->GetCurrentStoryboard(&storyboard);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
+	
 		return storyboard;
 	}
 
-	auto AnimationVariable::GetDimension() const -> UINT
+	auto AnimationVariable::GetDimension() const noexcept -> Result<UINT>
 	{
 		UINT dimension;
-		const auto hr = Get()->GetDimension(&dimension);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetDimension(&dimension);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return dimension;
 	}
 
-	auto AnimationVariable::GetPreviousIntegerValue() const -> INT32
+	auto AnimationVariable::GetPreviousIntegerValue() const noexcept -> Result<INT32>
 	{
 		INT32 previousValue;
-		const auto hr = Get()->GetPreviousIntegerValue(&previousValue);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetPreviousIntegerValue(&previousValue);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return previousValue;
 	}
 
-	auto AnimationVariable::GetPreviousIntegerVectorValue() const -> std::vector<INT32>
+	auto AnimationVariable::GetPreviousIntegerVectorValue() const noexcept -> Result<std::vector<INT32>>
 	{
 		const auto dimension = GetDimension();
-		std::vector<INT32> previousValues(dimension);
+		return dimension.and_then([this](const UINT dim) -> Result<std::vector<INT32>>
+		{
+			std::vector<INT32> previousValues(dim);
+			if (const auto hr = Get()->GetPreviousIntegerVectorValue(previousValues.data(), dim);
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Animation)
+				};
+			}
 
-		const auto hr = Get()->GetPreviousIntegerVectorValue(previousValues.data(), dimension);
-		ThrowFailed(hr);
-
-		return previousValues;
+			return previousValues;
+		}).or_else([this](const Error& err) -> Result<std::vector<INT32>>
+		{
+			return Unexpected{ err };
+		});
 	}
 
-	auto AnimationVariable::GetIntegerValue() const -> INT32
+	auto AnimationVariable::GetIntegerValue() const noexcept -> Result<INT32>
 	{
 		INT32 value;
-		const auto hr = Get()->GetIntegerValue(&value);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetIntegerValue(&value);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return value;
 	}
 
-	auto AnimationVariable::GetIntegerVectorValue() const -> std::vector<INT32>
+	auto AnimationVariable::GetIntegerVectorValue() const noexcept -> Result<std::vector<INT32>>
 	{
 		const auto dimension = GetDimension();
-		std::vector<INT32> values(dimension);
-
-		const auto hr = Get()->GetIntegerVectorValue(values.data(), dimension);
-		ThrowFailed(hr);
-
-		return values;
+		return dimension.and_then([this](const UINT dim) -> Result<std::vector<INT32>>
+		{
+			std::vector<INT32> values(dim);
+			if (const auto hr = Get()->GetIntegerVectorValue(values.data(), dim);
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Animation)
+				};
+			}
+			return values;
+		}).or_else([this](const Error& err) -> Result<std::vector<INT32>>
+		{
+			return Unexpected{ err };
+		});
 	}
 
-	auto AnimationVariable::GetFinalIntegerValue() const -> INT32
+	auto AnimationVariable::GetFinalIntegerValue() const noexcept -> Result<INT32>
 	{
 		INT32 finalValue;
-		const auto hr = Get()->GetFinalIntegerValue(&finalValue);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetFinalIntegerValue(&finalValue);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return finalValue;
 	}
 
-	auto AnimationVariable::GetFinalIntegerVectorValue() const -> std::vector<INT32>
+	auto AnimationVariable::GetFinalIntegerVectorValue() const noexcept -> Result<std::vector<INT32>>
 	{
 		const auto dimension = GetDimension();
-		std::vector<INT32> finalValues(dimension);
-
-		const auto hr = Get()->GetFinalIntegerVectorValue(finalValues.data(), dimension);
-		ThrowFailed(hr);
-
-		return finalValues;
+		return dimension.and_then([this](const UINT dim) -> Result<std::vector<INT32>>
+		{
+			std::vector<INT32> finalValues(dim);
+			if (const auto hr = Get()->GetFinalIntegerVectorValue(finalValues.data(), dim);
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Animation)
+				};
+			}
+			return finalValues;
+		}).or_else([this](const Error& err) -> Result<std::vector<INT32>>
+		{
+			return Unexpected{ err };
+		});
 	}
 
-	auto AnimationVariable::GetPreviousValue() const -> double
+	auto AnimationVariable::GetPreviousValue() const noexcept -> Result<double>
 	{
 		double previousValue;
-		const auto hr = Get()->GetPreviousValue(&previousValue);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetPreviousValue(&previousValue);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return previousValue;
 	}
 
-	auto AnimationVariable::GetPreviousVectorValue() const -> std::vector<double>
+	auto AnimationVariable::GetPreviousVectorValue() const noexcept -> Result<std::vector<double>>
 	{
 		const auto dimension = GetDimension();
-		std::vector<double> previousValues(dimension);
-
-		const auto hr = Get()->GetPreviousVectorValue(previousValues.data(), dimension);
-		ThrowFailed(hr);
-
-		return previousValues;
+		return dimension.and_then([this](const UINT dim) -> Result<std::vector<double>>
+		{
+			std::vector<double> previousValues(dim);
+			if (const auto hr = Get()->GetPreviousVectorValue(previousValues.data(), dim);
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Animation)
+				};
+			}
+			return previousValues;
+		}).or_else([this](const Error& err) -> Result<std::vector<double>>
+		{
+			return Unexpected{ err };
+		});
 	}
 
-	auto AnimationVariable::GetValue() const -> double
+	auto AnimationVariable::GetValue() const noexcept -> Result<double>
 	{
 		double value;
-		const auto hr = Get()->GetValue(&value);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetValue(&value);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return value;
 	}
 
-	auto AnimationVariable::GetVectorValue() const -> std::vector<double>
+	auto AnimationVariable::GetVectorValue() const noexcept -> Result<std::vector<double>>
 	{
 		const auto dimension = GetDimension();
-		std::vector<double> values(dimension);
-
-		const auto hr = Get()->GetVectorValue(values.data(), dimension);
-		ThrowFailed(hr);
-
-		return values;
+		return dimension.and_then([this](const UINT dim) -> Result<std::vector<double>>
+		{
+			std::vector<double> values(dim);
+			if (const auto hr = Get()->GetVectorValue(values.data(), dim);
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Animation)
+				};
+			}
+			return values;
+		}).or_else([this](const Error& err) -> Result<std::vector<double>>
+		{
+			return Unexpected{ err };
+		});
 	}
 
-	auto AnimationVariable::GetFinalValue() const -> double
+	auto AnimationVariable::GetFinalValue() const noexcept -> Result<double>
 	{
 		double finalValue;
-		const auto hr = Get()->GetFinalValue(&finalValue);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetFinalValue(&finalValue);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
 		return finalValue;
 	}
 
-	auto AnimationVariable::GetFinalVectorValue() const -> std::vector<double>
+	auto AnimationVariable::GetFinalVectorValue() const noexcept -> Result<std::vector<double>>
 	{
 		const auto dimension = GetDimension();
-		std::vector<double> finalValues(dimension);
-
-		const auto hr = Get()->GetFinalVectorValue(finalValues.data(), dimension);
-		ThrowFailed(hr);
-
-		return finalValues;
+		return dimension.and_then([this](const UINT dim) -> Result<std::vector<double>>
+		{
+			std::vector<double> finalValues(dim);
+			if (const auto hr = Get()->GetFinalVectorValue(finalValues.data(), dim);
+				FAILED(hr))
+			{
+				return Unexpected{
+					Error{ hr }
+					.AddTag(ErrorTags::Animation)
+				};
+			}
+			return finalValues;
+		}).or_else([this](const Error& err) -> Result<std::vector<double>>
+		{
+			return Unexpected{ err };
+		});
 	}
 
-	auto AnimationVariable::SetLowerBound(const double bound) const -> void
+	auto AnimationVariable::SetLowerBound(const double bound) const noexcept -> Error
 	{
-		const auto hr = Get()->SetLowerBound(bound);
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetLowerBound(bound)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Failed to set lower bound");
+		}
+
+		return error;
 	}
 
-	auto AnimationVariable::SetLowerBound(const std::span<double> bounds) const -> void
+	auto AnimationVariable::SetLowerBound(const std::span<double> bounds) const noexcept -> Error
 	{
-		const auto hr = Get()->SetLowerBoundVector(
-			bounds.data(),
-			static_cast<UINT>(bounds.size()));
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetLowerBoundVector(
+				bounds.data(),
+				static_cast<UINT>(bounds.size()))
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Failed to set lower bound");
+		}
+
+		return error;
 	}
 
-	auto AnimationVariable::SetUpperBound(const double bound) const -> void
+	auto AnimationVariable::SetUpperBound(const double bound) const noexcept -> Error
 	{
-		const auto hr = Get()->SetUpperBound(bound);
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetUpperBound(bound)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Failed to set upper bound");
+		}
+
+		return error;
 	}
 
-	auto AnimationVariable::SetUpperBound(const std::span<double> bounds) const -> void
+	auto AnimationVariable::SetUpperBound(const std::span<double> bounds) const noexcept -> Error
 	{
-		const auto hr = Get()->SetUpperBoundVector(
-			bounds.data(),
-			static_cast<UINT>(bounds.size()));
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetUpperBoundVector(
+				bounds.data(),
+				static_cast<UINT>(bounds.size()))
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Failed to set upper bound");
+		}
+
+		return error;
 	}
 
-	auto AnimationVariable::SetRoundingMode(AnimationRoundingMode mode) const -> void
+	auto AnimationVariable::SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Error
 	{
-		const auto hr = Get()->SetRoundingMode(
-			static_cast<UI_ANIMATION_ROUNDING_MODE>(mode));
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetRoundingMode(
+				static_cast<UI_ANIMATION_ROUNDING_MODE>(mode))
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Failed to set rounding mode");
+		}
+
+		return error;
 	}
 
-	auto AnimationVariable::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const -> void
+	auto AnimationVariable::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Error
 	{
-		const auto hr = Get()->SetTag(obj.Get(), id);
-		ThrowFailed(hr);
+		Error error{
+			Get()->SetTag(obj.Get(), id)
+		};
+		error.AddTag(ErrorTags::Animation);
+
+		if (error.IsFailure())
+		{
+			Logger::Error(L"Failed to set tag");
+		}
+
+		return error;
 	}
 
-	auto AnimationVariable::GetTag() const -> std::pair<ComPtr<IUnknown>, UINT32>
+	auto AnimationVariable::GetTag() const noexcept -> Result<std::pair<ComPtr<IUnknown>, UINT32>>
 	{
 		ComPtr<IUnknown> obj;
 		UINT32 tag;
-		const auto hr = Get()->GetTag(&obj, &tag);
-		ThrowFailed(hr);
+		if (const auto hr = Get()->GetTag(&obj, &tag);
+			FAILED(hr))
+		{
+			return Unexpected{
+				Error{ hr }
+				.AddTag(ErrorTags::Animation)
+			};
+		}
 
-		return { obj, tag };
+		return std::make_pair(obj, tag);
 	}
 
 	auto AnimationVariable::SetVariableChangeHandler(
 		AnimationVariableChangeEventHandler& handler,
-		const bool registerForNext) const -> void
+		const bool registerForNext) const noexcept -> Error
 	{
 		const auto& ptr = Get();
+
 		auto hr = ptr->SetVariableChangeHandler(
 			&handler.GetRouter(),
 			registerForNext
 		);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			Logger::Error(L"Failed to set variable change handler");
+			return Error{ hr }
+				.AddTag(ErrorTags::Animation);
+		}
+
 		hr = ptr->SetVariableIntegerChangeHandler(
 			&handler.GetIntegerRouter(),
 			registerForNext
 		);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			Logger::Error(L"Failed to set variable integer change handler");
+			return Error{ hr }
+				.AddTag(ErrorTags::Animation);
+		}
+
+		return Error{ S_OK }.AddTag(ErrorTags::Animation);
 	}
 
-	auto AnimationVariable::ClearVariableChangeHandler(const bool registerForNext) const -> void
+	auto AnimationVariable::ClearVariableChangeHandler(const bool registerForNext) const noexcept -> Error
 	{
 		const auto& ptr = Get();
+
 		auto hr = ptr->SetVariableChangeHandler(nullptr, registerForNext);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			Logger::Error(L"Failed to clear variable change handler");
+			return Error{ hr }
+				.AddTag(ErrorTags::Animation);
+		}
+
 		hr = ptr->SetVariableIntegerChangeHandler(nullptr, registerForNext);
-		ThrowFailed(hr);
+		if (FAILED(hr))
+		{
+			Logger::Error(L"Failed to clear variable integer change handler");
+			return Error{ hr }
+				.AddTag(ErrorTags::Animation);
+		}
+
+		return Error{ S_OK }.AddTag(ErrorTags::Animation);
 	}
 }

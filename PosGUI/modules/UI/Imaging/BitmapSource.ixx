@@ -8,9 +8,8 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
-import PGUI.Logging;
 import PGUI.Factories;
-import PGUI.Exceptions;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::UI::Imaging
 {
@@ -47,67 +46,88 @@ export namespace PGUI::UI::Imaging
 			ComPtrHolder<Interface>{ bitmapSource }
 		{ }
 
-		[[nodiscard]] auto GetSize() const
+		[[nodiscard]] auto GetSize() const noexcept -> Result<SizeU>
 		{
 			UINT width{ };
 			UINT height{ };
-			auto hr = this->Get()->GetSize(&width, &height);
-			ThrowFailed(hr);
+
+			if (const auto hr = this->Get()->GetSize(&width, &height);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return SizeU{ width, height };
 		}
 
-		[[nodiscard]] auto GetPixelFormat() const
+		[[nodiscard]] auto GetPixelFormat() const noexcept -> Result<WICPixelFormatGUID>
 		{
 			WICPixelFormatGUID format{ };
-			auto hr = this->Get()->GetPixelFormat(&format);
-			ThrowFailed(hr);
+			if (const auto hr = this->Get()->GetPixelFormat(&format);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return format;
 		}
 
-		[[nodiscard]] auto GetResolution() const
+		[[nodiscard]] auto GetResolution() const noexcept -> Result<std::pair<double, double>>
 		{
 			double dpiX{ };
 			double dpiY{ };
-			auto hr = this->Get()->GetResolution(&dpiX, &dpiY);
-			ThrowFailed(hr);
+			if (const auto hr = this->Get()->GetResolution(&dpiX, &dpiY);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return std::pair{ dpiX, dpiY };
 		}
 
-		[[nodiscard]] auto CopyPixels(UINT stride) const
+		[[nodiscard]] auto CopyPixels(UINT stride) const noexcept -> Result<std::vector<BYTE>>
 		{
 			auto size = this->GetSize();
 			const RectI rect = { 0, 0, size.cx, size.cy };
 			std::vector<BYTE> buffer(rect.Area() * stride);
-			auto hr = this->Get()->CopyPixels(nullptr, stride,
+
+			if (const auto hr = this->Get()->CopyPixels(nullptr, stride,
 				static_cast<UINT>(buffer.size()), buffer.data());
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return buffer;
 		}
 
-		[[nodiscard]] auto CopyPixels(const RectI rect, UINT stride) const
+		[[nodiscard]] auto CopyPixels(const RectI rect, UINT stride) const noexcept -> Result<std::vector<BYTE>>
 		{
 			std::vector<BYTE> buffer(rect.Area() * stride);
 			WICRect rc = rect;
-			auto hr = this->Get()->CopyPixels(
+
+			if (auto hr = this->Get()->CopyPixels(
 				&rc, stride,
 				static_cast<UINT>(buffer.size()), buffer.data());
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return buffer;
 		}
 
-		[[nodiscard]] auto CopyPixels(const RectI rect, UINT stride, UINT bufferSize) const
+		[[nodiscard]] auto CopyPixels(const RectI rect, UINT stride, UINT bufferSize) const noexcept -> Result<std::vector<BYTE>>
 		{
 			std::vector<BYTE> buffer(bufferSize);
 			WICRect rc = rect;
-			auto hr = this->Get()->CopyPixels(
+			if (auto hr = this->Get()->CopyPixels(
 				&rc, stride,
 				bufferSize, buffer.data());
-			ThrowFailed(hr);
+				FAILED(hr))
+			{
+				return Unexpected{ Error{ hr } };
+			}
 
 			return buffer;
 		}
@@ -123,15 +143,23 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapSourceScaler() noexcept = default;
 
-		BitmapSourceScaler(BitmapSource<> source, const SizeU targetSize, InterpolationMode interpolationMode)
+		BitmapSourceScaler(BitmapSource<> source, const SizeU targetSize, InterpolationMode interpolationMode) noexcept
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
 			auto hr = factory->CreateBitmapScaler(GetAddress());
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to create IWICBitmapScaler: {}", Error{ hr });
+				return;
+			}
+
 			hr = Get()->Initialize(
 				source.GetRaw(), targetSize.cx, targetSize.cy,
 				static_cast<WICBitmapInterpolationMode>(interpolationMode));
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to initialize IWICBitmapScaler: {}", Error{ hr });
+			}
 		}
 	};
 
@@ -140,14 +168,24 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapSourceClipper() noexcept = default;
 
-		BitmapSourceClipper(BitmapSource<> source, const RectI clipRect)
+		BitmapSourceClipper(BitmapSource<> source, const RectI clipRect) noexcept
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
 			auto hr = factory->CreateBitmapClipper(GetAddress());
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to create IWICBitmapClipper: {}", Error{ hr });
+				return;
+			}
+
 			const WICRect wicRect = clipRect;
 			hr = Get()->Initialize(source.GetRaw(), &wicRect);
-			ThrowFailed(hr);
+
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to initialize IWICBitmapClipper: {}", Error{ hr });
+				return;
+			}
 		}
 	};
 
@@ -156,15 +194,25 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapSourceFlipRotator() noexcept = default;
 
-		BitmapSourceFlipRotator(BitmapSource<> source, TransformOptions transformOptions)
+		BitmapSourceFlipRotator(BitmapSource<> source, TransformOptions transformOptions) noexcept
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
 			auto hr = factory->CreateBitmapFlipRotator(GetAddress());
-			ThrowFailed(hr);
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to create IWICBitmapFlipRotator: {}", Error{ hr });
+				return;
+			}
+			
 			hr = Get()->Initialize(
 				source.GetRaw(),
 				static_cast<WICBitmapTransformOptions>(transformOptions));
-			ThrowFailed(hr);
+
+			if (FAILED(hr))
+			{
+				Logger::Error(L"Failed to initialize IWICBitmapFlipRotator: {}", Error{ hr });
+				return;
+			}
 		}
 	};
 

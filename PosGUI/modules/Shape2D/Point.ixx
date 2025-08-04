@@ -194,3 +194,32 @@ export namespace PGUI
 	using PointL = Point<long>;
 	using PointU = Point<std::uint32_t>;
 }
+
+export template <typename T, typename Char>
+struct std::formatter<PGUI::Point<T>, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No formatting args supported for Point<T>" };
+	}
+
+	template <typename FormatContext>
+	auto format(const PGUI::Point<T>& point, FormatContext& ctx) const
+	{
+		if constexpr (std::floating_point<T>)
+		{
+			return std::format_to(ctx.out(), "x: {:.5f}, y: {:.5f}", point.x, point.y);
+		}
+		else
+		{
+			return std::format_to(ctx.out(), "x: {}, y: {}", point.x, point.y);
+		}
+	}
+};

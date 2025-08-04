@@ -35,9 +35,16 @@ export namespace PGUI::Factories
 				options.debugLevel = D2D1_DEBUG_LEVEL_ERROR;
 #endif
 
-				const auto hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
-				                            options, factory.GetAddressOf());
-				ThrowFailed(hr);
+				if (const auto hr = D2D1CreateFactory(
+					D2D1_FACTORY_TYPE_SINGLE_THREADED,
+					options, factory.GetAddressOf());
+					FAILED(hr))
+				{
+					Error error{ hr };
+					error.AddTag(ErrorTags::Initialization);
+					Logger::Critical(error, L"Failed to create Direct2D factory");
+					throw Exception{ error };
+				}
 			}
 
 			return factory;

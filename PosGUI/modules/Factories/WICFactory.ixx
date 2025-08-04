@@ -30,14 +30,19 @@ export namespace PGUI::Factories
 		{
 			if (!factory)
 			{
-				const auto hr = CoCreateInstance(
+				if (const auto hr = CoCreateInstance(
 					CLSID_WICImagingFactory,
 					nullptr,
 					CLSCTX_INPROC_SERVER,
 					__uuidof(IWICImagingFactory2),
-					std::bit_cast<void**>(factory.GetAddressOf())
-				);
-				ThrowFailed(hr);
+					std::bit_cast<void**>(factory.GetAddressOf())); 
+					FAILED(hr))
+				{
+					Error error{ hr };
+					error.AddTag(ErrorTags::Initialization);
+					Logger::Critical(error, L"Failed to create WIC factory");
+					throw Exception{ error };
+				}
 			}
 
 			return factory;

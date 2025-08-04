@@ -4,6 +4,8 @@ module;
 
 export module PGUI.UI.D2D.D2DEllipseGeometry;
 
+import std;
+
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
@@ -28,7 +30,11 @@ export namespace PGUI::UI::D2D
 			if (const auto hr = factory->CreateEllipseGeometry(ellipse, GetAddress());
 				FAILED(hr))
 			{
-				Logger::Error(L"Failed to create ellipse geometry with ellipse {}", ellipse);
+				Logger::Error(
+					Error{ hr }
+					.AddDetail(L"Ellipse", std::format(L"{}", ellipse))
+					.AddTag(ErrorTags::D2D),
+					L"Failed to create ellipse geometry");
 			}
 		}
 

@@ -218,12 +218,17 @@ export namespace PGUI
 		{
 			ComPtr<U> ptr;
 			auto error = Error{ Get<T>().As(&ptr) };
+			error
+				.AddDetail(L"From", StringToWString(typeid(T).name()))
+				.AddDetail(L"To", StringToWString(typeid(U).name()));
 
-			if (error.IsSuccess())
+			if (error.IsFailure())
 			{
-				Set(ptr);
+				Logger::Error(error, L"Cannot cast between interfaces");
+				return error;
 			}
 
+			Set(ptr);
 			return error;
 
 		}

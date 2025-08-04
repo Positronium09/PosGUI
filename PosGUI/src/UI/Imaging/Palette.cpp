@@ -64,10 +64,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreatePalette(GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create palette {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation));
+			              .AddTag(ErrorTags::Creation),
+			              L"Failed to create palette");
 		}
 
 		auto wicColors = colors | std::ranges::to<std::vector<WICColor>>();

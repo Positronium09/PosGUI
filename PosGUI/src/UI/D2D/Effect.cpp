@@ -4,6 +4,8 @@ module;
 
 module PGUI.UI.D2D.Effect;
 
+import std;
+
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
@@ -47,8 +49,11 @@ namespace PGUI::UI::D2D
 
 	auto Effect::SetInputCount(const UINT32 count) noexcept -> Error
 	{
-		return Error{
-			Get()->SetInputCount(count)
-		}.AddTag(ErrorTags::D2D);
+		Error error{ Get()->SetInputCount(count) };
+		error
+			.AddDetail(L"Count", std::to_wstring(count))
+			.AddTag(ErrorTags::D2D);
+		LogIfFailed(error, L"Failed to set input count");
+		return error;
 	}
 }

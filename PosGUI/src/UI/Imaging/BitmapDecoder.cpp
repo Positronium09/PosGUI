@@ -28,10 +28,10 @@ namespace PGUI::UI::Imaging
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create decoder {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging));
+			              .AddTag(ErrorTags::Imaging),
+			              L"Failed to create decoder");
 		}
 	}
 
@@ -49,10 +49,10 @@ namespace PGUI::UI::Imaging
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create decoder {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging));
+			              .AddTag(ErrorTags::Imaging),
+			              L"Failed to create decoder");
 		}
 	}
 
@@ -70,10 +70,10 @@ namespace PGUI::UI::Imaging
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create decoder {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging));
+			              .AddTag(ErrorTags::Imaging),
+			              L"Failed to create decoder");
 		}
 	}
 
@@ -89,10 +89,10 @@ namespace PGUI::UI::Imaging
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create decoder {}",
-			              Error{ hr }
+			Logger::Error(Error{ hr }
 			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging));
+			              .AddTag(ErrorTags::Imaging),
+			              L"Failed to create decoder");
 		}
 	}
 
@@ -114,10 +114,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->CopyPalette(palette.GetRaw());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to copy palette from decoder");
+			return Unexpected{ error };
 		}
 
 		return palette;
@@ -130,10 +130,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetMetadataQueryReader(reader.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get metadata query reader from decoder");
+			return Unexpected{ error };
 		}
 
 		return reader;
@@ -145,10 +145,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetPreview(preview.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get preview from decoder");
+			return Unexpected{ error };
 		}
 
 		return preview;
@@ -160,10 +160,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetThumbnail(thumbnail.GetAddressOf());
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get thumbnail from decoder");
+			return Unexpected{ error };
 		}
 
 		return thumbnail;
@@ -175,10 +175,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetContainerFormat(&format);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get container format from decoder");
+			return Unexpected{ error };
 		}
 
 		return format;
@@ -192,10 +192,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetColorContexts(count, contexts.data(), nullptr);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get color contexts from decoder");
+			return Unexpected{ error };
 		}
 
 		return contexts | std::views::transform([](auto context)
@@ -210,10 +210,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->GetFrameCount(&count);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to get frame count from decoder");
+			return Unexpected{ error };
 		}
 
 		return count;
@@ -221,28 +221,39 @@ namespace PGUI::UI::Imaging
 
 	auto BitmapDecoder::GetFrame(const UINT index) const noexcept -> Result<BitmapFrameDecode>
 	{
-		if (const auto frameCountResult = GetFrameCount();
-			!frameCountResult.has_value())
+		const auto frameCountResult = GetFrameCount();
+		return frameCountResult.and_then([this, index](const UINT frameCount) -> Result<BitmapFrameDecode>
 		{
-			return Unexpected{
-				Error{ std::errc::invalid_argument }
-				.AddDetail(L"Frame Index", std::to_wstring(index))
-				.AddDetail(L"Frame Count", std::to_wstring(frameCountResult.value()))
-			};
-		}
+			if (index >= frameCount)
+			{
+				Error error{ E_INVALIDARG };
+				error
+					.AddDetail(L"Frame Index", std::to_wstring(index))
+					.AddDetail(L"Frame Count", std::to_wstring(frameCount))
+					.AddTag(ErrorTags::Imaging)
+					.SuggestFix(L"Requested index is is bigger than or equal to frame count");
+				Logger::Error(error, L"Invalid frame index requested");
+				return Unexpected{ error };
+			}
+			ComPtr<IWICBitmapFrameDecode> frameDecode;
 
-		ComPtr<IWICBitmapFrameDecode> frameDecode;
+			if (const auto hr = Get()->GetFrame(index, frameDecode.GetAddressOf());
+				FAILED(hr))
+			{
+				Error error{ hr };
+				error
+					.AddDetail(L"Frame Index", std::to_wstring(index))
+					.AddTag(ErrorTags::Imaging);
+				Logger::Error(error, L"Failed to get frame from decoder");
+				return Unexpected{ error };
+			}
 
-		if (const auto hr = Get()->GetFrame(index, frameDecode.GetAddressOf());
-			FAILED(hr))
+			return BitmapFrameDecode{ frameDecode };
+		}).or_else([](const Error& error) -> Result<BitmapFrameDecode>
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
-		}
-
-		return frameDecode;
+			Logger::Error(error, L"Failed to get frame from decoder");
+			return Unexpected{ error };
+		});
 	}
 
 	auto BitmapDecoder::GetAllFrames() const noexcept -> Result<std::vector<BitmapFrameDecode>>
@@ -256,6 +267,7 @@ namespace PGUI::UI::Imaging
 				auto frameResult = GetFrame(i);
 				if (!frameResult.has_value())
 				{
+					Logger::Log(frameResult.error(), L"Failed to get frame from decoder");
 					return Unexpected{ frameResult.error() };
 				}
 				frames[i] = frameResult.value();
@@ -273,10 +285,10 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = Get()->QueryCapability(stream.Get(), &capabilities);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Imaging)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Imaging);
+			Logger::Error(error, L"Failed to query capabilities from decoder");
+			return Unexpected{ error };
 		}
 
 		return static_cast<WICBitmapDecoderCapabilities>(capabilities);

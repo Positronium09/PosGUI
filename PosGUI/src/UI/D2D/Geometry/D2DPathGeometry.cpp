@@ -190,9 +190,7 @@ namespace PGUI::UI::D2D
 			error.IsFailure())
 		{
 			Logger::Error(error, L"Failed to close geometry sink");
-			return Unexpected{
-				error
-			};
+			return Unexpected{ error };
 		}
 
 		return pathGeometry;

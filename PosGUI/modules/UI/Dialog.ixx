@@ -89,13 +89,12 @@ export namespace PGUI::UI
 
 			if (window->Hwnd() == NULL)
 			{
-				const auto errCode = GetLastError();
-
-				throw Exception{
-					Error{ errCode }
+				Error error{ GetLastError() };
+				error
 					.AddTag(ErrorTags::Window)
-					.AddTag(ErrorTags::Creation)
-				};
+					.AddTag(ErrorTags::Creation);
+				Logger::Critical(error, L"Dialog creation failed");
+				throw Exception{ error };
 			}
 
 			SendMessageW(window->Hwnd(), WM_INITDIALOG,

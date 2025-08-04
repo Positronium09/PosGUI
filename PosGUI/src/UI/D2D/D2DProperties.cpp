@@ -65,7 +65,6 @@ namespace PGUI::UI::D2D
 					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
 					.AddDetail(L"Value Size", std::to_wstring(size)),
 					L"Value size is bigger than the given span");
-
 				return false;
 			}
 

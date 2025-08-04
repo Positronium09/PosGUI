@@ -34,7 +34,7 @@ namespace PGUI::UI::D2D
 		auto dpiY = 0.0F;
 		Get()->GetDpi(&dpiX, &dpiY);
 
-		return std::pair{ dpiX, dpiY };
+		return std::make_pair(dpiX, dpiY);
 	}
 
 	auto D2DBitmap::GetPixelFormat() const noexcept -> D2D1_PIXEL_FORMAT

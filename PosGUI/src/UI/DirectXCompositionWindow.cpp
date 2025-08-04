@@ -102,7 +102,7 @@ namespace PGUI::UI
 
 		EndPaint(Hwnd(), &paintStruct);
 
-		return { tag1, tag2 };
+		return std::make_pair(tag1, tag2);
 	}
 
 	auto DirectXCompositionWindow::InitSwapChain() -> void

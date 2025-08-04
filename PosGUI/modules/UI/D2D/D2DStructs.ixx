@@ -12,7 +12,7 @@ export namespace PGUI::UI::D2D
 {
 	using Matrix3x2 = D2D1::Matrix3x2F;
 
-	[[nodiscard]] auto D2D1MatrixToMatrix3x2(const D2D1_MATRIX_3X2_F& matrix)
+	[[nodiscard]] auto D2D1MatrixToMatrix3x2(const D2D1_MATRIX_3X2_F& matrix) noexcept
 	{
 		return Matrix3x2{
 			matrix.m[0][0],

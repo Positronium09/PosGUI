@@ -96,7 +96,7 @@ namespace PGUI::UI::Imaging
 
 		throw Exception{
 			metadataResult.error()
-		}.SuggestFix(L"operator[] throws use GetMetadata if you want noexcept");
+		}.SuggestFix(L"operator[] throws an exception; use GetMetadata if you want noexcept");
 	}
 
 	auto MetadataReader::cbegin() const -> IEnumStringIterator

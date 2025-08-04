@@ -19,7 +19,7 @@ export namespace PGUI::UI::D2D
 		public:
 		GeometrySink() noexcept = default;
 
-		explicit GeometrySink(const ComPtr<ID2D1GeometrySink>& ptr) noexcept :
+		explicit GeometrySink(const ComPtr& ptr) noexcept :
 			SimplifiedGeometrySink{ ptr }
 		{ }
 

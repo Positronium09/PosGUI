@@ -36,12 +36,17 @@ export namespace PGUI::Factories
 				flags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-				const auto hr = 
-					CreateDXGIFactory2(
-						flags,
-						__uuidof(IDXGIFactory7),
-						std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
-				ThrowFailed(hr);
+				if (const auto hr = CreateDXGIFactory2(
+					flags,
+					__uuidof(IDXGIFactory7),
+					std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
+					FAILED(hr))
+				{
+					Error error{ hr };
+					error.AddTag(ErrorTags::Initialization);
+					Logger::Critical(error, L"Failed to create DXGI factory");
+					throw Exception{ error };
+				}
 			}
 
 			return dxgiFactory;

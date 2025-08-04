@@ -34,6 +34,18 @@ namespace PGUI::UI::Font
 
 	auto FontCollection::LoadFontFile(const std::filesystem::path& filePath) noexcept -> Result<FontCollection>
 	{
+		if (!std::filesystem::exists(filePath))
+		{
+			Error error{ E_INVALIDARG };
+			error
+				.AddDetail(L"File Path", filePath.wstring())
+				.AddTag(ErrorTags::Font)
+				.AddTag(ErrorTags::System)
+				.SuggestFix(L"Ensure the file path is correct and the file exists");
+			Logger::Error(error, L"Font file does not exist.");
+			return Unexpected{ error };
+		}
+
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 		ComPtr<IDWriteFontSetBuilder2> fontSetBuilder;
 
@@ -141,6 +153,7 @@ namespace PGUI::UI::Font
 				Error{ E_FAIL }
 				.AddDetail(L"Font Family Name", fontFamilyName)
 				.AddTag(ErrorTags::Font)
+				.SuggestFix(L"Ensure the font family name is correct and try again")
 			};
 		}
 

@@ -49,7 +49,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		[[nodiscard]] auto GetContentBounds() const noexcept -> RectF { return contentBounds; }
-		[[nodiscard]] auto GetGeometricMask() const noexcept { return D2DGeometry<ID2D1Geometry>{ geometricMask }; }
+		[[nodiscard]] auto GetGeometricMask() const noexcept { return D2DGeometry<>{ geometricMask }; }
 
 		[[nodiscard]] auto GetMaskAntialiasMode() const noexcept
 		{
@@ -75,8 +75,8 @@ export namespace PGUI::UI::D2D
 		public:
 		D2DLayer() noexcept = default;
 
-		D2DLayer(ComPtr<ID2D1Layer> layer) noexcept :
-			ComPtrHolder<ID2D1Layer>{ layer }
+		explicit D2DLayer(const ComPtr<ID2D1Layer>& layer) noexcept :
+			ComPtrHolder{ layer }
 		{ }
 
 		[[nodiscard]] auto GetSize() const noexcept -> SizeF

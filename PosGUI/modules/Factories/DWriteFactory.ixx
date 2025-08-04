@@ -30,11 +30,17 @@ export namespace PGUI::Factories
 		{
 			if (!directWriteFactory)
 			{
-				const auto hr =
-					DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
-					                    __uuidof(IDWriteFactory8),
-					                    std::bit_cast<IUnknown**>(directWriteFactory.GetAddressOf()));
-				ThrowFailed(hr);
+				if (const auto hr = DWriteCreateFactory(
+					DWRITE_FACTORY_TYPE_SHARED,
+					__uuidof(IDWriteFactory8),
+					std::bit_cast<IUnknown**>(directWriteFactory.GetAddressOf()));
+					FAILED(hr))
+				{
+					Error error{ hr };
+					error.AddTag(ErrorTags::Initialization);
+					Logger::Critical(error, L"Failed to create DirectWrite factory");
+					throw Exception{ error };
+				}
 			}
 			return directWriteFactory;
 		}

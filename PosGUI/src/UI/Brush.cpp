@@ -24,8 +24,9 @@ namespace PGUI::UI
 		if (const auto hr = renderTarget->CreateSolidColorBrush(color, GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(L"Failed to create SolidColorBrush {}", Error{ hr }
-			              .AddDetail(L"Color", std::format(L"{}", color)));
+			Logger::Error(Error{ hr }
+			              .AddDetail(L"Color", std::format(L"{}", color)),
+			              L"Failed to create SolidColorBrush");
 		}
 	}
 
@@ -41,7 +42,8 @@ namespace PGUI::UI
 		{
 			if (!referenceRect.has_value())
 			{
-				Logger::Error(L"Reference rectangle must be provided when using Relative positioning mode");
+				Logger::Error(Error{ E_INVALIDARG },
+				              L"Reference rectangle must be provided when using Relative positioning mode");
 				return;
 			}
 			gradient.ApplyReferenceRect(*referenceRect);
@@ -56,7 +58,8 @@ namespace PGUI::UI
 			&gradientStopCollection);
 		if (FAILED(hr))
 		{
-			Logger::Error(L"Failed to create GradientStopCollection {}", Error{ hr });
+			Logger::Error(Error{ hr },
+			              L"Failed to create GradientStopCollection");
 			return;
 		}
 
@@ -67,14 +70,13 @@ namespace PGUI::UI
 		);
 		if (FAILED(hr))
 		{
-			Logger::Error(
-				L"Failed to create LinearGradientBrush {}",
-				Error{ hr }
-				.AddDetail(
-					L"Start",
-					std::format(L"{}", gradient.Start()))
-				.AddDetail(
-					L"End", std::format(L"{}", gradient.End())));
+			Logger::Error(Error{ hr }
+			              .AddDetail(
+				              L"Start",
+				              std::format(L"{}", gradient.Start()))
+			              .AddDetail(
+				              L"End", std::format(L"{}", gradient.End())),
+			              L"Failed to create LinearGradientBrush");
 			return;
 		}
 	}
@@ -91,7 +93,8 @@ namespace PGUI::UI
 		{
 			if (!referenceRect.has_value())
 			{
-				Logger::Error(L"Reference rectangle must be provided when using Relative positioning mode");
+				Logger::Error(Error{ E_INVALIDARG },
+				              L"Reference rectangle must be provided when using Relative positioning mode");
 				return;
 			}
 			gradient.ApplyReferenceRect(*referenceRect);
@@ -106,7 +109,8 @@ namespace PGUI::UI
 			&gradientStopCollection);
 		if (FAILED(hr))
 		{
-			Logger::Error(L"Failed to create GradientStopCollection {}", Error{ hr });
+			Logger::Error(Error{ hr },
+			              L"Failed to create GradientStopCollection");
 			return;
 		}
 
@@ -119,14 +123,13 @@ namespace PGUI::UI
 		);
 		if (FAILED(hr))
 		{
-			Logger::Error(
-				L"Failed to create RadialGradientBrush {}",
-				Error{ hr }
-				.AddDetail(
-					L"Center",
-					std::format(L"{}", gradient.GetEllipse()))
-				.AddDetail(
-					L"Offset", std::format(L"{}", gradient.Offset())));
+			Logger::Error(Error{ hr }
+			              .AddDetail(
+				              L"Center",
+				              std::format(L"{}", gradient.GetEllipse()))
+			              .AddDetail(
+				              L"Offset", std::format(L"{}", gradient.Offset())),
+			              L"Failed to create RadialGradientBrush");
 			return;
 		}
 	}
@@ -144,9 +147,8 @@ namespace PGUI::UI
 			bitmapBrushProperties, GetAddress());
 		if (FAILED(hr))
 		{
-			Logger::Error(
-				L"Failed to create BitmapBrush {}",
-				Error{ hr });
+			Logger::Error(Error{ hr },
+			              L"Failed to create BitmapBrush");
 			return;
 		}
 	}
@@ -198,9 +200,10 @@ namespace PGUI::UI
 		if (const auto hr = bitmap.As(&bitmap1);
 			FAILED(hr))
 		{
-			Error err{ hr };
-			Logger::Error(L"Failed to extract bitmap from BitmapBrush {}", err);
-			return Unexpected{ err };
+			Error error{ hr };
+			Logger::Error(error,
+			              L"Failed to extract bitmap from BitmapBrush");
+			return Unexpected{ error };
 		}
 		const D2D::D2DBitmap bmp{ bitmap1 };
 
@@ -223,9 +226,7 @@ namespace PGUI::UI
 		auto hr = ptr.As(&solidBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{
-				hr
-			}
+			Error{ hr }
 			.AddTag(ErrorTags::Creation),
 			L"Given pointer is not a SolidColorBrush"
 		);
@@ -241,9 +242,7 @@ namespace PGUI::UI
 		hr = ptr.As(&linearGradientBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{
-				hr
-			}
+			Error{ hr }
 			.AddTag(ErrorTags::Creation),
 			L"Given pointer is not a LinearGradientBrush"
 		);
@@ -259,9 +258,7 @@ namespace PGUI::UI
 		hr = ptr.As(&radialGradientBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{
-				hr
-			}
+			Error{ hr }
 			.AddTag(ErrorTags::Creation),
 			L"Given pointer is not a RadialGradientBrush"
 		);
@@ -277,9 +274,7 @@ namespace PGUI::UI
 		hr = ptr.As(&bitmapBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{
-				hr
-			}
+			Error{ hr }
 			.AddTag(ErrorTags::Creation),
 			L"Given pointer is not a BitmapBrush"
 		);
@@ -289,7 +284,7 @@ namespace PGUI::UI
 			const auto result = ExtractBitmapBrushParameters(bitmapBrush);
 			if (!result.has_value())
 			{
-				Logger::Info(L"Failed to extract BitmapBrush parameters: {}", result.error());
+				Logger::Info(result.error(), L"Failed to extract BitmapBrush parameters");
 				brush = EmptyBrush{ };
 				return;
 			}

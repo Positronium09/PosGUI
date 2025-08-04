@@ -298,18 +298,12 @@ export namespace PGUI
 
 			if (window->hWnd == NULL)
 			{
-				const auto errCode = GetLastError();
-				Error error{
-					errCode
-				};
+				Error error{ GetLastError() };
 				error
 					.AddTag(ErrorTags::Window)
 					.AddTag(ErrorTags::Creation);
-				Logger::Error(
-					error,
-					L"Window creation failed"
-				);
-				throw Exception{ errCode };
+				Logger::Critical(error, L"Window creation failed");
+				throw Exception{ error };
 			}
 
 			return window;
@@ -331,19 +325,12 @@ export namespace PGUI
 
 			if (window->hWnd == NULL)
 			{
-				const auto errCode = GetLastError();
-				Error error{
-					errCode
-				};
+				Error error{ GetLastError() };
 				error
 					.AddTag(ErrorTags::Window)
 					.AddTag(ErrorTags::Creation);
-				Logger::Error(
-					error,
-					L"Window creation failed"
-				);
-
-				throw Exception{ errCode };
+				Logger::Critical(error, L"Window creation failed");
+				throw Exception{ error };
 			}
 
 			childWindows.push_back(window);

@@ -28,6 +28,7 @@ export namespace PGUI::UI::Imaging
 		Write = GENERIC_WRITE,
 		ReadWrite = GENERIC_READ | GENERIC_WRITE
 	};
+	DEFINE_ENUM_FLAG_OPERATORS(DesiredAccess);
 
 	class BitmapDecoder : public ComPtrHolder<IWICBitmapDecoder>
 	{

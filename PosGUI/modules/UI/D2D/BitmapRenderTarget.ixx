@@ -29,7 +29,10 @@ export namespace PGUI::UI::D2D
 			if (const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(&bitmapRenderTarget);
 				FAILED(hr))
 			{
-				Logger::Error(L"Failed to create compatible render target {}", Error{ hr });
+				Logger::Error(
+					Error{ hr }
+					.AddTag(ErrorTags::D2D),
+					L"Failed to create compatible render target");
 				return;
 			}
 
@@ -47,9 +50,10 @@ export namespace PGUI::UI::D2D
 
 				if (FAILED(hr))
 				{
-					Logger::Error(L"Failed to create compatible render target {}", 
+					Logger::Error(
 						Error{ hr }
-					.AddDetail(L"Size", std::format(L"{}", size)));
+						.AddDetail(L"Size", std::format(L"{}", size)),
+						L"Failed to create compatible render target");
 					return;
 				}
 
@@ -61,10 +65,10 @@ export namespace PGUI::UI::D2D
 			if (const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(size, &bitmapRenderTarget);
 				FAILED(hr))
 			{
-				Logger::Error(L"Failed to create compatible render target {}", 
+				Logger::Error(
 					Error{ hr }
-					.AddTag(ErrorTags::Creation)
-				);
+					.AddTag(ErrorTags::D2D),
+					L"Failed to create compatible render target");
 				return;
 			}
 
@@ -86,11 +90,12 @@ export namespace PGUI::UI::D2D
 				&bitmapRenderTarget);
 			if (FAILED(hr))
 			{
-				Logger::Error(L"Failed to create compatible render target {}",
+				Logger::Error(
 					Error{ hr }
 					.AddDetail(L"Size", std::format(L"{}", size))
 					.AddDetail(L"PixelSize", std::format(L"{}", pixelSize))
-				);
+					.AddTag(ErrorTags::D2D),
+					L"Failed to create compatible render target");
 				return;
 			}
 			Set(bitmapRenderTarget);

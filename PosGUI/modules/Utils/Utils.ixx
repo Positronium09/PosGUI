@@ -15,7 +15,6 @@ export namespace PGUI
 	template <Enumeration T>
 	using UnderlyingType = std::underlying_type_t<T>;
 
-
 	template <typename T, typename... Types>
 	concept IsAnyOf = (std::same_as<T, Types> || ...);
 

@@ -57,5 +57,6 @@ export namespace PGUI::UI::Imaging
 		auto SetPalette(Palette palette) noexcept -> Error;
 
 		auto SetResolution(double dpiX, double dpiY) noexcept -> Error;
+		auto SetResolution(Size<double> dpi) noexcept -> Error;
 	};
 }

@@ -17,7 +17,7 @@ export namespace PGUI
 		static auto Create(
 			std::wstring_view className,
 			UINT style = CS_HREDRAW | CS_VREDRAW, HBRUSH backgroundBrush = nullptr,
-			HICON icon = nullptr, HCURSOR cursor = nullptr, HICON smIcon = nullptr) noexcept -> WindowClassPtr;
+			HICON icon = nullptr, HCURSOR cursor = nullptr, HICON smIcon = nullptr) -> WindowClassPtr;
 
 		WindowClass(const WindowClass&) = delete;
 

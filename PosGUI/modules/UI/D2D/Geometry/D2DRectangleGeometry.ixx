@@ -4,6 +4,8 @@ module;
 
 export module PGUI.UI.D2D.D2DRectangleGeometry;
 
+import std;
+
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
@@ -28,7 +30,10 @@ export namespace PGUI::UI::D2D
 			if (const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
 				FAILED(hr))
 			{
-				Logger::Error(L"Failed to create rectangle geometry with rect {}", rect);
+				Logger::Error(Error{ hr }
+					.AddDetail(L"Rect", std::format(L"{}", rect))
+					.AddTag(ErrorTags::D2D),
+					L"Failed to create rounded rectangle geometry");
 			}
 			
 		}

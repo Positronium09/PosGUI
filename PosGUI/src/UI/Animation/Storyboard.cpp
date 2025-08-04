@@ -166,10 +166,7 @@ namespace PGUI::UI::Animation
 			variable.GetRaw(),
 			transition.GetRaw(), startKeyFrame, endKeyFrame)
 		};
-		error
-			.AddDetail(L"Start Keyframe", std::to_wstring(startKeyFrame->_))
-			.AddDetail(L"End Keyframe", std::to_wstring(endKeyFrame->_))
-			.AddTag(ErrorTags::Animation);
+		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"AddTransitionBetweenKeyframes failed");
 		return error;
 	}
@@ -186,8 +183,6 @@ namespace PGUI::UI::Animation
 				nullptr, 0, registerForNext)
 		};
 		error
-			.AddDetail(L"Start Keyframe", std::to_wstring(startKeyFrame->_))
-			.AddDetail(L"End Keyframe", std::to_wstring(endKeyFrame->_))
 			.AddDetail(L"Iteration Count", std::format(L"{:.10F}", iterationCount))
 			.AddDetail(L"Register for Next", std::format(L"{}", registerForNext))
 			.AddTag(ErrorTags::Animation);

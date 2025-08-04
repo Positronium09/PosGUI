@@ -103,7 +103,7 @@ export namespace PGUI
 
 		[[nodiscard]] auto Type() const noexcept { return static_cast<PropVariantType>(var.vt); }
 
-		[[nodiscard]] auto GetValue() const -> PropVariantValue;
+		[[nodiscard]] auto GetValue() const noexcept -> PropVariantValue;
 
 		PROPVARIANT var{ };
 	};

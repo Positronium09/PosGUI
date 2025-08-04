@@ -58,7 +58,7 @@ export namespace PGUI::UI::Animation
 			KeyFrame startKeyFrame, KeyFrame endKeyFrame) const noexcept -> Error;
 
 		auto RepeatBetweenKeyframes(
-			KeyFrame startKeyframe, KeyFrame endKeyframe,
+			KeyFrame startKeyFrame, KeyFrame endKeyFrame,
 			double iterationCount, AnimationRepeatMode repeatMode,
 			/* iterationChangeHandler, id */ bool registerForNext = false) const noexcept -> Error;
 

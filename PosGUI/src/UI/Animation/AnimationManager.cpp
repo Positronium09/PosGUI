@@ -48,12 +48,7 @@ namespace PGUI::UI::Animation
 			instance->Get()->AbandonAllStoryboards()
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"AbandonAllStoryboards failed {}", error);
-		}
-
+		LogIfFailed(error, L"AbandonAllStoryboards failed");
 		return error;
 	}
 
@@ -63,12 +58,7 @@ namespace PGUI::UI::Animation
 			instance->Get()->Pause()
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Pause failed {}", error);
-		}
-
+		LogIfFailed(error, L"Pause failed");
 		return error;
 	}
 
@@ -78,12 +68,7 @@ namespace PGUI::UI::Animation
 			instance->Get()->Resume()
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Resume failed {}", error);
-		}
-
+		LogIfFailed(error, L"Resume failed");
 		return error;
 	}
 
@@ -93,12 +78,7 @@ namespace PGUI::UI::Animation
 			instance->Get()->Shutdown()
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"Shutdown failed {}", error);
-		}
-
+		LogIfFailed(error, L"Shutdown failed");
 		return error;
 	}
 
@@ -110,7 +90,6 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ hr };
 			error.AddTag(ErrorTags::Animation);
-
 			Logger::Error(L"Update failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -126,7 +105,6 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ hr };
 			error.AddTag(ErrorTags::Animation);
-
 			Logger::Error(L"CreateAnimationVariable failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -147,7 +125,6 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ hr };
 			error.AddTag(ErrorTags::Animation);
-
 			Logger::Error(L"CreateAnimationVariable failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -208,12 +185,7 @@ namespace PGUI::UI::Animation
 			instance->Get()->SetAnimationMode(static_cast<UI_ANIMATION_MODE>(mode))
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetAnimationMode failed {}", error);
-		}
-
+		LogIfFailed(error, L"SetAnimationMode failed");
 		return error;
 	}
 
@@ -223,12 +195,7 @@ namespace PGUI::UI::Animation
 			instance->Get()->SetDefaultLongestAcceptableDelay(delay)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetDefaultLongestAcceptableDelay failed {}", error);
-		}
-
+		LogIfFailed(error, L"SetDefaultLongestAcceptableDelay failed");
 		return error;
 	}
 
@@ -276,12 +243,7 @@ namespace PGUI::UI::Animation
 				currentTime)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"ScheduleTransition failed {}", error);
-		}
-
+		LogIfFailed(error, L"ScheduleTransition failed");
 		return error;
 	}
 
@@ -294,12 +256,7 @@ namespace PGUI::UI::Animation
 			registerForNext)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetManagerEventHandler failed {}", error);
-		}
-
+		LogIfFailed(error, L"SetManagerEventHandler failed");
 		return error;
 	}
 
@@ -309,12 +266,7 @@ namespace PGUI::UI::Animation
 			Get()->SetManagerEventHandler(nullptr, registerForNext)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetManagerEventHandler failed {}", error);
-		}
-
+		LogIfFailed(error, L"SetManagerEventHandler failed");
 		return error;
 	}
 }

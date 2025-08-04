@@ -30,6 +30,7 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Logger::Error(L"Failed to create compatible render target {}", Error{ hr });
+				return;
 			}
 
 			Set(bitmapRenderTarget);
@@ -101,14 +102,20 @@ export namespace PGUI::UI::D2D
 			auto hr = Get()->GetBitmap(&bitmap);
 			if (FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to get bitmap");
+				return Unexpected{ error };
 			}
 
 			ComPtr<ID2D1Bitmap1> bitmap1;
 			hr = bitmap.As(&bitmap1);
 			if (FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to cast bitmap to ID2D1Bitmap1 interface");
+				return Unexpected{ error };
 			}
 
 			return D2DBitmap{ bitmap1 };

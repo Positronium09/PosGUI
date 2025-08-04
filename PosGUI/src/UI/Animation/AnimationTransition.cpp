@@ -23,10 +23,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetDimension(&dimension);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get dimension of animation transition");
+			return Unexpected{ error };
 		}
 
 		return dimension;
@@ -38,10 +38,10 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->GetDuration(&duration);
 			FAILED(hr))
 		{
-			return Unexpected{
-				Error{ hr }
-				.AddTag(ErrorTags::Animation)
-			};
+			Error error{ hr };
+			error.AddTag(ErrorTags::Animation);
+			Logger::Error(error, L"Failed to get duration of animation transition");
+			return Unexpected{ error };
 		}
 
 		return duration;
@@ -58,12 +58,7 @@ namespace PGUI::UI::Animation
 			Get()->SetInitialValue(value)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetInitialValue failed {}", error);
-		}
-
+		LogIfFailed(error, L"Failed to set initial value");
 		return error;
 	}
 
@@ -75,12 +70,7 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(values.size()))
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetInitialValue failed {}", error);
-		}
-
+		LogIfFailed(error, L"Failed to set initial vector value");
 		return error;
 	}
 
@@ -90,12 +80,7 @@ namespace PGUI::UI::Animation
 			Get()->SetInitialVelocity(velocity)
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetInitialVelocity failed {}", error);
-		}
-
+		LogIfFailed(error, L"Failed to set initial velocity");
 		return error;
 	}
 
@@ -107,12 +92,7 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(velocities.size()))
 		};
 		error.AddTag(ErrorTags::Animation);
-
-		if (error.IsFailure())
-		{
-			Logger::Error(L"SetInitialVelocity failed {}", error);
-		}
-
+		LogIfFailed(error, L"Failed to set initial vector velocity");
 		return error;
 	}
 }

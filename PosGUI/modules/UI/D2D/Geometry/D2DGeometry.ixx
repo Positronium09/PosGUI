@@ -41,7 +41,10 @@ export namespace PGUI::UI::D2D
 			if (auto hr = this->Get()->GetBounds(worldTransform, &bounds);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to get bounds");
+				return Unexpected{ error };
 			}
 
 			return RectF{ bounds };
@@ -60,7 +63,10 @@ export namespace PGUI::UI::D2D
 				worldTransform, flatteningTolerance, &bounds);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to get widened bounds");
+				return Unexpected{ error };
 			}
 			
 
@@ -77,7 +83,10 @@ export namespace PGUI::UI::D2D
 				flatteningTolerance, &area);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to compute area");
+				return Unexpected{ error };
 			}
 
 			return area;
@@ -94,7 +103,10 @@ export namespace PGUI::UI::D2D
 				flatteningTolerance, &contains);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to check if point is contained in fill");
+				return Unexpected{ error };
 			}
 
 			return contains;
@@ -112,7 +124,10 @@ export namespace PGUI::UI::D2D
 				worldTransform, flatteningTolerance, &contains);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to check if point is contained in stroke");
+				return Unexpected{ error };
 			}
 
 			return contains;
@@ -128,7 +143,10 @@ export namespace PGUI::UI::D2D
 				flatteningTolerance, &length);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to compute length");
+				return Unexpected{ error };
 			}
 
 			return length;
@@ -147,7 +165,10 @@ export namespace PGUI::UI::D2D
 				&point, &unitTangentVector);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to compute point at length");
+				return Unexpected{ error };
 			}
 
 			return PointAndUnitTangent{ .point = point, .unitTangentVector = unitTangentVector };
@@ -164,7 +185,10 @@ export namespace PGUI::UI::D2D
 				flatteningTolerance, &relation);
 				FAILED(hr))
 			{
-				return Unexpected{ Error{ hr } };
+				Error error{ hr };
+				error.AddTag(ErrorTags::D2D);
+				Logger::Error(error, L"Failed to compare with geometry");
+				return Unexpected{ error };
 			}
 
 			return static_cast<GeometryRelation>(relation);

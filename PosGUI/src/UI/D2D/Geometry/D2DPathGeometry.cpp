@@ -103,6 +103,7 @@ namespace PGUI::UI::D2D
 
 		if (!sinkResult.has_value())
 		{
+			Logger::Error(sinkResult.error(), L"Cannot open sink");
 			return Unexpected{
 				sinkResult.error()
 			};
@@ -188,6 +189,7 @@ namespace PGUI::UI::D2D
 		if (auto error = sink.Close();
 			error.IsFailure())
 		{
+			Logger::Error(error, L"Failed to close geometry sink");
 			return Unexpected{
 				error
 			};

@@ -41,7 +41,7 @@ export namespace PGUI::DataBinding
 
 		virtual ~Property() = default;
 
-		auto operator=(const Property& other) noexcept -> Property&
+		virtual auto operator=(const Property& other) noexcept -> Property&
 		{
 			if (this != &other)
 			{
@@ -51,7 +51,7 @@ export namespace PGUI::DataBinding
 			return *this;
 		}
 
-		auto operator=(Property&& other) noexcept -> Property&
+		virtual auto operator=(Property&& other) noexcept -> Property&
 		{
 			if (this != &other)
 			{
@@ -115,43 +115,39 @@ export namespace PGUI::DataBinding
 			valueChangedEvent.RemoveCallback(id);
 		}
 
-		auto operator=(const T& val) noexcept -> Property&
+		virtual auto operator=(const T& val) noexcept -> Property&
 		{
 			Set(val);
 			return *this;
 		}
 
-		auto operator=(T&& val) noexcept -> Property&
+		virtual auto operator=(T&& val) noexcept -> Property&
 		{
 			Set(val);
 			return *this;
 		}
 
-		explicit(false) operator const T&() const noexcept { return Get(); }
-		explicit(false) operator T&() noexcept { return Get(); }
-
-		auto operator==(const Property& other) const noexcept -> bool
-		{
-			std::scoped_lock lock{ mutex };
-			return value == other.Get();
-		}
-
-		auto operator==(const T& val) const noexcept -> bool
+		virtual auto operator==(const T& val) const noexcept -> bool
 		{
 			std::scoped_lock lock{ mutex };
 			return value == val;
 		}
 
-		auto operator<=>(const Property& other) const noexcept
-		{
-			std::scoped_lock lock{ mutex };
-			return value <=> other.Get();
-		}
-
-		auto operator<=>(const T& val) const noexcept
+		virtual auto operator<=>(const T& val) const noexcept -> decltype(std::declval<T&>() <=> std::declval<const T&>())
 		{
 			std::scoped_lock lock{ mutex };
 			return value <=> val;
+		}
+
+		virtual auto operator*() noexcept -> T&
+		{
+			std::scoped_lock lock{ mutex };
+			return value;
+		}
+		virtual auto operator*() const noexcept -> const T&
+		{
+			std::scoped_lock lock{ mutex };
+			return value;
 		}
 
 		private:

@@ -55,42 +55,29 @@ export namespace PGUI::DataBinding
 			}
 		}
 
-		auto operator=(const T& val) noexcept -> ValidatedProperty&
+		auto operator=(const T& val) noexcept -> ValidatedProperty& override
 		{
 			Set(val);
 			return *this;
 		}
 
-		auto operator=(T&& val) noexcept -> ValidatedProperty&
+		auto operator=(T&& val) noexcept -> ValidatedProperty& override
 		{
 			Set(val);
 			return *this;
 		}
 
-		explicit(false) operator const T&() const noexcept { return Property<T, Mutex>::Get(); }
-		explicit(false) operator T&() noexcept { return Property<T, Mutex>::Get(); }
-
-		auto operator==(const Property<T, Mutex>& other) const noexcept -> bool
-		{
-			return Property<T, Mutex>::operator==(other);
-		}
-
-		auto operator==(const T& val) const noexcept -> bool
+		auto operator==(const T& val) const noexcept -> bool override
 		{
 			return Property<T, Mutex>::operator==(val);
 		}
 
-		auto operator<=>(const Property<T, Mutex>& other) const noexcept
-		{
-			return Property<T, Mutex>::operator<=>(other);
-		}
-
-		auto operator<=>(const T& val) const noexcept
+		auto operator<=>(const T& val) const noexcept -> decltype(std::declval<T&>() <=> std::declval<const T&>()) override
 		{
 			return Property<T, Mutex>::operator<=>(val);
 		}
 
-		auto operator=(const Property<T, Mutex>& other) noexcept -> ValidatedProperty&
+		auto operator=(const Property<T, Mutex>& other) noexcept -> ValidatedProperty& override
 		{
 			if (this != &other)
 			{
@@ -108,7 +95,7 @@ export namespace PGUI::DataBinding
 			return *this;
 		}
 
-		auto operator=(Property<T, Mutex>&& other) noexcept -> ValidatedProperty&
+		auto operator=(Property<T, Mutex>&& other) noexcept -> ValidatedProperty& override
 		{
 			if (this != &other)
 			{
@@ -124,6 +111,19 @@ export namespace PGUI::DataBinding
 				Set(std::move(other.Get()));
 			}
 			return *this;
+		}
+		auto operator*() noexcept -> T& override
+		{
+			return Property<T, Mutex>::operator*();
+		}
+		auto operator*() const noexcept -> const T& override
+		{
+			return Property<T, Mutex>::operator*();
+		}
+
+		[[nodiscard]] auto GetValidators() const noexcept -> const std::vector<Validator>&
+		{
+			return validators;
 		}
 
 		private:

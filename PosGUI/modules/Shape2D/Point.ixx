@@ -16,7 +16,7 @@ export namespace PGUI
 
 		[[nodiscard]] static auto Distance(const Point a, const Point b) noexcept
 		{
-			return static_cast<T>(std::sqrt(static_cast<double>(DistanceSqr(a, b))));
+			return static_cast<T>(std::sqrtl(static_cast<long double>(DistanceSqr(a, b))));
 		}
 
 		[[nodiscard]] static constexpr auto DistanceSqr(Point a, Point b) noexcept
@@ -116,7 +116,8 @@ export namespace PGUI
 			return Point::DistanceSqr(*this, other);
 		}
 
-		auto Rotate(const float angleDegrees, Point point = Point{ }) noexcept -> void
+		template<typename F> requires std::is_arithmetic_v<F>
+		auto Rotate(const F angleDegrees, Point point = Point{ }) noexcept -> void
 		{
 			x -= point.x;
 			y -= point.y;
@@ -131,11 +132,41 @@ export namespace PGUI
 			y += point.y;
 		}
 
-		[[nodiscard]] auto Rotated(float angleDegrees, Point<T> centerPoint = Point<T>{ }) noexcept
+		template<typename F> requires std::is_arithmetic_v<F>
+		[[nodiscard]] auto Rotated(const F angleDegrees, Point centerPoint = Point{ }) noexcept
 		{
 			auto point = *this;
 			point.Rotate(angleDegrees, centerPoint);
 			return point;
+		}
+
+		constexpr auto Shift(const T dx, const T dy) noexcept -> void
+		{
+			x += dx;
+			y += dy;
+		}
+
+		constexpr auto Shift(const Point& other) noexcept -> void
+		{
+			x += other.x;
+			y += other.y;
+		}
+
+		[[nodiscard]] constexpr auto Shifted(const T dx, const T dy) const noexcept
+		{
+			return Point{ x + dx, y + dy };
+		}
+
+		[[nodiscard]] constexpr auto Shifted(const Point& other) const noexcept
+		{
+			auto point = *this;
+			point.Shift(other);
+			return point;
+		}
+
+		[[nodiscard]] constexpr auto IsZero() const noexcept -> bool
+		{
+			return x == static_cast<T>(0) && y == static_cast<T>(0);
 		}
 
 		template <typename U> requires std::is_arithmetic_v<U>

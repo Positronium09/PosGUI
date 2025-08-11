@@ -8,7 +8,7 @@ namespace PGUI::UI::Layout
 		const LayoutOrientation orientation,
 		const MainAxisAlignment mainAxisAlignment,
 		const CrossAxisAlignment crossAxisAlignment,
-		const LayoutPadding padding,
+		const StackLayoutPadding padding,
 		const long gap) noexcept :
 		LayoutPanel{ WindowClass::Create(L"PGUI_StackLayout") },
 		orientation{ orientation }, mainAxisAlignment{ mainAxisAlignment },
@@ -31,7 +31,7 @@ namespace PGUI::UI::Layout
 		RearrangeChildren();
 	}
 
-	auto StackLayout::SetPadding(const LayoutPadding _padding) noexcept -> void
+	auto StackLayout::SetPadding(const StackLayoutPadding _padding) noexcept -> void
 	{
 		padding = _padding;
 		RearrangeChildren();

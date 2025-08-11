@@ -18,4 +18,5 @@ export namespace PGUI::ErrorTags
 	constexpr auto Direct2D = D2D;
 	constexpr auto Imaging = L"Imaging"sv;
 	constexpr auto Font = L"Font"sv;
+	constexpr auto STL = L"STL"sv;
 }

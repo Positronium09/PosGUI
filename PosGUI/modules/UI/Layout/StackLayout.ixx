@@ -10,6 +10,14 @@ import PGUI.UI.Layout.LayoutPanel;
 
 export namespace PGUI::UI::Layout
 {
+	struct StackLayoutPadding
+	{
+		long startPad = 0;
+		long endingPad = 0;
+		long crossStartPad = 0;
+		long crossEndPad = 0;
+	};
+
 	class StackLayout : public LayoutPanel
 	{
 		public:
@@ -17,7 +25,7 @@ export namespace PGUI::UI::Layout
 			LayoutOrientation orientation,
 			MainAxisAlignment mainAxisAlignment = MainAxisAlignment::Center,
 			CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment::Center,
-			LayoutPadding padding = { 0, 0, 0, 0 },
+			StackLayoutPadding padding = { 0, 0, 0, 0 },
 			long gap = 0) noexcept;
 
 
@@ -35,14 +43,14 @@ export namespace PGUI::UI::Layout
 		auto SetGap(long gap) noexcept -> void;
 		[[nodiscard]] auto GetGap() const noexcept { return gap; }
 
-		auto SetPadding(LayoutPadding padding) noexcept -> void;
+		auto SetPadding(StackLayoutPadding padding) noexcept -> void;
 		[[nodiscard]] auto GetPadding() const noexcept { return padding; }
 
 		private:
 		LayoutOrientation orientation;
 		MainAxisAlignment mainAxisAlignment;
 		CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment::Center;
-		LayoutPadding padding;
+		StackLayoutPadding padding;
 		long gap = 0;
 
 		auto OnChildAdded(const WindowPtr<Window>&) -> void override;

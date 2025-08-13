@@ -72,14 +72,33 @@ namespace PGUI::UI::Layout
 	{
 		needsSorting = true;
 
+		const auto boundChangeHandler = std::bind_front(&GridLayout::PropertyChangeHandler, this);
+		const auto boundColumnSpanValidator = std::bind_front(&GridLayout::ColumnSpanValidator, this,
+		                                                      *properties.column);
+
 		const auto result = HasEntry(hwnd);
 		if (!result.has_value())
 		{
 			itemProperties.emplace_back(hwnd, properties);
+			auto& prop = itemProperties.back().second;
+
+			prop.column.AddObserver(boundChangeHandler);
+			prop.row.AddObserver(boundChangeHandler);
+			prop.rowSpan.AddObserver(boundChangeHandler);
+			prop.columnSpan.AddObserver(boundChangeHandler);
+			prop.columnSpan.AddValidator(boundColumnSpanValidator);
+
 			return;
 		}
 
-		itemProperties.at(*result).second = properties;
+		auto& prop = itemProperties.at(*result).second;
+		prop = properties;
+
+		prop.column.AddObserver(boundChangeHandler);
+		prop.row.AddObserver(boundChangeHandler);
+		prop.rowSpan.AddObserver(boundChangeHandler);
+		prop.columnSpan.AddObserver(boundChangeHandler);
+		prop.columnSpan.AddValidator(boundColumnSpanValidator);
 
 		RearrangeChildren();
 	}
@@ -103,16 +122,44 @@ namespace PGUI::UI::Layout
 		RearrangeChildren();
 	}
 
+	auto GridLayout::RemoveColumnDefinitionAtIndex(const std::size_t index) noexcept -> Error
+	{
+		if (index >= columnDefinitions.size())
+		{
+			return Error{ E_INVALIDARG }
+				.AddTag(ErrorTags::STL);
+		}
+
+		if (columnDefinitions.size() == 1)
+		{
+			return Error{ E_INVALIDARG }
+				.SuggestFix(L"Cannot remove the last column definition");
+		}
+
+		columnDefinitions.erase(
+			std::next(columnDefinitions.begin(), static_cast<std::ptrdiff_t>(index)));
+
+		return Error{ S_OK };
+	}
+
+	auto GridLayout::RemoveRowDefinitionAtIndex(const std::size_t index) noexcept -> Error
+	{
+		if (index >= rowDefinitions.size())
+		{
+			return Error{ E_INVALIDARG }
+				.AddTag(ErrorTags::STL);
+		}
+
+		rowDefinitions.erase(
+			std::next(rowDefinitions.begin(), static_cast<std::ptrdiff_t>(index)));
+
+		return Error{ S_OK };
+	}
+
 	auto GridLayout::RearrangeChildren() noexcept -> void
 	{
 		if (GetChildWindows().empty())
 		{
-			return;
-		}
-		if (GetChildWindows().size() == 1)
-		{
-			const auto& child = GetChildWindows().front();
-			child->MoveAndResize({ padding.left, padding.top }, GetClientSize());
 			return;
 		}
 
@@ -173,6 +220,7 @@ namespace PGUI::UI::Layout
 			auto actualColumnSpan = columnSpan;
 			if (column != AUTO_PLACE)
 			{
+				// Shouldnt happen but better safe than sorry
 				actualColumnSpan = std::min(
 					columnSpan,
 					static_cast<long>(columnSizes.size()) - column
@@ -428,6 +476,36 @@ namespace PGUI::UI::Layout
 			rowSizes.push_back(size);
 		}
 
+		for (auto& size : rowSizes)
+		{
+			if (size < minCellSize)
+			{
+				size = minCellSize;
+			}
+		}
+
+		if (!growToFit)
+		{
+			return rowSizes;
+		}
+
+		const auto totalRowSize =
+			std::accumulate(rowSizes.begin(),
+			                rowSizes.end(), 0L) +
+			(rowCount - 1) * rowGap;
+
+		if (const auto totalSpace = GetClientSize().cy - (padding.top + padding.bottom);
+			totalRowSize < totalSpace)
+		{
+			const auto delta = totalSpace - totalRowSize;
+			const auto toAdd = static_cast<float>(delta) / rowCount;
+
+			for (auto& size : rowSizes)
+			{
+				size += static_cast<long>(toAdd);
+			}
+		}
+
 		return rowSizes;
 	}
 
@@ -435,15 +513,15 @@ namespace PGUI::UI::Layout
 	{
 		std::size_t maxDefinedColumn = 0;
 
-		if (const auto maxRow = std::ranges::max_element(
+		if (const auto maxColumn = std::ranges::max_element(
 				itemProperties,
 				[](const auto& lhs, const auto& rhs) noexcept
 				{
 					return *lhs.second.column + *lhs.second.columnSpan < *rhs.second.column + *rhs.second.columnSpan;
 				});
-			maxRow != itemProperties.end())
+			maxColumn != itemProperties.end())
 		{
-			maxDefinedColumn = *maxRow->second.column + *maxRow->second.columnSpan - 1;
+			maxDefinedColumn = *maxColumn->second.column + *maxColumn->second.columnSpan - 1;
 		}
 
 		const auto columnCount = std::max(maxDefinedColumn + 1, columnDefinitions.size());
@@ -489,6 +567,34 @@ namespace PGUI::UI::Layout
 			const auto fractionalSize = std::get<FractionalSize>(autoRowSize);
 			const auto size = static_cast<long>(remainingSpace * (fractionalSize / totalFractionalSize));
 			columnSizes.push_back(size);
+		}
+
+		for (auto& size : columnSizes)
+		{
+			if (size < minCellSize)
+			{
+				size = minCellSize;
+			}
+		}
+
+		if (!growToFit)
+		{
+			return columnSizes;
+		}
+
+		const auto totalColumnSize =
+			std::accumulate(columnSizes.begin(),
+			                columnSizes.end(), 0L) +
+			(columnCount - 1) * columnGap;
+		if (const auto totalSpace = GetClientSize().cx - (padding.left + padding.right);
+			totalColumnSize < totalSpace)
+		{
+			const auto delta = totalSpace - totalColumnSize;
+			const auto toAdd = static_cast<float>(delta) / columnCount;
+			for (auto& size : columnSizes)
+			{
+				size += static_cast<long>(toAdd);
+			}
 		}
 
 		return columnSizes;

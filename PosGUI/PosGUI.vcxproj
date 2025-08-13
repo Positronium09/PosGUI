@@ -43,6 +43,7 @@
     <ClCompile Include="modules\UI\Layout\LayoutPanel.ixx" />
     <ClCompile Include="modules\UI\Layout\LayoutStructs.ixx" />
     <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
+    <ClCompile Include="modules\ScopedTimer.ixx" />
     <ClCompile Include="modules\Window.ixx" />
     <ClCompile Include="modules\Window\WindowInterface.ixx" />
     <ClCompile Include="modules\PropVariant.ixx" />

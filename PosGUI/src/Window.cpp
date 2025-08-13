@@ -9,6 +9,7 @@ import std;
 
 import :Impl;
 import PGUI.Utils;
+import PGUI.ScopedTimer;
 import PGUI.ErrorHandling;
 
 namespace PGUI
@@ -597,6 +598,10 @@ namespace PGUI
 	// ReSharper disable once CppInconsistentNaming
 	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 	{
+		ScopedTimer timer{
+			std::format(L"MSG {}", WindowMsgToText(msg))
+		};
+
 		if (msg == WM_NCCREATE) [[unlikely]]
 		{
 			const auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
@@ -618,8 +623,8 @@ namespace PGUI
 
 		if (msg == WM_TIMER)
 		{
-			const auto timerId = wParam;
-			if (window->timerMap.contains(timerId))
+			if (const auto timerId = wParam;
+				window->timerMap.contains(timerId))
 			{
 				const auto& callback = window->timerMap.at(timerId);
 				callback(timerId);
@@ -634,7 +639,7 @@ namespace PGUI
 
 		MessageHandlerResult result{ 0 };
 		auto hookerHandled = false;
-
+		
 		for (const auto& hooker : window->beforeHookers)
 		{
 			const auto& handlers = hooker.get().GetHandlers();
@@ -666,6 +671,7 @@ namespace PGUI
 				}
 			}
 		}
+		
 
 		if (!window->messageHandlerMap.contains(msg))
 		{

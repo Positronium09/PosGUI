@@ -159,6 +159,19 @@ export namespace PGUI::UI::Layout
 			RearrangeChildren();
 		}
 
+		auto RemoveColumnDefinitionAtIndex(std::size_t index) noexcept -> Error;
+		auto RemoveRowDefinitionAtIndex(std::size_t index) noexcept -> Error;
+
+		auto SetGrowToFit(const bool grow) noexcept -> void
+		{
+			growToFit = grow;
+			RearrangeChildren();
+		}
+		[[nodiscard]] auto GetGrowToFit() const noexcept
+		{
+			return growToFit;
+		}
+
 		auto SetPadding(const GridLayoutPadding& padding_) noexcept -> void
 		{
 			padding = padding_;
@@ -176,7 +189,7 @@ export namespace PGUI::UI::Layout
 
 			return Error{ S_OK };
 		}
-		[[nodiscard]] auto GetAutoFillSize() const noexcept
+		[[nodiscard]] auto GetAutoRowSize() const noexcept
 		{
 			return autoRowSize;
 		}
@@ -189,6 +202,7 @@ export namespace PGUI::UI::Layout
 		FixedSize rowGap = 0;
 		FixedSize columnGap = 0;
 		GridCellDefinition autoRowSize = 100L;
+		bool growToFit = false;
 		GridLayoutPadding padding{ 0, 0, 0, 0 };
 
 		std::vector<GridCellDefinition> columnDefinitions{
@@ -219,6 +233,15 @@ export namespace PGUI::UI::Layout
 		auto SortProperties() noexcept -> void;
 		auto GetRowSizesFromDefinition() const noexcept -> std::vector<long>;
 		auto GetColumnSizesFromDefinition() const noexcept -> std::vector<long>;
+
+		auto PropertyChangeHandler(const long&) noexcept
+		{
+			needsSorting = true;
+		}
+		auto ColumnSpanValidator(const long& value, const long column) const noexcept
+		{
+			return column + value <= columnDefinitions.size();
+		}
 
 		auto OnChildAdded(const WindowPtr<Window>&) -> void override;
 		auto OnChildRemoved(HWND hwnd) -> void override;

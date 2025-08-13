@@ -4,7 +4,7 @@ import std;
 
 export namespace PGUI
 {
-	enum class EventPriority
+	enum class CallbackPriority
 	{
 		Low = 0,
 		Normal = 1,
@@ -30,12 +30,18 @@ export namespace PGUI
 		struct CallbackData
 		{
 			CallbackId id;
+			CallbackPriority priority;
 			Callback callback;
+
+			auto operator<=>(const CallbackData& other) const noexcept -> std::partial_ordering
+			{
+				return std::to_underlying(priority) <=> std::to_underlying(other.priority);
+			}
 		};
 
 		public:
 		template <CallbackType<Args...> Callable>
-		auto AddCallback(const Callable& callback, EventPriority priority = EventPriority::Normal) noexcept
+		auto AddCallback(const Callable& callback, CallbackPriority priority = CallbackPriority::Normal) noexcept
 		{
 			using CallbackType = std::conditional_t<
 				std::is_same_v<bool, std::invoke_result_t<Callable, Args...>>,
@@ -44,8 +50,8 @@ export namespace PGUI
 
 			std::scoped_lock lock{ callbackMutex };
 
-			CallbackData data{ nextCallbackId, CallbackType{ callback } };
-			callbacks[2 - static_cast<int>(priority)].push_back(data);
+			CallbackData data{ nextCallbackId, priority, CallbackType{ callback } };
+			callbacks.insert(data);
 
 			return nextCallbackId++;
 		}
@@ -54,75 +60,62 @@ export namespace PGUI
 		{
 			std::scoped_lock lock{ callbackMutex };
 
-			for (auto& callbackList : callbacks)
+			std::erase_if(callbacks,
+				[id](const CallbackData& data) noexcept
 			{
-				auto erased = std::erase_if(
-					callbackList,
-					[id](const CallbackData& data) { return data.id == id; });
-				if (erased > 0)
-				{
-					break;
-				}
-			}
+				return data.id == id;
+			});
 		}
 
 		auto ClearCallbacks() noexcept -> void
 		{
 			std::scoped_lock lock{ callbackMutex };
 
-			for (auto& callbackList : callbacks)
-			{
-				callbackList.clear();
-			}
+			callbacks.clear();
 		}
 
 		auto Invoke(Args... args) const noexcept -> void
 		{
 			std::scoped_lock lock{ callbackMutex };
 
-			for (const auto& callbackVector : callbacks)
+			for ([[maybe_unused]] const auto& [id, priority, callback] : callbacks)
 			{
-				for (const auto& [id, callback] : callbackVector)
+				if (std::holds_alternative<CancellingCallback>(callback))
 				{
-					if (std::holds_alternative<CancellingCallback>(callback))
+					auto& cancellingCallback = std::get<CancellingCallback>(callback);
+					if (!cancellingCallback(std::forward<Args>(args)...))
 					{
-						auto& cancellingCallback = std::get<CancellingCallback>(callback);
-						if (!cancellingCallback(std::forward<Args>(args)...))
-						{
-							return;
-						}
-					}
-					else
-					{
-						auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
-						nonCancellingCallback(std::forward<Args>(args)...);
+						return;
 					}
 				}
+				else
+				{
+					auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
+					nonCancellingCallback(std::forward<Args>(args)...);
+				}
 			}
+
 		}
 
 		auto InvokeAsync(Args... args) const noexcept -> void
 		{
 			std::scoped_lock lock{ callbackMutex };
 
-			for (const auto& callbackVector : callbacks)
+			for ([[maybe_unused]] const auto& [id, priority, callback] : callbacks)
 			{
-				for (const auto& [id, callback] : callbackVector)
+				auto future = std::async(std::launch::async, [callback, args...]
 				{
-					auto future = std::async(std::launch::async, [callback, args...]()
+					if (std::holds_alternative<CancellingCallback>(callback))
 					{
-						if (std::holds_alternative<CancellingCallback>(callback))
-						{
-							auto& cancellingCallback = std::get<CancellingCallback>(callback);
-							cancellingCallback(std::forward<Args>(args)...);
-						}
-						else
-						{
-							auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
-							nonCancellingCallback(std::forward<Args>(args)...);
-						}
-					});
-				}
+						auto& cancellingCallback = std::get<CancellingCallback>(callback);
+						cancellingCallback(std::forward<Args>(args)...);
+					}
+					else
+					{
+						auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
+						nonCancellingCallback(std::forward<Args>(args)...);
+					}
+				});
 			}
 		}
 
@@ -147,7 +140,7 @@ export namespace PGUI
 		private:
 		CallbackId nextCallbackId = 0;
 		mutable std::mutex callbackMutex;
-		std::array<std::vector<CallbackData>, 3> callbacks;
+		std::set<CallbackData> callbacks;
 	};
 
 	template <typename... Args>
@@ -156,7 +149,7 @@ export namespace PGUI
 		using EventType = Event<Args...>;
 
 		public:
-		ScopedCallback(EventType& event, CallbackId id) noexcept :
+		ScopedCallback(EventType& event, const CallbackId id) noexcept :
 			event{ event }, id{ id }
 		{
 		}
@@ -168,11 +161,11 @@ export namespace PGUI
 
 		ScopedCallback(ScopedCallback&&) = default;
 
-		auto operator=(ScopedCallback&&) -> ScopedCallback & = default;
+		auto operator=(ScopedCallback&&) -> ScopedCallback& = default;
 
 		ScopedCallback(const ScopedCallback&) = delete;
 
-		auto operator=(const ScopedCallback&) -> ScopedCallback & = delete;
+		auto operator=(const ScopedCallback&) -> ScopedCallback& = delete;
 
 		private:
 		EventType& event;

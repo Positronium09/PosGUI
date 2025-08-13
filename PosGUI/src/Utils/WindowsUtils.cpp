@@ -9,9 +9,8 @@ import std;
 
 import PGUI.Utils;
 import PGUI.ErrorHandling;
-
 // ReSharper disable StringLiteralTypo
-constexpr std::array<std::wstring_view, 1024> messageStrings = {
+constexpr std::array<std::wstring_view, 1025> messageStrings = {
 	L"WM_NULL",
 	L"WM_CREATE",
 	L"WM_DESTROY",
@@ -74,7 +73,7 @@ constexpr std::array<std::wstring_view, 1024> messageStrings = {
 	L"WM_CLIENTSHUTDOWN",
 	L"WM_DDEMLEVENT",
 	L"WM_GETOBJECT",
-	L"<undefined>",
+	L"WM_CALCSCROLL",
 	L"<undefined>",
 	L"WM_TESTING",
 	L"WM_COMPACTING",
@@ -1035,7 +1034,8 @@ constexpr std::array<std::wstring_view, 1024> messageStrings = {
 	L"<WM_CBT_RESERVED__reserved_3fc>",
 	L"<WM_CBT_RESERVED__reserved_3fd>",
 	L"<WM_CBT_RESERVED__reserved_3fe>",
-	L"WM_CBT_RESERVED_LAST"
+	L"WM_CBT_RESERVED_LAST",
+	L"WM_USER"
 };
 // ReSharper restore StringLiteralTypo
 
@@ -1088,6 +1088,11 @@ namespace PGUI
 		if (msg >= messageStrings.size())
 		{
 			return L"<undefined>";
+		}
+		if (msg == WM_USER + 7)
+		{
+			// ReSharper disable once StringLiteralTypo
+			return L"WM_GETISHELLBROWSER";
 		}
 		return messageStrings.at(msg);
 	}

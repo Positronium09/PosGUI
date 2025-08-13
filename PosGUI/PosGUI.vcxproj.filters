@@ -492,5 +492,8 @@
     <ClCompile Include="modules\ErrorHandling\Tags.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\ScopedTimer.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

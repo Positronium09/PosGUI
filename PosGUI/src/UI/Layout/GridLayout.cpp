@@ -49,14 +49,21 @@ namespace PGUI::UI::Layout
 		LayoutPanel{ WindowClass::Create(L"PGUI_GridLayout") }
 	{ }
 
-	auto GridLayout::SetRowGap(const long gap) noexcept -> void
+	auto GridLayout::SetRowGap(const FixedSize gap) noexcept -> void
 	{
 		rowGap = gap;
 		RearrangeChildren();
 	}
 
-	auto GridLayout::SetColumnGap(const long gap) noexcept -> void
+	auto GridLayout::SetColumnGap(const FixedSize gap) noexcept -> void
 	{
+		columnGap = gap;
+		RearrangeChildren();
+	}
+
+	auto GridLayout::SetGap(const FixedSize gap) noexcept -> void
+	{
+		rowGap = gap;
 		columnGap = gap;
 		RearrangeChildren();
 	}
@@ -90,7 +97,7 @@ namespace PGUI::UI::Layout
 		return Unexpected{ error };
 	}
 
-	auto GridLayout::SetMinCellSize(const long size) noexcept -> void
+	auto GridLayout::SetMinCellSize(const FixedSize size) noexcept -> void
 	{
 		minCellSize = size;
 		RearrangeChildren();
@@ -98,14 +105,16 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::RearrangeChildren() noexcept -> void
 	{
-		//TODO(Drunk) keep track of occupied cells with LinearPosition and keep track of the next available cell
-		//TODO(Drunk) no sorting needed for performance
-		//TODO(Drunk) if columnspan + column > available then move to the next row
-		//TODO(Drunk) if two manually placed windows overlap allow overlapping
-		//TODO(Drunk) if the next is filled skip and update the next available cell
-		//TODO(Drunk) with custom grid and row spans there can be empty cells ignore those
-		//TODO(Drunk) if column or row is out of range just expand the grid with 1fr and 1fr for missing columns and rows
-		//TODO(Drunk) rest is easy dawg u can do it
+		if (GetChildWindows().empty())
+		{
+			return;
+		}
+		if (GetChildWindows().size() == 1)
+		{
+			const auto& child = GetChildWindows().front();
+			child->MoveAndResize({ padding.left, padding.top }, GetClientSize());
+			return;
+		}
 
 		if (needsSorting)
 		{
@@ -113,24 +122,56 @@ namespace PGUI::UI::Layout
 			needsSorting = false;
 		}
 
+		const auto rowSizes = GetRowSizesFromDefinition();
+		const auto columnSizes = GetColumnSizesFromDefinition();
+
 		std::set<std::pair<long, long>> occupied;
 
-		for (const auto& [hwnd, properties] : itemProperties)
-		{ }
+		const auto placeFixedPosition = [&occupied, &rowSizes, &columnSizes, this](
+			const long row, const long column,
+			const long rowSpan, const long columnSpan) -> RectL
+		{
+			const PointL position{
+				std::accumulate(
+					columnSizes.begin(), columnSizes.begin() + column,
+					0L) + column * columnGap + padding.left,
+				std::accumulate(
+					rowSizes.begin(), rowSizes.begin() + row,
+					0L) + row * rowGap + padding.top
+			};
+			const SizeL size{
+				std::accumulate(
+					columnSizes.begin() + column,
+					columnSizes.begin() + column + columnSpan,
+					0L) + (columnSpan - 1) * columnGap,
+				std::accumulate(
+					rowSizes.begin() + row,
+					rowSizes.begin() + row + rowSpan,
+					0L) + (rowSpan - 1) * rowGap
+			};
+
+			OccupySet(occupied, row, column, rowSpan, columnSpan);
+
+			return RectL{ position, size };
+		};
+
 
 		for (const auto& [hwnd, properties] : itemProperties)
 		{
-			// defined row auto column placement
-		}
+			const auto row = *properties.row;
+			const auto column = *properties.column;
+			const auto rowSpan = *properties.rowSpan;
+			const auto columnSpan = *properties.columnSpan;
 
-		for (const auto& [hwnd, properties] : itemProperties)
-		{
-			// defined row auto column placement
-		}
+			const auto window = GetWindowPtrFromHWND(hwnd);
 
-		for (const auto& [hwnd, properties] : itemProperties)
-		{
-			// defined row auto column placement
+			RectL rect;
+			if (row != AUTO_PLACE && column != AUTO_PLACE)
+			{
+				rect = placeFixedPosition(row, column, rowSpan, columnSpan);
+			}
+
+			window->MoveAndResize(rect);
 		}
 	}
 
@@ -196,22 +237,145 @@ namespace PGUI::UI::Layout
 			});
 	}
 
-	auto GridLayout::GetMaxDefinedRow() noexcept -> std::size_t
+	auto GridLayout::GetRowSizesFromDefinition() const noexcept -> std::vector<long>
 	{
-		const auto lastDefinedRow = std::ranges::find_if(
-			itemProperties,
-			[](const auto& item) noexcept
+		std::size_t maxDefinedRow = 0;
+
+		if (const auto maxRow = std::ranges::max_element(
+				itemProperties,
+				[](const auto& lhs, const auto& rhs) noexcept
+				{
+					return *lhs.second.row + *lhs.second.rowSpan < *rhs.second.row + *rhs.second.rowSpan;
+				});
+			maxRow != itemProperties.end())
+		{
+			maxDefinedRow = *maxRow->second.row + *maxRow->second.rowSpan - 1;
+		}
+		const auto autoExpandedRowCount = static_cast<std::size_t>(
+			std::ceil(static_cast<float>(GetChildWindows().size()) / columnDefinitions.size()));
+
+		const auto rowCount = std::max({ maxDefinedRow + 1, rowDefinitions.size(), autoExpandedRowCount });
+		const auto availableSpace = GetClientSize().cy - (
+			                            padding.top + padding.bottom + static_cast<long>(rowCount - 1) * rowGap
+		                            );
+		const auto nonDefinedRowCount = std::clamp(
+			rowCount - rowDefinitions.size(), 1ULL,
+			std::numeric_limits<std::size_t>::max());
+		auto remainingSpace = availableSpace;
+		auto totalFractionalSize = 0.0F;
+		for (const auto& definition : rowDefinitions)
+		{
+			if (std::holds_alternative<FractionalSize>(definition))
 			{
-				return item.second.row != AUTO_PLACE;
-			});
-		const auto lastDefinedRowIndex = std::distance(itemProperties.begin(), lastDefinedRow);
-		const auto lastRow = std::ranges::max_element(
-			itemProperties | std::views::take(lastDefinedRowIndex),
-			[](const auto& lhs, const auto& rhs) noexcept
+				totalFractionalSize += std::get<FractionalSize>(definition);
+			}
+			else if (std::holds_alternative<FixedSize>(definition))
 			{
-				return *lhs.second.row < *rhs.second.row;
-			});
-		return lastRow != itemProperties.end() ? *lastRow->second.row : 0;
+				remainingSpace -= std::get<FixedSize>(definition);
+			}
+		}
+		if (std::holds_alternative<FractionalSize>(autoRowSize))
+		{
+			totalFractionalSize += std::get<FractionalSize>(autoRowSize) *
+				(static_cast<float>(nonDefinedRowCount) - 1.0F);
+		}
+		else
+		{
+			remainingSpace -= std::get<FixedSize>(autoRowSize) * static_cast<long>(nonDefinedRowCount);
+		}
+
+		std::vector<long> rowSizes;
+		rowSizes.reserve(rowCount);
+
+		for (const auto& definition : rowDefinitions)
+		{
+			if (std::holds_alternative<FixedSize>(definition))
+			{
+				rowSizes.push_back(std::get<FixedSize>(definition));
+				continue;
+			}
+			const auto fractionalSize = std::get<FractionalSize>(definition);
+			const auto size = static_cast<long>(remainingSpace * (fractionalSize / totalFractionalSize));
+			rowSizes.push_back(size);
+		}
+
+		while (rowSizes.size() < rowCount)
+		{
+			if (std::holds_alternative<FixedSize>(autoRowSize))
+			{
+				rowSizes.push_back(std::get<FixedSize>(autoRowSize));
+				continue;
+			}
+
+			const auto fractionalSize = std::get<FractionalSize>(autoRowSize);
+			const auto size = static_cast<long>(remainingSpace * (fractionalSize / totalFractionalSize));
+			rowSizes.push_back(size);
+		}
+
+		return rowSizes;
+	}
+
+	auto GridLayout::GetColumnSizesFromDefinition() const noexcept -> std::vector<long>
+	{
+		std::size_t maxDefinedColumn = 0;
+
+		if (const auto maxRow = std::ranges::max_element(
+				itemProperties,
+				[](const auto& lhs, const auto& rhs) noexcept
+				{
+					return *lhs.second.column + *lhs.second.columnSpan < *rhs.second.column + *rhs.second.columnSpan;
+				});
+			maxRow != itemProperties.end())
+		{
+			maxDefinedColumn = *maxRow->second.column + *maxRow->second.columnSpan - 1;
+		}
+
+		const auto columnCount = std::max(maxDefinedColumn + 1, columnDefinitions.size());
+		const auto availableSpace = GetClientSize().cx - (
+			                            padding.left + padding.right + static_cast<long>(columnCount - 1) * columnGap
+		                            );
+
+		auto remainingSpace = availableSpace;
+		auto totalFractionalSize = 0.0F;
+		for (const auto& definition : columnDefinitions)
+		{
+			if (std::holds_alternative<FractionalSize>(definition))
+			{
+				totalFractionalSize += std::get<FractionalSize>(definition);
+			}
+			else if (std::holds_alternative<FixedSize>(definition))
+			{
+				remainingSpace -= std::get<FixedSize>(definition);
+			}
+		}
+
+		std::vector<long> columnSizes;
+		columnSizes.reserve(columnCount);
+		for (const auto& definition : columnDefinitions)
+		{
+			if (std::holds_alternative<FixedSize>(definition))
+			{
+				columnSizes.push_back(std::get<FixedSize>(definition));
+				continue;
+			}
+			const auto fractionalSize = std::get<FractionalSize>(definition);
+			const auto size = static_cast<long>(remainingSpace * (fractionalSize / totalFractionalSize));
+			columnSizes.push_back(size);
+		}
+
+		while (columnSizes.size() < columnCount)
+		{
+			if (std::holds_alternative<FixedSize>(autoRowSize))
+			{
+				columnSizes.push_back(std::get<FixedSize>(autoRowSize));
+				continue;
+			}
+			const auto fractionalSize = std::get<FractionalSize>(autoRowSize);
+			const auto size = static_cast<long>(remainingSpace * (fractionalSize / totalFractionalSize));
+			columnSizes.push_back(size);
+		}
+
+		return columnSizes;
 	}
 
 	auto GridLayout::OnChildAdded(const WindowPtr<Window>& wnd) -> void

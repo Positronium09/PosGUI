@@ -125,9 +125,9 @@ namespace PGUI::UI::Layout
 		const auto rowSizes = GetRowSizesFromDefinition();
 		const auto columnSizes = GetColumnSizesFromDefinition();
 
-		std::set<std::pair<long, long>> occupied;
+		std::set<std::pair<long, long>> occupiedPositions;
 
-		const auto placeFixedPosition = [&occupied, &rowSizes, &columnSizes, this](
+		const auto placeFixedPosition = [&occupiedPositions, &rowSizes, &columnSizes, this](
 			const long row, const long column,
 			const long rowSpan, const long columnSpan) -> RectL
 		{
@@ -150,7 +150,7 @@ namespace PGUI::UI::Layout
 					0L) + (rowSpan - 1) * rowGap
 			};
 
-			OccupySet(occupied, row, column, rowSpan, columnSpan);
+			OccupySet(occupiedPositions, row, column, rowSpan, columnSpan);
 
 			return RectL{ position, size };
 		};
@@ -162,13 +162,117 @@ namespace PGUI::UI::Layout
 			const auto column = *properties.column;
 			const auto rowSpan = *properties.rowSpan;
 			const auto columnSpan = *properties.columnSpan;
+			auto actualRowSpan = rowSpan;
+			if (row != AUTO_PLACE)
+			{
+				actualRowSpan = std::min(
+					actualRowSpan,
+					static_cast<long>(rowSizes.size()) - row
+				);
+			}
+			auto actualColumnSpan = columnSpan;
+			if (column != AUTO_PLACE)
+			{
+				actualColumnSpan = std::min(
+					columnSpan,
+					static_cast<long>(columnSizes.size()) - column
+				);
+			}
 
 			const auto window = GetWindowPtrFromHWND(hwnd);
 
 			RectL rect;
 			if (row != AUTO_PLACE && column != AUTO_PLACE)
 			{
-				rect = placeFixedPosition(row, column, rowSpan, columnSpan);
+				rect = placeFixedPosition(row, column, actualRowSpan, actualColumnSpan);
+			}
+			else if (row != AUTO_PLACE && column == AUTO_PLACE)
+			{
+				auto placed = false;
+				long tryColumn = 0;
+
+				while (tryColumn <= columnSizes.size() - actualColumnSpan && !placed)
+				{
+					if (IsOccupied(occupiedPositions, row, tryColumn, actualRowSpan, actualColumnSpan))
+					{
+						tryColumn++;
+						continue;
+					}
+					rect = placeFixedPosition(row, tryColumn, actualRowSpan, actualColumnSpan);
+					placed = true;
+				}
+				if (!placed)
+				{
+					tryColumn = static_cast<long>(columnSizes.size() - 1);
+					while (IsOccupied(occupiedPositions, row, tryColumn, 1, 1) && tryColumn > 0)
+					{
+						tryColumn--;
+					}
+					rect = placeFixedPosition(row, tryColumn, actualRowSpan, actualColumnSpan);
+				}
+			}
+			else if (row == AUTO_PLACE && column != AUTO_PLACE)
+			{
+				auto placed = false;
+				long tryRow = 0;
+
+				while (tryRow <= rowSizes.size() - actualRowSpan && !placed)
+				{
+					if (IsOccupied(occupiedPositions, tryRow, column, actualRowSpan, actualColumnSpan))
+					{
+						tryRow++;
+						continue;
+					}
+					rect = placeFixedPosition(tryRow, column, actualRowSpan, actualColumnSpan);
+					placed = true;
+				}
+				if (!placed)
+				{
+					tryRow = static_cast<long>(columnSizes.size() - 1);
+					while (IsOccupied(occupiedPositions, tryRow, column, 1, 1) && tryRow > 0)
+					{
+						tryRow--;
+					}
+					rect = placeFixedPosition(tryRow, column, actualRowSpan, actualColumnSpan);
+				}
+			}
+			else
+			{
+				long tryRow = 0;
+				long tryColumn = 0;
+				auto placed = false;
+
+				while (tryRow <= rowSizes.size() - actualRowSpan && !placed)
+				{
+					while (tryColumn <= columnSizes.size() - actualColumnSpan && !placed)
+					{
+						if (IsOccupied(occupiedPositions, tryRow, tryColumn, actualRowSpan, actualColumnSpan))
+						{
+							tryColumn++;
+							continue;
+						}
+						rect = placeFixedPosition(tryRow, tryColumn, actualRowSpan, actualColumnSpan);
+						placed = true;
+					}
+					tryRow++;
+					tryColumn = 0;
+				}
+				if (!placed)
+				{
+					tryRow = static_cast<long>(rowSizes.size() - 1);
+					tryColumn = static_cast<long>(columnSizes.size() - 1);
+
+					while (IsOccupied(occupiedPositions, tryRow, tryColumn, 1, 1) && tryRow > 0)
+					{
+						while (IsOccupied(occupiedPositions, tryRow, tryColumn, 1, 1) && tryColumn > 0)
+						{
+							tryColumn--;
+						}
+						tryColumn = static_cast<long>(columnSizes.size() - 1);
+						tryRow--;
+					}
+					rect = placeFixedPosition(tryRow, tryColumn, actualRowSpan, actualColumnSpan);
+				}
 			}
 
 			window->MoveAndResize(rect);
@@ -251,8 +355,20 @@ namespace PGUI::UI::Layout
 		{
 			maxDefinedRow = *maxRow->second.row + *maxRow->second.rowSpan - 1;
 		}
-		const auto autoExpandedRowCount = static_cast<std::size_t>(
+
+		std::size_t cellsNeeded = 0;
+		for (const auto& properties : itemProperties | std::views::values)
+		{
+			cellsNeeded += *properties.rowSpan * *properties.columnSpan;
+		}
+
+		auto autoExpandedRowCount = static_cast<std::size_t>(
 			std::ceil(static_cast<float>(GetChildWindows().size()) / columnDefinitions.size()));
+
+		while (autoExpandedRowCount * columnDefinitions.size() < cellsNeeded)
+		{
+			autoExpandedRowCount++;
+		}
 
 		const auto rowCount = std::max({ maxDefinedRow + 1, rowDefinitions.size(), autoExpandedRowCount });
 		const auto availableSpace = GetClientSize().cy - (

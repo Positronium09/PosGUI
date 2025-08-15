@@ -91,7 +91,7 @@ export namespace PGUI::UI::Layout
 		};
 	};
 
-	class GridLayout : public LayoutPanel
+	class GridLayout final : public LayoutPanel
 	{
 		public:
 		GridLayout() noexcept;

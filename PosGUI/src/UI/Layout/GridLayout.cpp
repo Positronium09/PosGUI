@@ -411,7 +411,7 @@ namespace PGUI::UI::Layout
 		}
 
 		auto autoExpandedRowCount = static_cast<std::size_t>(
-			std::ceil(static_cast<float>(GetChildWindows().size()) / columnDefinitions.size()));
+			std::ceil(static_cast<float>(cellsNeeded) / columnDefinitions.size()));
 
 		while (autoExpandedRowCount * columnDefinitions.size() < cellsNeeded)
 		{

@@ -510,5 +510,11 @@
     <ClCompile Include="modules\Mutex\KMutex.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\UI\Layout\WrapLayout.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Layout\WrapLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -10,9 +10,14 @@ namespace PGUI::UI::Layout
 		const CrossAxisAlignment crossAxisAlignment,
 		const StackLayoutPadding padding,
 		const long gap) noexcept :
-		LayoutPanel{ WindowClass::Create(L"PGUI_StackLayout") },
-		orientation{ orientation }, mainAxisAlignment{ mainAxisAlignment },
-		crossAxisAlignment{ crossAxisAlignment }, padding{ padding }, gap{ gap }
+		StackLayout{
+			L"PGUI_StackLayout",
+			orientation,
+			mainAxisAlignment,
+			crossAxisAlignment,
+			padding,
+			gap
+		}
 	{ }
 
 	auto StackLayout::RearrangeChildren() noexcept -> void
@@ -64,6 +69,17 @@ namespace PGUI::UI::Layout
 	{
 		RearrangeChildren();
 	}
+
+	StackLayout::StackLayout(
+		const std::wstring_view className,
+		const LayoutOrientation orientation,
+		const MainAxisAlignment mainAxisAlignment, const CrossAxisAlignment crossAxisAlignment,
+		const StackLayoutPadding padding,
+		const long gap) noexcept :
+		LayoutPanel{ WindowClass::Create(className) },
+		orientation{ orientation }, mainAxisAlignment{ mainAxisAlignment },
+		crossAxisAlignment{ crossAxisAlignment }, padding{ padding }, gap{ gap }
+	{ }
 
 	auto StackLayout::RearrangeHorizontal() const noexcept -> void
 	{

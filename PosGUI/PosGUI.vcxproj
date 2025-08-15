@@ -49,6 +49,7 @@
     <ClCompile Include="modules\UI\Layout\LayoutStructs.ixx" />
     <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
     <ClCompile Include="modules\ScopedTimer.ixx" />
+    <ClCompile Include="modules\UI\Layout\WrapLayout.ixx" />
     <ClCompile Include="modules\Window.ixx" />
     <ClCompile Include="modules\Window\WindowInterface.ixx" />
     <ClCompile Include="modules\PropVariant.ixx" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\UI\Imaging\WICBitmapLock.cpp" />
     <ClCompile Include="src\UI\Layout\GridLayout.cpp" />
     <ClCompile Include="src\UI\Layout\StackLayout.cpp" />
+    <ClCompile Include="src\UI\Layout\WrapLayout.cpp" />
     <ClCompile Include="src\UI\Theming\SystemTheme.cpp" />
     <ClCompile Include="src\UI\TextFormat.cpp" />
     <ClCompile Include="src\UI\Gradient.cpp" />

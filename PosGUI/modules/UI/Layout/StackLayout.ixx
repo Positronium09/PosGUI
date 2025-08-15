@@ -28,7 +28,6 @@ export namespace PGUI::UI::Layout
 			StackLayoutPadding padding = { 0, 0, 0, 0 },
 			long gap = 0) noexcept;
 
-
 		auto RearrangeChildren() noexcept -> void override;
 
 		auto SetOrientation(LayoutOrientation orientation) noexcept -> void;
@@ -37,7 +36,7 @@ export namespace PGUI::UI::Layout
 		auto SetMainAxisAlignment(MainAxisAlignment alignment) noexcept -> void;
 		[[nodiscard]] auto GetMainAxisAlignment() const noexcept { return mainAxisAlignment; }
 
-		auto SetCrossAxisAlignment(CrossAxisAlignment alignment) noexcept -> void;
+		virtual auto SetCrossAxisAlignment(CrossAxisAlignment alignment) noexcept -> void;
 		[[nodiscard]] auto GetCrossAxisAlignment() const noexcept { return crossAxisAlignment; }
 
 		auto SetGap(long gap) noexcept -> void;
@@ -46,17 +45,26 @@ export namespace PGUI::UI::Layout
 		auto SetPadding(StackLayoutPadding padding) noexcept -> void;
 		[[nodiscard]] auto GetPadding() const noexcept { return padding; }
 
+		protected:
+		explicit StackLayout(
+			std::wstring_view className,
+			LayoutOrientation orientation,
+			MainAxisAlignment mainAxisAlignment = MainAxisAlignment::Center,
+			CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment::Center,
+			StackLayoutPadding padding = { 0, 0, 0, 0 },
+			long gap = 0) noexcept;
+
+		virtual auto RearrangeHorizontal() const noexcept -> void;
+		virtual auto RearrangeVertical() const noexcept -> void;
+
 		private:
 		LayoutOrientation orientation;
 		MainAxisAlignment mainAxisAlignment;
-		CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment::Center;
+		CrossAxisAlignment crossAxisAlignment;
 		StackLayoutPadding padding;
-		long gap = 0;
+		long gap;
 
 		auto OnChildAdded(const WindowPtr<Window>&) -> void override;
 		auto OnChildRemoved(HWND) -> void override;
-
-		auto RearrangeHorizontal() const noexcept -> void;
-		auto RearrangeVertical() const noexcept -> void;
 	};
 }

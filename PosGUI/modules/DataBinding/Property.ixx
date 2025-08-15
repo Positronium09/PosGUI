@@ -3,27 +3,17 @@ export module PGUI.DataBinding.Property;
 import std;
 
 import PGUI.Event;
+import PGUI.Mutex;
 
 export namespace PGUI::DataBinding
 {
-	class NullMutex
-	{
-		public:
-		// ReSharper disable CppMemberFunctionMayBeStatic
-		auto lock() const noexcept -> void { }
-		auto unlock() const noexcept -> void { }
-		// ReSharper disable once CppInconsistentNaming
-		auto try_lock() const noexcept -> bool { return true; }
-		// ReSharper restore CppMemberFunctionMayBeStatic
-	};
-
-	template <typename T, typename Mutex = std::mutex>
+	template <typename T, typename Mutex = Mutex::SRWMutex>
 	class Property
 	{
 		public:
 		using ValueType = T;
 		using MutexType = Mutex;
-		using EventType = Event<T&>;
+		using EventType = EventT<Mutex, T&>;
 
 		Property() noexcept = default;
 
@@ -157,5 +147,5 @@ export namespace PGUI::DataBinding
 	};
 
 	template <typename T>
-	using PropertyNM = Property<T, NullMutex>;
+	using PropertyNM = Property<T, Mutex::NullMutex>;
 }

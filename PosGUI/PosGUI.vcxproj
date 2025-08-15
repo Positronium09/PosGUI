@@ -38,6 +38,11 @@
     <ClCompile Include="modules\Factories\WICFactory.ixx" />
     <ClCompile Include="modules\MessageLoop.ixx" />
     <ClCompile Include="modules\DataBinding\Property.ixx" />
+    <ClCompile Include="modules\Mutex\CSMutex.ixx" />
+    <ClCompile Include="modules\Mutex\KMutex.ixx" />
+    <ClCompile Include="modules\Mutex\Mutex.ixx" />
+    <ClCompile Include="modules\Mutex\NullMutex.ixx" />
+    <ClCompile Include="modules\Mutex\SRWMutex.ixx" />
     <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\LayoutEnums.ixx" />
     <ClCompile Include="modules\UI\Layout\LayoutPanel.ixx" />

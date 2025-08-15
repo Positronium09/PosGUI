@@ -1,6 +1,7 @@
 export module PGUI.Event;
 
 import std;
+import PGUI.Mutex;
 
 export namespace PGUI
 {
@@ -18,8 +19,8 @@ export namespace PGUI
 			std::is_same_v<void, std::invoke_result_t<T, Args...>>);
 	using CallbackId = std::size_t;
 
-	template <typename... Args>
-	class Event
+	template <typename MutexType, typename... Args>
+	class EventT
 	{
 		public:
 		using CancellingCallback = std::function<bool(Args...)>;
@@ -119,19 +120,19 @@ export namespace PGUI
 			}
 		}
 
-		Event() noexcept = default;
+		EventT() noexcept = default;
 
-		~Event() = default;
+		~EventT() = default;
 
-		Event(Event&&) = default;
+		EventT(EventT&&) = default;
 
-		auto operator=(Event&&) -> Event & = default;
+		auto operator=(EventT&&) -> EventT& = default;
 
-		Event(const Event&) = delete;
+		EventT(const EventT&) = delete;
 
-		auto operator=(const Event&) -> Event & = delete;
+		auto operator=(const EventT&) -> EventT& = delete;
 
-		auto operator+=(const CallbackType<Args...> auto& callback) -> Event&
+		auto operator+=(const CallbackType<Args...> auto& callback) -> EventT&
 		{
 			AddCallback(callback);
 			return *this;
@@ -139,14 +140,31 @@ export namespace PGUI
 
 		private:
 		CallbackId nextCallbackId = 0;
-		mutable std::mutex callbackMutex;
+		mutable MutexType callbackMutex;
 		std::set<CallbackData> callbacks;
 	};
 
-	template <typename... Args>
+	// ReSharper disable IdentifierTypo
+	// ReSharper disable CppInconsistentNaming
+
+	template <typename ...Args>
+	using Event = EventT<Mutex::CSMutex, Args...>;
+	template <typename ...Args>
+	using EventCSM = Event<Args...>;
+	template <typename ...Args>
+	using EventSRWM = EventT<Mutex::SRWMutex, Args...>;
+	template <typename ...Args>
+	using EventNM = EventT<Mutex::NullMutex, Args...>;
+	template <typename ...Args>
+	using EventKM = EventT<Mutex::KMutex, Args...>;
+
+	// ReSharper restore CppInconsistentNaming
+	// ReSharper restore IdentifierTypo
+
+	template <typename MutexType, typename... Args>
 	class ScopedCallback final
 	{
-		using EventType = Event<Args...>;
+		using EventType = Event<MutexType, Args...>;
 
 		public:
 		ScopedCallback(EventType& event, const CallbackId id) noexcept :

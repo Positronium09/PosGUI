@@ -3,11 +3,12 @@ export module PGUI.DataBinding.DerivedProperty;
 import std;
 
 import PGUI.Event;
+import PGUI.Mutex;
 import PGUI.DataBinding.Property;
 
 export namespace PGUI::DataBinding
 {
-	template <typename T, typename Mutex = std::mutex>
+	template <typename T, typename Mutex = Mutex::SRWMutex>
 	class DerivedProperty final : public Property<T, Mutex>
 	{
 		public:
@@ -63,5 +64,5 @@ export namespace PGUI::DataBinding
 	};
 
 	template <typename T>
-	using DerivedPropertyNM = DerivedProperty<T, NullMutex>;
+	using DerivedPropertyNM = DerivedProperty<T, Mutex::NullMutex>;
 }

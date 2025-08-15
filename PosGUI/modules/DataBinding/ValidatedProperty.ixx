@@ -3,10 +3,11 @@ export module PGUI.DataBinding.ValidatedProperty;
 import std;
 
 import PGUI.DataBinding.Property;
+import PGUI.Mutex;
 
 export namespace PGUI::DataBinding
 {
-	template <typename T, typename Mutex = std::mutex>
+	template <typename T, typename Mutex = Mutex::SRWMutex>
 	class ValidatedProperty final : public Property<T, Mutex>
 	{
 		using Validator = std::function<bool(const T&)>;
@@ -146,5 +147,5 @@ export namespace PGUI::DataBinding
 	};
 
 	template <typename T>
-	using ValidatedPropertyNM = ValidatedProperty<T, NullMutex>;
+	using ValidatedPropertyNM = ValidatedProperty<T, Mutex::NullMutex>;
 }

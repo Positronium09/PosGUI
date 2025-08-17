@@ -124,8 +124,6 @@ namespace PGUI::UI::Layout
 			RearrangeHorizontalRow(startIndex, endIndex, currentY);
 			currentY += rowSize + crossGap;
 		}
-
-		Logger::Debug(L"Row Sizes {} - Row Indices {}", rowSizes, startIndices);
 	}
 
 	auto WrapLayout::RearrangeVertical() const noexcept -> void
@@ -214,8 +212,6 @@ namespace PGUI::UI::Layout
 			RearrangeVerticalColumn(startIndex, endIndex, currentX);
 			currentX += columnSize + crossGap;
 		}
-
-		Logger::Debug(L"Column Sizes {} - Column Indices {}", columnSizes, startIndices);
 	}
 
 	auto WrapLayout::RearrangeHorizontalRow(const std::size_t startChildIndex,

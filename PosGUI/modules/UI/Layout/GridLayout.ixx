@@ -182,16 +182,39 @@ export namespace PGUI::UI::Layout
 			return padding;
 		}
 
-		auto SetAutoRowSize(const GridCellDefinition size) noexcept -> Error
+		auto SetAutoCellSize(const GridCellDefinition size) noexcept -> Error
 		{
-			autoRowSize = size;
+			autoCellSize = size;
 			RearrangeChildren();
 
 			return Error{ S_OK };
 		}
-		[[nodiscard]] auto GetAutoRowSize() const noexcept
+		[[nodiscard]] auto GetAutoCellSize() const noexcept
 		{
-			return autoRowSize;
+			return autoCellSize;
+		}
+
+		auto InsertBlankCell(const long row, const long column) noexcept -> Error
+		{
+			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
+			{
+				return Error{ E_INVALIDARG }.SuggestFix(L"Cannot insert a blank cell with auto place");
+			}
+			blankCells.emplace(row, column);
+			RearrangeChildren();
+
+			return Error{ S_OK };
+		}
+		auto RemoveBlankCell(const long row, const long column) noexcept -> Error
+		{
+			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
+			{
+				return Error{ E_INVALIDARG }.SuggestFix(L"Cannot remove a blank cell with auto place");
+			}
+
+			blankCells.erase(std::make_pair(row, column));
+			RearrangeChildren();
+			return Error{ S_OK };
 		}
 
 		protected:
@@ -201,9 +224,10 @@ export namespace PGUI::UI::Layout
 		FixedSize minCellSize = 5;
 		FixedSize rowGap = 0;
 		FixedSize columnGap = 0;
-		GridCellDefinition autoRowSize = 100L;
+		GridCellDefinition autoCellSize = 1.0F;
 		bool growToFit = false;
 		GridLayoutPadding padding{ 0, 0, 0, 0 };
+		std::set<std::pair<long, long>> blankCells;
 
 		std::vector<GridCellDefinition> columnDefinitions{
 			GridCellDefinition{ 1.0F }
@@ -231,8 +255,8 @@ export namespace PGUI::UI::Layout
 				.AddTag(ErrorTags::STL) };
 		}
 		auto SortProperties() noexcept -> void;
-		auto GetRowSizesFromDefinition() const noexcept -> std::vector<long>;
-		auto GetColumnSizesFromDefinition() const noexcept -> std::vector<long>;
+		auto GetRowSizes(std::size_t rowCount) const noexcept -> std::vector<long>;
+		auto GetColumnSizes(std::size_t columnCount) const noexcept -> std::vector<long>;
 
 		auto PropertyChangeHandler(const long&) noexcept
 		{

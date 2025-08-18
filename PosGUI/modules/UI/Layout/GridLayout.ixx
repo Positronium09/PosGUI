@@ -12,7 +12,6 @@ import std;
 
 export namespace PGUI::UI::Layout
 {
-
 	using FixedSize = long;
 	using FractionalSize = float;
 	using GridCellDefinition = std::variant<FixedSize, FractionalSize>;
@@ -49,6 +48,12 @@ export namespace PGUI::UI::Layout
 		FixedSize left = 0;
 		FixedSize bottom = 0;
 		FixedSize right = 0;
+	};
+
+	enum class GridCellPlacementType
+	{
+		Packed,
+		Appended
 	};
 
 	struct GridItemProperties final
@@ -194,6 +199,16 @@ export namespace PGUI::UI::Layout
 			return autoCellSize;
 		}
 
+		auto SetPlacementType(const GridCellPlacementType type) noexcept -> void
+		{
+			placementType = type;
+			RearrangeChildren();
+		}
+		[[nodiscard]] auto GetPlacementType() const noexcept
+		{
+			return placementType;
+		}
+
 		auto InsertBlankCell(const long row, const long column) noexcept -> Error
 		{
 			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
@@ -226,6 +241,7 @@ export namespace PGUI::UI::Layout
 		FixedSize columnGap = 0;
 		GridCellDefinition autoCellSize = 1.0F;
 		bool growToFit = false;
+		GridCellPlacementType placementType = GridCellPlacementType::Packed;
 		GridLayoutPadding padding{ 0, 0, 0, 0 };
 		std::set<std::pair<long, long>> blankCells;
 
@@ -264,6 +280,10 @@ export namespace PGUI::UI::Layout
 		}
 		auto ColumnSpanValidator(const long& value, const long column) const noexcept
 		{
+			if (column == AUTO_PLACE)
+			{
+				return value > 0;
+			}
 			return column + value <= columnDefinitions.size();
 		}
 

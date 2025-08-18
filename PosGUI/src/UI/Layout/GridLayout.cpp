@@ -170,19 +170,31 @@ namespace PGUI::UI::Layout
 		}
 
 		long maxDefinedColumn = 0;
+		long maxColumnSpan = 1;
 
 		if (const auto maxColumn = std::ranges::max_element(
 				itemProperties,
 				[](const auto& lhs, const auto& rhs) noexcept
 		{
-			return *lhs.second.column + *lhs.second.columnSpan < *rhs.second.column + *rhs.second.columnSpan;
+			return *lhs.second.column < *rhs.second.column;
 		});
 			maxColumn != itemProperties.end())
 		{
-			maxDefinedColumn = *maxColumn->second.column + *maxColumn->second.columnSpan - 1;
+			maxDefinedColumn = std::max(maxDefinedColumn, *maxColumn->second.column);
+		}
+		if (const auto maxSpan = std::ranges::max_element(
+				itemProperties,
+				[](const auto& lhs, const auto& rhs) noexcept
+				{
+					return *lhs.second.columnSpan < *rhs.second.columnSpan;
+				});
+			maxSpan != itemProperties.end())
+		{
+			maxColumnSpan = *maxSpan->second.columnSpan;
 		}
 
 		maxDefinedColumn = std::max(maxDefinedColumn, static_cast<long>(columnDefinitions.size()));
+		maxDefinedColumn += maxColumnSpan - 1;
 
 		std::set<std::pair<long, long>> occupiedPositions = blankCells;
 		std::unordered_map<HWND, std::tuple<long, long, long, long>> itemPositions;
@@ -193,6 +205,10 @@ namespace PGUI::UI::Layout
 			const long row, const long column, const long rowSpan, const long columnSpan)
 		{
 			itemPositions[hwnd] = std::make_tuple(row, column, rowSpan, columnSpan);
+			if (columnSpan <= 0)
+			{
+				DebugBreak();
+			}
 			OccupySet(occupiedPositions, row, column, rowSpan, columnSpan);
 			maxPlacedRow = std::max(maxPlacedRow, row + rowSpan - 1);
 		};
@@ -204,15 +220,7 @@ namespace PGUI::UI::Layout
 			const auto rowSpan = *properties.rowSpan;
 			const auto columnSpan = *properties.columnSpan;
 			const auto actualRowSpan = rowSpan;
-			auto actualColumnSpan = columnSpan;
-			if (column != AUTO_PLACE)
-			{
-				// Shouldnt happen but better safe than sorry
-				actualColumnSpan = std::min(
-					columnSpan,
-					static_cast<long>(columnDefinitions.size()) - column
-				);
-			}
+			const auto actualColumnSpan = columnSpan;
 
 			if (row != AUTO_PLACE && column != AUTO_PLACE)
 			{
@@ -235,7 +243,7 @@ namespace PGUI::UI::Layout
 				}
 				if (!placed)
 				{
-					tryColumn = static_cast<long>(maxDefinedColumn - 1);
+					tryColumn = maxDefinedColumn - 1;
 					while (IsOccupied(occupiedPositions, row, tryColumn, 1, 1) && tryColumn > 0)
 					{
 						tryColumn--;
@@ -246,6 +254,10 @@ namespace PGUI::UI::Layout
 			else if (row == AUTO_PLACE && column != AUTO_PLACE)
 			{
 				long tryRow = 0;
+				if (placementType == GridCellPlacementType::Appended)
+				{
+					tryRow = maxPlacedRow;
+				}
 
 				while (true)
 				{
@@ -260,6 +272,10 @@ namespace PGUI::UI::Layout
 			else
 			{
 				long tryRow = 0;
+				if (placementType == GridCellPlacementType::Appended)
+				{
+					tryRow = maxPlacedRow;
+				}
 				long tryColumn = 0;
 				auto placed = false;
 
@@ -279,6 +295,17 @@ namespace PGUI::UI::Layout
 					tryColumn = 0;
 				}
 			}
+		}
+
+		if (const auto maxColumn = std::ranges::max_element(
+			occupiedPositions,
+			[](const auto& lhs, const auto& rhs)
+			{
+				return lhs.second < rhs.second;
+			});
+			maxColumn != occupiedPositions.end())
+		{
+			maxDefinedColumn = maxColumn->second;
 		}
 
 		std::vector<long> rowSizes = GetRowSizes(maxPlacedRow + 1);
@@ -476,8 +503,11 @@ namespace PGUI::UI::Layout
 	auto GridLayout::GetColumnSizes(const std::size_t columnCount) const noexcept -> std::vector<long>
 	{
 		const auto availableSpace = GetClientSize().cx - (
-			                            padding.left + padding.right + static_cast<long>(columnCount - 2) * columnGap
+			                            padding.left + padding.right + static_cast<long>(columnCount - 1) * columnGap
 		                            );
+		const auto nonDefinedColumnCount = std::clamp(
+			columnCount - columnDefinitions.size(), 0ULL,
+			std::numeric_limits<std::size_t>::max());
 		auto remainingSpace = availableSpace;
 		auto totalFractionalSize = 0.0F;
 		for (const auto& definition : columnDefinitions)
@@ -490,6 +520,14 @@ namespace PGUI::UI::Layout
 			{
 				remainingSpace -= std::get<FixedSize>(definition);
 			}
+		}
+		if (std::holds_alternative<FractionalSize>(autoCellSize))
+		{
+			totalFractionalSize += std::get<FractionalSize>(autoCellSize) * static_cast<float>(nonDefinedColumnCount);
+		}
+		else
+		{
+			remainingSpace -= std::get<FixedSize>(autoCellSize) * static_cast<long>(nonDefinedColumnCount);
 		}
 
 		std::vector<long> columnSizes;

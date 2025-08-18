@@ -51,21 +51,30 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::SetRowGap(const FixedSize gap) noexcept -> void
 	{
-		rowGap = gap;
-		RearrangeChildren();
+		if (rowGap == gap)
+		{
+			rowGap = gap;
+			RearrangeChildren();
+		}
 	}
 
 	auto GridLayout::SetColumnGap(const FixedSize gap) noexcept -> void
 	{
-		columnGap = gap;
-		RearrangeChildren();
+		if (columnGap != gap)
+		{
+			columnGap = gap;
+			RearrangeChildren();
+		}
 	}
 
 	auto GridLayout::SetGap(const FixedSize gap) noexcept -> void
 	{
-		rowGap = gap;
-		columnGap = gap;
-		RearrangeChildren();
+		if (rowGap != gap || columnGap != gap)
+		{
+			rowGap = gap;
+			columnGap = gap;
+			RearrangeChildren();
+		}
 	}
 
 	auto GridLayout::SetItemProperty(const HWND hwnd, const GridItemProperties& properties) -> void
@@ -118,8 +127,11 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::SetMinCellSize(const FixedSize size) noexcept -> void
 	{
-		minCellSize = size;
-		RearrangeChildren();
+		if (minCellSize != size)
+		{
+			minCellSize = size;
+			RearrangeChildren();
+		}
 	}
 
 	auto GridLayout::RemoveColumnDefinitionAtIndex(const std::size_t index) noexcept -> Error
@@ -139,6 +151,8 @@ namespace PGUI::UI::Layout
 		columnDefinitions.erase(
 			std::next(columnDefinitions.begin(), static_cast<std::ptrdiff_t>(index)));
 
+		RearrangeChildren();
+
 		return Error{ S_OK };
 	}
 
@@ -152,6 +166,8 @@ namespace PGUI::UI::Layout
 
 		rowDefinitions.erase(
 			std::next(rowDefinitions.begin(), static_cast<std::ptrdiff_t>(index)));
+
+		RearrangeChildren();
 
 		return Error{ S_OK };
 	}

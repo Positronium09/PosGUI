@@ -22,6 +22,8 @@ export namespace PGUI::UI::Layout
 		long endingPad = 0;
 		long crossStartPad = 0;
 		long crossEndPad = 0;
+
+		auto operator==(const StackLayoutPadding&) const noexcept -> bool = default;
 	};
 
 	class StackLayout : public LayoutPanel
@@ -46,11 +48,11 @@ export namespace PGUI::UI::Layout
 		auto SetCrossAxisAlignment(CrossAxisAlignment alignment) noexcept -> void;
 		[[nodiscard]] auto GetCrossAxisAlignment() const noexcept { return crossAxisAlignment; }
 
-		auto SetGap(long gap) noexcept -> void;
-		[[nodiscard]] auto GetGap() const noexcept { return gap; }
+		auto SetMainAxisGap(long gap) noexcept -> void;
+		[[nodiscard]] auto GetMainAxisGap() const noexcept { return mainAxisGap; }
 
-		auto SetCrossGap(long crossGap) noexcept -> void;
-		[[nodiscard]] auto GetCrossGap() const noexcept { return crossGap; }
+		auto SetCrossAxisGap(long crossGap) noexcept -> void;
+		[[nodiscard]] auto GetCrossAxisGap() const noexcept { return crossAxisGap; }
 
 		auto SetPadding(StackLayoutPadding padding) noexcept -> void;
 		[[nodiscard]] auto GetPadding() const noexcept { return padding; }
@@ -70,8 +72,8 @@ export namespace PGUI::UI::Layout
 		CrossAxisAlignment crossAxisAlignment;
 		StackLayoutPadding padding;
 		WrapMode wrapMode;
-		long gap;
-		long crossGap;
+		long mainAxisGap;
+		long crossAxisGap;
 
 		auto OnChildAdded(const WindowPtr<Window>&) -> void override;
 		auto OnChildRemoved(HWND) -> void override;

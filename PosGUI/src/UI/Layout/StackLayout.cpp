@@ -102,18 +102,11 @@ namespace PGUI::UI::Layout
 
 	auto StackLayout::SetCrossAxisAlignment(const CrossAxisAlignment alignment) noexcept -> void
 	{
-		if (crossAxisAlignment == alignment)
+		if (crossAxisAlignment != alignment)
 		{
-			return;
+			crossAxisAlignment = alignment;
+			RearrangeChildren();
 		}
-		crossAxisAlignment = alignment;
-		if (alignment == CrossAxisAlignment::Stretch && wrapMode == WrapMode::Wrap)
-		{
-			Logger::Warning(
-				L"CrossAxisAlignment::Stretch cannot be used with WrapMode::Wrap reverting to CrossAxisAlignment::Center");
-			crossAxisAlignment = CrossAxisAlignment::Center;
-		}
-		RearrangeChildren();
 	}
 
 	auto StackLayout::OnChildAdded(const WindowPtr<Window>&) -> void
@@ -274,6 +267,20 @@ namespace PGUI::UI::Layout
 			rowSizes.push_back(maxHeight);
 		}
 
+		if (crossAxisAlignment == CrossAxisAlignment::Stretch)
+		{
+			const auto rowCount = rowSizes.size();
+			const auto height = (GetClientSize().cy -
+			                     (padding.crossStartPad + padding.crossEndPad +
+			                      static_cast<long>(rowCount - 1) * crossAxisGap)) /
+			                    static_cast<long>(rowCount);
+
+			for (auto& size : rowSizes)
+			{
+				size = height;
+			}
+		}
+
 		auto currentY = padding.crossStartPad;
 		switch (GetCrossAxisAlignment())
 		{
@@ -303,13 +310,14 @@ namespace PGUI::UI::Layout
 			}
 		}
 
+		const auto rowCount = rowSizes.size();
 		for (const auto& [index, rowSize] : rowSizes | std::views::enumerate)
 		{
 			const auto startIndex = startIndices[index];
 			const auto endIndex = static_cast<std::size_t>(index + 1) < startIndices.size()
 				? startIndices[index + 1] - 1
 				: GetChildWindows().size() - 1;
-			RearrangeHorizontalRow(startIndex, endIndex, currentY);
+			RearrangeHorizontalRow(startIndex, endIndex, currentY, rowCount);
 			currentY += rowSize + crossAxisGap;
 		}
 	}
@@ -360,6 +368,20 @@ namespace PGUI::UI::Layout
 			columnSizes.push_back(maxWidth);
 		}
 
+		if (crossAxisAlignment == CrossAxisAlignment::Stretch)
+		{
+			const auto columnCount = columnSizes.size();
+			const auto width = (GetClientSize().cx -
+			                    (padding.crossStartPad + padding.crossEndPad +
+			                     static_cast<long>(columnCount - 1) * crossAxisGap)) /
+			                   static_cast<long>(columnCount);
+
+			for (auto& size : columnSizes)
+			{
+				size = width;
+			}
+		}
+
 		auto currentX = padding.crossStartPad;
 
 		switch (GetCrossAxisAlignment())
@@ -390,13 +412,14 @@ namespace PGUI::UI::Layout
 			}
 		}
 
+		const auto columnCount = columnSizes.size();
 		for (const auto& [index, columnSize] : columnSizes | std::views::enumerate)
 		{
 			const auto startIndex = startIndices[index];
 			const auto endIndex = static_cast<std::size_t>(index + 1) < startIndices.size()
 				? startIndices[index + 1] - 1
 				: GetChildWindows().size() - 1;
-			RearrangeVerticalColumn(startIndex, endIndex, currentX);
+			RearrangeVerticalColumn(startIndex, endIndex, currentX, columnCount);
 			currentX += columnSize + crossAxisGap;
 		}
 	}
@@ -404,9 +427,13 @@ namespace PGUI::UI::Layout
 	auto StackLayout::RearrangeHorizontalRow(
 		const std::size_t startChildIndex,
 		const std::size_t endChildIndex,
-		long yPosition) const noexcept -> void
+		long yPosition, const std::size_t rowCount) const noexcept -> void
 	{
 		auto currentX = padding.startPad;
+		const auto height = (GetClientSize().cy -
+		                     (padding.crossStartPad + padding.crossEndPad +
+		                      static_cast<long>(rowCount - 1) * crossAxisGap)) /
+		                    static_cast<long>(rowCount);
 
 		switch (GetMainAxisAlignment())
 		{
@@ -450,6 +477,10 @@ namespace PGUI::UI::Layout
 		                         std::views::take(endChildIndex - startChildIndex + 1))
 		{
 			child->Move({ currentX, yPosition });
+			if (GetCrossAxisAlignment() == CrossAxisAlignment::Stretch)
+			{
+				child->Resize({ child->GetClientSize().cx, height });
+			}
 			currentX += child->GetClientSize().cx + GetMainAxisGap();
 		}
 	}
@@ -457,9 +488,13 @@ namespace PGUI::UI::Layout
 	auto StackLayout::RearrangeVerticalColumn(
 		const std::size_t startChildIndex,
 		const std::size_t endChildIndex,
-		long xPosition) const noexcept -> void
+		long xPosition, const std::size_t columnCount) const noexcept -> void
 	{
 		auto currentY = padding.startPad;
+		const auto width = (GetClientSize().cx -
+		                    (padding.crossStartPad + padding.crossEndPad +
+		                     static_cast<long>(columnCount - 1) * crossAxisGap)) /
+		                   static_cast<long>(columnCount);
 
 		switch (GetMainAxisAlignment())
 		{
@@ -503,6 +538,10 @@ namespace PGUI::UI::Layout
 		                         std::views::take(endChildIndex - startChildIndex + 1))
 		{
 			child->Move({ xPosition, currentY });
+			if (GetCrossAxisAlignment() == CrossAxisAlignment::Stretch)
+			{
+				child->Resize({ width, child->GetClientSize().cy });
+			}
 			currentY += child->GetClientSize().cy + GetMainAxisGap();
 		}
 	}

@@ -22,4 +22,10 @@ export namespace PGUI::UI::Layout
 		End,
 		Stretch
 	};
+
+	enum class WrapMode
+	{
+		NoWrap,
+		Wrap,
+	};
 }

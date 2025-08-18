@@ -10,12 +10,6 @@ import PGUI.UI.Layout.LayoutPanel;
 
 export namespace PGUI::UI::Layout
 {
-	enum class WrapMode
-	{
-		NoWrap,
-		Wrap,
-	};
-
 	struct StackLayoutPadding
 	{
 		long startPad = 0;
@@ -80,9 +74,9 @@ export namespace PGUI::UI::Layout
 
 		auto RearrangeHorizontalRow(
 			std::size_t startChildIndex, std::size_t endChildIndex,
-			long yPosition) const noexcept -> void;
+			long yPosition, std::size_t rowCount) const noexcept -> void;
 		auto RearrangeVerticalColumn(
 			std::size_t startChildIndex, std::size_t endChildIndex,
-			long xPosition) const noexcept -> void;
+			long xPosition, std::size_t columnCount) const noexcept -> void;
 	};
 }

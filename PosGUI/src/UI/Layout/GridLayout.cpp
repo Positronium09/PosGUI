@@ -51,7 +51,7 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::SetRowGap(const FixedSize gap) noexcept -> void
 	{
-		if (rowGap == gap)
+		if (rowGap != gap)
 		{
 			rowGap = gap;
 			RearrangeChildren();

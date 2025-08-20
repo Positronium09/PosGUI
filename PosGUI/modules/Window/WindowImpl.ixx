@@ -23,21 +23,21 @@ export namespace PGUI
 	template <WindowType T = Window>
 	using RawWindowPtr = T*;
 
-	enum class HandlerReturnFlags
+	enum class MessageHandlerReturnFlags
 	{
 		None,
 		PassToDefProc = 1,
 		ForceThisResult = 2,
 		NoFurtherHandling = 4
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(HandlerReturnFlags);
+	DEFINE_ENUM_FLAG_OPERATORS(MessageHandlerReturnFlags);
 
 	struct MessageHandlerResult
 	{
 		LRESULT result;
-		HandlerReturnFlags flags;
+		MessageHandlerReturnFlags flags;
 
-		explicit(false) MessageHandlerResult(const LRESULT result, const HandlerReturnFlags flags = HandlerReturnFlags::None) :
+		explicit(false) MessageHandlerResult(const LRESULT result, const MessageHandlerReturnFlags flags = MessageHandlerReturnFlags::None) :
 			result{ result }, flags{ flags }
 		{ }
 
@@ -127,7 +127,10 @@ export namespace PGUI
 		NoSendChanging = SWP_NOSENDCHANGING,
 		NoSize = SWP_NOSIZE,
 		NoZOrder = SWP_NOZORDER,
-		ShowWindow = SWP_SHOWWINDOW
+		ShowWindow = SWP_SHOWWINDOW,
+		NoClientSize = SWP_NOCLIENTSIZE,
+		NoClientMove = SWP_NOCLIENTMOVE,
+		StateChanged = SWP_STATECHANGED
 	};
 	DEFINE_ENUM_FLAG_OPERATORS(PositionFlags);
 
@@ -637,6 +640,11 @@ export namespace PGUI
 			/* E_NOTIMPL */
 		}
 
+		virtual auto OnMoved(PointL) -> void
+		{
+			/* E_NOTIMPL */
+		}
+
 		private:
 		// ReSharper disable CppInconsistentNaming
 		auto _RegisterHandler(UINT msg, const HandlerHWND& handler) -> void;
@@ -644,7 +652,9 @@ export namespace PGUI
 		auto _RegisterHandler(UINT msg, const Handler& handler) -> void;
 
 		auto _OnDpiChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		auto _OnWindowPosChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 		auto _OnSize(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		auto _OnMove(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 
 		// ReSharper restore CppInconsistentNaming
 

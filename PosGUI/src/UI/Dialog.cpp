@@ -21,7 +21,7 @@ namespace PGUI::UI
 
 	auto Dialog::OnInitDialog(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
 	{
-		return { NULL, HandlerReturnFlags::ForceThisResult };
+		return { NULL, MessageHandlerReturnFlags::ForceThisResult };
 	}
 
 	ModalDialog::ModalDialog() noexcept :

@@ -20,7 +20,9 @@ namespace PGUI
 		RegisterHandler(WM_DPICHANGED, &Window::_OnDpiChanged);
 		RegisterHandler(WM_DPICHANGED_AFTERPARENT, &Window::_OnDpiChanged);
 		RegisterHandler(WM_DPICHANGED_BEFOREPARENT, &Window::_OnDpiChanged);
+		RegisterHandler(WM_WINDOWPOSCHANGED, &Window::_OnWindowPosChanged);
 		RegisterHandler(WM_SIZE, &Window::_OnSize);
+		RegisterHandler(WM_MOVE, &Window::_OnMove);
 	}
 
 	Window::~Window()
@@ -95,18 +97,99 @@ namespace PGUI
 		return result;
 	}
 
+	auto Window::_OnWindowPosChanged(UINT, WPARAM, const LPARAM lParam) -> MessageHandlerResult
+	{
+		const auto windowPos = *std::bit_cast<LPWINDOWPOS>(lParam);
+		RectF windowRect{
+			static_cast<float>(windowPos.x),
+			static_cast<float>(windowPos.y),
+			static_cast<float>(windowPos.x + windowPos.cx),
+			static_cast<float>(windowPos.y + windowPos.cy)
+		};
+		if (parentHwnd != nullptr)
+		{
+			const auto parent = GetParentWindow();
+			windowRect = parent->LogicalToPhysical(
+				parent->ScreenToClient(
+					parent->PhysicalToLogical(windowRect)
+				)
+			);
+		}
+		const auto windowSize = windowRect.Size();
+		auto rect = logicalRect.GetPhysicalValue();
+
+		if (!(windowPos.flags & SWP_NOMOVE))
+		{
+			rect.left = windowRect.left;
+			rect.top = windowRect.top;
+			rect.right = rect.left + windowSize.cx;
+			rect.bottom = rect.top + windowSize.cy;
+		}
+		if (!(windowPos.flags & SWP_NOSIZE))
+		{
+			rect.right = rect.left + windowSize.cx;
+			rect.bottom = rect.top + windowSize.cy;
+		}
+		logicalRect.SetPhysicalValue(rect);
+
+		const auto flags = static_cast<PositionFlags>(windowPos.flags);
+		if (!IsFlagSet(flags, PositionFlags::NoClientMove))
+		{
+			const PointL point{
+				static_cast<long>(windowRect.left),
+				static_cast<long>(windowRect.top)
+			};
+			SendMsg(WM_MOVE, NULL, MAKELONG(point.x, point.y));
+		}
+		if (!IsFlagSet(flags, PositionFlags::NoClientSize) || IsFlagSet(flags, PositionFlags::StateChanged))
+		{
+			auto wparam = SIZE_RESTORED;
+			if (IsMinimized())
+			{
+				wparam = SIZE_MINIMIZED;
+			}
+			else if (IsMaximized())
+			{
+				wparam = SIZE_MAXIMIZED;
+			}
+			SendMsg(WM_SIZE, wparam, MAKELONG(windowSize.cx, windowSize.cy));
+		}
+
+		return 0;
+	}
+
 	auto Window::_OnSize(UINT /* unused */, WPARAM /* unused */, const LPARAM lParam) -> MessageHandlerResult
 	{
-		const RectF rect{
-			logicalRect.GetPhysicalValue().TopLeft(),
-			SizeF{
-				static_cast<float>(LOWORD(lParam)),
-				static_cast<float>(HIWORD(lParam))
-			}
+		(void)lParam;
+		const SizeF size{
+			static_cast<float>(LOWORD(lParam)),
+			static_cast<float>(HIWORD(lParam))
 		};
-		Logger::Info(L"{}", rect);
-		logicalRect.SetPhysicalValue(rect);
+		auto physicalRect = logicalRect.GetPhysicalValue();
+		physicalRect.right = physicalRect.left + size.cx;
+		physicalRect.bottom = physicalRect.top + size.cy;
+		logicalRect.SetPhysicalValue(physicalRect);
+
+		//OnSizeChanged(size);
 		OnSizeChanged(logicalRect->Size());
+
+		return 0;
+	}
+
+	auto Window::_OnMove(UINT, WPARAM, const LPARAM lParam) -> MessageHandlerResult
+	{
+		(void)lParam;
+		const PointF point{
+			static_cast<float>(LOWORD(lParam)),
+			static_cast<float>(HIWORD(lParam))
+		};
+		auto physicalRect = logicalRect.GetPhysicalValue();
+		physicalRect.left = point.x;
+		physicalRect.top = point.y;
+		logicalRect.SetPhysicalValue(physicalRect);
+
+		//OnMoved(point);
+		OnMoved(logicalRect->TopLeft());
 
 		return 0;
 	}
@@ -711,7 +794,7 @@ namespace PGUI
 
 				hookerHandled = true;
 
-				if (IsFlagSet(result.flags, HandlerReturnFlags::ForceThisResult)) [[unlikely]]
+				if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
 				{
 					return result.result;
 				}
@@ -743,7 +826,7 @@ namespace PGUI
 					}
 				}, handlerVariant);
 			}
-			if (IsFlagSet(result.flags, HandlerReturnFlags::PassToDefProc)) [[unlikely]]
+			if (IsFlagSet(result.flags, MessageHandlerReturnFlags::PassToDefProc)) [[unlikely]]
 			{
 				DefWindowProcW(hWnd, msg, wParam, lParam);
 			}
@@ -772,7 +855,7 @@ namespace PGUI
 					}
 				}, messageHandlers);
 
-				if (IsFlagSet(result.flags, HandlerReturnFlags::ForceThisResult)) [[unlikely]]
+				if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
 				{
 					return result.result;
 				}

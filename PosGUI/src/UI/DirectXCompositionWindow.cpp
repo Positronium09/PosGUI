@@ -405,7 +405,7 @@ namespace PGUI::UI
 
 		currentMonitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL);
 
-		return { 1, HandlerReturnFlags::PassToDefProc };
+		return { 1, MessageHandlerReturnFlags::PassToDefProc };
 	}
 
 	auto DirectXCompositionWindow::OnWindowPosChanged(
@@ -438,7 +438,7 @@ namespace PGUI::UI
 			}
 		}
 
-		return { 0, HandlerReturnFlags::PassToDefProc };
+		return { 0, MessageHandlerReturnFlags::PassToDefProc };
 	}
 
 	auto DirectXCompositionWindow::OnPaint(

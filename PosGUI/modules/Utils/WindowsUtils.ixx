@@ -39,6 +39,10 @@ export
 	constexpr auto WM_SYSTIMER = 0x0118;
 	constexpr auto WM_GETISHELLBROWSER = (WM_USER + 7);
 
+	constexpr auto SWP_STATECHANGED = 0x8000;
+	constexpr auto SWP_NOCLIENTSIZE = 0x0800;
+	constexpr auto SWP_NOCLIENTMOVE = 0x1000;
+
 	// describes the sizes of the menu bar or menu item
 	typedef union tagUAHMENUITEMMETRICS
 	{

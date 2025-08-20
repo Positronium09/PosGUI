@@ -274,14 +274,14 @@ namespace PGUI::UI
 
 		ApplyCurrentTheme();
 
-		return { 1, HandlerReturnFlags::PassToDefProc };
+		return { 1, MessageHandlerReturnFlags::PassToDefProc };
 	}
 
 	auto AppWindow::OnSetText(UINT /*unused*/, WPARAM /*unused*/, const LPARAM lParam) noexcept -> MessageHandlerResult
 	{
 		titleText = std::bit_cast<wchar_t*>(lParam);
 
-		return { 1, HandlerReturnFlags::PassToDefProc };
+		return { 1, MessageHandlerReturnFlags::PassToDefProc };
 	}
 
 	auto AppWindow::OnGetText(UINT /*unused*/, const WPARAM wParam,

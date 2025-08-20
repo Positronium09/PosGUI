@@ -160,7 +160,6 @@ namespace PGUI
 
 	auto Window::_OnSize(UINT /* unused */, WPARAM /* unused */, const LPARAM lParam) -> MessageHandlerResult
 	{
-		(void)lParam;
 		const SizeF size{
 			static_cast<float>(LOWORD(lParam)),
 			static_cast<float>(HIWORD(lParam))
@@ -170,7 +169,6 @@ namespace PGUI
 		physicalRect.bottom = physicalRect.top + size.cy;
 		logicalRect.SetPhysicalValue(physicalRect);
 
-		//OnSizeChanged(size);
 		OnSizeChanged(logicalRect->Size());
 
 		return 0;
@@ -178,7 +176,6 @@ namespace PGUI
 
 	auto Window::_OnMove(UINT, WPARAM, const LPARAM lParam) -> MessageHandlerResult
 	{
-		(void)lParam;
 		const PointF point{
 			static_cast<float>(LOWORD(lParam)),
 			static_cast<float>(HIWORD(lParam))
@@ -188,7 +185,6 @@ namespace PGUI
 		physicalRect.top = point.y;
 		logicalRect.SetPhysicalValue(physicalRect);
 
-		//OnMoved(point);
 		OnMoved(logicalRect->TopLeft());
 
 		return 0;

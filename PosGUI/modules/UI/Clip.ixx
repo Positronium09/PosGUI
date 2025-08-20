@@ -20,7 +20,7 @@ namespace PGUI
 
 export namespace PGUI::UI
 {
-	struct RectangleClip : public ComPtrHolder<ID2D1RectangleGeometry>
+	struct RectangleClip : ComPtrHolder<ID2D1RectangleGeometry>
 	{
 		explicit RectangleClip(const ComPtr<ID2D1RectangleGeometry>& geometry) noexcept;
 
@@ -29,7 +29,7 @@ export namespace PGUI::UI
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
 	};
 
-	struct RoundedRectangleClip : public ComPtrHolder<ID2D1RoundedRectangleGeometry>
+	struct RoundedRectangleClip : ComPtrHolder<ID2D1RoundedRectangleGeometry>
 	{
 		explicit RoundedRectangleClip(const ComPtr<ID2D1RoundedRectangleGeometry>& geometry) noexcept;
 
@@ -38,7 +38,7 @@ export namespace PGUI::UI
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
 	};
 
-	struct EllipseClip : public ComPtrHolder<ID2D1EllipseGeometry>
+	struct EllipseClip : ComPtrHolder<ID2D1EllipseGeometry>
 	{
 		explicit EllipseClip(const ComPtr<ID2D1EllipseGeometry>& geometry) noexcept;
 
@@ -47,7 +47,7 @@ export namespace PGUI::UI
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
 	};
 
-	struct PathClip : public ComPtrHolder<ID2D1PathGeometry1>
+	struct PathClip : ComPtrHolder<ID2D1PathGeometry1>
 	{
 		explicit PathClip(const ComPtr<ID2D1PathGeometry1>& geometry) noexcept;
 
@@ -56,7 +56,7 @@ export namespace PGUI::UI
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
 	};
 
-	struct RoundCornerClip : public PathClip
+	struct RoundCornerClip : PathClip
 	{
 		explicit RoundCornerClip(const ComPtr<ID2D1PathGeometry1>& geometry) noexcept;
 
@@ -155,7 +155,7 @@ export namespace PGUI::UI
 
 		auto SetParameters(const ClipParameters& parameters) noexcept -> void;
 
-		[[nodiscard]] auto GetGeometry() const noexcept -> D2D::D2DGeometry<ID2D1Geometry>;
+		[[nodiscard]] auto GetGeometry() const noexcept -> D2D::D2DGeometry<>;
 
 		explicit(false) operator ID2D1Geometry*() const noexcept;
 

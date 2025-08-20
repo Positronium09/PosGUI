@@ -398,7 +398,7 @@ export namespace PGUI::UI::D2D
 			}
 		}
 
-		auto PushAxisAlignedClip(RectF clipRect, AntiAliasingMode antialiasMode) noexcept -> void
+		auto PushAxisAlignedClip(const RectF clipRect, const AntiAliasingMode antialiasMode) noexcept -> void
 		{
 			this->Get()->PushAxisAlignedClip(clipRect, static_cast<D2D1_ANTIALIAS_MODE>(antialiasMode));
 		}
@@ -408,9 +408,19 @@ export namespace PGUI::UI::D2D
 			this->Get()->PopAxisAlignedClip();
 		}
 
-		auto SetDpi(float dpiX, float dpiY) noexcept -> void
+		auto SetDpi(const float dpiX, const float dpiY) noexcept -> void
 		{
 			this->Get()->SetDpi(dpiX, dpiY);
+		}
+
+		auto SetDpi(const float dpi) noexcept -> void
+		{
+			SetDpi(dpi, dpi);
+		}
+
+		auto SetDpi(const std::pair<float, float> dpi) noexcept -> void
+		{
+			SetDpi(dpi.first, dpi.second);
 		}
 
 		[[nodiscard]] auto GetDpi() const noexcept

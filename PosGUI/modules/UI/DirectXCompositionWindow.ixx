@@ -46,7 +46,13 @@ export namespace PGUI::UI
 		[[nodiscard]] static auto& DCompositionDevice() noexcept { return dcompDevice; }
 		[[nodiscard]] static auto& D2D1Device() noexcept { return d2d1Device; }
 
-		[[nodiscard]] auto GetGraphics() const noexcept { return Graphics{ GetD2D1DeviceContext() }; }
+		[[nodiscard]] auto GetGraphics() const noexcept
+		{
+			Graphics graphics{ GetD2D1DeviceContext() };
+			const auto dpi = GetDpi();
+			graphics.SetDpi(dpi);
+			return graphics;
+		}
 
 		virtual auto BeginDraw() -> void;
 

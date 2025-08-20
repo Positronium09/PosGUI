@@ -32,11 +32,44 @@ export namespace PGUI
 
 		[[nodiscard]] constexpr auto operator==(const Ellipse&) const noexcept -> bool = default;
 
+		constexpr auto& operator*=(const float scale) noexcept
+		{
+			center *= scale;
+			xRadius *= scale;
+			yRadius *= scale;
+			return *this;
+		}
+		constexpr auto& operator/=(const float scale) noexcept
+		{
+			center /= scale;
+			xRadius /= scale;
+			yRadius /= scale;
+			return *this;
+		}
+
+		[[nodiscard]] constexpr auto operator*(const float scale) const noexcept -> Ellipse
+		{
+			return Ellipse{ center * scale, xRadius * scale, yRadius * scale };
+		}
+		[[nodiscard]] constexpr auto operator/(const float scale) const noexcept -> Ellipse
+		{
+			return Ellipse{ center / scale, xRadius / scale, yRadius / scale };
+		}
+
 		explicit(false) operator D2D1_ELLIPSE() const noexcept
 		{
 			return D2D1_ELLIPSE{ center, xRadius, yRadius };
 		}
 	};
+
+	constexpr auto operator*(const float scale, const Ellipse& ellipse) noexcept -> Ellipse
+	{
+		return ellipse * scale;
+	}
+	constexpr auto operator/(const float scale, const Ellipse& ellipse) noexcept -> Ellipse
+	{
+		return ellipse / scale;
+	}
 }
 
 export template <typename Char>

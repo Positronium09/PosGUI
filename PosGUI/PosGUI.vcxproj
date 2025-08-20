@@ -50,6 +50,7 @@
     <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
     <ClCompile Include="modules\ScopedTimer.ixx" />
     <ClCompile Include="modules\Window.ixx" />
+    <ClCompile Include="modules\Window\DpiScaled.ixx" />
     <ClCompile Include="modules\Window\WindowInterface.ixx" />
     <ClCompile Include="modules\PropVariant.ixx" />
     <ClCompile Include="modules\Shape2D\Ellipse.ixx" />

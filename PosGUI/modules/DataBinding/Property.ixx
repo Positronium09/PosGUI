@@ -13,25 +13,25 @@ export namespace PGUI::DataBinding
 		public:
 		using ValueType = T;
 		using MutexType = Mutex;
-		using EventType = EventT<Mutex, T&>;
+		using EventType = EventT<Mutex, std::add_lvalue_reference_t<T>>;
 
-		Property() noexcept = default;
+		Property() noexcept(std::is_nothrow_default_constructible_v<T>) = default;
 
-		explicit(false) Property(const T& value) noexcept :
+		explicit(false) Property(const T& value) noexcept(std::is_nothrow_copy_constructible_v<T>) :
 			value{ value }
 		{ }
 
-		Property(const Property& other) noexcept :
+		Property(const Property& other) noexcept(std::is_nothrow_copy_constructible_v<T>) :
 			value{ other.Get() }
 		{ }
 
-		Property(Property&& other) noexcept :
+		Property(Property&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
 			value{ std::move(other.Get()) }
 		{ }
 
 		virtual ~Property() = default;
 
-		virtual auto operator=(const Property& other) noexcept -> Property&
+		virtual auto operator=(const Property& other) noexcept(std::is_nothrow_copy_assignable_v<T>) -> Property&
 		{
 			if (this != &other)
 			{
@@ -41,7 +41,7 @@ export namespace PGUI::DataBinding
 			return *this;
 		}
 
-		virtual auto operator=(Property&& other) noexcept -> Property&
+		virtual auto operator=(Property&& other) noexcept(std::is_nothrow_move_assignable_v<T>) -> Property&
 		{
 			if (this != &other)
 			{

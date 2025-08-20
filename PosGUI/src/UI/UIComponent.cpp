@@ -47,16 +47,6 @@ namespace PGUI::UI
 
 		auto graphics = GetGraphics();
 
-		if (autoDpiScaledDrawing)
-		{
-			const RectF clientRect = GetClientRect();
-			const auto dpi = static_cast<float>(GetDPI()) / DEFAULT_SCREEN_DPI;
-
-			const auto scaleMatrix = D2D::Matrix3x2::Scale(dpi, dpi, clientRect.Center());
-			const auto prevTransform = graphics.GetTransform();
-			graphics.SetTransform(scaleMatrix * prevTransform);
-		}
-
 		graphics.Clear(Colors::Transparent);
 
 		graphics.PushLayer(D2D::LayerParameters{
@@ -71,17 +61,6 @@ namespace PGUI::UI
 	{
 		auto graphics = GetGraphics();
 		graphics.PopLayer();
-
-		if (autoDpiScaledDrawing)
-		{
-			const RectF clientRect = GetClientRect();
-			const auto dpi = static_cast<float>(GetDPI()) / DEFAULT_SCREEN_DPI;
-
-			auto scaleMatrix = D2D::Matrix3x2::Scale(dpi, dpi, clientRect.Center());
-			scaleMatrix.Invert();
-
-			graphics.SetTransform(graphics.GetTransform() * scaleMatrix);
-		}
 
 		return DirectXCompositionWindow::EndDraw();
 	}

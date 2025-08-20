@@ -34,7 +34,7 @@ namespace PGUI::UI
 		const auto& d2d1 = GetD2D1DeviceContext();
 		d2d1->SetTarget(nullptr);
 
-		auto size = GetWindowSize();
+		SizeL size = LogicalToPhysical(GetClientSize());
 
 		if (size.cy == 0)
 		{

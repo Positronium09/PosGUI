@@ -12,9 +12,8 @@ import :Rect;
 
 export namespace PGUI
 {
-	struct RoundedRect : public RectF
+	struct RoundedRect : RectF
 	{
-		public:
 		float xRadius = 0.0F;
 		float yRadius = 0.0F;
 

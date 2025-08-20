@@ -27,12 +27,12 @@ export namespace PGUI::DataBinding
 			update();
 		};
 
-		DerivedProperty(const DerivedProperty& other) noexcept :
+		DerivedProperty(const DerivedProperty& other) noexcept(std::is_nothrow_copy_constructible_v<T>) :
 			Property<T, Mutex>{ other }
 		{ }
 
-		DerivedProperty(DerivedProperty&& other) noexcept :
-			Property<T, Mutex>{ other }
+		DerivedProperty(DerivedProperty&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
+			Property<T, Mutex>{ std::move(other) }
 		{ }
 
 		~DerivedProperty() override = default;

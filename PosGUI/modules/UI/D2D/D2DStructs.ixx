@@ -49,7 +49,7 @@ export namespace PGUI::UI::D2D
 		std::span<BYTE> bytes;
 	};
 
-	struct BitmapProperties : public D2D1_BITMAP_PROPERTIES1
+	struct BitmapProperties : D2D1_BITMAP_PROPERTIES1
 	{
 		constexpr BitmapProperties() noexcept = default;
 
@@ -100,7 +100,7 @@ export namespace PGUI::UI::D2D
 		}
 	};
 
-	struct BitmapBrushProperties : public D2D1_BITMAP_BRUSH_PROPERTIES
+	struct BitmapBrushProperties : D2D1_BITMAP_BRUSH_PROPERTIES
 	{
 		constexpr BitmapBrushProperties() noexcept :
 			D2D1_BITMAP_BRUSH_PROPERTIES{
@@ -129,7 +129,7 @@ export namespace PGUI::UI::D2D
 		}
 	};
 
-	struct BezierSegment : public D2D1_BEZIER_SEGMENT
+	struct BezierSegment : D2D1_BEZIER_SEGMENT
 	{
 		constexpr BezierSegment() noexcept = default;
 
@@ -147,7 +147,7 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] constexpr auto GetPoint3() const noexcept -> PointF { return point3; }
 	};
 
-	struct QuadraticBezierSegment : public D2D1_QUADRATIC_BEZIER_SEGMENT
+	struct QuadraticBezierSegment : D2D1_QUADRATIC_BEZIER_SEGMENT
 	{
 		constexpr QuadraticBezierSegment() noexcept = default;
 
@@ -164,7 +164,7 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] constexpr auto GetPoint2() const noexcept -> PointF { return point2; }
 	};
 
-	struct ArcSegment : public D2D1_ARC_SEGMENT
+	struct ArcSegment : D2D1_ARC_SEGMENT
 	{
 		constexpr ArcSegment() noexcept = default;
 

@@ -12,15 +12,24 @@ export namespace PGUI::UI::Layout
 {
 	struct StackLayoutPadding
 	{
-		long startPad = 0;
-		long endingPad = 0;
-		long crossStartPad = 0;
-		long crossEndPad = 0;
+		float startPad = 0;
+		float endingPad = 0;
+		float crossStartPad = 0;
+		float crossEndPad = 0;
 
 		auto operator==(const StackLayoutPadding&) const noexcept -> bool = default;
+		auto ScaleByDpiFactor(const float dpiFactor) const noexcept -> auto
+		{
+			return StackLayoutPadding{
+				.startPad = startPad * dpiFactor,
+				.endingPad = endingPad * dpiFactor,
+				.crossStartPad = crossStartPad * dpiFactor,
+				.crossEndPad = crossEndPad * dpiFactor
+			};
+		}
 	};
 
-	class StackLayout : public LayoutPanel
+	class StackLayout final : public LayoutPanel
 	{
 		public:
 		explicit StackLayout(
@@ -29,7 +38,7 @@ export namespace PGUI::UI::Layout
 			CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment::Center,
 			WrapMode wrapMode = WrapMode::NoWrap,
 			StackLayoutPadding padding = { 0, 0, 0, 0 },
-			long gap = 0, long crossGap = 0) noexcept;
+			float gap = 0, float crossGap = 0) noexcept;
 
 		auto RearrangeChildren() noexcept -> void override;
 
@@ -42,10 +51,10 @@ export namespace PGUI::UI::Layout
 		auto SetCrossAxisAlignment(CrossAxisAlignment alignment) noexcept -> void;
 		[[nodiscard]] auto GetCrossAxisAlignment() const noexcept { return crossAxisAlignment; }
 
-		auto SetMainAxisGap(long gap) noexcept -> void;
+		auto SetMainAxisGap(float gap) noexcept -> void;
 		[[nodiscard]] auto GetMainAxisGap() const noexcept { return mainAxisGap; }
 
-		auto SetCrossAxisGap(long crossGap) noexcept -> void;
+		auto SetCrossAxisGap(float crossGap) noexcept -> void;
 		[[nodiscard]] auto GetCrossAxisGap() const noexcept { return crossAxisGap; }
 
 		auto SetPadding(StackLayoutPadding padding) noexcept -> void;
@@ -66,17 +75,17 @@ export namespace PGUI::UI::Layout
 		CrossAxisAlignment crossAxisAlignment;
 		StackLayoutPadding padding;
 		WrapMode wrapMode;
-		long mainAxisGap;
-		long crossAxisGap;
+		float mainAxisGap;
+		float crossAxisGap;	
 
 		auto OnChildAdded(const WindowPtr<Window>&) -> void override;
 		auto OnChildRemoved(HWND) -> void override;
 
 		auto RearrangeHorizontalRow(
 			std::size_t startChildIndex, std::size_t endChildIndex,
-			long yPosition, std::size_t rowCount) const noexcept -> void;
+			float yPosition, std::size_t rowCount) const noexcept -> void;
 		auto RearrangeVerticalColumn(
 			std::size_t startChildIndex, std::size_t endChildIndex,
-			long xPosition, std::size_t columnCount) const noexcept -> void;
+			float xPosition, std::size_t columnCount) const noexcept -> void;
 	};
 }

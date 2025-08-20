@@ -11,7 +11,7 @@ import PGUI.ComPtr;
 
 export namespace PGUI::UI::Font
 {
-	struct FontAxisValue : public DWRITE_FONT_AXIS_VALUE
+	struct FontAxisValue : DWRITE_FONT_AXIS_VALUE
 	{
 		constexpr FontAxisValue() noexcept = default;
 
@@ -26,7 +26,7 @@ export namespace PGUI::UI::Font
 		explicit(false) constexpr operator DWRITE_FONT_AXIS_VALUE() const noexcept { return *this; }
 	};
 
-	struct FontAxisRange : public DWRITE_FONT_AXIS_RANGE
+	struct FontAxisRange : DWRITE_FONT_AXIS_RANGE
 	{
 		constexpr FontAxisRange() noexcept = default;
 
@@ -41,7 +41,7 @@ export namespace PGUI::UI::Font
 		explicit(false) constexpr operator DWRITE_FONT_AXIS_RANGE() const noexcept { return *this; }
 	};
 
-	struct TextRange : public DWRITE_TEXT_RANGE
+	struct TextRange : DWRITE_TEXT_RANGE
 	{
 		constexpr TextRange() noexcept = default;
 
@@ -60,7 +60,7 @@ export namespace PGUI::UI::Font
 		[[nodiscard]] auto GetStartPosition() const noexcept -> UINT32 { return startPosition; }
 	};
 
-	struct LineSpacing : public DWRITE_LINE_SPACING
+	struct LineSpacing : DWRITE_LINE_SPACING
 	{
 		constexpr LineSpacing() noexcept = default;
 
@@ -75,7 +75,7 @@ export namespace PGUI::UI::Font
 		explicit(false) constexpr operator DWRITE_LINE_SPACING() const noexcept { return *this; }
 	};
 
-	struct Trimming : public ComPtrHolder<IDWriteInlineObject>
+	struct Trimming : ComPtrHolder<IDWriteInlineObject>
 	{
 		constexpr Trimming() noexcept = default;
 

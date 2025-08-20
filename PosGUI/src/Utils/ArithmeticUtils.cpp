@@ -11,6 +11,18 @@ namespace PGUI
 {
 	auto MapPoints(const HWND from, const HWND to, std::span<PointL> points) noexcept -> std::span<PointL>
 	{
+		if (points.size() == 2U)
+		{
+			MapWindowPoints(
+				from, to,
+				std::bit_cast<LPPOINT>(points.data()), 1U);
+			MapWindowPoints(
+				from, to,
+				std::next(std::bit_cast<LPPOINT>(points.data())), 1U);
+
+			return points;
+		}
+
 		MapWindowPoints(
 			from, to,
 			std::bit_cast<LPPOINT>(points.data()),

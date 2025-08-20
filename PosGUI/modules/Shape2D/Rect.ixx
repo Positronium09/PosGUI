@@ -63,7 +63,34 @@ export namespace PGUI
 
 		~Rect() noexcept = default;
 
-		[[nodiscard]] constexpr auto operator==(const Rect<T>& other) const noexcept -> bool = default;
+		[[nodiscard]] constexpr auto operator==(const Rect& other) const noexcept -> bool = default;
+
+		[[nodiscard]] constexpr auto operator*(T factor) const noexcept
+		{
+			return Rect{ left * factor, top * factor, right * factor, bottom * factor };
+		}
+
+		[[nodiscard]] constexpr auto operator/(T factor) const noexcept
+		{
+			return Rect{ left / factor, top / factor, right / factor, bottom / factor };
+		}
+
+		constexpr auto& operator*=(T factor) noexcept
+		{
+			left *= factor;
+			top *= factor;
+			right *= factor;
+			bottom *= factor;
+			return *this;
+		}
+		constexpr auto& operator/=(T factor) noexcept
+		{
+			left /= factor;
+			top /= factor;
+			right /= factor;
+			bottom /= factor;
+			return *this;
+		}
 
 		[[nodiscard]] constexpr auto TopLeft() const noexcept
 		{
@@ -107,7 +134,7 @@ export namespace PGUI
 				top <= p.y && p.y <= bottom;
 		}
 
-		[[nodiscard]] constexpr auto IsIntersectingRect(Rect<T> rect) const noexcept
+		[[nodiscard]] constexpr auto IsIntersectingRect(Rect rect) const noexcept
 		{
 			return left < rect.right
 			       && right > rect.left
@@ -115,13 +142,13 @@ export namespace PGUI
 			       && bottom > top;
 		}
 
-		[[nodiscard]] constexpr auto IntersectRect(Rect<T> rect) const noexcept
+		[[nodiscard]] constexpr auto IntersectRect(Rect rect) const noexcept
 		{
 			if (!IsIntersectingRect(rect))
 			{
-				return Rect<T>{ };
+				return Rect{ };
 			}
-			return Rect<T>{
+			return Rect{
 				std::max(left, rect.left),
 				std::max(top, rect.top),
 				std::min(right, rect.right),
@@ -143,11 +170,21 @@ export namespace PGUI
 			bottom += yOffset;
 		}
 
+		constexpr auto Shift(Point<T> offset) noexcept -> void
+		{
+			Shift(offset.x, offset.y);
+		}
+
 		[[nodiscard]] constexpr auto Shifted(T xOffset, T yOffset) const noexcept
 		{
 			auto rect = *this;
 			rect.Shift(xOffset, yOffset);
 			return rect;
+		}
+
+		constexpr auto Shifted(Point<T> offset) noexcept
+		{
+			return Shifted(offset.x, offset.y);
 		}
 
 		constexpr auto Inflate(T dx, T dy) noexcept -> void
@@ -184,7 +221,7 @@ export namespace PGUI
 		{
 			auto size = Size() / static_cast<T>(2);
 
-			return Rect<T>{
+			return Rect{
 				p.x - size.cx,
 				p.y - size.cy,
 				p.x + size.cx,
@@ -256,6 +293,18 @@ export namespace PGUI
 			infinity,
 			infinity
 		};
+	}
+
+	template <typename T> requires std::is_arithmetic_v<T>
+	[[nodiscard]] constexpr auto operator*(const Rect<T>& v, T factor) noexcept
+	{
+		return Rect{ v.left * factor, v.top * factor, v.right * factor, v.bottom * factor };
+	}
+
+	template <typename T> requires std::is_arithmetic_v<T>
+	[[nodiscard]] constexpr auto operator/(const Rect<T>& v, T factor) noexcept
+	{
+		return Rect{ v.left / factor, v.top / factor, v.right / factor, v.bottom / factor };
 	}
 
 	using RectF = Rect<float>;

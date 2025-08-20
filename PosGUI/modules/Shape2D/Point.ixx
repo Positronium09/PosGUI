@@ -81,17 +81,17 @@ export namespace PGUI
 
 		[[nodiscard]] constexpr auto operator-(const Point& other) const noexcept
 		{
-			return Point(x - other.x, y - other.y);
+			return Point{ x - other.x, y - other.y };
 		}
 
 		[[nodiscard]] constexpr auto operator*(T factor) const noexcept
 		{
-			return Point(x * factor, y * factor);
+			return Point{ x * factor, y * factor };
 		}
 
 		[[nodiscard]] constexpr auto operator/(T factor) const noexcept
 		{
-			return Point(x / factor, y / factor);
+			return Point{ x / factor, y / factor };
 		}
 
 		[[nodiscard]] constexpr auto operator-() const noexcept

@@ -18,13 +18,9 @@ namespace PGUI
 		windowClass{ windowClass }
 	{
 		RegisterHandler(WM_DPICHANGED, &Window::_OnDpiChanged);
+		RegisterHandler(WM_DPICHANGED_AFTERPARENT, &Window::_OnDpiChanged);
+		RegisterHandler(WM_DPICHANGED_BEFOREPARENT, &Window::_OnDpiChanged);
 		RegisterHandler(WM_SIZE, &Window::_OnSize);
-	}
-
-	auto Window::OnDpiChanged(UINT /* unused */, const RectL suggestedRect) -> MessageHandlerResult
-	{
-		MoveAndResize(suggestedRect);
-		return 0;
 	}
 
 	Window::~Window()
@@ -75,21 +71,49 @@ namespace PGUI
 		messageHandlerMap[msg].push_back(handler);
 	}
 
-	auto Window::_OnDpiChanged(UINT /* unused */, const WPARAM wParam, const LPARAM lParam) -> MessageHandlerResult
+	auto Window::_OnDpiChanged(const UINT msg, const WPARAM, const LPARAM lParam) -> MessageHandlerResult
 	{
-		return OnDpiChanged(LOWORD(wParam), *std::bit_cast<LPRECT>(lParam));
+		LRESULT result = 0;
+		logicalRect.SetDpi(GetDpi());
+
+		if (msg == WM_DPICHANGED)
+		{
+			logicalRect.SetPhysicalValue(*std::bit_cast<LPRECT>(lParam));
+			result = OnDpiChanged(GetDpi());
+		}
+		else if (msg == WM_DPICHANGED_AFTERPARENT)
+		{
+			result = OnDpiChangedAfterParent(GetDpi());
+		}
+		else if (msg == WM_DPICHANGED_BEFOREPARENT)
+		{
+			result = OnDpiChangedBeforeParent(GetDpi());
+		}
+
+		Redraw();
+
+		return result;
 	}
 
 	auto Window::_OnSize(UINT /* unused */, WPARAM /* unused */, const LPARAM lParam) -> MessageHandlerResult
 	{
-		OnSizeChanged({ HIWORD(lParam), LOWORD(lParam) });
+		const RectF rect{
+			logicalRect.GetPhysicalValue().TopLeft(),
+			SizeF{
+				static_cast<float>(LOWORD(lParam)),
+				static_cast<float>(HIWORD(lParam))
+			}
+		};
+		Logger::Info(L"{}", rect);
+		logicalRect.SetPhysicalValue(rect);
+		OnSizeChanged(logicalRect->Size());
 
 		return 0;
 	}
 
 	// ReSharper restore CppInconsistentNaming
 
-	auto Window::RemoveChildWindow(HWND childHwnd) -> void
+	auto Window::RemoveChildWindow(const HWND childHwnd) -> void
 	{
 		const auto found = std::ranges::find_if(
 			childWindows,
@@ -248,7 +272,7 @@ namespace PGUI
 		}
 	}
 
-	auto Window::GetChildWindow(HWND hwnd) const noexcept -> WindowPtr<Window>
+	auto Window::GetChildWindow(const HWND hwnd) const noexcept -> WindowPtr<Window>
 	{
 		const auto result = std::ranges::find_if(childWindows, [hwnd](const auto& wnd)
 		{
@@ -263,67 +287,51 @@ namespace PGUI
 		return *result;
 	}
 
-	auto Window::ChildWindowFromPoint(const PointL point, const UINT flags) const noexcept -> WindowPtr<Window>
+	auto Window::ChildWindowFromPoint(const PointF point) const noexcept -> WindowPtr<Window>
 	{
-		WindowPtr<Window> wnd = nullptr;
-		if (const HWND hwnd = ChildWindowFromPointEx(hWnd, point, flags);
-			hwnd != nullptr)
+		auto hwnd = ::ChildWindowFromPoint(Hwnd(), LogicalToPhysical(point));
+
+		if (const auto result = std::ranges::find_if(
+				childWindows,
+				[hwnd](const auto& wnd)
+				{
+					return wnd->Hwnd() == hwnd;
+				});
+			result != childWindows.end())
 		{
-			return GetChildWindow(hwnd);
+			return *result;
 		}
-		return wnd;
+
+		return nullptr;
 	}
 
-	auto Window::AdjustForClientSize(const SizeI size) const noexcept -> void
+	auto Window::GetWindowRect() const noexcept -> RectF
 	{
 		RECT rc;
-		SetRect(&rc, 0, 0, size.cx, size.cy);
-
-		AdjustWindowRectExForDpi(&rc,
-			static_cast<DWORD>(GetWindowLongPtrW(hWnd, GWL_STYLE)),
-			FALSE,
-			static_cast<DWORD>(GetWindowLongPtrW(hWnd, GWL_EXSTYLE)),
-			GetDPI());
-
-		const RectL r = rc;
-		Resize(r.Size());
+		::GetWindowRect(Hwnd(), &rc);
+		return PhysicalToLogical(RectF{ rc });
 	}
 
-	auto Window::AdjustForRect(const RectI rect) const noexcept -> void
+	auto Window::GetClientRect() const noexcept -> RectF
 	{
-		RECT rc = rect;
-
-		AdjustWindowRectExForDpi(&rc,
-			static_cast<DWORD>(GetWindowLongPtrW(hWnd, GWL_STYLE)),
-			FALSE,
-			static_cast<DWORD>(GetWindowLongPtrW(hWnd, GWL_EXSTYLE)),
-			GetDPI());
-
-		MoveAndResize(rc);
+		auto rect = *logicalRect;
+		rect.Shift(-logicalRect->TopLeft());
+		return rect;
 	}
 
-	auto Window::GetWindowRect() const noexcept -> RectL
-	{
-		RECT windowRect{ };
-		::GetWindowRect(hWnd, &windowRect);
-		return windowRect;
-	}
-
-	auto Window::GetClientRect() const noexcept -> RectL
-	{
-		RECT clientRect{ };
-		::GetClientRect(hWnd, &clientRect);
-		return clientRect;
-	}
-
-	auto Window::GetWindowSize() const noexcept -> SizeL
+	auto Window::GetWindowSize() const noexcept -> SizeF
 	{
 		return GetWindowRect().Size();
 	}
 
-	auto Window::GetClientSize() const noexcept -> SizeL
+	auto Window::GetClientSize() const noexcept -> SizeF
 	{
 		return GetClientRect().Size();
+	}
+
+	auto Window::GetParentRelativeRect() const noexcept -> RectF
+	{
+		return PhysicalToLogical(MapRectToParent(LogicalToPhysical(GetClientRect())));
 	}
 
 	auto Window::GetPlacement() const noexcept -> WindowPlacement
@@ -334,37 +342,37 @@ namespace PGUI
 		return placement;
 	}
 
-	auto Window::ScreenToClient(const PointL point) const noexcept -> PointL
+	auto Window::ScreenToClient(const PointF point) const noexcept -> PointF
 	{
-		POINT p = point;
-		::ScreenToClient(hWnd, &p);
-		return p;
+		PointL physical = LogicalToPhysical(point);
+		::ScreenToClient(Hwnd(), std::bit_cast<LPPOINT>(&physical));
+		return PhysicalToLogical<PointF>(physical);
 	}
 
-	auto Window::ScreenToClient(const RectL rect) const noexcept -> RectL
+	auto Window::ScreenToClient(const RectF rect) const noexcept -> RectF
 	{
-		RECT rc = rect;
-		::ScreenToClient(hWnd, std::bit_cast<LPPOINT>(&rc));
-		::ScreenToClient(hWnd, std::bit_cast<LPPOINT>(&rc.right));
-		return rc;
+		RectL physical = LogicalToPhysical(rect);
+		::ScreenToClient(Hwnd(), std::bit_cast<LPPOINT>(&physical));
+		::ScreenToClient(Hwnd(), std::next(std::bit_cast<LPPOINT>(&physical)));
+		return PhysicalToLogical<RectF>(physical);
 	}
 
-	auto Window::ClientToScreen(const PointL point) const noexcept -> PointL
+	auto Window::ClientToScreen(const PointF point) const noexcept -> PointF
 	{
-		POINT p = point;
-		::ClientToScreen(hWnd, &p);
-		return p;
+		PointL physical = LogicalToPhysical(point);
+		::ClientToScreen(Hwnd(), std::bit_cast<LPPOINT>(&physical));
+		return PhysicalToLogical<PointF>(physical);
 	}
 
-	auto Window::ClientToScreen(const RectL rect) const noexcept -> RectL
+	auto Window::ClientToScreen(const RectF rect) const noexcept -> RectF
 	{
-		RECT rc = rect;
-		::ClientToScreen(hWnd, std::bit_cast<LPPOINT>(&rc));
-		::ClientToScreen(hWnd, std::bit_cast<LPPOINT>(&rc.right));
-		return rc;
+		RectL physical = LogicalToPhysical(rect);
+		::ClientToScreen(Hwnd(), std::bit_cast<LPPOINT>(&physical));
+		::ClientToScreen(Hwnd(), std::next(std::bit_cast<LPPOINT>(&physical)));
+		return PhysicalToLogical<RectF>(physical);
 	}
 
-	auto Window::CenterAroundWindow(WindowPtr<> wnd) const noexcept -> void
+	auto Window::CenterAroundWindow(const WindowPtr<>& wnd) noexcept -> void
 	{
 		if (wnd == nullptr)
 		{
@@ -386,7 +394,7 @@ namespace PGUI
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
 
-	auto Window::CenterAroundWindow(const HWND hwnd) const noexcept -> void
+	auto Window::CenterAroundWindow(const HWND hwnd) noexcept -> void
 	{
 		if (hwnd == nullptr)
 		{
@@ -396,7 +404,7 @@ namespace PGUI
 		RECT rc;
 		::GetWindowRect(hwnd, &rc);
 
-		const RectL rect = rc;
+		const RectL rect = PhysicalToLogical(RectF{ rc });
 		const auto center = rect.Center();
 		const auto centeredWindowRect = GetWindowRect().CenteredAround(center);
 
@@ -411,7 +419,7 @@ namespace PGUI
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
 
-	auto Window::CenterAroundPoint(const PointL point) const noexcept -> void
+	auto Window::CenterAroundPoint(const PointF point) noexcept -> void
 	{
 		const auto centeredWindowRect = GetWindowRect().CenteredAround(point);
 
@@ -426,7 +434,7 @@ namespace PGUI
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
 
-	auto Window::CenterAroundRect(const RectL rect) const noexcept -> void
+	auto Window::CenterAroundRect(const RectF rect) noexcept -> void
 	{
 		const auto center = rect.Center();
 		const auto centeredWindowRect = GetWindowRect().CenteredAround(center);
@@ -442,7 +450,8 @@ namespace PGUI
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
 
-	auto Window::CenterAroundParent() const noexcept -> void
+
+	auto Window::CenterAroundParent() noexcept -> void
 	{
 		if (parentHwnd == nullptr)
 		{
@@ -458,7 +467,7 @@ namespace PGUI
 		SetPosition(centeredClientRect, PositionFlags::NoZOrder);
 	}
 
-	auto Window::VerticallyCenterAroundParent() const noexcept -> void
+	auto Window::VerticallyCenterAroundParent() noexcept -> void
 	{
 		if (parentHwnd == nullptr)
 		{
@@ -477,7 +486,7 @@ namespace PGUI
 		SetPosition(centeredClientRect, PositionFlags::NoZOrder);
 	}
 
-	auto Window::HorizontallyCenterAroundParent() const noexcept -> void
+	auto Window::HorizontallyCenterAroundParent() noexcept -> void
 	{
 		if (parentHwnd == nullptr)
 		{
@@ -537,42 +546,58 @@ namespace PGUI
 		FlashWindowEx(&flashInfo);
 	}
 
-	auto Window::SetPosition(const PointL position, const SizeL size, PositionFlags flags,
-	                         const HWND insertAfter) const noexcept -> void
+	auto Window::SetPosition(const PointF position, const SizeF size,
+	                         const PositionFlags flags, const HWND insertAfter) noexcept -> void
 	{
-		SetWindowPos(hWnd, insertAfter, position.x, position.y,
-			size.cx, size.cy, static_cast<UINT>(flags));
+		RectF rect = *logicalRect;
+		if (!IsFlagSet(flags, PositionFlags::NoMove))
+		{
+			const auto rectSize = rect.Size();
+			rect.left = position.x;
+			rect.top = position.y;
+			rect.right = rect.left + rectSize.cx;
+			rect.bottom = rect.top + rectSize.cy;
+		}
+		if (!IsFlagSet(flags, PositionFlags::NoSize))
+		{
+			rect.right = rect.left + size.cx;
+			rect.bottom = rect.top + size.cy;
+		}
+		logicalRect.SetLogicalValue(rect);
+		const RectL physicalRect = logicalRect.GetPhysicalValue();
+
+		SetWindowPos(hWnd, insertAfter,
+		             physicalRect.left, physicalRect.top,
+		             physicalRect.right - physicalRect.left,
+		             physicalRect.bottom - physicalRect.top,
+		             ToUnderlying(flags));
 	}
 
-	auto Window::SetPosition(const RectL rect, const PositionFlags flags, const HWND insertAfter) const noexcept -> void
+	auto Window::SetPosition(const RectF rect, const PositionFlags flags, const HWND insertAfter) noexcept -> void
 	{
 		SetPosition(rect.TopLeft(), rect.Size(), flags, insertAfter);
 	}
 
-	auto Window::Move(const PointL newPos) const noexcept -> void
+	auto Window::Move(const PointF newPos) noexcept -> void
 	{
-		SetPosition(newPos, SizeL{ }, 
-			PositionFlags::NoSize | PositionFlags::NoZOrder | PositionFlags::NoActivate);
+		SetPosition(newPos, SizeF{ },
+		            PositionFlags::NoSize | PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
-	auto Window::Resize(const SizeL newSize) const noexcept -> void
+	auto Window::Resize(const SizeF newSize) noexcept -> void
 	{
-		SetPosition(PointL{ }, newSize,
-			PositionFlags::NoMove | PositionFlags::NoZOrder | PositionFlags::NoActivate);
+		SetPosition(PointF{ }, newSize,
+		            PositionFlags::NoMove | PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
-	auto Window::MoveAndResize(const RectL newRect) const noexcept -> void
+	auto Window::MoveAndResize(const RectF newRect) noexcept -> void
 	{
-		const auto size = newRect.Size();
-
-		SetPosition(newRect.TopLeft(), size,
-			PositionFlags::NoZOrder | PositionFlags::NoActivate);
+		SetPosition(newRect, PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
-	auto Window::MoveAndResize(const PointL newPos, const SizeL newSize) const noexcept -> void
+	auto Window::MoveAndResize(const PointF newPos, const SizeF newSize) noexcept -> void
 	{
-		SetPosition(newPos, newSize,
-			PositionFlags::NoZOrder | PositionFlags::NoActivate);
+		SetPosition(newPos, newSize, PositionFlags::NoZOrder | PositionFlags::NoActivate);
 	}
 
 	auto Window::MapPoints(const HWND hWndTo, const std::span<PointL> points) const noexcept -> std::span<PointL>
@@ -595,6 +620,26 @@ namespace PGUI
 		return PGUI::MapRect(hWnd, hWndTo, rect);
 	}
 
+	auto Window::MapPointsToParent(const std::span<PointL> points) const noexcept -> std::span<PointL>
+	{
+		return MapPoints(parentHwnd, points);
+	}
+
+	auto Window::MapPointToParent(const PointL point) const noexcept -> PointL
+	{
+		return MapPoint(parentHwnd, point);
+	}
+
+	auto Window::MapRectsToParent(const std::span<RectL> rects) const noexcept -> std::span<RectL>
+	{
+		return MapRects(parentHwnd, rects);
+	}
+
+	auto Window::MapRectToParent(const RectF rect) const noexcept -> RectF
+	{
+		return MapRect(parentHwnd, rect);
+	}
+
 	// ReSharper disable once CppInconsistentNaming
 	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 	{
@@ -609,10 +654,11 @@ namespace PGUI
 
 			window->hWnd = hWnd;
 			window->parentHwnd = createStruct->hwndParent;
+			window->logicalRect.SetDpi(window->GetDpi());
 
 			SetWindowLongPtrW(hWnd, GWLP_USERDATA, std::bit_cast<LONG_PTR>(window));
 		}
-		
+
 		if (LRESULT result = 0;
 			DwmDefWindowProc(hWnd, msg, wParam, lParam, &result)) [[unlikely]]
 		{
@@ -671,7 +717,6 @@ namespace PGUI
 				}
 			}
 		}
-		
 
 		if (!window->messageHandlerMap.contains(msg))
 		{
@@ -736,27 +781,25 @@ namespace PGUI
 
 		if (msg == WM_NCCREATE) [[unlikely]]
 		{
-			auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
+			const auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
+			RectL rc = RectF{
+				           0,
+				           0,
+				           static_cast<float>(createStruct->cx),
+				           static_cast<float>(createStruct->cy)
+			           } * window->GetDpiScaleFactor();
+			AdjustWindowRectExForDpi(
+				std::bit_cast<LPRECT>(&rc),
+				window->GetStyle(),
+				FALSE,
+				window->GetExStyle(),
+				GetDpiForWindow(hWnd));
+			const PointF p{ static_cast<float>(createStruct->x), static_cast<float>(createStruct->y) };
+			const RectF rect{ p * window->GetDpiScaleFactor(), rc.Size() };
 
-			if (createStruct->style & WS_CHILD)
-			{
-				window->parentHwnd = createStruct->hwndParent;
-				createStruct->x = AdjustForDPI(createStruct->x,
-					static_cast<float>(GetDpiForWindow(hWnd)));
-				createStruct->y = AdjustForDPI(createStruct->y,
-					static_cast<float>(GetDpiForWindow(hWnd)));
-			}
+			window->logicalRect.SetPhysicalValue(rect);
 
-			createStruct->cx = AdjustForDPI(createStruct->cx,
-				static_cast<float>(GetDpiForWindow(hWnd)));
-			createStruct->cy = AdjustForDPI(createStruct->cy,
-				static_cast<float>(GetDpiForWindow(hWnd)));
-
-			const RectI rect{
-				PointI{ createStruct->x, createStruct->y },
-				SizeI{ createStruct->cx, createStruct->cy } };
-
-			window->AdjustForRect(rect);
+			window->MoveAndResize(*window->logicalRect);
 		}
 
 		return result;

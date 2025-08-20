@@ -10,6 +10,7 @@ import PGUI.WindowClass;
 import PGUI.Shape2D;
 import PGUI.ErrorHandling;
 import :WindowInterface;
+import :DpiScaled;
 
 export namespace PGUI
 {
@@ -21,8 +22,6 @@ export namespace PGUI
 
 	template <WindowType T = Window>
 	using RawWindowPtr = T*;
-
-	constexpr auto DEFAULT_SCREEN_DPI = USER_DEFAULT_SCREEN_DPI;
 
 	enum class HandlerReturnFlags
 	{
@@ -124,13 +123,30 @@ export namespace PGUI
 		NoMove = SWP_NOMOVE,
 		NoOwnerZOrder = SWP_NOOWNERZORDER,
 		NoRedraw = SWP_NOREDRAW,
-		NoReposition = SWP_NOZORDER,
+		NoReposition = SWP_NOREPOSITION,
 		NoSendChanging = SWP_NOSENDCHANGING,
 		NoSize = SWP_NOSIZE,
 		NoZOrder = SWP_NOZORDER,
 		ShowWindow = SWP_SHOWWINDOW
 	};
 	DEFINE_ENUM_FLAG_OPERATORS(PositionFlags);
+
+	enum class RedrawFlags
+	{
+		Erase = RDW_ERASE,
+		Frame = RDW_FRAME,
+		InternalPaint = RDW_INTERNALPAINT,
+		Invalidate = RDW_INVALIDATE,
+		NoErase = RDW_NOERASE,
+		NoFrame = RDW_NOFRAME,
+		NoInternalPaint = RDW_NOINTERNALPAINT,
+		Validate = RDW_VALIDATE,
+		EraseNow = RDW_ERASENOW,
+		UpdateNow = RDW_UPDATENOW,
+		AllChildren = RDW_ALLCHILDREN,
+		NoChildren = RDW_NOCHILDREN,
+	};
+	DEFINE_ENUM_FLAG_OPERATORS(RedrawFlags);
 
 	enum class WindowPlacementFlags
 	{
@@ -426,31 +442,34 @@ export namespace PGUI
 
 		[[nodiscard]] auto GetChildWindow(HWND hWnd) const noexcept -> WindowPtr<Window>;
 
-		[[nodiscard]] auto ChildWindowFromPoint(PointL point, UINT flags) const noexcept -> WindowPtr<Window>;
+		[[nodiscard]] auto ChildWindowFromPoint(PointF point) const noexcept -> WindowPtr<Window>;
 
-		auto AdjustForClientSize(SizeI size) const noexcept -> void;
-
-		auto AdjustForRect(RectI rect) const noexcept -> void;
-
-		[[nodiscard]] auto GetWindowRect() const noexcept -> RectL;
-
-		[[nodiscard]] auto GetClientRect() const noexcept -> RectL;
-
-		[[nodiscard]] auto GetWindowSize() const noexcept -> SizeL;
-
-		[[nodiscard]] auto GetClientSize() const noexcept -> SizeL;
+		[[nodiscard]] auto GetWindowRect() const noexcept -> RectF;
+		[[nodiscard]] auto GetClientRect() const noexcept -> RectF;
+		[[nodiscard]] auto GetWindowSize() const noexcept -> SizeF;
+		[[nodiscard]] auto GetClientSize() const noexcept -> SizeF;
+		[[nodiscard]] auto GetParentRelativeRect() const noexcept -> RectF;
 
 		[[nodiscard]] auto GetPlacement() const noexcept -> WindowPlacement;
 
-		[[nodiscard]] auto ScreenToClient(PointL point) const noexcept -> PointL;
+		[[nodiscard]] auto ScreenToClient(PointF point) const noexcept -> PointF;
+		[[nodiscard]] auto ScreenToClient(RectF rect) const noexcept -> RectF;
+		[[nodiscard]] auto ClientToScreen(PointF point) const noexcept -> PointF;
+		[[nodiscard]] auto ClientToScreen(RectF rect) const noexcept -> RectF;
 
-		[[nodiscard]] auto ScreenToClient(RectL rect) const noexcept -> RectL;
+		[[nodiscard]] auto GetDpi() const noexcept { return static_cast<float>(GetDpiForWindow(Hwnd())); }
+		[[nodiscard]] auto GetDpiScaleFactor() const noexcept { return GetDpi() / DEFAULT_SCREEN_DPI; }
 
-		[[nodiscard]] auto ClientToScreen(PointL point) const noexcept -> PointL;
-
-		[[nodiscard]] auto ClientToScreen(RectL rect) const noexcept -> RectL;
-
-		[[nodiscard]] auto GetDPI() const noexcept { return GetDpiForWindow(Hwnd()); }
+		template <DpiScalable T>
+		[[nodiscard]] auto PhysicalToLogical(const T& value) const noexcept
+		{
+			return Scaling::PhysicalToLogical<T>(value, GetDpi());
+		}
+		template <DpiScalable T>
+		[[nodiscard]] auto LogicalToPhysical(const T& value) const noexcept
+		{
+			return Scaling::LogicalToPhysical<T>(value, GetDpi());
+		}
 
 		[[nodiscard]] auto IsInputEnabled() const noexcept -> bool { return IsWindowEnabled(Hwnd()); }
 
@@ -471,25 +490,21 @@ export namespace PGUI
 		[[nodiscard]] auto IsMinimized() const noexcept -> bool { return IsIconic(Hwnd()); }
 		[[nodiscard]] auto IsMaximized() const noexcept -> bool { return IsZoomed(Hwnd()); }
 
-		auto CenterAroundWindow(WindowPtr<> wnd) const noexcept -> void;
+		auto CenterAroundWindow(const WindowPtr<>& wnd) noexcept -> void;
+		auto CenterAroundWindow(HWND hwnd) noexcept -> void;
 
-		auto CenterAroundWindow(HWND hwnd) const noexcept -> void;
+		auto CenterAroundPoint(PointF point) noexcept -> void;
+		auto CenterAroundRect(RectF rect) noexcept -> void;
 
-		auto CenterAroundPoint(PointL point) const noexcept -> void;
+		auto CenterAroundParent() noexcept -> void;
 
-		auto CenterAroundRect(RectL rect) const noexcept -> void;
-
-		auto CenterAroundParent() const noexcept -> void;
-
-		auto VerticallyCenterAroundParent() const noexcept -> void;
-
-		auto HorizontallyCenterAroundParent() const noexcept -> void;
+		auto VerticallyCenterAroundParent() noexcept -> void;
+		auto HorizontallyCenterAroundParent() noexcept -> void;
 
 		[[nodiscard]] auto GetStyle() const noexcept -> DWORD
 		{
 			return static_cast<DWORD>(GetWindowLongPtrW(Hwnd(), GWL_STYLE));
 		}
-
 		[[nodiscard]] auto GetExStyle() const noexcept -> DWORD
 		{
 			return static_cast<DWORD>(GetWindowLongPtrW(Hwnd(), GWL_EXSTYLE));
@@ -533,6 +548,21 @@ export namespace PGUI
 		auto Maximize() const noexcept -> void { Show(ShowWindowCommand::Maximize); }
 		auto BringToTop() const noexcept -> void { BringWindowToTop(Hwnd()); }
 		auto Invalidate(const bool erase = true) const noexcept -> void { InvalidateRect(Hwnd(), nullptr, erase); }
+		auto Invalidate(const RectF rect, const bool erase = true) const noexcept -> void
+		{
+			InvalidateRect(Hwnd(), std::bit_cast<LPRECT>(&rect), erase);
+		}
+		auto Redraw(const RedrawFlags flags = 
+			RedrawFlags::Invalidate | RedrawFlags::InternalPaint | RedrawFlags::UpdateNow) const noexcept -> void
+		{
+			RedrawWindow(Hwnd(), nullptr, nullptr, ToUnderlying(flags));
+		}
+		auto Redraw(const RectF rect, 
+			const RedrawFlags flags = 
+			RedrawFlags::Invalidate | RedrawFlags::InternalPaint | RedrawFlags::UpdateNow) const noexcept -> void
+		{
+			RedrawWindow(Hwnd(), std::bit_cast<LPRECT>(&rect), nullptr, ToUnderlying(flags));
+		}
 		auto Update() const noexcept -> void { UpdateWindow(Hwnd()); }
 		auto SetFocus() const noexcept -> void { ::SetFocus(Hwnd()); }
 		auto SetForeground() const noexcept -> void { SetForegroundWindow(hWnd); }
@@ -546,32 +576,28 @@ export namespace PGUI
 		// ReSharper disable once CppMemberFunctionMayBeStatic
 		auto ReleaseCapture() const noexcept -> void { ::ReleaseCapture(); }
 
-		auto SetPosition(PointL position, SizeL size, PositionFlags flags,
-		                 HWND insertAfter = nullptr) const noexcept -> void;
-
-		auto SetPosition(RectL rect, PositionFlags flags, HWND insertAfter = nullptr) const noexcept -> void;
-
-		auto Move(PointL newPos) const noexcept -> void;
-
-		auto Resize(SizeL newSize) const noexcept -> void;
-
-		auto MoveAndResize(RectL newRect) const noexcept -> void;
-
-		auto MoveAndResize(PointL newPos, SizeL newSize) const noexcept -> void;
+		auto SetPosition(PointF position, SizeF size, PositionFlags flags,
+			HWND insertAfter = nullptr) noexcept -> void;
+		auto SetPosition(RectF rect, PositionFlags flags, HWND insertAfter = nullptr) noexcept -> void;
+		auto Move(PointF newPos) noexcept -> void;
+		auto Resize(SizeF newSize) noexcept -> void;
+		auto MoveAndResize(RectF newRect) noexcept -> void;
+		auto MoveAndResize(PointF newPos, SizeF newSize) noexcept -> void;
 
 		[[nodiscard]] auto MapPoints(HWND hWndTo, std::span<PointL> points) const noexcept -> std::span<PointL>;
-
 		[[nodiscard]] auto MapPoint(HWND hWndTo, PointL point) const noexcept -> PointL;
-
 		[[nodiscard]] auto MapRects(HWND hWndTo, std::span<RectL> rects) const noexcept -> std::span<RectL>;
-
 		[[nodiscard]] auto MapRect(HWND hWndTo, RectL rect) const noexcept -> RectL;
+		[[nodiscard]] auto MapPointsToParent(std::span<PointL> points) const noexcept -> std::span<PointL>;
+		[[nodiscard]] auto MapPointToParent(PointL point) const noexcept -> PointL;
+		[[nodiscard]] auto MapRectsToParent(std::span<RectL> rects) const noexcept -> std::span<RectL>;
+
+		[[nodiscard]] auto MapRectToParent(RectF rect) const noexcept -> RectF;
 
 		auto SendMsg(const UINT msg, const WPARAM wParam, const LPARAM lParam) const noexcept -> void
 		{
 			SendMessageW(Hwnd(), msg, wParam, lParam);
 		}
-
 		auto PostMsg(const UINT msg, const WPARAM wParam, const LPARAM lParam) const noexcept -> void
 		{
 			PostMessageW(Hwnd(), msg, wParam, lParam);
@@ -580,7 +606,21 @@ export namespace PGUI
 		protected:
 		explicit Window(const WindowClassPtr& windowClass) noexcept;
 
-		virtual auto OnDpiChanged(UINT dpi, RectL suggestedRect) -> MessageHandlerResult;
+		virtual auto OnDpiChanged(float) -> MessageHandlerResult
+		{
+			MoveAndResize(*logicalRect);
+			return 0;
+		}
+		virtual auto OnDpiChangedBeforeParent(float) -> MessageHandlerResult
+		{
+			MoveAndResize(*logicalRect);
+			return 0;
+		}
+		virtual auto OnDpiChangedAfterParent(float) -> MessageHandlerResult
+		{
+			//MoveAndResize(*logicalRect);
+			return 0;
+		}
 
 		virtual auto OnChildAdded(const WindowPtr<Window>&) -> void
 		{
@@ -616,6 +656,7 @@ export namespace PGUI
 		WindowClassPtr windowClass;
 		HWND hWnd = nullptr;
 		HWND parentHwnd = nullptr;
+		DpiScaled<RectF> logicalRect;
 	};
 
 	// ReSharper disable once CppInconsistentNaming

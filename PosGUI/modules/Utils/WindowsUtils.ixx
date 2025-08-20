@@ -125,13 +125,13 @@ export namespace PGUI
 	auto WinErrToString(DWORD errorCode) noexcept -> std::wstring;
 
 	template <typename T, std::floating_point U>
-	[[nodiscard]] auto AdjustForDPI(T value, U dpi) noexcept -> T
+	[[nodiscard]] auto AdjustForDpi(T value, U dpi) noexcept -> T
 	{
 		return static_cast<T>(value * dpi / static_cast<U>(96.0));
 	}
 
 	template <typename T, std::floating_point U>
-	[[nodiscard]] auto RemoveDPIAdjustment(T value, U dpi) noexcept -> T
+	[[nodiscard]] auto RemoveDpiAdjustment(T value, U dpi) noexcept -> T
 	{
 		return static_cast<T>(value * static_cast<U>(96.0) / dpi);
 	}

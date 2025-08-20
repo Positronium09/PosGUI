@@ -42,14 +42,10 @@ export namespace PGUI::UI
 			/* */
 		}
 
-		auto AutoDpiScaleDrawing(const bool enable) noexcept -> void { autoDpiScaledDrawing = enable; }
-		[[nodiscard]] auto IsAutoDpiScaleDrawingEnabled() const noexcept { return autoDpiScaledDrawing; }
-
 		auto AdjustClip() noexcept -> void;
 
 		private:
 		Clip clip;
-		bool autoDpiScaledDrawing = true;
 		bool adjustClipOnSize = true;
 		bool hitTestClip = true;
 

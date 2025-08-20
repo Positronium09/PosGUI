@@ -15,7 +15,7 @@ namespace PGUI
 
 	template<typename ...Arg> auto static CreateWindowClassSharedPtr(Arg&&...arg) -> std::shared_ptr<WindowClass>
 	{
-		struct EnableMakeShared : public WindowClass
+		struct EnableMakeShared : WindowClass
 		{
 			explicit(false) EnableMakeShared(Arg&&...arg) : WindowClass(arg...) { }
 		};

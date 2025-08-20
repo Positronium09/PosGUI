@@ -510,5 +510,8 @@
     <ClCompile Include="modules\Mutex\KMutex.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\Window\DpiScaled.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

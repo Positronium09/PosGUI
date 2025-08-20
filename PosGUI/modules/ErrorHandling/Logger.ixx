@@ -62,7 +62,7 @@ export namespace PGUI
 		virtual auto Log(LogLevel logLevel, std::wstring_view message) -> void = 0;
 	};
 
-	struct DebugConsoleSink final : public LogSink
+	struct DebugConsoleSink final : LogSink
 	{
 		auto Log(const LogLevel logLevel, const std::wstring_view message) -> void override
 		{

@@ -13,7 +13,7 @@ import PGUI.UI.D2D.D2DGeometry;
 
 export namespace PGUI::UI::D2D
 {
-	struct LayerParameters : public D2D1_LAYER_PARAMETERS1
+	struct LayerParameters : D2D1_LAYER_PARAMETERS1
 	{
 		constexpr LayerParameters() noexcept = default;
 

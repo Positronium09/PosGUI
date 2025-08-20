@@ -17,19 +17,19 @@ export namespace PGUI::DataBinding
 
 		ValidatedProperty(
 			const T& value, 
-			const std::initializer_list<Validator>& validators) noexcept :
+			const std::initializer_list<Validator>& validators) noexcept(std::is_nothrow_copy_constructible_v<T>) :
 			Property<T, Mutex>{ value }, validators{ validators }
 		{ }
 
-		explicit(false) ValidatedProperty(const T& value) noexcept :
+		explicit(false) ValidatedProperty(const T& value) noexcept(std::is_nothrow_copy_constructible_v<T>) :
 			Property<T, Mutex>{ value }
 		{ }
 
-		ValidatedProperty(const ValidatedProperty& other) noexcept :
+		ValidatedProperty(const ValidatedProperty& other) noexcept(std::is_nothrow_copy_constructible_v<T>) :
 			Property<T, Mutex>{ other }, validators{ other.validators }
 		{ }
 
-		ValidatedProperty(ValidatedProperty&& other) noexcept :
+		ValidatedProperty(ValidatedProperty&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
 			Property<T, Mutex>{ std::move(other) }, validators{ std::move(other.validators) }
 		{ }
 
@@ -56,15 +56,15 @@ export namespace PGUI::DataBinding
 			}
 		}
 
-		auto operator=(const T& val) noexcept -> ValidatedProperty& override
+		auto operator=(const T& val) noexcept(std::is_nothrow_copy_assignable_v<T>) -> ValidatedProperty& override
 		{
 			Set(val);
 			return *this;
 		}
 
-		auto operator=(T&& val) noexcept -> ValidatedProperty& override
+		auto operator=(T&& val) noexcept(std::is_nothrow_move_assignable_v<T>) -> ValidatedProperty& override
 		{
-			Set(val);
+			Set(std::move(val));
 			return *this;
 		}
 
@@ -78,7 +78,7 @@ export namespace PGUI::DataBinding
 			return Property<T, Mutex>::operator<=>(val);
 		}
 
-		auto operator=(const Property<T, Mutex>& other) noexcept -> ValidatedProperty& override
+		auto operator=(const Property<T, Mutex>& other) noexcept(std::is_nothrow_copy_assignable_v<T>) -> ValidatedProperty& override
 		{
 			if (this != &other)
 			{
@@ -87,7 +87,7 @@ export namespace PGUI::DataBinding
 			return *this;
 		}
 
-		auto operator=(const ValidatedProperty& other) noexcept -> ValidatedProperty&
+		auto operator=(const ValidatedProperty& other) noexcept(std::is_nothrow_copy_assignable_v<T>) -> ValidatedProperty&
 		{
 			if (this != &other)
 			{
@@ -96,7 +96,7 @@ export namespace PGUI::DataBinding
 			return *this;
 		}
 
-		auto operator=(Property<T, Mutex>&& other) noexcept -> ValidatedProperty& override
+		auto operator=(Property<T, Mutex>&& other) noexcept(std::is_nothrow_move_assignable_v<T>) -> ValidatedProperty& override
 		{
 			if (this != &other)
 			{
@@ -105,7 +105,7 @@ export namespace PGUI::DataBinding
 			return *this;
 		}
 
-		auto operator=(ValidatedProperty&& other) noexcept -> ValidatedProperty&
+		auto operator=(ValidatedProperty&& other) noexcept(std::is_nothrow_move_assignable_v<T>) -> ValidatedProperty&
 		{
 			if (this != &other)
 			{

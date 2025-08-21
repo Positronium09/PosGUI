@@ -18,15 +18,6 @@ export namespace PGUI::UI::Layout
 		float crossEndPad = 0;
 
 		auto operator==(const StackLayoutPadding&) const noexcept -> bool = default;
-		auto ScaleByDpiFactor(const float dpiFactor) const noexcept -> auto
-		{
-			return StackLayoutPadding{
-				.startPad = startPad * dpiFactor,
-				.endingPad = endingPad * dpiFactor,
-				.crossStartPad = crossStartPad * dpiFactor,
-				.crossEndPad = crossEndPad * dpiFactor
-			};
-		}
 	};
 
 	class StackLayout final : public LayoutPanel

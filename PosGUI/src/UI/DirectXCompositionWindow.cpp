@@ -397,7 +397,7 @@ namespace PGUI::UI
 	}
 
 	auto DirectXCompositionWindow::OnNCCreate(
-		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
+		UINT, WPARAM, LPARAM) -> MessageHandlerResult
 	{
 		InitSwapChain();
 		InitD2D1DeviceContext();
@@ -409,7 +409,7 @@ namespace PGUI::UI
 	}
 
 	auto DirectXCompositionWindow::OnWindowPosChanged(
-		const UINT msg, WPARAM /* unused */, LPARAM /* unused */) noexcept -> MessageHandlerResult
+		const UINT msg, WPARAM, LPARAM) noexcept -> MessageHandlerResult
 	{
 		if (const auto monitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL);
 			monitor != currentMonitor)
@@ -442,7 +442,7 @@ namespace PGUI::UI
 	}
 
 	auto DirectXCompositionWindow::OnPaint(
-		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) -> MessageHandlerResult
+		UINT, WPARAM, LPARAM) -> MessageHandlerResult
 	{
 		Draw(GetGraphics());
 

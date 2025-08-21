@@ -100,42 +100,34 @@ namespace PGUI
 	auto Window::_OnWindowPosChanged(UINT, WPARAM, const LPARAM lParam) -> MessageHandlerResult
 	{
 		const auto windowPos = *std::bit_cast<LPWINDOWPOS>(lParam);
-		RectF windowRect{
+		const RectF windowRect{
 			static_cast<float>(windowPos.x),
 			static_cast<float>(windowPos.y),
 			static_cast<float>(windowPos.x + windowPos.cx),
 			static_cast<float>(windowPos.y + windowPos.cy)
 		};
-		if (parentHwnd != nullptr)
-		{
-			const auto parent = GetParentWindow();
-			windowRect = parent->LogicalToPhysical(
-				parent->ScreenToClient(
-					parent->PhysicalToLogical(windowRect)
-				)
-			);
-		}
+
 		const auto windowSize = windowRect.Size();
 		auto rect = logicalRect.GetPhysicalValue();
+		const auto flags = static_cast<PositionFlags>(windowPos.flags);
 
-		if (!(windowPos.flags & SWP_NOMOVE))
+		if (!IsFlagSet(flags, PositionFlags::NoClientMove))
 		{
 			rect.left = windowRect.left;
 			rect.top = windowRect.top;
 			rect.right = rect.left + windowSize.cx;
 			rect.bottom = rect.top + windowSize.cy;
 		}
-		if (!(windowPos.flags & SWP_NOSIZE))
+		if (!IsFlagSet(flags, PositionFlags::NoClientSize))
 		{
 			rect.right = rect.left + windowSize.cx;
 			rect.bottom = rect.top + windowSize.cy;
 		}
 		logicalRect.SetPhysicalValue(rect);
 
-		const auto flags = static_cast<PositionFlags>(windowPos.flags);
 		if (!IsFlagSet(flags, PositionFlags::NoClientMove))
 		{
-			const PointL point{
+			PointL point{
 				static_cast<long>(windowRect.left),
 				static_cast<long>(windowRect.top)
 			};
@@ -158,33 +150,15 @@ namespace PGUI
 		return 0;
 	}
 
-	auto Window::_OnSize(UINT /* unused */, WPARAM /* unused */, const LPARAM lParam) -> MessageHandlerResult
+	auto Window::_OnSize(UINT, WPARAM, const LPARAM) -> MessageHandlerResult
 	{
-		const SizeF size{
-			static_cast<float>(LOWORD(lParam)),
-			static_cast<float>(HIWORD(lParam))
-		};
-		auto physicalRect = logicalRect.GetPhysicalValue();
-		physicalRect.right = physicalRect.left + size.cx;
-		physicalRect.bottom = physicalRect.top + size.cy;
-		logicalRect.SetPhysicalValue(physicalRect);
-
 		OnSizeChanged(logicalRect->Size());
 
 		return 0;
 	}
 
-	auto Window::_OnMove(UINT, WPARAM, const LPARAM lParam) -> MessageHandlerResult
+	auto Window::_OnMove(UINT, WPARAM, const LPARAM) -> MessageHandlerResult
 	{
-		const PointF point{
-			static_cast<float>(LOWORD(lParam)),
-			static_cast<float>(HIWORD(lParam))
-		};
-		auto physicalRect = logicalRect.GetPhysicalValue();
-		physicalRect.left = point.x;
-		physicalRect.top = point.y;
-		logicalRect.SetPhysicalValue(physicalRect);
-
 		OnMoved(logicalRect->TopLeft());
 
 		return 0;

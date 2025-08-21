@@ -1,4 +1,7 @@
-﻿export module PGUI.UI.Layout.LayoutPanel;
+﻿module;
+#include <Windows.h>
+
+export module PGUI.UI.Layout.LayoutPanel;
 
 import std;
 
@@ -78,6 +81,10 @@ export namespace PGUI::UI::Layout
 
 		private:
 		auto OnChildAdded(const WindowPtr<Window>&) -> void override
+		{
+			RearrangeChildren();
+		}
+		auto OnChildRemoved(HWND) -> void override
 		{
 			RearrangeChildren();
 		}

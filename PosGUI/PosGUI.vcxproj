@@ -43,6 +43,7 @@
     <ClCompile Include="modules\Mutex\Mutex.ixx" />
     <ClCompile Include="modules\Mutex\NullMutex.ixx" />
     <ClCompile Include="modules\Mutex\SRWMutex.ixx" />
+    <ClCompile Include="modules\UI\Layout\DockLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\LayoutEnums.ixx" />
     <ClCompile Include="modules\UI\Layout\LayoutPanel.ixx" />
@@ -171,6 +172,7 @@
     <ClCompile Include="src\UI\Imaging\Palette.cpp" />
     <ClCompile Include="src\UI\Imaging\WICBitmap.cpp" />
     <ClCompile Include="src\UI\Imaging\WICBitmapLock.cpp" />
+    <ClCompile Include="src\UI\Layout\DockLayout.cpp" />
     <ClCompile Include="src\UI\Layout\GridLayout.cpp" />
     <ClCompile Include="src\UI\Layout\StackLayout.cpp" />
     <ClCompile Include="src\UI\Theming\SystemTheme.cpp" />

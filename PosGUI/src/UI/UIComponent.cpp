@@ -104,7 +104,7 @@ namespace PGUI::UI
 	}
 
 	auto UIComponent::OnCreate(
-		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) const noexcept -> MessageHandlerResult
+		UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult
 	{
 		DisableInput();
 
@@ -133,7 +133,7 @@ namespace PGUI::UI
 	}
 
 	auto UIComponent::OnSize(
-		UINT /* unused */, WPARAM /* unused */, LPARAM /* unused */) noexcept -> MessageHandlerResult
+		UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
 	{
 		AdjustClip();
 

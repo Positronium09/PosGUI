@@ -185,7 +185,7 @@ namespace PGUI::UI::Layout
 				{
 					auto rightWidth = childWindow->GetClientSize().cx;
 					if (maxDockSizes.contains(DockPosition::Right) &&
-					    clientRect.right - availableSpace.right + rightWidth < maxDockSizes[DockPosition::Right])
+					    clientRect.right - availableSpace.right + rightWidth > maxDockSizes[DockPosition::Right])
 					{
 						rightWidth = maxDockSizes[DockPosition::Right] - clientRect.right + availableSpace.right;
 					}

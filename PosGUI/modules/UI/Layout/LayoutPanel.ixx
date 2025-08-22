@@ -5,88 +5,347 @@ export module PGUI.UI.Layout.LayoutPanel;
 
 import std;
 
-import PGUI.WindowClass;
+import PGUI.Window;
+import PGUI.Shape2D;
+import PGUI.Utils;
+import PGUI.ErrorHandling;
 import PGUI.UI.UIComponent;
 
 export namespace PGUI::UI::Layout
 {
-	class LayoutPanel : public UIComponent
+	class LayoutPanel;
+
+	using LayoutItem = std::variant<RawWindowPtr<>, RawPtr<LayoutPanel>>;
+
+	class LayoutPanel
 	{
 		public:
-		LayoutPanel() noexcept :
-			LayoutPanel{ WindowClass::Create(L"PGUI_LayoutPanel") }
+		explicit LayoutPanel(const RectF bounds) noexcept :
+			bounds{ bounds }
 		{ }
+		virtual ~LayoutPanel() noexcept = default;
 
-		explicit LayoutPanel(const WindowClassPtr& wndClass) noexcept :
-			UIComponent{ wndClass }
-		{ }
+		virtual auto RearrangeItems() noexcept -> void = 0;
 
-		virtual auto RearrangeChildren() noexcept -> void = 0;
-
-		auto GetTotalChildrenSize() const noexcept
+		virtual auto AddItem(const LayoutItem& item) noexcept -> void
 		{
-			SizeL totalSize;
-			for (const auto& child : GetChildWindows())
+			managedItems.push_back(item);
+			OnItemAdded(item);
+		}
+		auto AddItem(const WindowPtr<>& wnd) -> void
+		{
+			AddItem(wnd.get());
+		}
+		auto AddItem(const RawWindowPtr<>& wnd)
+		{
+			AddItem(LayoutItem{ wnd });
+		}
+		auto AddItem(LayoutPanel& panel)
+		{
+			AddItem(&panel);
+		}
+		virtual auto RemoveItem(const std::size_t index) -> Error
+		{
+			if (index >= managedItems.size())
 			{
-				const auto size = child->GetClientSize();
+				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+			}
+
+			managedItems.erase(managedItems.begin() + index);
+			OnItemRemoved(index);
+
+			return Error{ S_OK };
+		}
+		auto RemoveItem(const HWND hwnd) noexcept
+		{
+			if (const auto it = std::ranges::find_if(managedItems,
+				[&hwnd](const LayoutItem& item)
+			{
+				if (std::holds_alternative<RawWindowPtr<>>(item))
+				{
+					return std::get<RawWindowPtr<>>(item)->Hwnd() == hwnd;
+				}
+				return false;
+			});
+				it != managedItems.end())
+			{
+				managedItems.erase(it);
+				OnItemRemoved(std::distance(managedItems.begin(), it));
+				return Error{ S_OK };
+			}
+			return Error{ E_INVALIDARG }.SuggestFix(L"Given HWND not found in managed items");
+		}
+		auto RemoveItem(const RawWindowPtr<> wnd) noexcept
+		{
+			return RemoveItem(wnd->Hwnd());
+		}
+		[[nodiscard]] const auto& GetItems() const noexcept
+		{
+			return managedItems;
+		}
+		[[nodiscard]] auto GetItem(const std::size_t& index) const noexcept -> Result<LayoutItem>
+		{
+			if (index >= managedItems.size())
+			{
+				return Unexpected{
+					Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range")
+				};
+			}
+			return managedItems.at(index);
+		}
+		[[nodiscard]] auto GetItem(const HWND hwnd) const noexcept -> Result<LayoutItem>
+		{
+			if (const auto it = std::ranges::find_if(managedItems,
+				[&hwnd](const LayoutItem& item)
+			{
+				if (std::holds_alternative<RawWindowPtr<>>(item))
+				{
+					return std::get<RawWindowPtr<>>(item)->Hwnd() == hwnd;
+				}
+				return false;
+			});
+				it != managedItems.end())
+			{
+				return *it;
+			}
+			return Unexpected{
+				Error{ E_INVALIDARG }.SuggestFix(L"Given HWND not found in managed items")
+			};
+		}
+		[[nodiscard]] auto GetItem(const RawWindowPtr<> wnd) const noexcept
+		{
+			return GetItem(wnd->Hwnd());
+		}
+		[[nodiscard]] auto GetItem(const LayoutPanel& panel) const noexcept -> Result<LayoutItem>
+		{
+			if (const auto it = std::ranges::find_if(managedItems,
+				[&panel](const LayoutItem& item)
+			{
+				if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
+				{
+					return std::get<RawPtr<LayoutPanel>>(item) == &panel;
+				}
+				return false;
+			});
+				it != managedItems.end())
+			{
+				return *it;
+			}
+
+			return Unexpected{
+				Error{ E_INVALIDARG }.SuggestFix(L"Given panel not found in managed items")
+			};
+		}
+
+		[[nodiscard]] auto GetItemCount() const noexcept
+		{
+			return managedItems.size();
+		}
+
+		auto GetTotalItemSize() const noexcept
+		{
+			SizeF totalSize;
+			for (const auto& item : GetItems())
+			{
+				const auto size = MeasureItem(item);
 				totalSize += size;
 			}
 
 			return totalSize;
 		}
-
-		auto GetChildrenSizeUpToIndex(const std::size_t index) const noexcept
+		auto GetItemSizeUpToIndex(const std::size_t index) const noexcept
 		{
-			if (index >= GetChildWindows().size())
+			if (index >= GetItems().size())
 			{
-				return SizeL{ 0, 0 };
+				return SizeF{ 0, 0 };
 			}
 
-			SizeL totalSize;
-			for (const auto& child : GetChildWindows() | std::views::take(index + 1))
+			SizeF totalSize;
+			for (const auto& item : GetItems() | std::views::take(index + 1))
 			{
-				const auto size = child->GetClientSize();
+				const auto size = MeasureItem(item);
 				totalSize += size;
 			}
 			return totalSize;
 		}
-
-		auto GetChildrenSizeBetweenIndices(
+		auto GetItemSizeBetweenIndices(
 			const std::size_t startIndex, const std::size_t endIndex) const noexcept
 		{
-			const auto end = std::clamp(endIndex, 0ULL, GetChildWindows().size() - 1);
+			const auto end = std::clamp(endIndex, 0ULL, GetItems().size() - 1);
 
-			if (startIndex >= GetChildWindows().size() || startIndex > end)
+			if (startIndex >= GetItems().size() || startIndex > end)
 			{
-				return SizeL{ 0, 0 };
+				return SizeF{ 0, 0 };
 			}
 
-			SizeL totalSize;
+			SizeF totalSize;
 
-			for (const auto& child : GetChildWindows() |
+			for (const auto& item : GetItems() |
 				std::views::drop(startIndex) | std::views::take(end - startIndex + 1))
 			{
-				const auto size = child->GetClientSize();
+				const auto size = MeasureItem(item);
 				totalSize += size;
 			}
 			return totalSize;
+		}
+
+		auto SetBounds(const RectF newBounds) noexcept
+		{
+			bounds = newBounds;
+			RearrangeItems();
+		}
+		[[nodiscard]] auto GetBounds() const noexcept
+		{
+			return bounds;
+		}
+		[[nodiscard]] auto GetBoundsSize() const noexcept
+		{
+			return bounds.Size();
+		}
+		static auto MeasureItem(const LayoutItem& item) noexcept -> SizeF
+		{
+			if (std::holds_alternative<RawWindowPtr<>>(item))
+			{
+				return std::get<RawWindowPtr<>>(item)->GetClientSize();
+			}
+			if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
+			{
+				return std::get<RawPtr<LayoutPanel>>(item)->GetBoundsSize();
+			}
+			std::unreachable();
+		}
+		auto MeasureItem(const std::size_t index) const noexcept -> SizeF
+		{
+			if (index < managedItems.size())
+			{
+				return MeasureItem(managedItems.at(index));
+			}
+
+			return SizeF{ 0, 0 };
+		}
+
+		auto Move(const PointF point) noexcept
+		{
+			auto size = bounds.Size();
+			bounds = { point, size };
+			RearrangeItems();
+		}
+		auto Resize(const SizeF size) noexcept
+		{
+			auto topLeft = bounds.TopLeft();
+			bounds = { topLeft, size };
+			RearrangeItems();
 		}
 
 		protected:
-		auto OnSizeChanged(const SizeL newSize) -> void override
+		auto GetItemIndex(const LayoutItem& item) const noexcept -> Result<std::size_t>
 		{
-			UIComponent::OnSizeChanged(newSize);
-			RearrangeChildren();
+			if (const auto it = std::ranges::find_if(
+				GetItems(),
+				[&item](const auto& other)
+			{
+				if (item.index() != other.index())
+				{
+					return false;
+				}
+				if (std::holds_alternative<RawWindowPtr<>>(item))
+				{
+					return std::get<RawWindowPtr<>>(item)->Hwnd() == std::get<RawWindowPtr<>>(other)->Hwnd();
+				}
+				if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
+				{
+					return std::get<RawPtr<LayoutPanel>>(item) == std::get<RawPtr<LayoutPanel>>(other);
+				}
+				std::unreachable();
+			}); it != GetItems().end())
+			{
+				return std::distance(GetItems().begin(), it);
+			}
+
+			return Unexpected{
+				Error{ E_INVALIDARG }.SuggestFix(L"Given item not found in managed items")
+			};
+		}
+		auto ArrangeItem(const LayoutItem& item, const RectF assignedBounds) const noexcept -> void
+		{
+			auto converted = assignedBounds;
+			converted.Shift(bounds.TopLeft());
+			if (std::holds_alternative<RawWindowPtr<>>(item))
+			{
+				std::get<RawWindowPtr<>>(item)->MoveAndResize(converted);
+			}
+			else if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
+			{
+				std::get<RawPtr<LayoutPanel>>(item)->SetBounds(converted);
+			}
+		}
+		auto MoveItem(const LayoutItem& item, const PointF point) const noexcept -> void
+		{
+			auto converted = point;
+			converted.Shift(bounds.TopLeft());
+			if (std::holds_alternative<RawWindowPtr<>>(item))
+			{
+				std::get<RawWindowPtr<>>(item)->Move(converted);
+			}
+			else if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
+			{
+				const auto currentBounds = std::get<RawPtr<LayoutPanel>>(item)->GetBounds();
+				const RectF assignedBounds{ converted, currentBounds.Size() };
+				std::get<RawPtr<LayoutPanel>>(item)->SetBounds(assignedBounds);
+			}
+		}
+		static auto ResizeItem(const LayoutItem& item, const SizeF size) noexcept -> void
+		{
+			if (std::holds_alternative<RawWindowPtr<>>(item))
+			{
+				std::get<RawWindowPtr<>>(item)->Resize(size);
+			}
+			else if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
+			{
+				const auto currentBounds = std::get<RawPtr<LayoutPanel>>(item)->GetBounds();
+				const RectF assignedBounds{ currentBounds.TopLeft(), size };
+				std::get<RawPtr<LayoutPanel>>(item)->SetBounds(assignedBounds);
+			}
+		}
+		auto ArrangeItem(const std::size_t index, const RectF assignedBounds) const noexcept -> Error
+		{
+			if (index >= managedItems.size())
+			{
+				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+			}
+			ArrangeItem(managedItems.at(index), assignedBounds);
+			return Error{ S_OK };
+		}
+		auto MoveItem(const std::size_t index, const PointF point) const noexcept -> Error
+		{
+			if (index >= managedItems.size())
+			{
+				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+			}
+			MoveItem(managedItems.at(index), point);
+			return Error{ S_OK };
+		}
+		auto ResizeItem(const std::size_t index, const SizeF size) const noexcept -> Error
+		{
+			if (index >= managedItems.size())
+			{
+				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+			}
+			ResizeItem(managedItems.at(index), size);
+			return Error{ S_OK };
+		}
+
+		virtual auto OnItemAdded(const LayoutItem&) -> void
+		{
+			RearrangeItems();
+		}
+		virtual auto OnItemRemoved(const std::size_t) -> void
+		{
+			RearrangeItems();
 		}
 
 		private:
-		auto OnChildAdded(const WindowPtr<Window>&) -> void override
-		{
-			RearrangeChildren();
-		}
-		auto OnChildRemoved(HWND) -> void override
-		{
-			RearrangeChildren();
-		}
+		std::vector<LayoutItem> managedItems;
+		RectF bounds;
 	};
 }

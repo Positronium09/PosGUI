@@ -9,6 +9,11 @@ export import :ArithmeticUtils;
 
 export namespace PGUI
 {
+	template <typename T> requires !std::is_same_v<T, void>
+	using RawPtr = T*;
+	template <typename T> requires !std::is_same_v<T, void>
+	using ConstRawPtr = const T*;
+
 	template <typename T>
 	concept Enumeration = std::is_enum_v<T>;
 

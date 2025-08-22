@@ -3,6 +3,7 @@
 
 export module PGUI.UI.Layout.GridLayout;
 
+import PGUI.Utils;
 import PGUI.ErrorHandling;
 import PGUI.UI.Layout.LayoutPanel;
 import PGUI.DataBinding;
@@ -99,7 +100,7 @@ export namespace PGUI::UI::Layout
 	class GridLayout final : public LayoutPanel
 	{
 		public:
-		GridLayout() noexcept;
+		using LayoutPanel::LayoutPanel;
 
 		auto SetRowGap(FixedSize gap) noexcept -> void;
 		[[nodiscard]] auto GetRowGap() const noexcept
@@ -118,15 +119,29 @@ export namespace PGUI::UI::Layout
 			return std::make_pair(rowGap, columnGap);
 		}
 
-		auto SetItemProperty(HWND hwnd, const GridItemProperties& properties) -> void;
-		auto SetItemProperty(const RawWindowPtr<> wnd, const GridItemProperties& properties) -> void
+		auto AddItem(const LayoutItem& item, const GridItemProperties& properties) noexcept -> void;
+		auto AddItem(const LayoutItem& item) noexcept -> void override;
+
+		auto SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void;
+		auto SetItemProperty(const RawWindowPtr<> wnd, const GridItemProperties& properties) noexcept -> void
 		{
-			SetItemProperty(wnd->Hwnd(), properties);
+			const LayoutItem item = wnd;
+			SetItemProperty(item, properties);
 		}
-		[[nodiscard]] auto GetItemProperty(HWND hwnd) const noexcept -> Result<GridItemProperties>;
+		auto SetItemProperty(LayoutPanel& panel, const GridItemProperties& properties)
+		{
+			SetItemProperty(&panel, properties);
+		}
+
+		[[nodiscard]] auto GetItemProperty(const LayoutItem& item) const noexcept -> Result<GridItemProperties>;
 		[[nodiscard]] auto GetItemProperty(const RawWindowPtr<> wnd) const noexcept
 		{
-			return GetItemProperty(wnd->Hwnd());
+			const LayoutItem item = wnd;
+			return GetItemProperty(item);
+		}
+		[[nodiscard]] auto GetItemProperty(LayoutPanel& panel) const noexcept
+		{
+			return GetItemProperty(&panel);
 		}
 
 		auto SetMinCellSize(FixedSize size) noexcept -> void;
@@ -138,7 +153,7 @@ export namespace PGUI::UI::Layout
 		auto SetColumnDefinitions(const std::vector<GridCellDefinition>& definitions) noexcept -> void
 		{
 			columnDefinitions = definitions;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 		[[nodiscard]] auto GetColumnDefinitions() const noexcept
 		{
@@ -147,12 +162,12 @@ export namespace PGUI::UI::Layout
 		auto AddColumnDefinition(const GridCellDefinition& definition) noexcept
 		{
 			columnDefinitions.push_back(definition);
-			RearrangeChildren();
+			RearrangeItems();
 		}
 		auto SetRowDefinitions(const std::vector<GridCellDefinition>& definitions) noexcept -> void
 		{
 			rowDefinitions = definitions;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 		[[nodiscard]] auto GetRowDefinitions() const noexcept
 		{
@@ -161,7 +176,7 @@ export namespace PGUI::UI::Layout
 		auto AddRowDefinition(const GridCellDefinition& definition) noexcept
 		{
 			rowDefinitions.push_back(definition);
-			RearrangeChildren();
+			RearrangeItems();
 		}
 
 		auto RemoveColumnDefinitionAtIndex(std::size_t index) noexcept -> Error;
@@ -170,7 +185,7 @@ export namespace PGUI::UI::Layout
 		auto SetGrowToFit(const bool grow) noexcept -> void
 		{
 			growToFit = grow;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 		[[nodiscard]] auto GetGrowToFit() const noexcept
 		{
@@ -180,7 +195,7 @@ export namespace PGUI::UI::Layout
 		auto SetPadding(const GridLayoutPadding& padding_) noexcept -> void
 		{
 			padding = padding_;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 		[[nodiscard]] auto GetPadding() const noexcept
 		{
@@ -190,7 +205,7 @@ export namespace PGUI::UI::Layout
 		auto SetAutoCellSize(const GridCellDefinition size) noexcept -> Error
 		{
 			autoCellSize = size;
-			RearrangeChildren();
+			RearrangeItems();
 
 			return Error{ S_OK };
 		}
@@ -202,7 +217,7 @@ export namespace PGUI::UI::Layout
 		auto SetPlacementType(const GridCellPlacementType type) noexcept -> void
 		{
 			placementType = type;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 		[[nodiscard]] auto GetPlacementType() const noexcept
 		{
@@ -216,7 +231,7 @@ export namespace PGUI::UI::Layout
 				return Error{ E_INVALIDARG }.SuggestFix(L"Cannot insert a blank cell with auto place");
 			}
 			blankCells.emplace(row, column);
-			RearrangeChildren();
+			RearrangeItems();
 
 			return Error{ S_OK };
 		}
@@ -228,12 +243,12 @@ export namespace PGUI::UI::Layout
 			}
 
 			blankCells.erase(std::make_pair(row, column));
-			RearrangeChildren();
+			RearrangeItems();
 			return Error{ S_OK };
 		}
 
 		protected:
-		auto RearrangeChildren() noexcept -> void override;
+		auto RearrangeItems() noexcept -> void override;
 
 		private:
 		FixedSize minCellSize = 5;
@@ -251,15 +266,18 @@ export namespace PGUI::UI::Layout
 		std::vector<GridCellDefinition> rowDefinitions;
 
 		bool needsSorting = false;
-		std::vector<std::pair<HWND, GridItemProperties>> itemProperties;
+		std::vector<std::pair<std::size_t, GridItemProperties>> itemProperties;
 
-		auto HasEntry(HWND hwnd) const noexcept -> Result<std::size_t>
+		auto GetItemId(const LayoutItem& item) const noexcept -> Result<std::size_t>;
+		auto SetItemProperty(std::size_t id, const GridItemProperties& properties) noexcept -> void;
+		auto GetItemProperty(std::size_t id) const noexcept -> Result<GridItemProperties>;
+		auto HasEntry(std::size_t id) const noexcept -> Result<std::size_t>
 		{
 			const auto iter = std::ranges::find_if(
 				itemProperties,
-				[&hwnd](const auto& item) noexcept
+				[&id](const auto& item) noexcept
 				{
-					return item.first == hwnd;
+					return item.first == id;
 				});
 			if (iter != itemProperties.end())
 			{
@@ -287,7 +305,6 @@ export namespace PGUI::UI::Layout
 			return column + value <= columnDefinitions.size();
 		}
 
-		auto OnChildAdded(const WindowPtr<Window>&) -> void override;
-		auto OnChildRemoved(HWND hwnd) -> void override;
+		auto OnItemRemoved(std::size_t) -> void override;
 	};
 }

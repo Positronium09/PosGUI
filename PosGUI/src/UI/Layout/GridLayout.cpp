@@ -4,6 +4,7 @@ module;
 module PGUI.UI.Layout.GridLayout;
 
 import PGUI.WindowClass;
+import PGUI.UI.Layout.LayoutPanel;
 
 namespace PGUI::UI::Layout
 {
@@ -45,16 +46,12 @@ namespace PGUI::UI::Layout
 		return !IsOccupied(set, row, column, rowSpan, columnSpan);
 	}
 
-	GridLayout::GridLayout() noexcept :
-		LayoutPanel{ WindowClass::Create(L"PGUI_GridLayout") }
-	{ }
-
 	auto GridLayout::SetRowGap(const FixedSize gap) noexcept -> void
 	{
 		if (rowGap != gap)
 		{
 			rowGap = gap;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -63,7 +60,7 @@ namespace PGUI::UI::Layout
 		if (columnGap != gap)
 		{
 			columnGap = gap;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -73,56 +70,49 @@ namespace PGUI::UI::Layout
 		{
 			rowGap = gap;
 			columnGap = gap;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
-	auto GridLayout::SetItemProperty(const HWND hwnd, const GridItemProperties& properties) -> void
+	auto GridLayout::AddItem(const LayoutItem& item) noexcept -> void
 	{
-		needsSorting = true;
+		AddItem(item, GridItemProperties{ });
+	}
 
-		const auto boundChangeHandler = std::bind_front(&GridLayout::PropertyChangeHandler, this);
-		const auto boundColumnSpanValidator = std::bind_front(&GridLayout::ColumnSpanValidator, this,
-		                                                      *properties.column);
+	auto GridLayout::AddItem(const LayoutItem& item, const GridItemProperties& properties) noexcept -> void
+	{
+		SetItemProperty(GetItemCount(), properties);
+		LayoutPanel::AddItem(item);
+	}
 
-		const auto result = HasEntry(hwnd);
-		if (!result.has_value())
+	auto GridLayout::SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void
+	{
+		if (const auto result = GetItemId(item);
+			result.has_value())
 		{
-			itemProperties.emplace_back(hwnd, properties);
-			auto& prop = itemProperties.back().second;
-
-			prop.column.AddObserver(boundChangeHandler);
-			prop.row.AddObserver(boundChangeHandler);
-			prop.rowSpan.AddObserver(boundChangeHandler);
-			prop.columnSpan.AddObserver(boundChangeHandler);
-			prop.columnSpan.AddValidator(boundColumnSpanValidator);
-
-			return;
+			SetItemProperty(*result, properties);
 		}
-
-		auto& prop = itemProperties.at(*result).second;
-		prop = properties;
-
-		prop.column.AddObserver(boundChangeHandler);
-		prop.row.AddObserver(boundChangeHandler);
-		prop.rowSpan.AddObserver(boundChangeHandler);
-		prop.columnSpan.AddObserver(boundChangeHandler);
-		prop.columnSpan.AddValidator(boundColumnSpanValidator);
-
-		RearrangeChildren();
 	}
 
-	auto GridLayout::GetItemProperty(const HWND hwnd) const noexcept -> Result<GridItemProperties>
+	auto GridLayout::GetItemProperty(const LayoutItem& item) const noexcept -> Result<GridItemProperties>
 	{
-		auto result = HasEntry(hwnd);
+		const auto result = GetItemId(item);
+		if (result.has_value())
+		{
+			return GetItemProperty(*result);
+		}
+
+		return Unexpected{ result.error() };
+	}
+
+	auto GridLayout::GetItemProperty(const std::size_t id) const noexcept -> Result<GridItemProperties>
+	{
+		auto result = HasEntry(id);
 		if (result.has_value())
 		{
 			return itemProperties.at(*result).second;
 		}
-
-		auto& error = result.error();
-		Logger::Error(error, L"Cannot find item property for");
-		return Unexpected{ error };
+		return Unexpected{ result.error() };
 	}
 
 	auto GridLayout::SetMinCellSize(const FixedSize size) noexcept -> void
@@ -130,7 +120,7 @@ namespace PGUI::UI::Layout
 		if (minCellSize != size)
 		{
 			minCellSize = size;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -151,7 +141,7 @@ namespace PGUI::UI::Layout
 		columnDefinitions.erase(
 			std::next(columnDefinitions.begin(), static_cast<std::ptrdiff_t>(index)));
 
-		RearrangeChildren();
+		RearrangeItems();
 
 		return Error{ S_OK };
 	}
@@ -167,14 +157,14 @@ namespace PGUI::UI::Layout
 		rowDefinitions.erase(
 			std::next(rowDefinitions.begin(), static_cast<std::ptrdiff_t>(index)));
 
-		RearrangeChildren();
+		RearrangeItems();
 
 		return Error{ S_OK };
 	}
 
-	auto GridLayout::RearrangeChildren() noexcept -> void
+	auto GridLayout::RearrangeItems() noexcept -> void
 	{
-		if (GetChildWindows().empty())
+		if (GetItemCount() == 0)
 		{
 			return;
 		}
@@ -213,23 +203,19 @@ namespace PGUI::UI::Layout
 		maxDefinedColumn += maxColumnSpan - 1;
 
 		std::set<std::pair<long, long>> occupiedPositions = blankCells;
-		std::unordered_map<HWND, std::tuple<long, long, long, long>> itemPositions;
+		std::unordered_map<std::size_t, std::tuple<long, long, long, long>> itemPositions;
 
 		long maxPlacedRow = 0;
 		const auto populateStructures = [&occupiedPositions, &itemPositions, &maxPlacedRow](
-			const HWND hwnd,
+			const std::size_t id,
 			const long row, const long column, const long rowSpan, const long columnSpan)
 		{
-			itemPositions[hwnd] = std::make_tuple(row, column, rowSpan, columnSpan);
-			if (columnSpan <= 0)
-			{
-				DebugBreak();
-			}
+			itemPositions[id] = std::make_tuple(row, column, rowSpan, columnSpan);
 			OccupySet(occupiedPositions, row, column, rowSpan, columnSpan);
 			maxPlacedRow = std::max(maxPlacedRow, row + rowSpan - 1);
 		};
 
-		for (const auto& [hwnd, properties] : itemProperties)
+		for (const auto& [id, properties] : itemProperties)
 		{
 			const auto row = *properties.row;
 			const auto column = *properties.column;
@@ -240,7 +226,7 @@ namespace PGUI::UI::Layout
 
 			if (row != AUTO_PLACE && column != AUTO_PLACE)
 			{
-				populateStructures(hwnd, row, column, actualRowSpan, actualColumnSpan);
+				populateStructures(id, row, column, actualRowSpan, actualColumnSpan);
 			}
 			else if (row != AUTO_PLACE && column == AUTO_PLACE)
 			{
@@ -254,7 +240,7 @@ namespace PGUI::UI::Layout
 						tryColumn++;
 						continue;
 					}
-					populateStructures(hwnd, row, column, actualRowSpan, actualColumnSpan);
+					populateStructures(id, row, column, actualRowSpan, actualColumnSpan);
 					placed = true;
 				}
 				if (!placed)
@@ -264,7 +250,7 @@ namespace PGUI::UI::Layout
 					{
 						tryColumn--;
 					}
-					populateStructures(hwnd, row, column, actualRowSpan, actualColumnSpan);
+					populateStructures(id, row, column, actualRowSpan, actualColumnSpan);
 				}
 			}
 			else if (row == AUTO_PLACE && column != AUTO_PLACE)
@@ -279,7 +265,7 @@ namespace PGUI::UI::Layout
 				{
 					if (IsUnoccupied(occupiedPositions, tryRow, column, actualRowSpan, actualColumnSpan))
 					{
-						populateStructures(hwnd, row, column, actualRowSpan, actualColumnSpan);
+						populateStructures(id, row, column, actualRowSpan, actualColumnSpan);
 						break;
 					}
 					tryRow++;
@@ -301,7 +287,7 @@ namespace PGUI::UI::Layout
 					{
 						if (IsUnoccupied(occupiedPositions, tryRow, tryColumn, actualRowSpan, actualColumnSpan))
 						{
-							populateStructures(hwnd, tryRow, tryColumn, actualRowSpan, actualColumnSpan);
+							populateStructures(id, tryRow, tryColumn, actualRowSpan, actualColumnSpan);
 							placed = true;
 							break;
 						}
@@ -355,12 +341,52 @@ namespace PGUI::UI::Layout
 				return RectL{ position, size };
 			};
 
-		for (const auto& [hwnd, positions] : itemPositions)
+		for (const auto& [id, positions] : itemPositions)
 		{
 			const auto& [row, column, rowSpan, columnSpan] = positions;
 			const auto rect = placeFixedPosition(row, column, rowSpan, columnSpan);
-			GetWindowPtrFromHWND(hwnd)->MoveAndResize(rect);
+			ArrangeItem(*GetItem(id), rect);
 		}
+	}
+
+	auto GridLayout::GetItemId(const LayoutItem& item) const noexcept -> Result<std::size_t>
+	{
+		return GetItemIndex(item);
+	}
+
+	auto GridLayout::SetItemProperty(std::size_t id, const GridItemProperties& properties) noexcept -> void
+	{
+		needsSorting = true;
+
+		const auto boundChangeHandler = std::bind_front(&GridLayout::PropertyChangeHandler, this);
+		const auto boundColumnSpanValidator = std::bind_front(&GridLayout::ColumnSpanValidator, this,
+		                                                      *properties.column);
+
+		const auto result = HasEntry(id);
+		if (!result.has_value())
+		{
+			itemProperties.emplace_back(id, properties);
+			auto& prop = itemProperties.back().second;
+
+			prop.column.AddObserver(boundChangeHandler);
+			prop.row.AddObserver(boundChangeHandler);
+			prop.rowSpan.AddObserver(boundChangeHandler);
+			prop.columnSpan.AddObserver(boundChangeHandler);
+			prop.columnSpan.AddValidator(boundColumnSpanValidator);
+
+			return;
+		}
+
+		auto& prop = itemProperties.at(*result).second;
+		prop = properties;
+
+		prop.column.AddObserver(boundChangeHandler);
+		prop.row.AddObserver(boundChangeHandler);
+		prop.rowSpan.AddObserver(boundChangeHandler);
+		prop.columnSpan.AddObserver(boundChangeHandler);
+		prop.columnSpan.AddValidator(boundColumnSpanValidator);
+
+		RearrangeItems();
 	}
 
 	auto GridLayout::SortProperties() noexcept -> void
@@ -427,7 +453,7 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::GetRowSizes(const std::size_t rowCount) const noexcept -> std::vector<long>
 	{
-		const auto availableSpace = GetClientSize().cy - (
+		const auto availableSpace = GetBoundsSize().cy - (
 			                            padding.top + padding.bottom + static_cast<long>(rowCount - 1) * rowGap
 		                            );
 		const auto nonDefinedRowCount = std::clamp(
@@ -501,7 +527,7 @@ namespace PGUI::UI::Layout
 			                rowSizes.end(), 0L) +
 			(rowCount - 1) * rowGap;
 
-		if (const auto totalSpace = GetClientSize().cy - (padding.top + padding.bottom);
+		if (const auto totalSpace = GetBoundsSize().cy - (padding.top + padding.bottom);
 			totalRowSize < totalSpace)
 		{
 			const auto delta = totalSpace - totalRowSize;
@@ -518,7 +544,7 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::GetColumnSizes(const std::size_t columnCount) const noexcept -> std::vector<long>
 	{
-		const auto availableSpace = GetClientSize().cx - (
+		const auto availableSpace = GetBoundsSize().cx - (
 			                            padding.left + padding.right + static_cast<long>(columnCount - 1) * columnGap
 		                            );
 		const auto nonDefinedColumnCount = std::clamp(
@@ -589,7 +615,7 @@ namespace PGUI::UI::Layout
 			std::accumulate(columnSizes.begin(),
 			                columnSizes.end(), 0L) +
 			(columnCount - 1) * columnGap;
-		if (const auto totalSpace = GetClientSize().cx - (padding.left + padding.right);
+		if (const auto totalSpace = GetBoundsSize().cx - (padding.left + padding.right);
 			totalColumnSize < totalSpace)
 		{
 			const auto delta = totalSpace - totalColumnSize;
@@ -603,20 +629,14 @@ namespace PGUI::UI::Layout
 		return columnSizes;
 	}
 
-	auto GridLayout::OnChildAdded(const WindowPtr<Window>& wnd) -> void
-	{
-		SetItemProperty(wnd->Hwnd(), GridItemProperties{ });
-		RearrangeChildren();
-	}
-
-	auto GridLayout::OnChildRemoved(const HWND hwnd) -> void
+	auto GridLayout::OnItemRemoved(std::size_t size) -> void
 	{
 		itemProperties.erase(std::ranges::find_if(
 			itemProperties,
-			[&hwnd](const auto& item) noexcept
+			[&size](const auto& item) noexcept
 			{
-				return item.first == hwnd;
+				return item.first == size;
 			}));
-		RearrangeChildren();
+		LayoutPanel::OnItemRemoved(size);
 	}
 }

@@ -24,6 +24,7 @@ export namespace PGUI::UI::Layout
 	{
 		public:
 		explicit StackLayout(
+			RectF bounds,
 			LayoutOrientation orientation,
 			MainAxisAlignment mainAxisAlignment = MainAxisAlignment::Center,
 			CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment::Center,
@@ -31,7 +32,7 @@ export namespace PGUI::UI::Layout
 			StackLayoutPadding padding = { 0, 0, 0, 0 },
 			float gap = 0, float crossGap = 0) noexcept;
 
-		auto RearrangeChildren() noexcept -> void override;
+		auto RearrangeItems() noexcept -> void override;
 
 		auto SetOrientation(LayoutOrientation orientation) noexcept -> void;
 		[[nodiscard]] auto GetOrientation() const noexcept { return orientation; }
@@ -67,10 +68,7 @@ export namespace PGUI::UI::Layout
 		StackLayoutPadding padding;
 		WrapMode wrapMode;
 		float mainAxisGap;
-		float crossAxisGap;	
-
-		auto OnChildAdded(const WindowPtr<Window>&) -> void override;
-		auto OnChildRemoved(HWND) -> void override;
+		float crossAxisGap;
 
 		auto RearrangeHorizontalRow(
 			std::size_t startChildIndex, std::size_t endChildIndex,

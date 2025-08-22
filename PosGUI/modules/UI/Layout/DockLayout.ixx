@@ -21,22 +21,48 @@ export namespace PGUI::UI::Layout
 
 	enum class DockPriority
 	{
-		None = -1,
 		First,
 		Second,
 		Third,
-		Fourth
+		Fourth,
+		None
 	};
 
 	class DockLayout : public LayoutPanel
 	{
 		public:
-		explicit DockLayout() noexcept;
+		explicit DockLayout(RectF bounds) noexcept;
 
-		auto SetDockPosition(HWND hwnd, DockPosition position) noexcept -> Error;
-		auto SetDockPosition(const WindowPtr<Window>& child, const DockPosition position) noexcept -> Error
+		auto AddItem(const LayoutItem& item, DockPosition position) noexcept -> void;
+
+		auto SetDockPosition(const LayoutItem& item, DockPosition position) -> void;
+		auto SetDockPosition(const RawPtr<LayoutItem> item, const DockPosition position) -> void
 		{
-			return SetDockPosition(child->Hwnd(), position);
+			SetDockPosition(*item, position);
+		}
+		auto SetDockPosition(const RawWindowPtr<> wnd, const DockPosition position) noexcept -> void
+		{
+			const LayoutItem item = wnd;
+			SetDockPosition(item, position);
+		}
+		auto SetDockPosition(LayoutPanel& panel, const DockPosition position)
+		{
+			SetDockPosition(&panel, position);
+		}
+
+		[[nodiscard]] auto GetDockPosition(const LayoutItem& item) const noexcept -> Result<DockPosition>;
+		[[nodiscard]] auto GetDockPosition(const RawPtr<LayoutItem> item) const noexcept -> Result<DockPosition>
+		{
+			return GetDockPosition(*item);
+		}
+		[[nodiscard]] auto GetDockPosition(const RawWindowPtr<> wnd) const noexcept
+		{
+			const LayoutItem item = wnd;
+			return GetDockPosition(item);
+		}
+		[[nodiscard]] auto GetDockPosition(LayoutPanel& panel) const noexcept
+		{
+			return GetDockPosition(&panel);
 		}
 
 		auto SetMaxDockSize(DockPosition position, float size) noexcept -> Error;
@@ -49,13 +75,17 @@ export namespace PGUI::UI::Layout
 		}
 
 		private:
-		std::unordered_map<HWND, DockPosition> dockPositions;
+		std::unordered_map<std::size_t, DockPosition> dockPositions;
 		std::unordered_map<DockPosition, float> maxDockSizes;
 		std::unordered_map<DockPosition, DockPriority> dockPriorities;
 
-		auto RearrangeChildren() noexcept -> void override;
+		auto AddItem(const LayoutItem& item) noexcept -> void override;
 
-		auto OnChildAdded(const WindowPtr<Window>&) -> void override;
-		auto OnChildRemoved(HWND) -> void override;
+		auto SetDockPosition(std::size_t id, DockPosition position) noexcept -> void;
+		[[nodiscard]] auto GetItemPosition(std::size_t id) const noexcept -> Result<DockPosition>;
+
+		auto RearrangeItems() noexcept -> void override;
+
+		auto OnItemRemoved(std::size_t id) -> void override;
 	};
 }

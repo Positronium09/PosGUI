@@ -12,7 +12,10 @@ export namespace PGUI::UI::Layout
 	{
 		Start,
 		Center,
-		End
+		End,
+		SpaceBetween,
+		SpaceAround,
+		SpaceEvenly
 	};
 
 	enum class CrossAxisAlignment

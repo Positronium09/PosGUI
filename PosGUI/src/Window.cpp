@@ -367,9 +367,9 @@ namespace PGUI
 
 	auto Window::GetClientRect() const noexcept -> RectF
 	{
-		auto rect = *logicalRect;
-		rect.Shift(-logicalRect->TopLeft());
-		return rect;
+		RECT rc;
+		::GetClientRect(Hwnd(), &rc);
+		return PhysicalToLogical(RectF{ rc });
 	}
 
 	auto Window::GetWindowSize() const noexcept -> SizeF

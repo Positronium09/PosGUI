@@ -11,8 +11,8 @@ import PGUI.UI.Layout.LayoutPanel;
 
 namespace PGUI::UI::Layout
 {
-	DockLayout::DockLayout() noexcept :
-		LayoutPanel{ WindowClass::Create(L"PGUI_DockLayout") }
+	DockLayout::DockLayout(const RectF bounds) noexcept :
+		LayoutPanel{ bounds }
 	{
 		dockPriorities.insert_or_assign(DockPosition::None, DockPriority::None);
 		dockPriorities.insert_or_assign(DockPosition::Fill, DockPriority::None);
@@ -22,17 +22,34 @@ namespace PGUI::UI::Layout
 		dockPriorities.insert_or_assign(DockPosition::Bottom, DockPriority::Fourth);
 	}
 
-	auto DockLayout::SetDockPosition(const HWND hwnd, const DockPosition position) noexcept -> Error
+	auto DockLayout::AddItem(const LayoutItem& item, DockPosition position) noexcept -> void
 	{
-		if (dockPositions.contains(hwnd))
-		{
-			dockPositions[hwnd] = position;
-			RearrangeChildren();
-			return Error{ S_OK };
-		}
+		dockPositions.insert_or_assign(GetItemCount(), position);
+		LayoutPanel::AddItem(item);
+	}
 
-		return Error{ E_INVALIDARG }
-			.SuggestFix(L"No child window with given hwnd");
+	auto DockLayout::AddItem(const LayoutItem& item) noexcept -> void
+	{
+		AddItem(item, DockPosition::None);
+	}
+
+	auto DockLayout::SetDockPosition(const LayoutItem& item, const DockPosition position) -> void
+	{
+		if (const auto result = GetItemIndex(item);
+			result.has_value())
+		{
+			SetDockPosition(*result, position);
+		}
+	}
+
+	auto DockLayout::GetDockPosition(const LayoutItem& item) const noexcept -> Result<DockPosition>
+	{
+		const auto result = GetItemIndex(item);
+		if (result.has_value())
+		{
+			return GetItemPosition(*result);
+		}
+		return Unexpected{ result.error() };
 	}
 
 	auto DockLayout::SetMaxDockSize(const DockPosition position, float size) noexcept -> Error
@@ -63,7 +80,7 @@ namespace PGUI::UI::Layout
 		}
 
 		maxDockSizes.insert_or_assign(position, size);
-		RearrangeChildren();
+		RearrangeItems();
 
 		return Error{ S_OK };
 	}
@@ -98,17 +115,35 @@ namespace PGUI::UI::Layout
 
 		dockPriorities.insert_or_assign(toSwap, dockPriorities.at(position));
 		dockPriorities[position] = priority;
-		RearrangeChildren();
+		RearrangeItems();
 	}
 
-	auto DockLayout::RearrangeChildren() noexcept -> void
+	auto DockLayout::SetDockPosition(const std::size_t id, const DockPosition position) noexcept -> void
 	{
-		std::vector<std::pair<HWND, DockPosition>> dockedItems;
+		if (dockPositions.contains(id))
+		{
+			dockPositions[id] = position;
+			RearrangeItems();
+		}
+	}
+
+	auto DockLayout::GetItemPosition(const std::size_t id) const noexcept -> Result<DockPosition>
+	{
+		if (dockPositions.contains(id))
+		{
+			return dockPositions.at(id);
+		}
+		return Unexpected{ Error{ E_INVALIDARG } };
+	}
+
+	auto DockLayout::RearrangeItems() noexcept -> void
+	{
+		std::vector<std::pair<std::size_t, DockPosition>> dockedItems;
 		dockedItems.reserve(dockPositions.size());
 
-		for (const auto& [hwnd, position] : dockPositions)
+		for (const auto& [id, position] : dockPositions)
 		{
-			dockedItems.emplace_back(hwnd, position);
+			dockedItems.emplace_back(id, position);
 		}
 		std::ranges::stable_sort(
 			dockedItems,
@@ -119,17 +154,17 @@ namespace PGUI::UI::Layout
 				return ToUnderlying(priorityA) < ToUnderlying(priorityB);
 			});
 
-		const auto clientRect = GetClientRect();
-		auto availableSpace = clientRect;
+		const auto space = GetBounds();
+		auto availableSpace = space;
 
-		for (const auto& [hwnd, position] : dockedItems)
+		for (const auto& [id, position] : dockedItems)
 		{
-			const auto childWindow = GetChildWindow(hwnd);
+			const auto item = *GetItem(id);
 			switch (position)
 			{
 				case DockPosition::Top:
 				{
-					auto topHeight = childWindow->GetClientSize().cy;
+					auto topHeight = MeasureItem(item).cy;
 					if (maxDockSizes.contains(DockPosition::Top) &&
 					    availableSpace.top + topHeight > maxDockSizes[DockPosition::Top])
 					{
@@ -141,17 +176,17 @@ namespace PGUI::UI::Layout
 						availableSpace.right,
 						availableSpace.top + topHeight
 					};
-					childWindow->MoveAndResize(rect);
+					ArrangeItem(item, rect);
 					availableSpace.top += topHeight;
 					break;
 				}
 				case DockPosition::Bottom:
 				{
-					auto bottomHeight = childWindow->GetClientSize().cy;
+					auto bottomHeight = MeasureItem(item).cy;
 					if (maxDockSizes.contains(DockPosition::Bottom) &&
-					    clientRect.bottom - availableSpace.bottom + bottomHeight > maxDockSizes[DockPosition::Bottom])
+					    space.bottom - availableSpace.bottom + bottomHeight > maxDockSizes[DockPosition::Bottom])
 					{
-						bottomHeight = maxDockSizes[DockPosition::Bottom] - clientRect.bottom + availableSpace.bottom;
+						bottomHeight = maxDockSizes[DockPosition::Bottom] - space.bottom + availableSpace.bottom;
 					}
 					const auto rect = RectF{
 						availableSpace.left,
@@ -159,13 +194,13 @@ namespace PGUI::UI::Layout
 						availableSpace.right,
 						availableSpace.bottom
 					};
-					childWindow->MoveAndResize(rect);
+					ArrangeItem(item, rect);
 					availableSpace.bottom -= bottomHeight;
 					break;
 				}
 				case DockPosition::Left:
 				{
-					auto leftWidth = childWindow->GetClientSize().cx;
+					auto leftWidth = MeasureItem(item).cx;
 					if (maxDockSizes.contains(DockPosition::Left) &&
 					    availableSpace.left + leftWidth > maxDockSizes[DockPosition::Left])
 					{
@@ -177,17 +212,17 @@ namespace PGUI::UI::Layout
 						availableSpace.left + leftWidth,
 						availableSpace.bottom
 					};
-					childWindow->MoveAndResize(rect);
+					ArrangeItem(item, rect);
 					availableSpace.left += leftWidth;
 					break;
 				}
 				case DockPosition::Right:
 				{
-					auto rightWidth = childWindow->GetClientSize().cx;
+					auto rightWidth = MeasureItem(item).cx;
 					if (maxDockSizes.contains(DockPosition::Right) &&
-					    clientRect.right - availableSpace.right + rightWidth > maxDockSizes[DockPosition::Right])
+					    space.right - availableSpace.right + rightWidth > maxDockSizes[DockPosition::Right])
 					{
-						rightWidth = maxDockSizes[DockPosition::Right] - clientRect.right + availableSpace.right;
+						rightWidth = maxDockSizes[DockPosition::Right] - space.right + availableSpace.right;
 					}
 					const auto rect = RectF{
 						availableSpace.right - rightWidth,
@@ -195,13 +230,13 @@ namespace PGUI::UI::Layout
 						availableSpace.right,
 						availableSpace.bottom
 					};
-					childWindow->MoveAndResize(rect);
+					ArrangeItem(item, rect);
 					availableSpace.right -= rightWidth;
 					break;
 				}
 				case DockPosition::Fill:
 				{
-					childWindow->MoveAndResize(availableSpace);
+					ArrangeItem(item, availableSpace);
 					break;
 				}
 				case DockPosition::None:
@@ -212,15 +247,9 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto DockLayout::OnChildAdded(const WindowPtr<Window>& wnd) -> void
+	auto DockLayout::OnItemRemoved(const std::size_t id) -> void
 	{
-		dockPositions.insert_or_assign(wnd->Hwnd(), DockPosition::None);
-		RearrangeChildren();
-	}
-
-	auto DockLayout::OnChildRemoved(const HWND hwnd) -> void
-	{
-		dockPositions.erase(hwnd);
-		RearrangeChildren();
+		dockPositions.erase(id);
+		LayoutPanel::OnItemRemoved(id);
 	}
 }

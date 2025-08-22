@@ -8,19 +8,25 @@ import PGUI.ErrorHandling;
 namespace PGUI::UI::Layout
 {
 	StackLayout::StackLayout(
+		const RectF bounds,
 		const LayoutOrientation orientation,
 		const MainAxisAlignment mainAxisAlignment, const CrossAxisAlignment crossAxisAlignment,
 		const WrapMode wrapMode, const StackLayoutPadding padding,
 		const float gap, const float crossGap) noexcept :
-		LayoutPanel{ WindowClass::Create(L"PGUI_StackLayout") },
+		LayoutPanel{ bounds },
 		orientation{ orientation }, mainAxisAlignment{ mainAxisAlignment },
 		crossAxisAlignment{ crossAxisAlignment }, padding{ padding },
 		wrapMode{ wrapMode },
 		mainAxisGap{ gap }, crossAxisGap{ crossGap }
 	{ }
 
-	auto StackLayout::RearrangeChildren() noexcept -> void
+	auto StackLayout::RearrangeItems() noexcept -> void
 	{
+		if (GetItemCount() == 0)
+		{
+			return;
+		}
+
 		if (orientation == LayoutOrientation::Horizontal)
 		{
 			if (wrapMode == WrapMode::Wrap)
@@ -48,7 +54,7 @@ namespace PGUI::UI::Layout
 		if (mainAxisGap != _gap)
 		{
 			mainAxisGap = _gap;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -59,7 +65,7 @@ namespace PGUI::UI::Layout
 			crossAxisGap = _crossGap;
 			if (wrapMode == WrapMode::Wrap)
 			{
-				RearrangeChildren();
+				RearrangeItems();
 			}
 		}
 	}
@@ -69,7 +75,7 @@ namespace PGUI::UI::Layout
 		if (padding != _padding)
 		{
 			padding = _padding;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -78,7 +84,7 @@ namespace PGUI::UI::Layout
 		if (wrapMode != mode)
 		{
 			wrapMode = mode;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -87,7 +93,7 @@ namespace PGUI::UI::Layout
 		if (orientation != _orientation)
 		{
 			orientation = _orientation;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -96,7 +102,7 @@ namespace PGUI::UI::Layout
 		if (mainAxisAlignment != alignment)
 		{
 			mainAxisAlignment = alignment;
-			RearrangeChildren();
+			RearrangeItems();
 		}
 	}
 
@@ -105,27 +111,17 @@ namespace PGUI::UI::Layout
 		if (crossAxisAlignment != alignment)
 		{
 			crossAxisAlignment = alignment;
-			RearrangeChildren();
+			RearrangeItems();
 		}
-	}
-
-	auto StackLayout::OnChildAdded(const WindowPtr<Window>&) -> void
-	{
-		RearrangeChildren();
-	}
-
-	auto StackLayout::OnChildRemoved(HWND) -> void
-	{
-		RearrangeChildren();
 	}
 
 	auto StackLayout::RearrangeHorizontalNoWrap() const noexcept -> void
 	{
-		const auto size = GetClientSize();
-		const auto childrenSize = GetTotalChildrenSize().cx;
+		const auto size = GetBoundsSize();
+		const auto totalItemSize = GetTotalItemSize().cx;
 		const auto requiredSpace =
-			childrenSize +
-			static_cast<float>(GetChildWindows().size() - 1) * mainAxisGap;
+			totalItemSize +
+			static_cast<float>(GetItemCount() - 1) * mainAxisGap;
 
 		auto position = padding.startPad;
 
@@ -138,9 +134,9 @@ namespace PGUI::UI::Layout
 			position = (size.cx + padding.startPad - padding.endingPad - requiredSpace) / 2;
 		}
 
-		for (const auto& child : GetChildWindows())
+		for (const auto& item : GetItems())
 		{
-			const auto childSize = child->GetClientSize();
+			const auto itemSize = MeasureItem(item);
 			float top = 0;
 			switch (crossAxisAlignment)
 			{
@@ -151,33 +147,33 @@ namespace PGUI::UI::Layout
 				}
 				case CrossAxisAlignment::Center:
 				{
-					top = padding.crossStartPad + (size.cy - childSize.cy) / 2;
+					top = padding.crossStartPad + (size.cy - itemSize.cy) / 2;
 					break;
 				}
 				case CrossAxisAlignment::End:
 				{
-					top = size.cy - padding.crossEndPad - childSize.cy;
+					top = size.cy - padding.crossEndPad - itemSize.cy;
 					break;
 				}
 				case CrossAxisAlignment::Stretch:
 				{
-					child->Resize({ size.cy, childSize.cx });
+					ResizeItem(item, { size.cy, itemSize.cx });
 					break;
 				}
 			}
 
-			child->Move({ position, top });
-			position += childSize.cx + mainAxisGap;
+			MoveItem(item, { position, top });
+			position += itemSize.cx + mainAxisGap;
 		}
 	}
 
 	auto StackLayout::RearrangeVerticalNoWrap() const noexcept -> void
 	{
-		const auto size = GetClientSize();
-		const auto childrenSize = GetTotalChildrenSize().cy;
+		const auto size = GetBoundsSize();
+		const auto totalItemSize = GetTotalItemSize().cy;
 		const auto requiredSpace =
-			childrenSize +
-			static_cast<float>(GetChildWindows().size() - 1) * mainAxisGap;
+			totalItemSize +
+			static_cast<float>(GetItemCount() - 1) * mainAxisGap;
 
 		auto position = padding.startPad;
 
@@ -190,9 +186,9 @@ namespace PGUI::UI::Layout
 			position = (size.cy + padding.startPad - padding.endingPad - requiredSpace) / 2;
 		}
 
-		for (const auto& child : GetChildWindows())
+		for (const auto& item : GetItems())
 		{
-			const auto childSize = child->GetClientSize();
+			const auto itemSize = MeasureItem(item);
 			float left = 0;
 			switch (crossAxisAlignment)
 			{
@@ -203,65 +199,65 @@ namespace PGUI::UI::Layout
 				}
 				case CrossAxisAlignment::Center:
 				{
-					left = (size.cx - childSize.cx) / 2;
+					left = (size.cx - itemSize.cx) / 2;
 					break;
 				}
 				case CrossAxisAlignment::End:
 				{
-					left = size.cx - padding.crossEndPad - childSize.cx;
+					left = size.cx - padding.crossEndPad - itemSize.cx;
 					break;
 				}
 				case CrossAxisAlignment::Stretch:
 				{
-					child->Resize({ size.cx, childSize.cy });
+					ResizeItem(item, { size.cx, itemSize.cy });
 					break;
 				}
 			}
 
-			child->Move({ left, position });
-			position += childSize.cy + mainAxisGap;
+			MoveItem(item, { left, position });
+			position += itemSize.cy + mainAxisGap;
 		}
 	}
 
 	auto StackLayout::RearrangeHorizontalWrap() const noexcept -> void
 	{
-		const auto clientSize = GetClientSize();
-		const auto totalChildrenSize = GetTotalChildrenSize();
+		const auto clientSize = GetBoundsSize();
+		const auto totalItemSize = GetTotalItemSize();
 		const auto availableWidth = clientSize.cx - padding.startPad - padding.endingPad;
 
-		if (totalChildrenSize.cx + (GetChildWindows().size() - 1) * mainAxisGap <= availableWidth)
+		if (totalItemSize.cx + (GetItemCount() - 1) * mainAxisGap <= availableWidth)
 		{
 			RearrangeHorizontalNoWrap();
 			return;
 		}
 
 		std::vector<float> rowSizes;
-		rowSizes.reserve(GetChildWindows().size());
+		rowSizes.reserve(GetItemCount());
 		std::vector<std::size_t> startIndices;
-		startIndices.reserve(GetChildWindows().size());
+		startIndices.reserve(GetItemCount());
 		startIndices.push_back(0);
 
 		float currentRowSize = 0;
 		float maxHeight = 0;
 
-		for (const auto& [index, child] : GetChildWindows() | std::views::enumerate)
+		for (const auto& [index, item] : GetItems() | std::views::enumerate)
 		{
-			const auto childSize = child->GetClientSize();
-			if (currentRowSize + childSize.cx > availableWidth)
+			const auto itemSize = MeasureItem(item);
+			if (currentRowSize + itemSize.cx > availableWidth)
 			{
 				rowSizes.push_back(maxHeight);
 				startIndices.push_back(index);
 				currentRowSize = 0;
 				maxHeight = 0;
 			}
-			maxHeight = std::max(maxHeight, childSize.cy);
-			currentRowSize += childSize.cx + mainAxisGap;
+			maxHeight = std::max(maxHeight, itemSize.cy);
+			currentRowSize += itemSize.cx + mainAxisGap;
 		}
 		while (rowSizes.size() < startIndices.size())
 		{
-			for (const auto& child : GetChildWindows() | std::views::drop(startIndices.back()))
+			for (const auto& item : GetItems() | std::views::drop(startIndices.back()))
 			{
-				maxHeight = std::max(maxHeight, child->GetClientSize().cy);
+				maxHeight = std::max(maxHeight, MeasureItem(item).cy);
 			}
 			rowSizes.push_back(maxHeight);
 		}
@@ -269,7 +265,7 @@ namespace PGUI::UI::Layout
 		if (crossAxisAlignment == CrossAxisAlignment::Stretch)
 		{
 			const auto rowCount = rowSizes.size();
-			const auto height = (GetClientSize().cy -
+			const auto height = (GetBoundsSize().cy -
 			                     (padding.crossStartPad + padding.crossEndPad +
 			                      static_cast<float>(rowCount - 1) * crossAxisGap)) /
 			                    static_cast<float>(rowCount);
@@ -313,7 +309,7 @@ namespace PGUI::UI::Layout
 			const auto startIndex = startIndices[index];
 			const auto endIndex = static_cast<std::size_t>(index + 1) < startIndices.size()
 				? startIndices[index + 1] - 1
-				: GetChildWindows().size() - 1;
+				: GetItemCount() - 1;
 			RearrangeHorizontalRow(startIndex, endIndex, currentY, rowCount);
 			currentY += rowSize + crossAxisGap;
 		}
@@ -321,45 +317,45 @@ namespace PGUI::UI::Layout
 
 	auto StackLayout::RearrangeVerticalWrap() const noexcept -> void
 	{
-		const auto clientSize = GetClientSize();
-		const auto totalChildrenSize = GetTotalChildrenSize();
+		const auto clientSize = GetBoundsSize();
+		const auto totalItemSize = GetTotalItemSize();
 		const auto availableHeight = clientSize.cy - padding.startPad - padding.endingPad;
 
-		if (totalChildrenSize.cy + (GetChildWindows().size() - 1) * mainAxisGap <= availableHeight)
+		if (totalItemSize.cy + (GetItemCount() - 1) * mainAxisGap <= availableHeight)
 		{
 			RearrangeVerticalNoWrap();
 			return;
 		}
 
 		std::vector<float> columnSizes;
-		columnSizes.reserve(GetChildWindows().size());
+		columnSizes.reserve(GetItemCount());
 
 		std::vector<std::size_t> startIndices;
-		startIndices.reserve(GetChildWindows().size());
+		startIndices.reserve(GetItemCount());
 		startIndices.push_back(0);
 
 		float currentColumnSize = 0;
 		float maxWidth = 0;
 
-		for (const auto& [index, child] : GetChildWindows() | std::views::enumerate)
+		for (const auto& [index, item] : GetItems() | std::views::enumerate)
 		{
-			const auto childSize = child->GetClientSize();
-			if (currentColumnSize + childSize.cy > availableHeight)
+			const auto itemSize = MeasureItem(item);
+			if (currentColumnSize + itemSize.cy > availableHeight)
 			{
 				columnSizes.push_back(maxWidth);
 				startIndices.push_back(index);
 				currentColumnSize = 0;
 				maxWidth = 0;
 			}
-			maxWidth = std::max<float>(maxWidth, childSize.cx);
-			currentColumnSize += childSize.cy + mainAxisGap;
+			maxWidth = std::max<float>(maxWidth, itemSize.cx);
+			currentColumnSize += itemSize.cy + mainAxisGap;
 		}
 
 		while (columnSizes.size() < startIndices.size())
 		{
-			for (const auto& child : GetChildWindows() | std::views::drop(startIndices.back()))
+			for (const auto& item : GetItems() | std::views::drop(startIndices.back()))
 			{
-				maxWidth = std::max<float>(maxWidth, child->GetClientSize().cx);
+				maxWidth = std::max<float>(maxWidth, MeasureItem(item).cx);
 			}
 			columnSizes.push_back(maxWidth);
 		}
@@ -367,7 +363,7 @@ namespace PGUI::UI::Layout
 		if (crossAxisAlignment == CrossAxisAlignment::Stretch)
 		{
 			const auto columnCount = columnSizes.size();
-			const auto width = (GetClientSize().cx -
+			const auto width = (GetBoundsSize().cx -
 			                    (padding.crossStartPad + padding.crossEndPad +
 			                     static_cast<float>(columnCount - 1) * crossAxisGap)) /
 			                   static_cast<float>(columnCount);
@@ -414,7 +410,7 @@ namespace PGUI::UI::Layout
 			const auto startIndex = startIndices[index];
 			const auto endIndex = static_cast<std::size_t>(index + 1) < startIndices.size()
 				? startIndices[index + 1] - 1
-				: GetChildWindows().size() - 1;
+				: GetItemCount() - 1;
 			RearrangeVerticalColumn(startIndex, endIndex, currentX, columnCount);
 			currentX += columnSize + crossAxisGap;
 		}
@@ -426,7 +422,7 @@ namespace PGUI::UI::Layout
 		float yPosition, const std::size_t rowCount) const noexcept -> void
 	{
 		auto currentX = padding.startPad;
-		const auto height = (GetClientSize().cy -
+		const auto height = (GetBoundsSize().cy -
 		                     (padding.crossStartPad + padding.crossEndPad +
 		                      static_cast<float>(rowCount - 1) * crossAxisGap)) /
 		                    static_cast<float>(rowCount);
@@ -437,13 +433,13 @@ namespace PGUI::UI::Layout
 			{
 				const auto totalWidth =
 					std::accumulate(
-						GetChildWindows().begin() + startChildIndex,
-						GetChildWindows().begin() + endChildIndex + 1, 0.0F,
-						[](float sum, const auto& child)
+						GetItems().begin() + startChildIndex,
+						GetItems().begin() + endChildIndex + 1, 0.0F,
+						[](float sum, const auto& item)
 						{
-							return sum + child->GetClientSize().cx;
+							return sum + MeasureItem(item).cx;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableWidth = GetClientSize().cx -
+				const auto availableWidth = GetBoundsSize().cx -
 				                            padding.startPad - padding.endingPad;
 				currentX += (availableWidth - totalWidth) / 2;
 				break;
@@ -452,13 +448,13 @@ namespace PGUI::UI::Layout
 			{
 				const auto totalWidth =
 					std::accumulate(
-						GetChildWindows().begin() + startChildIndex,
-						GetChildWindows().begin() + endChildIndex + 1, 0.0F,
-						[](float sum, const auto& child)
+						GetItems().begin() + startChildIndex,
+						GetItems().begin() + endChildIndex + 1, 0.0F,
+						[](float sum, const auto& item)
 						{
-							return sum + child->GetClientSize().cx;
+							return sum + MeasureItem(item).cx;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableWidth = GetClientSize().cx -
+				const auto availableWidth = GetBoundsSize().cx -
 				                            padding.startPad - padding.endingPad;
 				currentX += availableWidth - totalWidth;
 				break;
@@ -469,15 +465,15 @@ namespace PGUI::UI::Layout
 			}
 		}
 
-		for (const auto& child : GetChildWindows() | std::views::drop(startChildIndex) |
-		                         std::views::take(endChildIndex - startChildIndex + 1))
+		for (const auto& item : GetItems() | std::views::drop(startChildIndex) |
+		                        std::views::take(endChildIndex - startChildIndex + 1))
 		{
-			child->Move({ currentX, yPosition });
+			MoveItem(item, { currentX, yPosition });
 			if (GetCrossAxisAlignment() == CrossAxisAlignment::Stretch)
 			{
-				child->Resize({ child->GetClientSize().cx, height });
+				ResizeItem(item, { MeasureItem(item).cx, height });
 			}
-			currentX += child->GetClientSize().cx + mainAxisGap;
+			currentX += MeasureItem(item).cx + mainAxisGap;
 		}
 	}
 
@@ -487,7 +483,7 @@ namespace PGUI::UI::Layout
 		float xPosition, const std::size_t columnCount) const noexcept -> void
 	{
 		auto currentY = padding.startPad;
-		const auto width = (GetClientSize().cx -
+		const auto width = (GetBoundsSize().cx -
 		                    (padding.crossStartPad + padding.crossEndPad +
 		                     static_cast<float>(columnCount - 1) * crossAxisGap)) /
 		                   static_cast<float>(columnCount);
@@ -498,13 +494,13 @@ namespace PGUI::UI::Layout
 			{
 				const auto totalHeight =
 					std::accumulate(
-						GetChildWindows().begin() + startChildIndex,
-						GetChildWindows().begin() + endChildIndex + 1, 0.0F,
-						[](float sum, const auto& child)
+						GetItems().begin() + startChildIndex,
+						GetItems().begin() + endChildIndex + 1, 0.0F,
+						[](float sum, const auto& item)
 						{
-							return sum + child->GetClientSize().cy;
+							return sum + MeasureItem(item).cy;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableHeight = GetClientSize().cy -
+				const auto availableHeight = GetBoundsSize().cy -
 				                             padding.startPad - padding.endingPad;
 				currentY += (availableHeight - totalHeight) / 2;
 				break;
@@ -513,13 +509,13 @@ namespace PGUI::UI::Layout
 			{
 				const auto totalHeight =
 					std::accumulate(
-						GetChildWindows().begin() + startChildIndex,
-						GetChildWindows().begin() + endChildIndex + 1, 0.0F,
-						[](float sum, const auto& child)
+						GetItems().begin() + startChildIndex,
+						GetItems().begin() + endChildIndex + 1, 0.0F,
+						[](float sum, const auto& item)
 						{
-							return sum + child->GetClientSize().cy;
+							return sum + MeasureItem(item).cy;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableHeight = GetClientSize().cy -
+				const auto availableHeight = GetBoundsSize().cy -
 				                             padding.startPad - padding.endingPad;
 				currentY += availableHeight - totalHeight;
 				break;
@@ -530,15 +526,16 @@ namespace PGUI::UI::Layout
 			}
 		}
 
-		for (const auto& child : GetChildWindows() | std::views::drop(startChildIndex) |
-		                         std::views::take(endChildIndex - startChildIndex + 1))
+		for (const auto& item : GetItems() | std::views::drop(startChildIndex) |
+		                        std::views::take(endChildIndex - startChildIndex + 1))
 		{
-			child->Move({ xPosition, currentY });
+			MoveItem(item, { xPosition, currentY });
+
 			if (GetCrossAxisAlignment() == CrossAxisAlignment::Stretch)
 			{
-				child->Resize({ width, child->GetClientSize().cy });
+				ResizeItem(item, { width, MeasureItem(item).cy });
 			}
-			currentY += child->GetClientSize().cy + mainAxisGap;
+			currentY += MeasureItem(item).cy + mainAxisGap;
 		}
 	}
 }

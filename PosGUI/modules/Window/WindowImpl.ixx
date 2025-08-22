@@ -175,9 +175,10 @@ export namespace PGUI
 		DWORD style;
 		DWORD exStyle;
 
-		constexpr WindowCreateInfo(const std::wstring_view title,
-		                           const PointI position, const SizeI size,
-		                           const DWORD style, const DWORD exStyle) noexcept :
+		constexpr WindowCreateInfo(
+			const std::wstring_view title,
+			const PointI position, const SizeI size,
+			const DWORD style = NULL, const DWORD exStyle = NULL) noexcept :
 			title{ title },
 			position{ position }, size{ size },
 			style{ style }, exStyle{ exStyle }

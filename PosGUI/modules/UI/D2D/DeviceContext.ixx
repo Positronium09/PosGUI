@@ -40,9 +40,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
 				Logger::Error(error, std::format(L"Cannot create effect with IID {}", effectID));
 				return Unexpected{ error };
 			}

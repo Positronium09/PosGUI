@@ -11,6 +11,8 @@ export namespace PGUI::UI::Animation
 	class AnimationTimer : public ComPtrHolder<IUIAnimationTimer>
 	{
 		public:
+		[[nodiscard]] static auto GetGlobalInstance() -> const AnimationTimer&;
+
 		AnimationTimer();
 
 		explicit(false) AnimationTimer(const ComPtr<IUIAnimationTimer>& ptr) noexcept;
@@ -27,5 +29,8 @@ export namespace PGUI::UI::Animation
 
 		//TODO SetTimerEventHandler
 		//TODO SetTimerUpdateHandler
+
+		private:
+		static inline AnimationTimer* instance = nullptr;
 	};
 }

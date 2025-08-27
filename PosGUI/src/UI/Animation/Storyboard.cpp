@@ -26,7 +26,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Scheduling failed");
 			return Unexpected{ error };
 		}
@@ -39,7 +38,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->Abandon()
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Abandoning failed");
 		return error;
 	}
@@ -49,7 +47,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->Conclude()
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Concluding failed");
 		return error;
 	}
@@ -60,8 +57,7 @@ namespace PGUI::UI::Animation
 			Get()->Finish(completionDeadline)
 		};
 		error
-			.AddDetail(L"Completion Deadline", std::format(L"{:.10F}", completionDeadline))
-			.AddTag(ErrorTags::Animation);
+			.AddDetail(L"Completion Deadline", std::format(L"{:.10F}", completionDeadline));
 		LogIfFailed(error, L"Finish failed");
 		return error;
 	}
@@ -72,8 +68,7 @@ namespace PGUI::UI::Animation
 			Get()->SetSkipDuration(duration)
 		};
 		error
-			.AddDetail(L"Duration", std::format(L"{:.10F}", duration))
-			.AddTag(ErrorTags::Animation);
+			.AddDetail(L"Duration", std::format(L"{:.10F}", duration));
 		LogIfFailed(error, L"Setting skip duration failed");
 		return error;
 	}
@@ -84,8 +79,7 @@ namespace PGUI::UI::Animation
 			Get()->SetLongestAcceptableDelay(delay)
 		};
 		error
-			.AddDetail(L"Delay", std::format(L"{:.10F}", delay))
-			.AddTag(ErrorTags::Animation);
+			.AddDetail(L"Delay", std::format(L"{:.10F}", delay));
 		LogIfFailed(error, L"Setting longest acceptable delay failed");
 		return error;
 	}
@@ -95,7 +89,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->HoldVariable(variable.GetRaw())
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Hold variable failed");
 		return error;
 	}
@@ -108,7 +101,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"AddKeyframeAfterTransition failed");
 			return Unexpected{ error };
 		}
@@ -124,7 +116,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"AddKeyframeAtOffset failed");
 			return Unexpected{ error };
 		}
@@ -138,7 +129,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->AddTransition(variable.GetRaw(), transition.GetRaw())
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"AddTransition failed");
 		return error;
 	}
@@ -152,7 +142,6 @@ namespace PGUI::UI::Animation
 				variable.GetRaw(),
 				transition.GetRaw(), keyFrame)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"AddTransitionAtKeyframe failed");
 		return error;
 	}
@@ -166,7 +155,6 @@ namespace PGUI::UI::Animation
 			variable.GetRaw(),
 			transition.GetRaw(), startKeyFrame, endKeyFrame)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"AddTransitionBetweenKeyframes failed");
 		return error;
 	}
@@ -184,8 +172,7 @@ namespace PGUI::UI::Animation
 		};
 		error
 			.AddDetail(L"Iteration Count", std::format(L"{:.10F}", iterationCount))
-			.AddDetail(L"Register for Next", std::format(L"{}", registerForNext))
-			.AddTag(ErrorTags::Animation);
+			.AddDetail(L"Register for Next", std::format(L"{}", registerForNext));
 		LogIfFailed(error, L"RepeatBetweenKeyframes failed");
 		return error;
 	}
@@ -198,7 +185,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"GetStatus failed");
 			return Unexpected{ error };
 		}
@@ -213,7 +199,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"GetElapsedTime failed");
 			return Unexpected{ error };
 		}
@@ -227,8 +212,7 @@ namespace PGUI::UI::Animation
 			Get()->SetTag(obj.Get(), id)
 		};
 		error
-			.AddDetail(L"ID", std::to_wstring(id))
-			.AddTag(ErrorTags::Animation);
+			.AddDetail(L"ID", std::to_wstring(id));
 		LogIfFailed(error, L"SetTag failed");
 		return error;
 	}
@@ -241,7 +225,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"GetTag failed");
 			return Unexpected{ error };
 		}
@@ -255,8 +238,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetStoryboardEventHandler(&eventHandler.GetRouter())
 		};
-		error
-			.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"SetStoryboardEventHandler failed");
 		return error;
 	}

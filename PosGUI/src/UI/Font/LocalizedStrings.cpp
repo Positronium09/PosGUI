@@ -30,8 +30,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Locale Name", name)
-				.AddTag(ErrorTags::Font);
+				.AddDetail(L"Locale Name", name);
 			Logger::Error(error, L"Failed to find locale name in localized strings.");
 			return Unexpected{ error };
 		}
@@ -49,8 +48,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Index", std::to_wstring(index))
-				.AddTag(ErrorTags::Font);
+				.AddDetail(L"Index", std::to_wstring(index));
 			Logger::Error(error, L"Failed to get locale name length.");
 			return Unexpected{ error };
 		}
@@ -62,8 +60,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Index", std::to_wstring(index))
-				.AddTag(ErrorTags::Font);
+				.AddDetail(L"Index", std::to_wstring(index));
 			Logger::Error(error, L"Failed to get locale name.");
 			return Unexpected{ error };
 		}
@@ -81,8 +78,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Index", std::to_wstring(index))
-				.AddTag(ErrorTags::Font);
+				.AddDetail(L"Index", std::to_wstring(index));
 			Logger::Error(error, L"Failed to get string length.");
 			return Unexpected{ error };
 		}
@@ -94,8 +90,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Index", std::to_wstring(index))
-				.AddTag(ErrorTags::Font);
+				.AddDetail(L"Index", std::to_wstring(index));
 			Logger::Error(error, L"Failed to get string.");
 			return Unexpected{ error };
 		}

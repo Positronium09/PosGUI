@@ -29,7 +29,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::Creation)
 			.AddDetail(L"rect", std::format(L"{}", rect))
 		);
 	}
@@ -47,7 +46,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::Creation)
 			.AddDetail(L"rect", std::format(L"{}", rect))
 		);
 	}
@@ -65,7 +63,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::Creation)
 			.AddDetail(L"ellipse", std::format(L"{}", ellipse))
 		);
 	}

@@ -7,40 +7,59 @@ import std;
 
 import PGUI.Utils;
 import :Error;
+import :ErrorCodes;
 
 export namespace PGUI
 {
 	class Exception final : public std::exception
 	{
 		public:
-		explicit Exception(const Error& error,
-			const std::optional<std::wstring_view>& customMessage = std::nullopt,
-			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
-			error{ error }, customMessage{ customMessage }, stacktrace{ stacktrace }
-		{
-		}
 		explicit Exception(const std::error_code& code,
 			const std::optional<std::wstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
-			error{ code }, customMessage{ customMessage }, stacktrace{ stacktrace }
+			error{ code }, stacktrace{ stacktrace }
+		{
+			if (customMessage.has_value())
+			{
+				error.SetCustomMessage(customMessage.value());
+			}
+		}
+
+		explicit Exception(const Error& error,
+			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
+			error{ error }, stacktrace{ stacktrace }
+		{
+			if (customMessage.has_value())
+			{
+				this->error.SetCustomMessage(customMessage.value());
+			}
+		}
+		template <PGUIErrorCodeEnum ErrorType>
+		explicit Exception(
+			const ErrorType error,
+			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
+			Exception{ std::make_error_code(error), customMessage, stacktrace }
 		{
 		}
+
 		explicit Exception(const std::errc& errc,
 			const std::optional<std::wstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
-			error{ errc }, customMessage{ customMessage }, stacktrace{ stacktrace }
+			Exception{ std::make_error_code(errc), customMessage, stacktrace }
 		{
 		}
 		explicit Exception(const HRESULT hresult,
 			const std::optional<std::wstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
-			error{ hresult }, customMessage{ customMessage }, stacktrace{ stacktrace }
+			Exception{ std::error_code{ hresult, std::system_category() }, customMessage, stacktrace }
 		{
 		}
 		explicit Exception(const WINERROR winError,
 			const std::optional<std::wstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
-			error{ winError }, customMessage{ customMessage }, stacktrace{ stacktrace }
+			Exception{ HresultFromWin32(winError), customMessage, stacktrace }
 		{
 		}
 
@@ -53,18 +72,18 @@ export namespace PGUI
 
 		[[nodiscard]] auto what() const noexcept -> const char* override
 		{
-			if (customMessage)
+			if (error.HasCustomMessage())
 			{
-				return WStringToString(*customMessage).c_str();
+				return WStringToString(*error.CustomMessage()).c_str();
 			}
 			return error.Message().c_str();
 		}
 		// ReSharper disable once IdentifierTypo
 		[[nodiscard]] auto wwhat() const noexcept
 		{
-			if (customMessage)
+			if (error.HasCustomMessage())
 			{
-				return *customMessage;
+				return *error.CustomMessage();
 			}
 			return StringToWString(error.Message());
 		}
@@ -101,22 +120,9 @@ export namespace PGUI
 		{
 			return error.Details();
 		}
-		[[nodiscard]] auto HasTags() const noexcept -> bool
-		{
-			return error.HasTags();
-		}
-		[[nodiscard]] const auto& Tags() const noexcept
-		{
-			return error.Tags();
-		}
 		auto& AddDetail(const std::wstring_view key, const std::wstring_view value)
 		{
 			error.AddDetail(key, value);
-			return *this;
-		}
-		auto& AddTag(const std::wstring_view tag)
-		{
-			error.AddTag(tag);
 			return *this;
 		}
 		auto& SuggestFix(const std::wstring_view suggestion)
@@ -127,7 +133,6 @@ export namespace PGUI
 
 		private:
 		Error error;
-		std::optional<std::wstring> customMessage;
 		std::stacktrace stacktrace;
 	};
 

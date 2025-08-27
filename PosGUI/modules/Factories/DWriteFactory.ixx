@@ -18,11 +18,11 @@ export namespace PGUI::Factories
 
 		DWriteFactory(const DWriteFactory&) = delete;
 
-		auto operator=(const DWriteFactory&) -> DWriteFactory& = delete;
+		auto operator=(const DWriteFactory&) -> DWriteFactory & = delete;
 
 		DWriteFactory(DWriteFactory&&) = delete;
 
-		auto operator=(DWriteFactory&&) -> DWriteFactory& = delete;
+		auto operator=(DWriteFactory&&) -> DWriteFactory & = delete;
 
 		~DWriteFactory() = default;
 
@@ -36,8 +36,7 @@ export namespace PGUI::Factories
 					std::bit_cast<IUnknown**>(directWriteFactory.GetAddressOf()));
 					FAILED(hr))
 				{
-					Error error{ hr };
-					error.AddTag(ErrorTags::Initialization);
+					const Error error{ hr };
 					Logger::Critical(error, L"Failed to create DirectWrite factory");
 					throw Exception{ error };
 				}

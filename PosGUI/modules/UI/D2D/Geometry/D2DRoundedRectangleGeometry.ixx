@@ -21,7 +21,8 @@ export namespace PGUI::UI::D2D
 
 		explicit(false) constexpr D2DRoundedRectangleGeometry(const ComPtr<ID2D1RoundedRectangleGeometry>& ptr) noexcept :
 			D2DGeometry{ ptr }
-		{ }
+		{
+		}
 
 		explicit D2DRoundedRectangleGeometry(const RoundedRect& roundedRect)
 		{
@@ -31,8 +32,7 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Logger::Error(Error{ hr }
-					.AddDetail(L"RoundedRect", std::format(L"{}", roundedRect))
-					.AddTag(ErrorTags::D2D),
+					.AddDetail(L"RoundedRect", std::format(L"{}", roundedRect)),
 					L"Failed to create rounded rectangle geometry");
 			}
 		}

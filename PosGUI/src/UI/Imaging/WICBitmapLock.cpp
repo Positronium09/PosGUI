@@ -26,7 +26,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get size");
 			return Unexpected{ error };
 		}
@@ -42,7 +41,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get stride");
 			return Unexpected{ error };
 		}
@@ -59,7 +57,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get data pointer");
 			return Unexpected{ error };
 		}
@@ -75,7 +72,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get pixel format");
 			return Unexpected{ error };
 		}

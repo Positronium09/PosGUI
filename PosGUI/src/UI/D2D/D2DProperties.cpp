@@ -26,8 +26,7 @@ namespace PGUI::UI::D2D
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Index", std::to_wstring(index))
-				.AddTag(ErrorTags::D2D);
+				.AddDetail(L"Index", std::to_wstring(index));
 			Logger::Error(error, L"Failed to get property name");
 			return Unexpected{ error };
 		}
@@ -43,8 +42,7 @@ namespace PGUI::UI::D2D
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Index", std::to_wstring(index))
-				.AddTag(ErrorTags::D2D);
+				.AddDetail(L"Index", std::to_wstring(index));
 			Logger::Error(error, L"Failed to get sub-properties");
 			return Unexpected{ error };
 		}
@@ -75,8 +73,7 @@ namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
-					.AddTag(ErrorTags::D2D);
+					.AddDetail(L"Span Size", std::to_wstring(bytes.size()));
 				Logger::Error(error, L"Failed to get property value");
 				return false;
 			}
@@ -91,8 +88,7 @@ namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
-					.AddTag(ErrorTags::D2D);
+					.AddDetail(L"Span Size", std::to_wstring(bytes.size()));
 				Logger::Error(error, L"Failed to get property value");
 				return false;
 			}

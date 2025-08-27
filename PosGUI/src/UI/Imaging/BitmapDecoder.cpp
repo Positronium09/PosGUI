@@ -29,8 +29,7 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			              ,
 			              L"Failed to create decoder");
 		}
 	}
@@ -50,8 +49,7 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			              ,
 			              L"Failed to create decoder");
 		}
 	}
@@ -71,8 +69,7 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			              ,
 			              L"Failed to create decoder");
 		}
 	}
@@ -90,8 +87,7 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			              ,
 			              L"Failed to create decoder");
 		}
 	}
@@ -115,7 +111,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to copy palette from decoder");
 			return Unexpected{ error };
 		}
@@ -131,7 +126,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get metadata query reader from decoder");
 			return Unexpected{ error };
 		}
@@ -146,7 +140,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get preview from decoder");
 			return Unexpected{ error };
 		}
@@ -161,7 +154,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get thumbnail from decoder");
 			return Unexpected{ error };
 		}
@@ -176,7 +168,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get container format from decoder");
 			return Unexpected{ error };
 		}
@@ -193,7 +184,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get color contexts from decoder");
 			return Unexpected{ error };
 		}
@@ -211,7 +201,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get frame count from decoder");
 			return Unexpected{ error };
 		}
@@ -230,7 +219,6 @@ namespace PGUI::UI::Imaging
 				error
 					.AddDetail(L"Frame Index", std::to_wstring(index))
 					.AddDetail(L"Frame Count", std::to_wstring(frameCount))
-					.AddTag(ErrorTags::Imaging)
 					.SuggestFix(L"Requested index is is bigger than or equal to frame count");
 				Logger::Error(error, L"Invalid frame index requested");
 				return Unexpected{ error };
@@ -242,8 +230,7 @@ namespace PGUI::UI::Imaging
 			{
 				Error error{ hr };
 				error
-					.AddDetail(L"Frame Index", std::to_wstring(index))
-					.AddTag(ErrorTags::Imaging);
+					.AddDetail(L"Frame Index", std::to_wstring(index));
 				Logger::Error(error, L"Failed to get frame from decoder");
 				return Unexpected{ error };
 			}
@@ -286,7 +273,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to query capabilities from decoder");
 			return Unexpected{ error };
 		}

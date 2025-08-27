@@ -29,7 +29,7 @@ namespace PGUI
 		(void)Factories::DXGIFactory::GetFactory();
 		(void)Factories::DWriteFactory::GetFactory();
 		(void)Factories::WICFactory::GetFactory();
-		(void)UI::Animation::AnimationManager::GetInstance();
+		(void)UI::Animation::AnimationManager::GetGlobalInstance();
 		(void)UI::Animation::AnimationTransitionLibrary::GetInstance();
 
 		UI::Theming::SystemTheme::RegisterSystemEventChanges();

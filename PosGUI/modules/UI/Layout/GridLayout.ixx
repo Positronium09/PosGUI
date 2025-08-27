@@ -3,6 +3,7 @@
 
 export module PGUI.UI.Layout.GridLayout;
 
+import PGUI.Window;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
 import PGUI.UI.Layout.LayoutPanel;
@@ -286,7 +287,7 @@ export namespace PGUI::UI::Layout
 
 			return Unexpected{
 				Error{ E_INVALIDARG }
-				.AddTag(ErrorTags::STL) };
+};
 		}
 		auto SortProperties() noexcept -> void;
 		auto GetRowSizes(std::size_t rowCount) const noexcept -> std::vector<long>;

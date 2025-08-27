@@ -21,7 +21,8 @@ export namespace PGUI::UI::D2D
 
 		explicit(false) constexpr D2DEllipseGeometry(const ComPtr<ID2D1EllipseGeometry>& ptr) noexcept :
 			D2DGeometry{ ptr }
-		{ }
+		{
+		}
 
 		explicit D2DEllipseGeometry(const Ellipse ellipse)
 		{
@@ -32,8 +33,7 @@ export namespace PGUI::UI::D2D
 			{
 				Logger::Error(
 					Error{ hr }
-					.AddDetail(L"Ellipse", std::format(L"{}", ellipse))
-					.AddTag(ErrorTags::D2D),
+					.AddDetail(L"Ellipse", std::format(L"{}", ellipse)),
 					L"Failed to create ellipse geometry");
 			}
 		}

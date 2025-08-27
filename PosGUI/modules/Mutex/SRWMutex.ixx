@@ -8,7 +8,10 @@ export namespace PGUI::Mutex
 	class SRWMutex
 	{
 		public:
-		SRWMutex() noexcept = default;
+		SRWMutex() noexcept
+		{
+			InitializeSRWLock(&srwLock);
+		}
 
 		auto lock() noexcept -> void
 		{

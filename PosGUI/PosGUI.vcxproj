@@ -29,7 +29,7 @@
     <ClCompile Include="modules\ErrorHandling\ErrorHandling.ixx" />
     <ClCompile Include="modules\ErrorHandling\Exception.ixx" />
     <ClCompile Include="modules\ErrorHandling\Logger.ixx" />
-    <ClCompile Include="modules\ErrorHandling\Tags.ixx" />
+    <ClCompile Include="modules\ErrorHandling\ErrorCodes.ixx" />
     <ClCompile Include="modules\Event.ixx" />
     <ClCompile Include="modules\Factories\D2DFactory.ixx" />
     <ClCompile Include="modules\Factories\DWriteFactory.ixx" />
@@ -43,6 +43,8 @@
     <ClCompile Include="modules\Mutex\Mutex.ixx" />
     <ClCompile Include="modules\Mutex\NullMutex.ixx" />
     <ClCompile Include="modules\Mutex\SRWMutex.ixx" />
+    <ClCompile Include="modules\UI\Animation\Animated.ixx" />
+    <ClCompile Include="modules\UI\Animation\AnimationTimerEventHandler.ixx" />
     <ClCompile Include="modules\UI\Layout\DockLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\LayoutEnums.ixx" />
@@ -50,9 +52,10 @@
     <ClCompile Include="modules\UI\Layout\LayoutStructs.ixx" />
     <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
     <ClCompile Include="modules\ScopedTimer.ixx" />
+    <ClCompile Include="modules\UI\UIWindow.ixx" />
+    <ClCompile Include="modules\Utils\EnumUtils.ixx" />
     <ClCompile Include="modules\Window.ixx" />
-    <ClCompile Include="modules\Window\DpiScaled.ixx" />
-    <ClCompile Include="modules\Window\WindowInterface.ixx" />
+    <ClCompile Include="modules\DpiScaled.ixx" />
     <ClCompile Include="modules\PropVariant.ixx" />
     <ClCompile Include="modules\Shape2D\Ellipse.ixx" />
     <ClCompile Include="modules\Shape2D\Line.ixx" />
@@ -136,7 +139,6 @@
     <ClCompile Include="modules\Utils\StringUtils.ixx" />
     <ClCompile Include="modules\Utils\Utils.ixx" />
     <ClCompile Include="modules\Utils\WindowsUtils.ixx" />
-    <ClCompile Include="modules\Window\WindowImpl.ixx" />
     <ClCompile Include="modules\WindowClass.ixx" />
     <ClCompile Include="src\MessageLoop.cpp" />
     <ClCompile Include="src\PGUI.cpp" />
@@ -181,6 +183,7 @@
     <ClCompile Include="src\UI\TextLayout.cpp" />
     <ClCompile Include="src\UI\Theming\Theme.cpp" />
     <ClCompile Include="src\UI\UIComponent.cpp" />
+    <ClCompile Include="src\UI\UIWindow.cpp" />
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
     <ClCompile Include="src\Utils\IEnumStringIterator.cpp" />
     <ClCompile Include="src\Utils\StringUtils.cpp" />

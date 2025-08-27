@@ -156,7 +156,7 @@ export namespace PGUI
 			};
 		}
 
-		constexpr auto Area() const noexcept
+		[[nodiscard]] constexpr auto Area() const noexcept
 		{
 			auto size = Size();
 			return size.cx * size.cy;
@@ -182,7 +182,7 @@ export namespace PGUI
 			return rect;
 		}
 
-		constexpr auto Shifted(Point<T> offset) noexcept
+		[[nodiscard]] constexpr auto Shifted(Point<T> offset) noexcept
 		{
 			return Shifted(offset.x, offset.y);
 		}
@@ -227,6 +227,77 @@ export namespace PGUI
 				p.x + size.cx,
 				p.y + size.cy
 			};
+		}
+
+		constexpr auto Resize(PGUI::Size<T> newSize) noexcept -> void
+		{
+			right = left + newSize.cx;
+			bottom = top + newSize.cy;
+		}
+
+		[[nodiscard]] constexpr auto Resized(PGUI::Size<T> newSize) const noexcept
+		{
+			auto rect = *this;
+			rect.Resize(newSize);
+			return rect;
+		}
+
+		constexpr auto Resize(T cx, T cy) noexcept -> void
+		{
+			Resize(PGUI::Size<T>{ cx, cy });
+		}
+
+		[[nodiscard]] constexpr auto Resized(T cx, T cy) const noexcept
+		{
+			return Resized(PGUI::Size<T>{ cx, cy });
+		}
+
+		constexpr auto Move(Point<T> newPos) noexcept -> void
+		{
+			auto size = Size();
+			left = newPos.x;
+			top = newPos.y;
+			right = left + size.cx;
+			bottom = top + size.cy;
+		}
+
+		[[nodiscard]] constexpr auto Moved(Point<T> newPos) const noexcept
+		{
+			auto rect = *this;
+			rect.Move(newPos);
+			return rect;
+		}
+
+		constexpr auto Move(T x, T y) noexcept -> void
+		{
+			Move(Point<T>{ x, y });
+		}
+		[[nodiscard]] constexpr auto Moved(T x, T y) const noexcept
+		{
+			return Moved(Point<T>{ x, y });
+		}
+
+		constexpr auto MoveAndResize(Point<T> newPos, PGUI::Size<T> newSize) noexcept -> void
+		{
+			left = newPos.x;
+			top = newPos.y;
+			right = left + newSize.cx;
+			bottom = top + newSize.cy;
+		}
+		[[nodiscard]] constexpr auto MovedAndResized(Point<T> newPos, PGUI::Size<T> newSize) const noexcept
+		{
+			auto rect = *this;
+			rect.MoveAndResize(newPos, newSize);
+			return rect;
+		}
+
+		constexpr auto MoveAndResize(T x, T y, T cx, T cy) noexcept -> void
+		{
+			MoveAndResize(Point<T>{ x, y }, PGUI::Size<T>{ cx, cy });
+		}
+		[[nodiscard]] constexpr auto MovedAndResized(T x, T y, T cx, T cy) const noexcept
+		{
+			return MovedAndResized(Point<T>{ x, y }, PGUI::Size<T>{ cx, cy });
 		}
 
 		template <typename U> requires std::is_arithmetic_v<U>

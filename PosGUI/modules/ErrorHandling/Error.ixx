@@ -6,6 +6,7 @@ export module PGUI.ErrorHandling:Error;
 import std;
 
 import PGUI.Utils;
+import :ErrorCodes;
 
 export namespace PGUI
 {
@@ -26,6 +27,15 @@ export namespace PGUI
 			const std::source_location& sourceLocation = std::source_location::current(),
 			const std::chrono::system_clock::time_point& timeStamp = std::chrono::system_clock::now()) noexcept :
 			code{ code }, sourceLocation{ sourceLocation }, timeStamp{ timeStamp }
+		{
+		}
+
+		template <PGUIErrorCodeEnum ErrorType>
+		explicit Error(
+			const ErrorType error,
+			const std::source_location& sourceLocation = std::source_location::current(),
+			const std::chrono::system_clock::time_point& timeStamp = std::chrono::system_clock::now()) noexcept :
+			Error{ std::make_error_code(error), sourceLocation, timeStamp }
 		{
 		}
 
@@ -120,28 +130,18 @@ export namespace PGUI
 
 			return details.at(key);
 		}
-		auto& AddTag(std::wstring_view tag)
-		{
-			tags.emplace(tag);
-			return *this;
-		}
 
-		[[nodiscard]] const auto& Tags() const noexcept
+		auto SetCustomMessage(std::wstring_view message) noexcept -> void
 		{
-			return tags;
+			customMessage = message;
 		}
-		[[nodiscard]] auto HasTags() const noexcept
+		[[nodiscard]] auto CustomMessage() const noexcept
 		{
-			return !tags.empty();
+			return customMessage;
 		}
-		[[nodiscard]] auto HasTag(const std::wstring& tag) const noexcept
+		[[nodiscard]] auto HasCustomMessage() const noexcept
 		{
-			return tags.contains(tag);
-		}
-		auto& RemoveTag(const std::wstring& tag)
-		{
-			tags.erase(tag);
-			return *this;
+			return customMessage.has_value();
 		}
 
 		[[nodiscard]] const auto& FixSuggestions() const noexcept
@@ -180,7 +180,6 @@ export namespace PGUI
 				sourceLocation.function_name() == other.sourceLocation.function_name() &&
 				sourceLocation.line() == other.sourceLocation.line() &&
 				sourceLocation.column() == other.sourceLocation.column() &&
-				tags == other.tags &&
 				details == other.details;
 		}
 
@@ -189,37 +188,36 @@ export namespace PGUI
 		std::source_location sourceLocation;
 		std::chrono::system_clock::time_point timeStamp;
 		std::unordered_map<std::wstring, std::wstring> details{ };
-		std::unordered_set<std::wstring> tags;
+		std::optional<std::wstring> customMessage;
 		std::vector<std::wstring> fixSuggestions;
 	};
 }
 
 export template <typename Char>
-class std::formatter<PGUI::Error, Char>
+struct std::formatter<PGUI::Error, Char>
 {
-	public:
 	template <typename FormatParseContext>
 	constexpr auto parse(FormatParseContext& ctx)
 	{
-		auto iter = ctx.begin();
+		auto it = ctx.begin();
 		const auto end = ctx.end();
-		if (iter == end || *iter == '}')
+		if (it == end || *it == '}')
 		{
-			return iter;
+			return it;
 		}
 
 		outCode = false;
 		outSource = false;
 		outDetails = false;
 
-		while (iter != end && *iter != '}')
+		while (it != end && *it != '}')
 		{
-			const auto current = *iter;
+			const auto current = *it;
 
 			if (current == 'a' || current == 'A')
 			{
-				std::advance(iter, 1);
-				if (iter != end && *iter != '}')
+				std::advance(it, 1);
+				if (it != end && *it != '}')
 				{
 					throw std::format_error{ "All flags are turned on but extra characters found" };
 				}
@@ -229,7 +227,7 @@ class std::formatter<PGUI::Error, Char>
 				outSource = true;
 				outDetails = true;
 				outTime = true;
-				outTags = true;
+				outCustomMessage = true;
 				outSuggest = true;
 
 				break;
@@ -254,9 +252,9 @@ class std::formatter<PGUI::Error, Char>
 			{
 				outTime = true;
 			}
-			else if (current == 'g' || current == 'G')
+			else if (current == 'x' || current == 'X')
 			{
-				outTags = true;
+				outCustomMessage = true;
 			}
 			else if (current == 'f' || current == 'F')
 			{
@@ -267,10 +265,10 @@ class std::formatter<PGUI::Error, Char>
 				throw std::format_error{ "Unknown format specifier" };
 			}
 
-			std::advance(iter, 1);
+			std::advance(it, 1);
 		}
 
-		return iter;
+		return it;
 	}
 
 	template <typename FormatContext>
@@ -326,22 +324,19 @@ class std::formatter<PGUI::Error, Char>
 					PGUI::WStringToString(detailString));
 			}
 		}
-		if (outTags)
+		if (outCustomMessage)
 		{
-			if (!error.HasTags())
+			if (!error.HasCustomMessage())
 			{
-				std::format_to(ctx.out(), "{}No tags specified",
+				std::format_to(ctx.out(), "{}No custom message specified",
 					outCode || outMessage || outTime || outSource || outDetails ? " | " : "");
 			}
 			else
 			{
-				const auto tagsString = error.Tags()
-					| std::views::join_with(std::wstring{ L", " })
-					| std::ranges::to<std::wstring>();
+				const auto customMessageString = *error.CustomMessage();
 
-				std::format_to(ctx.out(), "{}Tags: [{}]",
-					outCode || outMessage || outTime || outSource || outDetails ? " | " : "",
-					PGUI::WStringToString(tagsString));
+				std::format_to(ctx.out(), L"{}Custom Message: {}",
+					outCode || outMessage || outTime || outSource || outDetails ? L" | " : L"", customMessageString);
 			}
 		}
 		if (outSuggest)
@@ -349,7 +344,7 @@ class std::formatter<PGUI::Error, Char>
 			if (!error.HasSuggestions())
 			{
 				std::format_to(ctx.out(), "{}No suggestions available",
-					outCode || outMessage || outTime || outSource || outDetails || outTags ? " | " : "");
+					outCode || outMessage || outTime || outSource || outDetails || outCustomMessage ? " | " : "");
 			}
 			else
 			{
@@ -362,7 +357,7 @@ class std::formatter<PGUI::Error, Char>
 					| std::ranges::to<std::wstring>();
 				
 				std::format_to(ctx.out(), "{}Suggestions: {}",
-					outCode || outMessage || outTime || outSource || outDetails || outTags ? " | " : "",
+					outCode || outMessage || outTime || outSource || outDetails || outCustomMessage ? " | " : "",
 					PGUI::WStringToString(suggestionsString));
 			}
 		}
@@ -376,6 +371,6 @@ class std::formatter<PGUI::Error, Char>
 	bool outTime = false;
 	bool outSource = true;
 	bool outDetails = true;
-	bool outTags = false;
+	bool outCustomMessage = false;
 	bool outSuggest = false;
 };

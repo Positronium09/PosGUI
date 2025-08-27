@@ -29,8 +29,7 @@ namespace PGUI::UI::Imaging
 		{
 			Logger::Error(
 				Error{ hr }
-				.AddTag(ErrorTags::Creation)
-				.AddTag(ErrorTags::Imaging),
+				,
 				L"Cannot create format converted"
 			);
 			return;
@@ -41,8 +40,7 @@ namespace PGUI::UI::Imaging
 		{
 			Logger::Error(
 				Error{ E_INVALIDARG }
-				.AddTag(ErrorTags::Creation)
-				.AddTag(ErrorTags::Imaging),
+				,
 				L"Source and destination pixel formats are the same"
 			);
 			return;
@@ -57,8 +55,7 @@ namespace PGUI::UI::Imaging
 		{
 			Logger::Error(
 				Error{ E_INVALIDARG }
-				.AddTag(ErrorTags::Creation)
-				.AddTag(ErrorTags::Imaging),
+				,
 				L"Cannot initialize format converter"
 			);
 		}
@@ -75,8 +72,7 @@ namespace PGUI::UI::Imaging
 			Error error{ hr };
 			error
 				.AddDetail(L"Source Format", std::format(L"{}", sourceFormat))
-				.AddDetail(L"Destination Format", std::format(L"{}", destinationFormat))
-				.AddTag(ErrorTags::Imaging);
+				.AddDetail(L"Destination Format", std::format(L"{}", destinationFormat));
 			Logger::Error(error, L"Failed to check if conversion is possible");
 			return Unexpected{ error };
 		}
@@ -102,9 +98,7 @@ namespace PGUI::UI::Imaging
 		{
 			Error error{ E_FAIL };
 			error
-				.AddDetail(L"Destination Format", std::format(L"{}", GUID_WICPixelFormat32bppPBGRA))
-				.AddTag(ErrorTags::Imaging)
-				.AddTag(ErrorTags::Creation);
+				.AddDetail(L"Destination Format", std::format(L"{}", GUID_WICPixelFormat32bppPBGRA));
 			if (const auto pixelFormat = bitmapSource.GetPixelFormat();
 				pixelFormat.has_value())
 			{

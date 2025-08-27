@@ -1,7 +1,3 @@
-module;
-#include <d2d1_3.h>
-#include <Windows.h>
-
 module PGUI.UI.UIComponent;
 
 import std;
@@ -15,128 +11,66 @@ import PGUI.UI.DirectXCompositionWindow;
 
 namespace PGUI::UI
 {
-	UIComponent::UIComponent() :
-		UIComponent{ WindowClass::Create(L"PGUI_UIComponent") }
+	UIComponent::UIComponent(const RectF bounds) :
+		bounds{ bounds }
 	{ }
-
-	UIComponent::UIComponent(const WindowClassPtr& wndClass) :
-		DirectXCompositionWindow{ wndClass }
-	{
-		RegisterHandler(WM_CREATE, &UIComponent::OnCreate);
-		RegisterHandler(WM_NCHITTEST, &UIComponent::OnNcHitTest);
-		RegisterHandler(WM_SIZE, &UIComponent::OnSize);
-	}
 
 	auto UIComponent::SetClip(const ClipParameters& params) noexcept -> void
 	{
 		clip.SetParameters(params);
 		AdjustClip();
-		Invalidate();
-		OnClipChanged();
+		clipChanged.Invoke();
 	}
 
 	auto UIComponent::ClearClip() noexcept -> void
 	{
 		clip.Clear();
-		OnClipChanged();
+		clipChanged.Invoke();
 	}
 
-	auto UIComponent::BeginDraw() -> void
+	auto UIComponent::SetBounds(const RectF& rect) noexcept -> void
 	{
-		DirectXCompositionWindow::BeginDraw();
-
-		auto graphics = GetGraphics();
-
-		graphics.Clear(Colors::Transparent);
-
-		graphics.PushLayer(D2D::LayerParameters{
-			InfiniteRect<float>(),
-			D2D::AntiAliasingMode::PerPrimitive,
-			D2D::LayerOptions::None,
-			D2D::D2DGeometry<>{ clip }
-		});
-	}
-
-	auto UIComponent::EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG>
-	{
-		auto graphics = GetGraphics();
-		graphics.PopLayer();
-
-		return DirectXCompositionWindow::EndDraw();
-	}
-
-	auto UIComponent::AdjustClip() noexcept -> void
-	{
-		if (!adjustClipOnSize)
+		if (bounds == rect)
 		{
 			return;
 		}
 
-		auto& clipParams = clip.GetParameters();
+		const auto oldBounds = bounds;
+		bounds = rect;
+		if (adjustClipOnSize && oldBounds.Size() != bounds.Size())
+		{
+			AdjustClip();
+		}
+		boundsChanged.Invoke(oldBounds, bounds);
+	}
 
-		const RectF clientRect = GetClientRect();
-
-		if (std::holds_alternative<EllipseClipParameters>(clipParams))
+	auto UIComponent::AdjustClip() noexcept -> void
+	{
+		if (auto& clipParams = clip.GetParameters();
+			std::holds_alternative<EllipseClipParameters>(clipParams))
 		{
 			EllipseClipParameters& params = std::get<EllipseClipParameters>(clipParams);
-			params.ellipse.center = clientRect.Center();
+			params.ellipse.center = bounds.Center();
 		}
 		else if (std::holds_alternative<RectangleClipParameters>(clipParams))
 		{
 			RectangleClipParameters& params = std::get<RectangleClipParameters>(clipParams);
-			params.rect = clientRect;
+			params.rect = bounds;
 		}
 		else if (std::holds_alternative<RoundedRectangleClipParameters>(clipParams))
 		{
 			RoundedRectangleClipParameters& params = std::get<RoundedRectangleClipParameters>(clipParams);
-			params.rect.left = clientRect.left;
-			params.rect.top = clientRect.top;
-			params.rect.right = clientRect.right;
-			params.rect.bottom = clientRect.bottom;
+			params.rect.left = bounds.left;
+			params.rect.top = bounds.top;
+			params.rect.right = bounds.right;
+			params.rect.bottom = bounds.bottom;
 		}
 		else if (std::holds_alternative<RoundCornerClipParameters>(clipParams))
 		{
 			RoundCornerClipParameters& params = std::get<RoundCornerClipParameters>(clipParams);
-			params.rect = clientRect;
+			params.rect = bounds;
 		}
 
 		clip.CreateClip();
-	}
-
-	auto UIComponent::OnCreate(
-		UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult
-	{
-		DisableInput();
-
-		return 0;
-	}
-
-	auto UIComponent::OnNcHitTest(
-		const UINT msg, const WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult
-	{
-		const auto defResult = DefWindowProcW(Hwnd(), msg, wParam, lParam);
-
-		if (!hitTestClip || defResult != HTCLIENT || !clip.GetGeometry().IsInitialized())
-		{
-			return defResult;
-		}
-
-		const PointL point = ScreenToClient(MAKEPOINTS(lParam));
-
-		if (const auto contains = clip.GetGeometry().FillContainsPoint(point);
-			!contains)
-		{
-			return { HTTRANSPARENT, MessageHandlerReturnFlags::ForceThisResult };
-		}
-
-		return defResult;
-	}
-
-	auto UIComponent::OnSize(
-		UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
-	{
-		AdjustClip();
-
-		return 0;
 	}
 }

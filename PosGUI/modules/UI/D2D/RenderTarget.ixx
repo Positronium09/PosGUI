@@ -77,8 +77,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size))
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
+;
 				Logger::Error(error, L"Cannot create bitmap");
 				return Unexpected{ error };
 			}
@@ -89,8 +88,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size))
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
+;
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}
@@ -111,8 +109,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size))
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
+;
 				Logger::Error(error, L"Cannot create bitmap");
 				return Unexpected{ error };
 			}
@@ -123,8 +120,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size))
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
+;
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}
@@ -143,9 +139,6 @@ export namespace PGUI::UI::D2D
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
 				Logger::Error(error, L"Cannot create bitmap from source {}");
 				return Unexpected{ error };
 			}
@@ -154,9 +147,6 @@ export namespace PGUI::UI::D2D
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface {}");
 				return Unexpected{ error };
 			}
@@ -171,9 +161,6 @@ export namespace PGUI::UI::D2D
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
 				Logger::Error(error, L"Cannot create bitmap from source {}");
 				return Unexpected{ error };
 			}
@@ -182,9 +169,6 @@ export namespace PGUI::UI::D2D
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddTag(ErrorTags::D2D)
-					.AddTag(ErrorTags::Creation);
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface {}");
 				return Unexpected{ error };
 			}
@@ -201,7 +185,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size))
-					.AddTag(ErrorTags::Creation);
+;
 				Logger::Error(error, L"Cannot create layer {}");
 				return Unexpected{ error };
 			}

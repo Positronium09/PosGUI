@@ -1,5 +1,5 @@
 module;
-#include <d2d1_3.h>
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 export module PGUI.UI.UIComponent;
@@ -7,52 +7,113 @@ export module PGUI.UI.UIComponent;
 import std;
 
 import PGUI.Window;
+import PGUI.Event;
+import PGUI.Shape2D;
 import PGUI.WindowClass;
 import PGUI.UI.Clip;
 import PGUI.UI.DirectXCompositionWindow;
 
 export namespace PGUI::UI
 {
-	class UIComponent : public DirectXCompositionWindow
+	class UIComponent;
+
+	template <typename T>
+	concept UIComponentType = std::derived_from<T, UIComponent>;
+
+	template<UIComponentType T = UIComponent>
+	using UIComponentPtr = std::shared_ptr<T>;
+	template<UIComponentType T = UIComponent>
+	using RawUIComponentPtr = T*;
+	template<UIComponentType T = UIComponent>
+	using CRawUIComponentPtr = const T*;
+
+	enum class UIComponentState
+	{
+		Hidden = 1 << 0,
+		Visible = 1 << 1,
+		Normal = 1 << 2,
+		Hovered = 1 << 3,
+		Focused = 1 << 4,
+		Pressed = 1 << 5,
+		Disabled = 1 << 6
+	};
+	DEFINE_ENUM_FLAG_OPERATORS(UIComponentState);
+
+	using ZIndex = int;
+	namespace ZIndices
+	{
+		constexpr auto Background = -1000;
+		constexpr auto Normal = 0;
+		constexpr auto Elevated = 100;
+		constexpr auto Floating = 500;
+		constexpr auto Modal = 1000;
+		constexpr auto Tooltip = 2000;
+		constexpr auto Notification = 5000;
+		constexpr auto Debug = 10000;
+	}
+
+	class UIComponent
 	{
 		public:
-		UIComponent();
+#pragma region Events
 
-		explicit UIComponent(const WindowClassPtr& wndClass);
+		EventSRWM<> clipChanged;
+		EventSRWM<const RectF&, const RectF&> boundsChanged;
+		EventSRWM<PointF> clickedEvent;
+
+#pragma endregion
+
+		explicit UIComponent(RectF bounds);
+
+		virtual ~UIComponent() = default;
+
+		#pragma region Properties
 
 		auto SetClip(const ClipParameters& params) noexcept -> void;
-
+		[[nodiscard]] const auto& GetClip() const noexcept { return clip; }
 		auto ClearClip() noexcept -> void;
 
-		[[nodiscard]] const auto& GetClip() const noexcept { return clip; }
+		auto SetHitTestClipGeometry(const bool enable) noexcept -> void { hitTestClip = enable; }
+		[[nodiscard]] auto GetHitTestClipGeometryEnabled() const noexcept { return hitTestClip; }
 
-		auto HitTestClipGeometry(const bool enable) noexcept -> void { hitTestClip = enable; }
-		[[nodiscard]] auto IsHitTestClipGeometryEnabled() const noexcept { return hitTestClip; }
+		auto SetAdjustClipOnSize(const bool enable) noexcept -> void { adjustClipOnSize = enable; }
+		[[nodiscard]] auto GetAdjustClipOnSizeEnabled() const noexcept { return adjustClipOnSize; }
 
-		auto AdjustClipOnSize(const bool enable) noexcept -> void { adjustClipOnSize = enable; }
-		[[nodiscard]] auto IsAdjustClipOnSizeEnabled() const noexcept { return adjustClipOnSize; }
+		auto SetBounds(const RectF& rect) noexcept -> void;
+		[[nodiscard]] auto GetBounds() const noexcept { return bounds; }
+
+		auto Move(const PointF point) noexcept -> void
+		{
+			SetBounds(RectF{ point, bounds.Size() });
+		}
+		auto Resize(const SizeF size) noexcept -> void
+		{
+			SetBounds(RectF{ bounds.TopLeft(), size });
+		}
+		auto MoveAndResize(const RectF rect) noexcept -> void
+		{
+			SetBounds(rect);
+		}
+		auto MoveAndResize(const PointF point, const SizeF size) noexcept -> void
+		{
+			SetBounds(RectF{ point, size });
+		}
+		[[nodiscard]] auto GetPosition() const noexcept { return bounds.TopLeft(); }
+		[[nodiscard]] auto GetSize() const noexcept { return bounds.Size(); }
+
+		#pragma endregion
 
 		protected:
-		auto BeginDraw() -> void override;
-
-		auto EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG> override;
-
-		virtual auto OnClipChanged() -> void
-		{
-			/* */
-		}
-
 		auto AdjustClip() noexcept -> void;
 
 		private:
 		Clip clip;
-		bool adjustClipOnSize = true;
+		RectF bounds;
+		ZIndex zIndex = ZIndices::Normal;
+		RawUIComponentPtr<> parent = nullptr;
+		std::vector<UIComponentPtr<>> children;
 		bool hitTestClip = true;
-
-		[[nodiscard]] auto OnCreate(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
-
-		[[nodiscard]] auto OnNcHitTest(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
-
-		auto OnSize(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+		bool adjustClipOnSize = true;
+		UIComponentState state = UIComponentState::Normal | UIComponentState::Visible;
 	};
 }

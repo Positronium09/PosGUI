@@ -89,10 +89,7 @@ export namespace PGUI::UI
 
 			if (window->Hwnd() == NULL)
 			{
-				Error error{ GetLastError() };
-				error
-					.AddTag(ErrorTags::Window)
-					.AddTag(ErrorTags::Creation);
+				const Error error{ GetLastError() };
 				Logger::Critical(error, L"Dialog creation failed");
 				throw Exception{ error };
 			}

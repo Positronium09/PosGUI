@@ -18,11 +18,11 @@ export namespace PGUI::Factories
 
 		WICFactory(const WICFactory&) = delete;
 
-		auto operator=(const WICFactory&) -> WICFactory& = delete;
+		auto operator=(const WICFactory&) -> WICFactory & = delete;
 
 		WICFactory(WICFactory&&) = delete;
 
-		auto operator=(WICFactory&&) -> WICFactory& = delete;
+		auto operator=(WICFactory&&) -> WICFactory & = delete;
 
 		~WICFactory() = default;
 
@@ -35,11 +35,10 @@ export namespace PGUI::Factories
 					nullptr,
 					CLSCTX_INPROC_SERVER,
 					__uuidof(IWICImagingFactory2),
-					std::bit_cast<void**>(factory.GetAddressOf())); 
+					std::bit_cast<void**>(factory.GetAddressOf()));
 					FAILED(hr))
 				{
-					Error error{ hr };
-					error.AddTag(ErrorTags::Initialization);
+					const Error error{ hr };
 					Logger::Critical(error, L"Failed to create WIC factory");
 					throw Exception{ error };
 				}

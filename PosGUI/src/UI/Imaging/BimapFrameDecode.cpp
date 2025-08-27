@@ -26,7 +26,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get metadata query reader");
 			return Unexpected{ error };
 		}
@@ -42,7 +41,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get thumbnail");
 			return Unexpected{ error };
 		}
@@ -58,7 +56,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get color contexts");
 			return Unexpected{ error };
 		}

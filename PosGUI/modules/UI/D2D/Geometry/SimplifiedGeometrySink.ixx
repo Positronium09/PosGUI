@@ -42,7 +42,6 @@ export namespace PGUI::UI::D2D
 		auto Close() noexcept -> Error
 		{
 			Error error{ this->Get()->Close() };
-			error.AddTag(ErrorTags::D2D);
 			LogIfFailed(error, L"Failed to close the sink");
 			return error;
 		}

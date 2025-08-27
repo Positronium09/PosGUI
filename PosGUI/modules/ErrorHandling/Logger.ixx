@@ -6,7 +6,7 @@ export module PGUI.ErrorHandling:Logger;
 import std;
 
 import :Error;
-import :Tags;
+import :ErrorCodes;
 import :Exception;
 
 export namespace PGUI
@@ -81,8 +81,6 @@ export namespace PGUI
 			if (!file)
 			{
 				throw Exception{ std::errc::no_such_file_or_directory }
-				.AddTag(ErrorTags::Initialization)
-				.AddTag(ErrorTags::Logging)
 				.AddDetail(L"filePath", filePath.wstring());
 			}
 		}
@@ -152,10 +150,9 @@ export namespace PGUI
 			{
 				throw Exception{ E_POINTER }
 					.SuggestFix(L"Set logger before using")
-					.AddTag(ErrorTags::Logging)
 					.AddDetail(L"message", message)
 					.AddDetail(L"logLevel", LogLevelToString(logLevel));
-			};
+			}
 
 			logSink.value().get().Log(logLevel, message);
 		}
@@ -166,7 +163,7 @@ export namespace PGUI
 
 		template <typename ...Args>
 		static auto Log(
-			const LogLevel logLevel, 
+			const LogLevel logLevel,
 			const std::wformat_string<Args...> formatString,
 			Args&&... args)
 		{
@@ -185,12 +182,12 @@ export namespace PGUI
 			if (message.empty())
 			{
 				// ReSharper disable once StringLiteralTypo
-				Log(logLevel, std::format(L"{:cmsdfg}", error));
+				Log(logLevel, std::format(L"{:cmsdfx}", error));
 				return;
 			}
 
 			// ReSharper disable once StringLiteralTypo
-			Log(logLevel, std::format(L"Message: {} | {:cmsdfg}", message, error));
+			Log(logLevel, std::format(L"Message: {} | {:cmsdfx}", message, error));
 		}
 		static auto Log(const Error& error, const std::wstring_view message = L"")
 		{
@@ -287,9 +284,9 @@ export namespace PGUI
 		static inline auto defaultLogLevel =
 			#ifdef _DEBUG
 			LogLevel::Debug;
-			#else
+		#else
 			LogLevel::Info;
-			#endif
+		#endif
 	};
 
 	auto LogIfFailed(const Error& error, const std::wstring_view message = L"")

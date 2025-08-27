@@ -1,7 +1,7 @@
 module;
 #include <Windows.h>
 
-export module PGUI.Window:DpiScaled;
+export module PGUI.DpiScaled;
 
 import std;
 

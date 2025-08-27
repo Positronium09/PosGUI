@@ -30,9 +30,6 @@
     <ClCompile Include="modules\Shape2D\Shape2D.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Window\WindowImpl.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -450,9 +447,6 @@
     <ClCompile Include="modules\UI\Animation\AnimationInterface.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Window\WindowInterface.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\Window.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -489,7 +483,7 @@
     <ClCompile Include="modules\ErrorHandling\Error.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ErrorHandling\Tags.ixx">
+    <ClCompile Include="modules\ErrorHandling\ErrorCodes.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ScopedTimer.ixx">
@@ -510,13 +504,28 @@
     <ClCompile Include="modules\Mutex\KMutex.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Window\DpiScaled.ixx">
+    <ClCompile Include="modules\DpiScaled.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Layout\DockLayout.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\UI\Layout\DockLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\Animation\AnimationTimerEventHandler.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\Animation\Animated.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\UIWindow.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\UIWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Utils\EnumUtils.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

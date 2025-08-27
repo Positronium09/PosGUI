@@ -11,13 +11,6 @@ import PGUI.ComPtr;
 import PGUI.UI.D2D.D2DGeometry;
 import PGUI.UI.D2D.D2DPathGeometry;
 
-namespace PGUI
-{
-	class Window;
-	template <typename T>
-	using WindowPtr = std::shared_ptr<T>;
-}
-
 export namespace PGUI::UI
 {
 	struct RectangleClip : ComPtrHolder<ID2D1RectangleGeometry>

@@ -25,7 +25,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get container format");
 			return Unexpected{ error };
 		}
@@ -41,8 +40,7 @@ namespace PGUI::UI::Imaging
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Name", name)
-				.AddTag(ErrorTags::Imaging);
+				.AddDetail(L"Name", name);
 			Logger::Error(error, L"Failed to get metadata for name: {}");
 			return Unexpected{ error };
 		}
@@ -57,7 +55,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get location length");
 			return Unexpected{ error };
 		}
@@ -78,7 +75,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get metadata enumerator");
 			return Unexpected{ error };
 		}

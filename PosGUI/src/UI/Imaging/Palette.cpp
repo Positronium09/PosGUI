@@ -20,9 +20,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreatePalette(GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation),
+			Logger::Error(Error{ hr },
 			              L"Failed to create palette");
 		}
 	}
@@ -38,9 +36,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreatePalette(GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation),
+			Logger::Error(Error{ hr },
 			              L"Failed to create palette");
 			return;
 		}
@@ -50,9 +46,7 @@ namespace PGUI::UI::Imaging
 				addTransparentColor);
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation),
+			Logger::Error(Error{ hr },
 			              L"Failed to initialize palette from bitmap");
 		}
 	}
@@ -64,9 +58,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreatePalette(GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation),
+			Logger::Error(Error{ hr },
 			              L"Failed to create palette");
 		}
 
@@ -77,9 +69,7 @@ namespace PGUI::UI::Imaging
 				static_cast<UINT>(wicColors.size()));
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Imaging)
-			              .AddTag(ErrorTags::Creation),
+			Logger::Error(Error{ hr },
 			              L"Failed to initialize palette from colors");
 		}
 	}
@@ -91,7 +81,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get palette type");
 			return Unexpected{ error };
 		}
@@ -106,7 +95,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to get color count");
 			return Unexpected{ error };
 		}
@@ -124,7 +112,6 @@ namespace PGUI::UI::Imaging
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Failed to get colors from palette");
 				return Unexpected{ error };
 			}
@@ -143,7 +130,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to check black and white");
 			return Unexpected{ error };
 		}
@@ -158,7 +144,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to check grayscale");
 			return Unexpected{ error };
 		}
@@ -173,7 +158,6 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Imaging);
 			Logger::Error(error, L"Failed to check alpha channel presence");
 			return Unexpected{ error };
 		}

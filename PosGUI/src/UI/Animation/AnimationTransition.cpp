@@ -24,7 +24,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get dimension of animation transition");
 			return Unexpected{ error };
 		}
@@ -39,7 +38,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get duration of animation transition");
 			return Unexpected{ error };
 		}
@@ -57,7 +55,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetInitialValue(value)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set initial value");
 		return error;
 	}
@@ -69,7 +66,6 @@ namespace PGUI::UI::Animation
 				values.data(),
 				static_cast<UINT>(values.size()))
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set initial vector value");
 		return error;
 	}
@@ -79,7 +75,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetInitialVelocity(velocity)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set initial velocity");
 		return error;
 	}
@@ -91,7 +86,6 @@ namespace PGUI::UI::Animation
 				velocities.data(),
 				static_cast<UINT>(velocities.size()))
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set initial vector velocity");
 		return error;
 	}

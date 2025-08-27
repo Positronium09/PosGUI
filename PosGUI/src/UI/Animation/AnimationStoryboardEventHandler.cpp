@@ -48,7 +48,7 @@ namespace PGUI::UI::Animation
 
 	auto __stdcall AnimationStoryboardEventHandlerRouter::Release() -> ULONG
 	{
-		auto refCount = InterlockedDecrement(&referenceCount);
+		const auto refCount = InterlockedDecrement(&referenceCount);
 		if (0 == refCount)
 		{
 			delete this;

@@ -227,7 +227,7 @@ namespace PGUI::UI
 		LogIfFailed(
 			LogLevel::Info,
 			Error{ hr }
-			.AddTag(ErrorTags::Creation),
+			,
 			L"Given pointer is not a SolidColorBrush"
 		);
 
@@ -243,7 +243,7 @@ namespace PGUI::UI
 		LogIfFailed(
 			LogLevel::Info,
 			Error{ hr }
-			.AddTag(ErrorTags::Creation),
+			,
 			L"Given pointer is not a LinearGradientBrush"
 		);
 
@@ -259,7 +259,7 @@ namespace PGUI::UI
 		LogIfFailed(
 			LogLevel::Info,
 			Error{ hr }
-			.AddTag(ErrorTags::Creation),
+			,
 			L"Given pointer is not a RadialGradientBrush"
 		);
 
@@ -275,7 +275,7 @@ namespace PGUI::UI
 		LogIfFailed(
 			LogLevel::Info,
 			Error{ hr }
-			.AddTag(ErrorTags::Creation),
+			,
 			L"Given pointer is not a BitmapBrush"
 		);
 
@@ -292,7 +292,6 @@ namespace PGUI::UI
 			brush = BitmapBrush{ bitmapBrush };
 
 			return;
-			
 		}
 
 		brush = EmptyBrush{ };

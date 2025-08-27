@@ -10,3 +10,4 @@ export import :AnimationVariable;
 export import :AnimationManagerEventHandler;
 export import :AnimationStoryboardEventHandler;
 export import :AnimationVariableChangeEventHandler;
+export import :Animated;

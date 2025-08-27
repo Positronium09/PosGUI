@@ -30,9 +30,7 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr }
-			              .AddDetail(L"Size", std::format(L"{}", size))
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			              .AddDetail(L"Size", std::format(L"{}", size)),
 			              L"Failed to create WICBitmap");
 		}
 	}
@@ -49,9 +47,7 @@ namespace PGUI::UI::Imaging
 			GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			Logger::Error(Error{ hr },
 			              L"Failed to create WICBitmap from HBITMAP");
 		}
 	}
@@ -63,9 +59,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreateBitmapFromHICON(hIcon, GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			Logger::Error(Error{ hr },
 			              L"Failed to create WICBitmap from HICON");
 		}
 	}
@@ -79,9 +73,7 @@ namespace PGUI::UI::Imaging
 			GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			Logger::Error(Error{ hr },
 			              L"Failed to create WICBitmap from BitmapSource");
 		}
 	}
@@ -97,9 +89,7 @@ namespace PGUI::UI::Imaging
 			GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              .AddTag(ErrorTags::Creation)
-			              .AddTag(ErrorTags::Imaging),
+			Logger::Error(Error{ hr },
 			              L"Failed to create WICBitmap from BitmapSource");
 		}
 	}
@@ -114,8 +104,7 @@ namespace PGUI::UI::Imaging
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Rect", std::format(L"{}", rect))
-				.AddTag(ErrorTags::Imaging);
+				.AddDetail(L"Rect", std::format(L"{}", rect));
 			Logger::Error(error, L"Failed to lock WICBitmap");
 			return Unexpected{ error };
 		}
@@ -128,7 +117,6 @@ namespace PGUI::UI::Imaging
 		Error error{
 			Get()->SetPalette(palette.GetRaw())
 		};
-		error.AddTag(ErrorTags::Imaging);
 		LogIfFailed(error, L"Failed to set palette for WICBitmap");
 		return error;
 	}
@@ -140,8 +128,7 @@ namespace PGUI::UI::Imaging
 		};
 		error
 			.AddDetail(L"DPI X", std::to_wstring(dpiX))
-			.AddDetail(L"DPI Y", std::to_wstring(dpiY))
-			.AddTag(ErrorTags::Imaging);
+			.AddDetail(L"DPI Y", std::to_wstring(dpiY));
 		LogIfFailed(error, L"Failed to set resolution for WICBitmap");
 		return error;
 	}

@@ -24,7 +24,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get current storyboard for animation variable");
 			return Unexpected{ error };
 		}
@@ -39,7 +38,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get dimension of animation variable");
 			return Unexpected{ error };
 		}
@@ -54,7 +52,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get previous integer value of animation variable");
 			return Unexpected{ error };
 		}
@@ -72,7 +69,6 @@ namespace PGUI::UI::Animation
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Animation);
 				Logger::Error(error, L"Failed to get previous integer vector value of animation variable");
 				return Unexpected{ error };
 			}
@@ -88,7 +84,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get integer value of animation variable");
 			return Unexpected{ error };
 		}
@@ -106,9 +101,7 @@ namespace PGUI::UI::Animation
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Dimension", std::to_wstring(dim))
-					.AddTag(ErrorTags::Animation);
+				error.AddDetail(L"Dimension", std::to_wstring(dim));
 				Logger::Error(error, L"Failed to get integer vector value of animation variable");
 				return Unexpected{ error };
 			}
@@ -123,7 +116,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get final integer value of animation variable");
 			return Unexpected{ error };
 		}
@@ -141,9 +133,7 @@ namespace PGUI::UI::Animation
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Dimension", std::to_wstring(dim))
-					.AddTag(ErrorTags::Animation);
+				error.AddDetail(L"Dimension", std::to_wstring(dim));
 				Logger::Error(error, L"Failed to get final integer vector value of animation variable");
 				return Unexpected{ error };
 			}
@@ -158,7 +148,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get previous value of animation variable");
 			return Unexpected{ error };
 		}
@@ -176,9 +165,7 @@ namespace PGUI::UI::Animation
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Dimension", std::to_wstring(dim))
-					.AddTag(ErrorTags::Animation);
+				error.AddDetail(L"Dimension", std::to_wstring(dim));
 				Logger::Error(error, L"Failed to get previous vector value of animation variable");
 				return Unexpected{ error };
 			}
@@ -193,7 +180,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get value of animation variable");
 			return Unexpected{ error };
 		}
@@ -211,9 +197,7 @@ namespace PGUI::UI::Animation
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Dimension", std::to_wstring(dim))
-					.AddTag(ErrorTags::Animation);
+				error.AddDetail(L"Dimension", std::to_wstring(dim));
 				Logger::Error(error, L"Failed to get vector value of animation variable");
 				return Unexpected{ error };
 			}
@@ -228,7 +212,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get final value of animation variable");
 			return Unexpected{ error };
 		}
@@ -246,9 +229,7 @@ namespace PGUI::UI::Animation
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Dimension", std::to_wstring(dim))
-					.AddTag(ErrorTags::Animation);
+				error.AddDetail(L"Dimension", std::to_wstring(dim));
 				Logger::Error(error, L"Failed to get final vector value of animation variable");
 				return Unexpected{ error };
 			}
@@ -261,7 +242,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetLowerBound(bound)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set lower bound");
 		return error;
 	}
@@ -273,7 +253,6 @@ namespace PGUI::UI::Animation
 				bounds.data(),
 				static_cast<UINT>(bounds.size()))
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set lower bound vector");
 		return error;
 	}
@@ -283,7 +262,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetUpperBound(bound)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set upper bound");
 		return error;
 	}
@@ -295,7 +273,6 @@ namespace PGUI::UI::Animation
 				bounds.data(),
 				static_cast<UINT>(bounds.size()))
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set upper bound vector");
 		return error;
 	}
@@ -306,7 +283,6 @@ namespace PGUI::UI::Animation
 			Get()->SetRoundingMode(
 				static_cast<UI_ANIMATION_ROUNDING_MODE>(mode))
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set rounding mode");
 		return error;
 	}
@@ -316,7 +292,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetTag(obj.Get(), id)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Failed to set tag");
 		return error;
 	}
@@ -329,7 +304,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to get tag");
 			return Unexpected{ error };
 		}
@@ -349,7 +323,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to set variable change handler");
 			return error;
 		}
@@ -360,12 +333,11 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to set variable integer change handler");
 			return error;
 		}
 
-		return Error{ S_OK }.AddTag(ErrorTags::Animation);
+		return Error{ GeneralErrorCodes::Success };
 	}
 
 	auto AnimationVariable::ClearVariableChangeHandler(const bool registerForNext) const noexcept -> Error
@@ -376,7 +348,6 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to clear variable change handler");
 			return error;
 		}
@@ -385,11 +356,10 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(error, L"Failed to clear variable integer change handler");
 			return error;
 		}
 
-		return Error{ S_OK }.AddTag(ErrorTags::Animation);
+		return Error{ GeneralErrorCodes::Success };
 	}
 }

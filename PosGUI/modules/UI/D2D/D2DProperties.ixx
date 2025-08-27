@@ -76,7 +76,7 @@ export namespace PGUI::UI::D2D
 					.AddDetail(L"sizeof T", std::to_wstring(sizeof(T)))
 					.AddDetail(L"T", StringToWString(typeid(T).name()))
 					.AddDetail(L"Size of value at index", std::to_wstring(size))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Property size mismatch");
 
 				return Unexpected{ error };
@@ -90,7 +90,7 @@ export namespace PGUI::UI::D2D
 					.AddDetail(L"Index", std::to_wstring(index))
 					.AddDetail(L"sizeof T", std::to_wstring(sizeof(T)))
 					.AddDetail(L"T", StringToWString(typeid(T).name()))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property value");
 				return Unexpected{ error };
 			}
@@ -107,7 +107,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 				.AddDetail(L"Name", name)
-				.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property index with given name");
 				return Unexpected{ error };
 			}
@@ -125,7 +125,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Property type mismatch");
 				return Unexpected{ error };
 			}
@@ -136,7 +136,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property value");
 				return Unexpected{ error };
 			}
@@ -153,7 +153,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Name", name)
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property index with given name");
 				return Unexpected{ error };
 			}
@@ -171,7 +171,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Property type mismatch");
 				return Unexpected{ error };
 			}
@@ -182,7 +182,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property value");
 				return Unexpected{ error };
 			}
@@ -198,7 +198,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Name", name)
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property index with given name");
 				return Unexpected{ error };
 			}
@@ -215,7 +215,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Property type mismatch");
 				return Unexpected{ error };
 			}
@@ -226,7 +226,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property value");
 				return Unexpected{ error };
 			}
@@ -242,7 +242,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Name", name)
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property index with given name");
 				return Unexpected{ error };
 			}
@@ -259,7 +259,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Property type mismatch");
 				return Unexpected{ error };
 			}
@@ -270,7 +270,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property value");
 				return Unexpected{ error };
 			}
@@ -286,7 +286,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Name", name)
-					.AddTag(ErrorTags::D2D);
+;
 				Logger::Error(error, L"Cannot get property index with given name");
 				return Unexpected{ error };
 			}
@@ -302,7 +302,7 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Index", std::to_wstring(index))
-					.AddTag(ErrorTags::D2D);
+;
 				if constexpr (std::formattable<T, wchar_t>)
 				{
 					error.AddDetail(L"Value", std::format(L"{}", value));
@@ -326,7 +326,7 @@ export namespace PGUI::UI::D2D
 				Error error{ E_INVALIDARG };
 				error
 					.AddDetail(L"Name", name)
-					.AddTag(ErrorTags::D2D);
+;
 				if constexpr (std::formattable<T, wchar_t>)
 				{
 					error.AddDetail(L"Value", std::format(L"{}", value));

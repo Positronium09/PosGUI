@@ -128,8 +128,7 @@ namespace PGUI::UI::Layout
 	{
 		if (index >= columnDefinitions.size())
 		{
-			return Error{ E_INVALIDARG }
-				.AddTag(ErrorTags::STL);
+			return Error{ E_INVALIDARG };
 		}
 
 		if (columnDefinitions.size() == 1)
@@ -150,8 +149,7 @@ namespace PGUI::UI::Layout
 	{
 		if (index >= rowDefinitions.size())
 		{
-			return Error{ E_INVALIDARG }
-				.AddTag(ErrorTags::STL);
+			return Error{ E_INVALIDARG };
 		}
 
 		rowDefinitions.erase(
@@ -314,32 +312,32 @@ namespace PGUI::UI::Layout
 		std::vector<long> columnSizes = GetColumnSizes(maxDefinedColumn + 1);
 
 		const auto placeFixedPosition = [&occupiedPositions, &rowSizes, &columnSizes, this](
-				const long row, const long column,
-				const long rowSpan, const long columnSpan) -> RectL
-			{
-				const PointL position{
-					std::accumulate(
-						columnSizes.begin(), columnSizes.begin() + column,
-						0L) + column * columnGap + padding.left,
-					std::accumulate(
-						rowSizes.begin(), rowSizes.begin() + row,
-						0L) + row * rowGap + padding.top
-				};
-				const SizeL size{
-					std::accumulate(
-						columnSizes.begin() + column,
-						columnSizes.begin() + column + columnSpan,
-						0L) + (columnSpan - 1) * columnGap,
-					std::accumulate(
-						rowSizes.begin() + row,
-						rowSizes.begin() + row + rowSpan,
-						0L) + (rowSpan - 1) * rowGap
-				};
-
-				OccupySet(occupiedPositions, row, column, rowSpan, columnSpan);
-
-				return RectL{ position, size };
+			const long row, const long column,
+			const long rowSpan, const long columnSpan) -> RectL
+		{
+			const PointL position{
+				std::accumulate(
+					columnSizes.begin(), columnSizes.begin() + column,
+					0L) + column * columnGap + padding.left,
+				std::accumulate(
+					rowSizes.begin(), rowSizes.begin() + row,
+					0L) + row * rowGap + padding.top
 			};
+			const SizeL size{
+				std::accumulate(
+					columnSizes.begin() + column,
+					columnSizes.begin() + column + columnSpan,
+					0L) + (columnSpan - 1) * columnGap,
+				std::accumulate(
+					rowSizes.begin() + row,
+					rowSizes.begin() + row + rowSpan,
+					0L) + (rowSpan - 1) * rowGap
+			};
+
+			OccupySet(occupiedPositions, row, column, rowSpan, columnSpan);
+
+			return RectL{ position, size };
+		};
 
 		for (const auto& [id, positions] : itemPositions)
 		{

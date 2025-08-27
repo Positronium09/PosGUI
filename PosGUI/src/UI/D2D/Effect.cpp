@@ -51,8 +51,7 @@ namespace PGUI::UI::D2D
 	{
 		Error error{ Get()->SetInputCount(count) };
 		error
-			.AddDetail(L"Count", std::to_wstring(count))
-			.AddTag(ErrorTags::D2D);
+			.AddDetail(L"Count", std::to_wstring(count));
 		LogIfFailed(error, L"Failed to set input count");
 		return error;
 	}

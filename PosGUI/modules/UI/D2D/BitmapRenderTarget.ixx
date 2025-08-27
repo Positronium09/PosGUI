@@ -21,7 +21,8 @@ export namespace PGUI::UI::D2D
 
 		explicit(false) BitmapRenderTarget(const ComPtr<ID2D1BitmapRenderTarget>& renderTarget) noexcept :
 			RenderTarget{ renderTarget }
-		{ }
+		{
+		}
 
 		explicit BitmapRenderTarget(RenderTarget<> renderTarget) noexcept
 		{
@@ -30,8 +31,7 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Logger::Error(
-					Error{ hr }
-					.AddTag(ErrorTags::D2D),
+					Error{ hr },
 					L"Failed to create compatible render target");
 				return;
 			}
@@ -61,13 +61,12 @@ export namespace PGUI::UI::D2D
 				return;
 			}
 
-			
+
 			if (const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(size, &bitmapRenderTarget);
 				FAILED(hr))
 			{
 				Logger::Error(
-					Error{ hr }
-					.AddTag(ErrorTags::D2D),
+					Error{ hr },
 					L"Failed to create compatible render target");
 				return;
 			}
@@ -76,12 +75,12 @@ export namespace PGUI::UI::D2D
 		}
 
 		BitmapRenderTarget(RenderTarget<> renderTarget, const SizeF size, const SizeU pixelSize,
-		                   const D2D1_PIXEL_FORMAT pixelFormat = {
-			                   .format = DXGI_FORMAT_UNKNOWN,
-			                   .alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
-		                   },
-		                   const D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS compatibleRenderTargetOptions =
-			                   D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE) noexcept
+			const D2D1_PIXEL_FORMAT pixelFormat = {
+				.format = DXGI_FORMAT_UNKNOWN,
+				.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
+			},
+			const D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS compatibleRenderTargetOptions =
+			D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE) noexcept
 		{
 			ComPtr<ID2D1BitmapRenderTarget> bitmapRenderTarget;
 			const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(
@@ -93,8 +92,7 @@ export namespace PGUI::UI::D2D
 				Logger::Error(
 					Error{ hr }
 					.AddDetail(L"Size", std::format(L"{}", size))
-					.AddDetail(L"PixelSize", std::format(L"{}", pixelSize))
-					.AddTag(ErrorTags::D2D),
+					.AddDetail(L"PixelSize", std::format(L"{}", pixelSize)),
 					L"Failed to create compatible render target");
 				return;
 			}
@@ -108,7 +106,6 @@ export namespace PGUI::UI::D2D
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to get bitmap");
 				return Unexpected{ error };
 			}
@@ -118,7 +115,6 @@ export namespace PGUI::UI::D2D
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to cast bitmap to ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}

@@ -54,7 +54,6 @@ namespace PGUI::UI::D2D
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::D2D);
 			Logger::Error(error, L"Cannot get surface");
 			return Unexpected{ error };
 		}
@@ -71,7 +70,6 @@ namespace PGUI::UI::D2D
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::D2D);
 			Logger::Error(error, L"Cannot map bitmap");
 			return Unexpected{ error };
 		}
@@ -83,7 +81,6 @@ namespace PGUI::UI::D2D
 	{
 		const auto hr = Get()->Unmap();
 		Error error{ hr };
-		error.AddTag(ErrorTags::D2D);
 		LogIfFailed(error, L"Cannot Unmap");
 		return error;
 	}
@@ -122,8 +119,7 @@ namespace PGUI::UI::D2D
 				                       static_cast<std::uint32_t>(-1),
 				                       static_cast<std::uint32_t>(-1),
 				                       static_cast<std::uint32_t>(-1)
-			                       })))
-			.AddTag(ErrorTags::D2D);
+			                       })));
 		LogIfFailed(error, L"Cannot copy from bitmap");
 		return error;
 	}
@@ -150,8 +146,7 @@ namespace PGUI::UI::D2D
 				                       static_cast<std::uint32_t>(-1),
 				                       static_cast<std::uint32_t>(-1),
 				                       static_cast<std::uint32_t>(-1)
-			                       })))
-			.AddTag(ErrorTags::D2D);
+			                       })));
 		LogIfFailed(error, L"Cannot copy from memory");
 		return error;
 	}

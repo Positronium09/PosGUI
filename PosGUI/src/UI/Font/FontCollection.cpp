@@ -23,8 +23,6 @@ namespace PGUI::UI::Font
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font)
-			     .AddTag(ErrorTags::System);
 			Logger::Error(error, L"Failed to get system font collection.");
 			return Unexpected{ error };
 		}
@@ -39,8 +37,6 @@ namespace PGUI::UI::Font
 			Error error{ E_INVALIDARG };
 			error
 				.AddDetail(L"File Path", filePath.wstring())
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System)
 				.SuggestFix(L"Ensure the file path is correct and the file exists");
 			Logger::Error(error, L"Font file does not exist.");
 			return Unexpected{ error };
@@ -54,9 +50,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"File Path", filePath.wstring())
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
+				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to create font set builder.");
 			return Unexpected{ error };
 		}
@@ -67,9 +61,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"File Path", filePath.wstring())
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
+				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to create font file reference.");
 			return Unexpected{ error };
 		}
@@ -79,9 +71,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"File Path", filePath.wstring())
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
+				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to add font file to font set builder.");
 			return Unexpected{ error };
 		}
@@ -92,9 +82,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"File Path", filePath.wstring())
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
+				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to create font set from builder.");
 			return Unexpected{ error };
 		}
@@ -105,9 +93,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"File Path", filePath.wstring())
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
+				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to create font collection from font set.");
 			return Unexpected{ error };
 		}
@@ -118,9 +104,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"File Path", filePath.wstring())
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
+				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3.");
 			return Unexpected{ error };
 		}
@@ -142,8 +126,7 @@ namespace PGUI::UI::Font
 		const auto hr = ptr->FindFamilyName(fontFamilyName.data(), &result, &exists);
 		LogIfFailed(
 			Error{ hr }
-			.AddDetail(L"fontFamilName", fontFamilyName)
-			.AddTag(ErrorTags::Font),
+			.AddDetail(L"fontFamilName", fontFamilyName),
 			L"An error occurred while trying to find a font family by name."
 		);
 
@@ -152,7 +135,6 @@ namespace PGUI::UI::Font
 			return Unexpected{
 				Error{ E_FAIL }
 				.AddDetail(L"Font Family Name", fontFamilyName)
-				.AddTag(ErrorTags::Font)
 				.SuggestFix(L"Ensure the font family name is correct and try again")
 			};
 		}
@@ -180,8 +162,7 @@ namespace PGUI::UI::Font
 		{
 			Error error{ hr };
 			error
-				.AddDetail(L"Index", std::to_wstring(index))
-				.AddTag(ErrorTags::Font);
+				.AddDetail(L"Index", std::to_wstring(index));
 			Logger::Error(error, L"Failed to get font family by index.");
 			return Unexpected{ error };
 		}
@@ -199,9 +180,6 @@ namespace PGUI::UI::Font
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
 			Logger::Error(error, L"Failed to get font set.");
 			return Unexpected{ error };
 		}
@@ -211,9 +189,6 @@ namespace PGUI::UI::Font
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error
-				.AddTag(ErrorTags::Font)
-				.AddTag(ErrorTags::System);
 			Logger::Error(error, L"Failed to cast font set to IDWriteFontSet4.");
 			return Unexpected{ error };
 		}

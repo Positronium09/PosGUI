@@ -25,10 +25,7 @@ namespace PGUI::UI::D2D
 		if (const auto hr = factory->CreatePathGeometry(GetAddress());
 			FAILED(hr))
 		{
-			Error error{ hr };
-			error
-				.AddTag(ErrorTags::D2D)
-				.AddTag(ErrorTags::Creation);
+			const Error error{ hr };
 			Logger::Error(error, L"Failed to create D2DPathGeometry");
 		}
 	}
@@ -45,11 +42,10 @@ namespace PGUI::UI::D2D
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::D2D);
 			Logger::Error(error, L"Failed to get figure count");
 			return Unexpected{ error };
 		}
-		
+
 		return count;
 	}
 
@@ -60,7 +56,6 @@ namespace PGUI::UI::D2D
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::D2D);
 			Logger::Error(error, L"Failed to get segment count");
 			return Unexpected{ error };
 		}
@@ -74,7 +69,6 @@ namespace PGUI::UI::D2D
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::D2D);
 			Logger::Error(error, L"Failed to open geometry sink");
 			return Unexpected{ error };
 		}
@@ -86,7 +80,6 @@ namespace PGUI::UI::D2D
 		Error error{
 			Get()->Stream(sink.Get())
 		};
-		error.AddTag(ErrorTags::D2D);
 		LogIfFailed(error, L"Streaming failed");
 		return error;
 	}

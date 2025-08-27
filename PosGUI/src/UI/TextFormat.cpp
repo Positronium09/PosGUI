@@ -110,7 +110,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetFlowDirection(flowDirection)
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set flow direction");
 		return error;
 	}
@@ -120,7 +119,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetIncrementalTabStop(incrementalTabStop)
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set incremental tab stop");
 		return error;
 	}
@@ -130,7 +128,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetParagraphAlignment(paragraphAlignment)
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set paragraph alignment");
 		return error;
 	}
@@ -140,7 +137,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetReadingDirection(readingDirection)
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set reading direction");
 		return error;
 	}
@@ -150,7 +146,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetTextAlignment(textAlignment)
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set text alignment");
 		return error;
 	}
@@ -160,7 +155,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetWordWrapping(wordWrapping)
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set word wrapping");
 		return error;
 	}
@@ -170,7 +164,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetTrimming(&trimming.trimmingOptions, trimming.GetRaw())
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set trimming");
 		return error;
 	}
@@ -180,7 +173,6 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetLineSpacing(&lineSpacing)
 		};
-		error.AddTag(ErrorTags::Font);
 		LogIfFailed(error, L"Cannot set line spacing");
 		return error;
 	}
@@ -199,7 +191,6 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"Failed to get font collection");
 			return Unexpected{ error };
 		}
@@ -208,7 +199,6 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3");
 			return Unexpected{ error };
 		}
@@ -227,7 +217,6 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"Failed to get font family name");
 			return Unexpected{ error };
 		}
@@ -271,7 +260,6 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"Failed to get locale name");
 			return Unexpected{ error };
 		}
@@ -306,7 +294,6 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"Failed to get trimming");
 			return Unexpected{ error };
 		}
@@ -321,7 +308,6 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"Failed to get line spacing");
 			return Unexpected{ error };
 		}

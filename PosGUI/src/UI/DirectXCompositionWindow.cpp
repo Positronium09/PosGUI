@@ -53,8 +53,6 @@ namespace PGUI::UI
 			throw Exception{
 				Error{ hr }
 				.AddDetail(L"Window Size", std::format(L"{}", size))
-				.AddTag(ErrorTags::Window)
-				.AddTag(ErrorTags::DirectX)
 			};
 		}
 
@@ -84,8 +82,7 @@ namespace PGUI::UI
 		else if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"D2D1DeviceContext::EndDraw failed"
 			};
 		}
@@ -94,8 +91,7 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"SwapChain::Present failed"
 			};
 		}
@@ -125,12 +121,10 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot create swap chain"
 			};
 		}
-		
 	}
 
 	auto DirectXCompositionWindow::InitD2D1DeviceContext() -> void
@@ -144,8 +138,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot create D2D1DeviceContext"
 			};
 		}
@@ -155,8 +148,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot get swap chain buffer"
 			};
 		}
@@ -174,8 +166,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot create bitmap from DXGI surface"
 			};
 		}
@@ -195,8 +186,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot create DComposition target for window"
 			};
 		}
@@ -205,8 +195,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot create DComposition visual"
 			};
 		}
@@ -215,8 +204,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot set content for DComposition visual"
 			};
 		}
@@ -225,8 +213,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot set root for DComposition target"
 			};
 		}
@@ -235,8 +222,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX),
+				Error{ hr },
 				L"Cannot commit DComposition device"
 			};
 		}
@@ -279,9 +265,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX)
-				.AddTag(ErrorTags::Initialization),
+				Error{ hr },
 				L"Cannot enumerate DXGI adapters"
 			};
 		}
@@ -318,9 +302,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX)
-				.AddTag(ErrorTags::Initialization),
+				Error{ hr },
 				L"Cannot create D3D11 device"
 			};
 		}
@@ -329,9 +311,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX)
-				.AddTag(ErrorTags::Initialization),
+				Error{ hr },
 				L"Cannot query D3D11Device2 interface"
 			};
 		}
@@ -340,9 +320,7 @@ namespace PGUI::UI
 		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX)
-				.AddTag(ErrorTags::Initialization),
+				Error{ hr },
 				L"Cannot query IDXGIDevice4 interface"
 			};
 		}
@@ -364,9 +342,7 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX)
-				.AddTag(ErrorTags::Initialization),
+				Error{ hr },
 				L"Cannot create DirectComposition device"
 			};
 		}
@@ -388,9 +364,7 @@ namespace PGUI::UI
 			FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::DirectX)
-				.AddTag(ErrorTags::Initialization),
+				Error{ hr },
 				L"Cannot create D2D1 device"
 			};
 		}
@@ -426,8 +400,6 @@ namespace PGUI::UI
 				Error{
 					hr
 				}
-				.AddTag(ErrorTags::Window)
-				.AddTag(ErrorTags::WindowMessage)
 				.AddDetail(L"Window Message", WindowMsgToText(msg)),
 				L"Cannot create IDWriteRenderingParams with CreateMonitorRenderingParams"
 			);

@@ -9,6 +9,7 @@ import std;
 
 import PGUI.Utils;
 import PGUI.ErrorHandling;
+
 // ReSharper disable StringLiteralTypo
 constexpr std::array<std::wstring_view, 1025> messageStrings = {
 	L"WM_NULL",
@@ -1067,7 +1068,7 @@ namespace PGUI
 				localeName.data(), LOCALE_NAME_MAX_LENGTH);
 			ret == 0)
 		{
-			throw Exception{ GetLastError() }.AddTag(ErrorTags::System);
+			throw Exception{ GetLastError() };
 		}
 
 		return localeName;
@@ -1108,8 +1109,6 @@ namespace PGUI
 
 		LogIfFailed(
 			Error{ hr }
-			.AddTag(ErrorTags::Window)
-			.AddTag(ErrorTags::System)
 			.SuggestFix(L"System may not support DWMWA_USE_IMMERSIVE_DARK_MODE (Also tried value 19)")
 		);
 	}

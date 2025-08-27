@@ -18,11 +18,11 @@ export namespace PGUI::Factories
 
 		DXGIFactory(const DXGIFactory&) = delete;
 
-		auto operator=(const DXGIFactory&) -> DXGIFactory& = delete;
+		auto operator=(const DXGIFactory&) -> DXGIFactory & = delete;
 
 		DXGIFactory(DXGIFactory&&) = delete;
 
-		auto operator=(DXGIFactory&&) -> DXGIFactory& = delete;
+		auto operator=(DXGIFactory&&) -> DXGIFactory & = delete;
 
 		~DXGIFactory() = default;
 
@@ -32,9 +32,9 @@ export namespace PGUI::Factories
 			{
 				UINT flags = 0;
 
-#ifdef _DEBUG
+				#ifdef _DEBUG
 				flags = DXGI_CREATE_FACTORY_DEBUG;
-#endif
+				#endif
 
 				if (const auto hr = CreateDXGIFactory2(
 					flags,
@@ -42,8 +42,7 @@ export namespace PGUI::Factories
 					std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
 					FAILED(hr))
 				{
-					Error error{ hr };
-					error.AddTag(ErrorTags::Initialization);
+					const Error error{ hr };
 					Logger::Critical(error, L"Failed to create DXGI factory");
 					throw Exception{ error };
 				}

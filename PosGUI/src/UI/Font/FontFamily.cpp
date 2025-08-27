@@ -23,7 +23,6 @@ namespace PGUI::UI::Font
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"GetFamilyNames failed");
 			return Unexpected{ error };
 		}
@@ -42,7 +41,6 @@ namespace PGUI::UI::Font
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"GetFontSet failed");
 			return Unexpected{ error };
 		}
@@ -51,7 +49,6 @@ namespace PGUI::UI::Font
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Font);
 			Logger::Error(error, L"Cannot get IDWriteFontSet4 interface");
 			return Unexpected{ error };
 		}

@@ -40,7 +40,7 @@ namespace PGUI::UI::Theming
 			throw Exception{
 				Error{
 					static_cast<HRESULT>(error.code().value)
-				}.AddTag(ErrorTags::System)
+				}
 			};
 		}
 	}

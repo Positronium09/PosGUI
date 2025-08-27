@@ -18,9 +18,8 @@ namespace PGUI::UI
 	{ }
 
 	AppWindow::AppWindow(const WindowClassPtr& wndClass) noexcept :
-		DirectXCompositionWindow{ wndClass }
+		UIWindow{ wndClass }
 	{
-		Hook(autoStop);
 		RegisterHandler(WM_NCCREATE, &AppWindow::OnNCCreate);
 		RegisterHandler(WM_SETTEXT, &AppWindow::OnSetText);
 		RegisterHandler(WM_GETTEXT, &AppWindow::OnGetText);
@@ -158,22 +157,6 @@ namespace PGUI::UI
 		RemoveStyle(WS_SIZEBOX);
 	}
 
-	auto AppWindow::SetAutoStopAnimations(const bool enable) noexcept -> void
-	{
-		if (autoStopAnimations == enable)
-		{
-			return;
-		}
-		autoStopAnimations = enable;
-
-		if (autoStopAnimations)
-		{
-			Hook(autoStop);
-			return;
-		}
-		UnHook(autoStop);
-	}
-
 	auto AppWindow::SetBorderColor(const RGBA color) const noexcept -> void
 	{
 		const auto colorRef = color != Colors::Transparent ? static_cast<COLORREF>(color) : DWMWA_COLOR_DEFAULT;
@@ -189,8 +172,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::Window)
-			.AddTag(ErrorTags::System)
 			.SuggestFix(L"Border color change is not supported on Win10")
 		);
 	}
@@ -209,8 +190,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::Window)
-			.AddTag(ErrorTags::System)
 			.SuggestFix(L"Caption color change is not supported on Win10")
 		);
 	}
@@ -229,8 +208,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::Window)
-			.AddTag(ErrorTags::System)
 			.SuggestFix(L"Border color change is not supported on Win10")
 		);
 	}
@@ -249,8 +226,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::Window)
-			.AddTag(ErrorTags::System)
 			.SuggestFix(L"Border color change is not supported on Win10")
 		);
 	}
@@ -295,7 +270,6 @@ namespace PGUI::UI
 			Error{
 				hr
 			}
-			.AddTag(ErrorTags::WindowMessage)
 			.AddDetail(L"New Title Size", std::to_wstring(size))
 			.AddDetail(L"New Title", std::bit_cast<wchar_t*>(lParam)),
 			L"Cannot copy title string"

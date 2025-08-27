@@ -15,39 +15,41 @@ export namespace PGUI::UI::Animation
 	class AnimationManager : public ComPtrHolder<IUIAnimationManager2>
 	{
 		public:
-		[[nodiscard]] static auto GetInstance() -> const AnimationManager&;
+		[[nodiscard]] static auto GetGlobalInstance() -> const AnimationManager&;
 
-		static auto AbandonAllStoryboards() noexcept -> Error;
+		AnimationManager();
 
-		static auto Pause() noexcept -> Error;
+		auto AbandonAllStoryboards() noexcept -> Error;
 
-		static auto Resume() noexcept -> Error;
+		auto Pause() const noexcept -> Error;
 
-		static auto Shutdown() noexcept -> Error;
+		auto Resume() const noexcept -> Error;
 
-		[[nodiscard]] static auto Update(double timeNow) noexcept -> Result<AnimationUpdateResult>;
+		auto Shutdown() const noexcept -> Error;
 
-		[[nodiscard]] static auto CreateAnimationVariable(double initialValue) noexcept -> Result<AnimationVariable>;
+		[[nodiscard]] auto Update(double timeNow) const noexcept -> Result<AnimationUpdateResult>;
 
-		[[nodiscard]] static auto CreateAnimationVariable(std::span<const double> initialValues) noexcept -> Result<AnimationVariable>;
+		[[nodiscard]] auto CreateAnimationVariable(double initialValue) const noexcept -> Result<AnimationVariable>;
 
-		[[nodiscard]] static auto CreateStoryboard() noexcept -> Result<Storyboard>;
+		[[nodiscard]] auto CreateAnimationVariable(std::span<const double> initialValues) const noexcept -> Result<AnimationVariable>;
 
-		[[nodiscard]] static auto GetStatus() noexcept -> Result<AnimationManagerStatus>;
+		[[nodiscard]] auto CreateStoryboard() const noexcept -> Result<Storyboard>;
 
-		[[nodiscard]] static auto EstimateNextEventTime() noexcept -> Result<double>;
+		[[nodiscard]] auto GetStatus() const noexcept -> Result<AnimationManagerStatus>;
 
-		static auto SetAnimationMode(AnimationMode mode) noexcept -> Error;
+		[[nodiscard]] auto EstimateNextEventTime() const noexcept -> Result<double>;
 
-		static auto SetDefaultLongestAcceptableDelay(double delay) noexcept -> Error;
+		auto SetAnimationMode(AnimationMode mode) const noexcept -> Error;
 
-		[[nodiscard]] static auto GetStoryboardFromTag(const ComPtr<IUnknown>& obj, UINT32 id) noexcept -> Result<Storyboard>;
+		auto SetDefaultLongestAcceptableDelay(double delay) const noexcept -> Error;
 
-		[[nodiscard]] static auto GetAnimationVariableFromTag(const ComPtr<IUnknown>& obj, UINT32 id) noexcept -> Result<AnimationVariable>;
+		[[nodiscard]] auto GetStoryboardFromTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<Storyboard>;
 
-		static auto ScheduleTransition(
+		[[nodiscard]] auto GetAnimationVariableFromTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<AnimationVariable>;
+
+		auto ScheduleTransition(
 			const AnimationVariable& variable,
-			AnimationTransition transition, double currentTime) noexcept -> Error;
+			AnimationTransition transition, double currentTime) const noexcept -> Error;
 
 		auto SetManagerEventHandler(
 			AnimationManagerEventHandler& eventHandler,
@@ -61,8 +63,6 @@ export namespace PGUI::UI::Animation
 		//TODO SetTrimPriorityComparison
 
 		private:
-		AnimationManager();
-
 		inline static AnimationManager* instance;
 	};
 }

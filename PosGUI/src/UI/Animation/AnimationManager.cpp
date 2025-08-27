@@ -25,15 +25,13 @@ namespace PGUI::UI::Animation
 			FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddTag(ErrorTags::Initialization)
-				.AddTag(ErrorTags::Animation),
+				Error{ hr },
 				L"Cannot create animation manager"
 			};
 		}
 	}
 
-	auto AnimationManager::GetInstance() -> const AnimationManager&
+	auto AnimationManager::GetGlobalInstance() -> const AnimationManager&
 	{
 		if (instance == nullptr)
 		{
@@ -45,51 +43,46 @@ namespace PGUI::UI::Animation
 	auto AnimationManager::AbandonAllStoryboards() noexcept -> Error
 	{
 		Error error{
-			instance->Get()->AbandonAllStoryboards()
+			Get()->AbandonAllStoryboards()
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"AbandonAllStoryboards failed");
 		return error;
 	}
 
-	auto AnimationManager::Pause() noexcept -> Error
+	auto AnimationManager::Pause() const noexcept -> Error
 	{
 		Error error{
-			instance->Get()->Pause()
+			Get()->Pause()
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Pause failed");
 		return error;
 	}
 
-	auto AnimationManager::Resume() noexcept -> Error
+	auto AnimationManager::Resume() const noexcept -> Error
 	{
 		Error error{
-			instance->Get()->Resume()
+			Get()->Resume()
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Resume failed");
 		return error;
 	}
 
-	auto AnimationManager::Shutdown() noexcept -> Error
+	auto AnimationManager::Shutdown() const noexcept -> Error
 	{
 		Error error{
-			instance->Get()->Shutdown()
+			Get()->Shutdown()
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"Shutdown failed");
 		return error;
 	}
 
-	auto AnimationManager::Update(const double timeNow) noexcept -> Result<AnimationUpdateResult>
+	auto AnimationManager::Update(const double timeNow) const noexcept -> Result<AnimationUpdateResult>
 	{
 		UI_ANIMATION_UPDATE_RESULT result;
-		if (const auto hr = instance->Get()->Update(timeNow, &result);
+		if (const auto hr = Get()->Update(timeNow, &result);
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"Update failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -97,14 +90,14 @@ namespace PGUI::UI::Animation
 		return static_cast<AnimationUpdateResult>(result);
 	}
 
-	auto AnimationManager::CreateAnimationVariable(const double initialValue) noexcept -> Result<AnimationVariable>
+	auto AnimationManager::CreateAnimationVariable(
+		const double initialValue) const noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
-		if (const auto hr = instance->Get()->CreateAnimationVariable(initialValue, variable.GetAddress());
+		if (const auto hr = Get()->CreateAnimationVariable(initialValue, variable.GetAddress());
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"CreateAnimationVariable failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -113,18 +106,17 @@ namespace PGUI::UI::Animation
 	}
 
 	auto AnimationManager::CreateAnimationVariable(
-		const std::span<const double> initialValues) noexcept -> Result<AnimationVariable>
+		const std::span<const double> initialValues) const noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
 
-		if (const auto hr = instance->Get()->CreateAnimationVectorVariable(
+		if (const auto hr = Get()->CreateAnimationVectorVariable(
 			initialValues.data(),
 			static_cast<UINT>(initialValues.size()),
 			variable.GetAddress());
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"CreateAnimationVariable failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -133,15 +125,14 @@ namespace PGUI::UI::Animation
 		return variable;
 	}
 
-	auto AnimationManager::CreateStoryboard() noexcept -> Result<Storyboard>
+	auto AnimationManager::CreateStoryboard() const noexcept -> Result<Storyboard>
 	{
 		Storyboard storyboard;
 
-		if (const auto hr = instance->Get()->CreateStoryboard(storyboard.GetAddress());
+		if (const auto hr = Get()->CreateStoryboard(storyboard.GetAddress());
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"CreateStoryboard failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -149,14 +140,13 @@ namespace PGUI::UI::Animation
 		return storyboard;
 	}
 
-	auto AnimationManager::GetStatus() noexcept -> Result<AnimationManagerStatus>
+	auto AnimationManager::GetStatus() const noexcept -> Result<AnimationManagerStatus>
 	{
 		UI_ANIMATION_MANAGER_STATUS status;
-		if (const auto hr = instance->Get()->GetStatus(&status);
+		if (const auto hr = Get()->GetStatus(&status);
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"GetStatus failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -164,14 +154,13 @@ namespace PGUI::UI::Animation
 		return static_cast<AnimationManagerStatus>(status);
 	}
 
-	auto AnimationManager::EstimateNextEventTime() noexcept -> Result<double>
+	auto AnimationManager::EstimateNextEventTime() const noexcept -> Result<double>
 	{
 		double nextEventTime;
-		if (const auto hr = instance->Get()->EstimateNextEventTime(&nextEventTime);
+		if (const auto hr = Get()->EstimateNextEventTime(&nextEventTime);
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"EstimateNextEventTime failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -179,35 +168,32 @@ namespace PGUI::UI::Animation
 		return nextEventTime;
 	}
 
-	auto AnimationManager::SetAnimationMode(AnimationMode mode) noexcept -> Error
+	auto AnimationManager::SetAnimationMode(AnimationMode mode) const noexcept -> Error
 	{
 		Error error{
-			instance->Get()->SetAnimationMode(static_cast<UI_ANIMATION_MODE>(mode))
+			Get()->SetAnimationMode(static_cast<UI_ANIMATION_MODE>(mode))
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"SetAnimationMode failed");
 		return error;
 	}
 
-	auto AnimationManager::SetDefaultLongestAcceptableDelay(const double delay) noexcept -> Error
+	auto AnimationManager::SetDefaultLongestAcceptableDelay(const double delay) const noexcept -> Error
 	{
 		Error error{
-			instance->Get()->SetDefaultLongestAcceptableDelay(delay)
+			Get()->SetDefaultLongestAcceptableDelay(delay)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"SetDefaultLongestAcceptableDelay failed");
 		return error;
 	}
 
 	auto AnimationManager::GetStoryboardFromTag(
-		const ComPtr<IUnknown>& obj, const UINT32 id) noexcept -> Result<Storyboard>
+		const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Result<Storyboard>
 	{
 		Storyboard storyboard;
-		if (const auto hr = instance->Get()->GetStoryboardFromTag(obj.Get(), id, storyboard.GetAddress());
+		if (const auto hr = Get()->GetStoryboardFromTag(obj.Get(), id, storyboard.GetAddress());
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"GetStoryboardFromTag failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -217,14 +203,13 @@ namespace PGUI::UI::Animation
 
 	auto AnimationManager::GetAnimationVariableFromTag(
 		const ComPtr<IUnknown>& obj,
-		const UINT32 id) noexcept -> Result<AnimationVariable>
+		const UINT32 id) const noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
-		if (const auto hr = instance->Get()->GetVariableFromTag(obj.Get(), id, variable.GetAddress());
+		if (const auto hr = Get()->GetVariableFromTag(obj.Get(), id, variable.GetAddress());
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error.AddTag(ErrorTags::Animation);
 			Logger::Error(L"GetAnimationVariableFromTag failed with Error: {}", error);
 			return Unexpected{ error };
 		}
@@ -234,15 +219,14 @@ namespace PGUI::UI::Animation
 
 	auto AnimationManager::ScheduleTransition(
 		const AnimationVariable& variable,
-		AnimationTransition transition, const double currentTime) noexcept -> Error
+		AnimationTransition transition, const double currentTime) const noexcept -> Error
 	{
 		Error error{
-			instance->Get()->ScheduleTransition(
+			Get()->ScheduleTransition(
 				variable.GetRaw(),
 				transition.GetRaw(),
 				currentTime)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"ScheduleTransition failed");
 		return error;
 	}
@@ -255,7 +239,6 @@ namespace PGUI::UI::Animation
 			&eventHandler.GetRouter(),
 			registerForNext)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"SetManagerEventHandler failed");
 		return error;
 	}
@@ -265,7 +248,6 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetManagerEventHandler(nullptr, registerForNext)
 		};
-		error.AddTag(ErrorTags::Animation);
 		LogIfFailed(error, L"SetManagerEventHandler failed");
 		return error;
 	}

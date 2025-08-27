@@ -55,7 +55,6 @@ export namespace PGUI::UI::Imaging
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Cannot get size");
 				return Unexpected{ error };
 			}
@@ -70,7 +69,6 @@ export namespace PGUI::UI::Imaging
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Cannot get pixel format");
 				return Unexpected{ error };
 			}
@@ -86,7 +84,6 @@ export namespace PGUI::UI::Imaging
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Cannot get resolution");
 				return Unexpected{ error };
 			}
@@ -105,7 +102,6 @@ export namespace PGUI::UI::Imaging
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Cannot copy pixels");
 				return Unexpected{ error };
 			}
@@ -124,7 +120,6 @@ export namespace PGUI::UI::Imaging
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Cannot copy pixels");
 				return Unexpected{ error };
 			}
@@ -142,7 +137,6 @@ export namespace PGUI::UI::Imaging
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Cannot copy pixels");
 				return Unexpected{ error };
 			}
@@ -168,7 +162,6 @@ export namespace PGUI::UI::Imaging
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Failed to create IWICBitmapScaler");
 				return;
 			}
@@ -179,7 +172,6 @@ export namespace PGUI::UI::Imaging
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Failed to initialize IWICBitmapScaler");
 			}
 		}
@@ -197,7 +189,6 @@ export namespace PGUI::UI::Imaging
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Failed to create IWICBitmapClipper");
 				return;
 			}
@@ -208,7 +199,6 @@ export namespace PGUI::UI::Imaging
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Failed to initialize IWICBitmapClipper");
 			}
 		}
@@ -226,7 +216,6 @@ export namespace PGUI::UI::Imaging
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Failed to create IWICBitmapFlipRotator");
 				return;
 			}
@@ -238,7 +227,6 @@ export namespace PGUI::UI::Imaging
 			if (FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::Imaging);
 				Logger::Error(error, L"Failed to initialize IWICBitmapFlipRotator");
 			}
 		}

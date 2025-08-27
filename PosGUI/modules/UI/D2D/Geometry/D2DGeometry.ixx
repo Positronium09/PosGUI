@@ -42,7 +42,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to get bounds");
 				return Unexpected{ error };
 			}
@@ -64,7 +63,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to get widened bounds");
 				return Unexpected{ error };
 			}
@@ -84,7 +82,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to compute area");
 				return Unexpected{ error };
 			}
@@ -104,7 +101,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to check if point is contained in fill");
 				return Unexpected{ error };
 			}
@@ -125,7 +121,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to check if point is contained in stroke");
 				return Unexpected{ error };
 			}
@@ -144,7 +139,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to compute length");
 				return Unexpected{ error };
 			}
@@ -166,7 +160,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to compute point at length");
 				return Unexpected{ error };
 			}
@@ -186,7 +179,6 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error.AddTag(ErrorTags::D2D);
 				Logger::Error(error, L"Failed to compare with geometry");
 				return Unexpected{ error };
 			}

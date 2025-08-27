@@ -3,13 +3,13 @@ module;
 #include <ranges>
 #include <Windows.h>
 
-module PGUI.Window:Impl;
+module PGUI.Window;
 
 import std;
 
-import :Impl;
 import PGUI.Utils;
 import PGUI.ScopedTimer;
+import PGUI.DpiScaled;
 import PGUI.ErrorHandling;
 
 namespace PGUI
@@ -42,16 +42,16 @@ namespace PGUI
 		});
 		childWindows.clear();
 
-		
+
 		std::ranges::for_each(beforeHookers,
-			[](auto& hook)
-		{
-			hook.get().hookedWindow = nullptr;
-		});
+		                      [](auto& hook)
+		                      {
+			                      hook.get().UnhookFromWindow();
+		                      });
 		std::ranges::for_each(afterHookers,
 			[](auto& hook)
 		{
-			hook.get().hookedWindow = nullptr;
+			hook.get().UnhookFromWindow();
 		});
 		beforeHookers.clear();
 		afterHookers.clear();
@@ -127,14 +127,17 @@ namespace PGUI
 
 		if (!IsFlagSet(flags, PositionFlags::NoClientMove))
 		{
-			PointL point{
-				static_cast<long>(windowRect.left),
-				static_cast<long>(windowRect.top)
+			[[maybe_unused]]
+				const PointL point{
+					static_cast<long>(windowRect.left),
+					static_cast<long>(windowRect.top)
 			};
-			SendMsg(WM_MOVE, NULL, MAKELONG(point.x, point.y));
+			OnMoved(logicalRect->TopLeft());
+			//SendMsg(WM_MOVE, NULL, MAKELONG(point.x, point.y));
 		}
 		if (!IsFlagSet(flags, PositionFlags::NoClientSize) || IsFlagSet(flags, PositionFlags::StateChanged))
 		{
+			[[maybe_unused]]
 			auto wparam = SIZE_RESTORED;
 			if (IsMinimized())
 			{
@@ -144,7 +147,8 @@ namespace PGUI
 			{
 				wparam = SIZE_MAXIMIZED;
 			}
-			SendMsg(WM_SIZE, wparam, MAKELONG(windowSize.cx, windowSize.cy));
+			OnSizeChanged(logicalRect->Size());
+			//SendMsg(WM_SIZE, wparam, MAKELONG(windowSize.cx, windowSize.cy));
 		}
 
 		return 0;
@@ -200,38 +204,38 @@ namespace PGUI
 
 	auto Window::Hook(MessageHooker& hooker) noexcept -> void
 	{
-		if (hooker.hookedWindow != nullptr)
+		if (hooker.HookedWindow() != nullptr)
 		{
-			hooker.hookedWindow->UnHook(hooker);
+			hooker.HookedWindow()->UnHook(hooker);
 		}
-		hooker.hookedWindow = this;
+		hooker.HookToWindow(this);
 		beforeHookers.push_back(hooker);
 		afterHookers.push_back(hooker);
 	}
 
 	auto Window::HookBefore(MessageHooker& hooker) noexcept -> void
 	{
-		if (hooker.hookedWindow != nullptr)
+		if (hooker.HookedWindow() != nullptr)
 		{
-			hooker.hookedWindow->UnHookBefore(hooker);
+			hooker.HookedWindow()->UnHookBefore(hooker);
 		}
-		hooker.hookedWindow = this;
+		hooker.HookToWindow(this);
 		beforeHookers.push_back(hooker);
 	}
 
 	auto Window::HookAfter(MessageHooker& hooker) noexcept -> void
 	{
-		if (hooker.hookedWindow != nullptr)
+		if (hooker.HookedWindow() != nullptr)
 		{
-			hooker.hookedWindow->UnHookAfter(hooker);
+			hooker.HookedWindow()->UnHookAfter(hooker);
 		}
-		hooker.hookedWindow = this;
+		hooker.HookToWindow(this);
 		afterHookers.push_back(hooker);
 	}
 
 	auto Window::UnHook(MessageHooker& hooker) noexcept -> void
 	{
-		hooker.hookedWindow = nullptr;
+		hooker.UnhookFromWindow();
 
 		auto [beforeBegin, beforeEnd] = std::ranges::remove_if(beforeHookers, [&hooker](const auto& hook)
 		{
@@ -250,7 +254,7 @@ namespace PGUI
 
 	auto Window::UnHookBefore(MessageHooker& hooker) noexcept -> void
 	{
-		hooker.hookedWindow = nullptr;
+		hooker.UnhookFromWindow();
 
 		auto [begin, end] = std::ranges::remove_if(beforeHookers, [&hooker](const auto& hook)
 		{
@@ -262,7 +266,7 @@ namespace PGUI
 
 	auto Window::UnHookAfter(MessageHooker& hooker) noexcept -> void
 	{
-		hooker.hookedWindow = nullptr;
+		hooker.UnhookFromWindow();
 
 		auto [begin, end] = std::ranges::remove_if(afterHookers, [&hooker](const auto& hook)
 		{
@@ -283,7 +287,6 @@ namespace PGUI
 
 			Logger::Error(
 				Error{ error }
-				.AddTag(ErrorTags::Window)
 			);
 
 			return setTimerId;
@@ -312,7 +315,6 @@ namespace PGUI
 			{
 				Logger::Error(
 					Error{ error }
-					.AddTag(ErrorTags::Window)
 				);
 
 				return;
@@ -577,21 +579,21 @@ namespace PGUI
 	auto Window::Flash(const WindowFlashFlags flags, const UINT count,
 	                   const std::chrono::milliseconds timeout) const noexcept -> void
 	{
-		FLASHWINFO flashInfo{ 
-			.cbSize = sizeof(FLASHWINFO), 
-			.hwnd = hWnd, 
-			.dwFlags = ToUnderlying(flags), 
+		FLASHWINFO flashInfo{
+			.cbSize = sizeof(FLASHWINFO),
+			.hwnd = hWnd,
+			.dwFlags = ToUnderlying(flags),
 			.uCount = count,
-			.dwTimeout = static_cast<DWORD>(timeout.count()) 
+			.dwTimeout = static_cast<DWORD>(timeout.count())
 		};
 		FlashWindowEx(&flashInfo);
 	}
 
 	auto Window::StopFlash() const noexcept -> void
 	{
-		FLASHWINFO flashInfo{ 
-			.cbSize = sizeof(FLASHWINFO), 
-			.hwnd = hWnd, 
+		FLASHWINFO flashInfo{
+			.cbSize = sizeof(FLASHWINFO),
+			.hwnd = hWnd,
 			.dwFlags = FLASHW_STOP,
 			.uCount = 0,
 			.dwTimeout = 0
@@ -738,7 +740,7 @@ namespace PGUI
 
 		MessageHandlerResult result{ 0 };
 		auto hookerHandled = false;
-		
+
 		for (const auto& hooker : window->beforeHookers)
 		{
 			const auto& handlers = hooker.get().GetHandlers();

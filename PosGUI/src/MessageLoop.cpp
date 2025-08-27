@@ -23,8 +23,6 @@ namespace PGUI
 
 				Logger::Critical(
 					Error{ errCode }
-					.AddTag(ErrorTags::WindowMessage)
-					.AddTag(ErrorTags::Logging)
 					.AddDetail(L"Message", WindowMsgToText(msg.message))
 					.AddDetail(L"wParam", std::to_wstring(msg.wParam))
 					.AddDetail(L"lParam", std::to_wstring(msg.lParam))
@@ -64,8 +62,6 @@ namespace PGUI
 
 				Logger::Critical(
 					Error{ errCode }
-					.AddTag(ErrorTags::WindowMessage)
-					.AddTag(ErrorTags::Logging)
 					.AddDetail(L"Message", WindowMsgToText(msg.message))
 					.AddDetail(L"wParam", std::to_wstring(msg.wParam))
 					.AddDetail(L"lParam", std::to_wstring(msg.lParam))

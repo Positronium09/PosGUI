@@ -337,7 +337,7 @@ namespace PGUI::UI::Animation
 			return error;
 		}
 
-		return Error{ GeneralErrorCodes::Success };
+		return Error{ ErrorCode::Success };
 	}
 
 	auto AnimationVariable::ClearVariableChangeHandler(const bool registerForNext) const noexcept -> Error
@@ -360,6 +360,6 @@ namespace PGUI::UI::Animation
 			return error;
 		}
 
-		return Error{ GeneralErrorCodes::Success };
+		return Error{ ErrorCode::Success };
 	}
 }

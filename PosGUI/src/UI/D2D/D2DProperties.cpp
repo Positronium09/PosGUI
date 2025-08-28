@@ -58,7 +58,7 @@ namespace PGUI::UI::D2D
 			if (size > bytes.size())
 			{
 				Logger::Error(
-					Error{ E_INVALIDARG }
+					Error{ ErrorCode::InvalidArgument }
 					.AddDetail(L"Index", std::to_wstring(index))
 					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
 					.AddDetail(L"Value Size", std::to_wstring(size)),

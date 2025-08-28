@@ -483,7 +483,7 @@
     <ClCompile Include="modules\ErrorHandling\Error.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ErrorHandling\ErrorCodes.ixx">
+    <ClCompile Include="modules\ErrorHandling\ErrorCode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ScopedTimer.ixx">

@@ -128,12 +128,12 @@ namespace PGUI::UI::Layout
 	{
 		if (index >= columnDefinitions.size())
 		{
-			return Error{ E_INVALIDARG };
+			return Error{ ErrorCode::InvalidArgument };
 		}
 
 		if (columnDefinitions.size() == 1)
 		{
-			return Error{ E_INVALIDARG }
+			return Error{ ErrorCode::InvalidArgument }
 				.SuggestFix(L"Cannot remove the last column definition");
 		}
 
@@ -142,14 +142,14 @@ namespace PGUI::UI::Layout
 
 		RearrangeItems();
 
-		return Error{ S_OK };
+		return Error{ ErrorCode::Success };
 	}
 
 	auto GridLayout::RemoveRowDefinitionAtIndex(const std::size_t index) noexcept -> Error
 	{
 		if (index >= rowDefinitions.size())
 		{
-			return Error{ E_INVALIDARG };
+			return Error{ ErrorCode::InvalidArgument };
 		}
 
 		rowDefinitions.erase(
@@ -157,7 +157,7 @@ namespace PGUI::UI::Layout
 
 		RearrangeItems();
 
-		return Error{ S_OK };
+		return Error{ ErrorCode::Success };
 	}
 
 	auto GridLayout::RearrangeItems() noexcept -> void

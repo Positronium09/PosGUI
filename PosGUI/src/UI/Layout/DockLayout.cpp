@@ -56,33 +56,33 @@ namespace PGUI::UI::Layout
 	{
 		if (size < 0.0F)
 		{
-			return Error{ E_INVALIDARG }
+			return Error{ ErrorCode::InvalidArgument }
 				.SuggestFix(L"Size cannot be negative");
 		}
 		if (position == DockPosition::None)
 		{
-			return Error{ E_INVALIDARG }
+			return Error{ ErrorCode::InvalidArgument }
 				.SuggestFix(L"Cannot set max size for DockPosition::None");
 		}
 		if (position == DockPosition::Fill)
 		{
-			return Error{ E_INVALIDARG }
+			return Error{ ErrorCode::InvalidArgument }
 				.SuggestFix(L"Cannot set max size for DockPosition::Fill");
 		}
 		if (size == 0.0F)
 		{
 			ClearMaxDockSize(position);
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 		if (maxDockSizes.contains(position) && maxDockSizes[position] == size)
 		{
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 
 		maxDockSizes.insert_or_assign(position, size);
 		RearrangeItems();
 
-		return Error{ S_OK };
+		return Error{ ErrorCode::Success };
 	}
 
 	auto DockLayout::ClearMaxDockSize(const DockPosition position) noexcept -> void
@@ -133,7 +133,7 @@ namespace PGUI::UI::Layout
 		{
 			return dockPositions.at(id);
 		}
-		return Unexpected{ Error{ E_INVALIDARG } };
+		return Unexpected{ Error{ ErrorCode::InvalidArgument } };
 	}
 
 	auto DockLayout::RearrangeItems() noexcept -> void

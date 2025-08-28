@@ -28,8 +28,7 @@ namespace PGUI::UI::Imaging
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              ,
+			Logger::Error(Error{ hr },
 			              L"Failed to create decoder");
 		}
 	}
@@ -48,8 +47,7 @@ namespace PGUI::UI::Imaging
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              ,
+			Logger::Error(Error{ hr },
 			              L"Failed to create decoder");
 		}
 	}
@@ -68,8 +66,7 @@ namespace PGUI::UI::Imaging
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              ,
+			Logger::Error(Error{ hr },
 			              L"Failed to create decoder");
 		}
 	}
@@ -86,8 +83,7 @@ namespace PGUI::UI::Imaging
 			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr }
-			              ,
+			Logger::Error(Error{ hr },
 			              L"Failed to create decoder");
 		}
 	}
@@ -215,7 +211,7 @@ namespace PGUI::UI::Imaging
 		{
 			if (index >= frameCount)
 			{
-				Error error{ E_INVALIDARG };
+				Error error{ ErrorCode::InvalidArgument };
 				error
 					.AddDetail(L"Frame Index", std::to_wstring(index))
 					.AddDetail(L"Frame Count", std::to_wstring(frameCount))

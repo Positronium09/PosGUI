@@ -96,13 +96,13 @@ export namespace PGUI
 		{
 			if (newDpi <= 0.0F)
 			{
-				Error error{ ERROR_INVALID_PARAMETER };
+				Error error{ ErrorCode::InvalidArgument };
 				Logger::Warning(error);
 
 				return error;
 			}
 			dpi = newDpi;
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 		constexpr auto GetDpi() const noexcept -> float
 		{

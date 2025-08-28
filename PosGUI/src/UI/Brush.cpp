@@ -42,7 +42,7 @@ namespace PGUI::UI
 		{
 			if (!referenceRect.has_value())
 			{
-				Logger::Error(Error{ E_INVALIDARG },
+				Logger::Error(Error{ ErrorCode::InvalidArgument },
 				              L"Reference rectangle must be provided when using Relative positioning mode");
 				return;
 			}
@@ -93,7 +93,7 @@ namespace PGUI::UI
 		{
 			if (!referenceRect.has_value())
 			{
-				Logger::Error(Error{ E_INVALIDARG },
+				Logger::Error(Error{ ErrorCode::InvalidArgument },
 				              L"Reference rectangle must be provided when using Relative positioning mode");
 				return;
 			}
@@ -226,8 +226,7 @@ namespace PGUI::UI
 		auto hr = ptr.As(&solidBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr }
-			,
+			Error{ hr },
 			L"Given pointer is not a SolidColorBrush"
 		);
 
@@ -242,8 +241,7 @@ namespace PGUI::UI
 		hr = ptr.As(&linearGradientBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr }
-			,
+			Error{ hr },
 			L"Given pointer is not a LinearGradientBrush"
 		);
 
@@ -258,8 +256,7 @@ namespace PGUI::UI
 		hr = ptr.As(&radialGradientBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr }
-			,
+			Error{ hr },
 			L"Given pointer is not a RadialGradientBrush"
 		);
 
@@ -274,8 +271,7 @@ namespace PGUI::UI
 		hr = ptr.As(&bitmapBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr }
-			,
+			Error{ hr },
 			L"Given pointer is not a BitmapBrush"
 		);
 

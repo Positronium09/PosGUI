@@ -62,23 +62,25 @@ export namespace PGUI::UI::Layout
 	{
 		GridItemProperties() noexcept :
 			GridItemProperties{ AUTO_PLACE, AUTO_PLACE }
-		{ }
+		{
+		}
 		GridItemProperties(
-			const long row, 
-			const long column, 
-			const long rowSpan = 1, 
+			const long row,
+			const long column,
+			const long rowSpan = 1,
 			const long columnSpan = 1) noexcept :
-				row{ row }, column{ column },
-				rowSpan{ rowSpan }, columnSpan{ columnSpan }
-		{ }
+			row{ row }, column{ column },
+			rowSpan{ rowSpan }, columnSpan{ columnSpan }
+		{
+		}
 
-		DataBinding::ValidatedPropertyNM<long> row{ AUTO_PLACE, 
+		DataBinding::ValidatedPropertyNM<long> row{ AUTO_PLACE,
 			{ [](const auto& val)
 			{
 				return val >= AUTO_PLACE;
 			} }
 		};
-		DataBinding::ValidatedPropertyNM<long> column{ AUTO_PLACE, 
+		DataBinding::ValidatedPropertyNM<long> column{ AUTO_PLACE,
 			{ [](const auto& val)
 			{
 				return val >= AUTO_PLACE;
@@ -208,7 +210,7 @@ export namespace PGUI::UI::Layout
 			autoCellSize = size;
 			RearrangeItems();
 
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 		[[nodiscard]] auto GetAutoCellSize() const noexcept
 		{
@@ -229,23 +231,23 @@ export namespace PGUI::UI::Layout
 		{
 			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
 			{
-				return Error{ E_INVALIDARG }.SuggestFix(L"Cannot insert a blank cell with auto place");
+				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Cannot insert a blank cell with auto place");
 			}
 			blankCells.emplace(row, column);
 			RearrangeItems();
 
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 		auto RemoveBlankCell(const long row, const long column) noexcept -> Error
 		{
 			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
 			{
-				return Error{ E_INVALIDARG }.SuggestFix(L"Cannot remove a blank cell with auto place");
+				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Cannot remove a blank cell with auto place");
 			}
 
 			blankCells.erase(std::make_pair(row, column));
 			RearrangeItems();
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 
 		protected:
@@ -277,17 +279,17 @@ export namespace PGUI::UI::Layout
 			const auto iter = std::ranges::find_if(
 				itemProperties,
 				[&id](const auto& item) noexcept
-				{
-					return item.first == id;
-				});
+			{
+				return item.first == id;
+			});
 			if (iter != itemProperties.end())
 			{
 				return std::distance(itemProperties.begin(), iter);
 			}
 
 			return Unexpected{
-				Error{ E_INVALIDARG }
-};
+				Error{ ErrorCode::InvalidArgument }
+			};
 		}
 		auto SortProperties() noexcept -> void;
 		auto GetRowSizes(std::size_t rowCount) const noexcept -> std::vector<long>;

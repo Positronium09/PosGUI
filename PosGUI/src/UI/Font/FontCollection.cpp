@@ -34,7 +34,7 @@ namespace PGUI::UI::Font
 	{
 		if (!std::filesystem::exists(filePath))
 		{
-			Error error{ E_INVALIDARG };
+			Error error{ ErrorCode::InvalidArgument };
 			error
 				.AddDetail(L"File Path", filePath.wstring())
 				.SuggestFix(L"Ensure the file path is correct and the file exists");
@@ -133,7 +133,7 @@ namespace PGUI::UI::Font
 		if (!exists)
 		{
 			return Unexpected{
-				Error{ E_FAIL }
+				Error{ ErrorCode::Failure }
 				.AddDetail(L"Font Family Name", fontFamilyName)
 				.SuggestFix(L"Ensure the font family name is correct and try again")
 			};

@@ -22,7 +22,8 @@ export namespace PGUI::UI::Layout
 		public:
 		explicit LayoutPanel(const RectF bounds) noexcept :
 			bounds{ bounds }
-		{ }
+		{
+		}
 		virtual ~LayoutPanel() noexcept = default;
 
 		virtual auto RearrangeItems() noexcept -> void = 0;
@@ -48,13 +49,13 @@ export namespace PGUI::UI::Layout
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
 			}
 
 			managedItems.erase(managedItems.begin() + index);
 			OnItemRemoved(index);
 
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 		auto RemoveItem(const HWND hwnd) noexcept
 		{
@@ -67,13 +68,13 @@ export namespace PGUI::UI::Layout
 				}
 				return false;
 			});
-				it != managedItems.end())
+			it != managedItems.end())
 			{
 				managedItems.erase(it);
 				OnItemRemoved(std::distance(managedItems.begin(), it));
-				return Error{ S_OK };
+				return Error{ ErrorCode::Success };
 			}
-			return Error{ E_INVALIDARG }.SuggestFix(L"Given HWND not found in managed items");
+			return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given HWND not found in managed items");
 		}
 		auto RemoveItem(const RawWindowPtr<> wnd) noexcept
 		{
@@ -88,7 +89,7 @@ export namespace PGUI::UI::Layout
 			if (index >= managedItems.size())
 			{
 				return Unexpected{
-					Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range")
+					Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range")
 				};
 			}
 			return managedItems.at(index);
@@ -104,12 +105,12 @@ export namespace PGUI::UI::Layout
 				}
 				return false;
 			});
-				it != managedItems.end())
+			it != managedItems.end())
 			{
 				return *it;
 			}
 			return Unexpected{
-				Error{ E_INVALIDARG }.SuggestFix(L"Given HWND not found in managed items")
+				Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given HWND not found in managed items")
 			};
 		}
 		[[nodiscard]] auto GetItem(const RawWindowPtr<> wnd) const noexcept
@@ -127,13 +128,13 @@ export namespace PGUI::UI::Layout
 				}
 				return false;
 			});
-				it != managedItems.end())
+			it != managedItems.end())
 			{
 				return *it;
 			}
 
 			return Unexpected{
-				Error{ E_INVALIDARG }.SuggestFix(L"Given panel not found in managed items")
+				Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given panel not found in managed items")
 			};
 		}
 
@@ -263,7 +264,7 @@ export namespace PGUI::UI::Layout
 			}
 
 			return Unexpected{
-				Error{ E_INVALIDARG }.SuggestFix(L"Given item not found in managed items")
+				Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given item not found in managed items")
 			};
 		}
 		auto ArrangeItem(const LayoutItem& item, const RectF assignedBounds) const noexcept -> void
@@ -311,28 +312,28 @@ export namespace PGUI::UI::Layout
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
 			}
 			ArrangeItem(managedItems.at(index), assignedBounds);
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 		auto MoveItem(const std::size_t index, const PointF point) const noexcept -> Error
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
 			}
 			MoveItem(managedItems.at(index), point);
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 		auto ResizeItem(const std::size_t index, const SizeF size) const noexcept -> Error
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ E_INVALIDARG }.SuggestFix(L"Given index is out of range");
+				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
 			}
 			ResizeItem(managedItems.at(index), size);
-			return Error{ S_OK };
+			return Error{ ErrorCode::Success };
 		}
 
 		virtual auto OnItemAdded(const LayoutItem&) -> void

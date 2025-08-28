@@ -76,8 +76,7 @@ export namespace PGUI::UI::D2D
 			{
 				Error error{ hr };
 				error
-					.AddDetail(L"Size", std::format(L"{}", size))
-;
+					.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot create bitmap");
 				return Unexpected{ error };
 			}
@@ -87,8 +86,7 @@ export namespace PGUI::UI::D2D
 			{
 				Error error{ hr };
 				error
-					.AddDetail(L"Size", std::format(L"{}", size))
-;
+					.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}
@@ -184,8 +182,7 @@ export namespace PGUI::UI::D2D
 			{
 				Error error{ hr };
 				error
-					.AddDetail(L"Size", std::format(L"{}", size))
-;
+					.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot create layer {}");
 				return Unexpected{ error };
 			}

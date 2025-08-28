@@ -29,7 +29,7 @@
     <ClCompile Include="modules\ErrorHandling\ErrorHandling.ixx" />
     <ClCompile Include="modules\ErrorHandling\Exception.ixx" />
     <ClCompile Include="modules\ErrorHandling\Logger.ixx" />
-    <ClCompile Include="modules\ErrorHandling\ErrorCodes.ixx" />
+    <ClCompile Include="modules\ErrorHandling\ErrorCode.ixx" />
     <ClCompile Include="modules\Event.ixx" />
     <ClCompile Include="modules\Factories\D2DFactory.ixx" />
     <ClCompile Include="modules\Factories\DWriteFactory.ixx" />

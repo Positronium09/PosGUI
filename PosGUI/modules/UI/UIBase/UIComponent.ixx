@@ -2,10 +2,11 @@ module;
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-export module PGUI.UI.UIComponent;
+export module PGUI.UI.UIBase:UIComponent;
 
 import std;
 
+import :Interface;
 import PGUI.Window;
 import PGUI.Event;
 import PGUI.Shape2D;
@@ -15,18 +16,6 @@ import PGUI.UI.DirectXCompositionWindow;
 
 export namespace PGUI::UI
 {
-	class UIComponent;
-
-	template <typename T>
-	concept UIComponentType = std::derived_from<T, UIComponent>;
-
-	template<UIComponentType T = UIComponent>
-	using UIComponentPtr = std::shared_ptr<T>;
-	template<UIComponentType T = UIComponent>
-	using RawUIComponentPtr = T*;
-	template<UIComponentType T = UIComponent>
-	using CRawUIComponentPtr = const T*;
-
 	enum class UIComponentState
 	{
 		Hidden = 1 << 0,
@@ -54,12 +43,16 @@ export namespace PGUI::UI
 
 	class UIComponent
 	{
+		friend class UIWindow;
+
 		public:
 #pragma region Events
 
 		EventSRWM<> clipChanged;
 		EventSRWM<const RectF&, const RectF&> boundsChanged;
 		EventSRWM<PointF> clickedEvent;
+		EventSRWM<UIComponentState, UIComponentState> stateChanged;
+		EventSRWM<ZIndex> zIndexChanged;
 
 #pragma endregion
 
@@ -67,7 +60,7 @@ export namespace PGUI::UI
 
 		virtual ~UIComponent() = default;
 
-		#pragma region Properties
+#pragma region Properties
 
 		auto SetClip(const ClipParameters& params) noexcept -> void;
 		[[nodiscard]] const auto& GetClip() const noexcept { return clip; }
@@ -81,6 +74,9 @@ export namespace PGUI::UI
 
 		auto SetBounds(const RectF& rect) noexcept -> void;
 		[[nodiscard]] auto GetBounds() const noexcept { return bounds; }
+
+		auto SetZIndex(const ZIndex z) noexcept { zIndex = z; zIndexChanged.Invoke(zIndex); }
+		[[nodiscard]] auto GetZIndex() const noexcept { return zIndex; }
 
 		auto Move(const PointF point) noexcept -> void
 		{
@@ -101,7 +97,7 @@ export namespace PGUI::UI
 		[[nodiscard]] auto GetPosition() const noexcept { return bounds.TopLeft(); }
 		[[nodiscard]] auto GetSize() const noexcept { return bounds.Size(); }
 
-		#pragma endregion
+#pragma endregion
 
 		protected:
 		auto AdjustClip() noexcept -> void;
@@ -110,7 +106,7 @@ export namespace PGUI::UI
 		Clip clip;
 		RectF bounds;
 		ZIndex zIndex = ZIndices::Normal;
-		RawUIComponentPtr<> parent = nullptr;
+		RawUIWindowPtr<> parent = nullptr;
 		std::vector<UIComponentPtr<>> children;
 		bool hitTestClip = true;
 		bool adjustClipOnSize = true;

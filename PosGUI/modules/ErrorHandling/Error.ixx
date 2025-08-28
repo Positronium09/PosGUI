@@ -131,9 +131,10 @@ export namespace PGUI
 			return details.at(key);
 		}
 
-		auto SetCustomMessage(std::wstring_view message) noexcept -> void
+		auto& SetCustomMessage(std::wstring_view message) noexcept
 		{
 			customMessage = message;
+			return *this;
 		}
 		[[nodiscard]] auto CustomMessage() const noexcept
 		{

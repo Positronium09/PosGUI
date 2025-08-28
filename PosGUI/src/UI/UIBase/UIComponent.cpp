@@ -1,4 +1,4 @@
-module PGUI.UI.UIComponent;
+module PGUI.UI.UIBase:UIComponent;
 
 import std;
 

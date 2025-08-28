@@ -11,7 +11,9 @@ export namespace PGUI
 		OutOfRange,
 		InvalidArgument,
 		NotImplemented,
-		NullPointer
+		NullPointer,
+		NotFound,
+		InvalidCast
 	};
 
 	enum class SystemErrorCode : int

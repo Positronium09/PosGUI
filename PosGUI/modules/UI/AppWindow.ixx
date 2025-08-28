@@ -13,7 +13,7 @@ import PGUI.UI.Brush;
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ThemeAware;
 import PGUI.UI.Animation;
-import PGUI.UI.UIWindow;
+import PGUI.UI.UIBase;
 
 export namespace PGUI::UI
 {

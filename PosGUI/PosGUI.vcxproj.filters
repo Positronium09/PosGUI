@@ -306,10 +306,10 @@
     <ClCompile Include="modules\UI\D2D\Geometry\D2DLayer.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\UIComponent.ixx">
+    <ClCompile Include="modules\UI\UIBase\UIComponent.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\UIComponent.cpp">
+    <ClCompile Include="src\UI\UIBase\UIComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Theming\Theme.ixx">
@@ -519,13 +519,19 @@
     <ClCompile Include="modules\UI\Animation\Animated.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\UIWindow.ixx">
+    <ClCompile Include="modules\UI\UIBase\UIWindow.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\UIWindow.cpp">
+    <ClCompile Include="src\UI\UIBase\UIWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\Utils\EnumUtils.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\UIBase\Interface.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\UIBase\UIBase.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

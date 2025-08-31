@@ -156,6 +156,11 @@ namespace PGUI::UI
 
 	auto UIWindow::OnMouseMove(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
 	{
+		EnsureZOrder();
+
+		for (const auto& component : components)
+		{ }
+
 		return 0;
 	}
 

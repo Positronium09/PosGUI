@@ -28,22 +28,10 @@ export namespace PGUI::UI
 	};
 	DEFINE_ENUM_FLAG_OPERATORS(UIComponentState);
 
-	using ZIndex = int;
-	namespace ZIndices
-	{
-		constexpr auto Background = -1000;
-		constexpr auto Normal = 0;
-		constexpr auto Elevated = 100;
-		constexpr auto Floating = 500;
-		constexpr auto Modal = 1000;
-		constexpr auto Tooltip = 2000;
-		constexpr auto Notification = 5000;
-		constexpr auto Debug = 10000;
-	}
-
 	class UIComponent
 	{
 		friend class UIWindow;
+		friend class UIContainer;
 
 		public:
 #pragma region Events
@@ -102,12 +90,18 @@ export namespace PGUI::UI
 		protected:
 		auto AdjustClip() noexcept -> void;
 
+		virtual auto OnMouseMove() noexcept -> void { }
+
+		[[nodiscard]] auto HitTest(PointF point) const noexcept -> bool;
+		[[nodiscard]] auto HitTest(RectF rect) const noexcept -> bool;
+		[[nodiscard]] auto HitTestBounds(PointF point) const noexcept -> bool;
+		[[nodiscard]] auto HitTestBounds(RectF rect) const noexcept -> bool;
+
 		private:
 		Clip clip;
 		RectF bounds;
 		ZIndex zIndex = ZIndices::Normal;
 		RawUIWindowPtr<> parent = nullptr;
-		std::vector<UIComponentPtr<>> children;
 		bool hitTestClip = true;
 		bool adjustClipOnSize = true;
 		UIComponentState state = UIComponentState::Normal | UIComponentState::Visible;

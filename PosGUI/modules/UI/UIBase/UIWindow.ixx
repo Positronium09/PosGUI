@@ -23,7 +23,7 @@ export namespace PGUI::UI
 		explicit UIWindow(const WindowClassPtr& wndClass) noexcept;
 
 		template <UIComponentType Type, typename ...Args>
-		[[nodiscard]] auto AddComponent(Args&&... args) noexcept
+		[[nodiscard]] auto AddComponent(Args&&... args)
 		{
 			auto component = std::make_shared<Type>(std::forward<Args>(args)...);
 

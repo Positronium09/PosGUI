@@ -73,4 +73,63 @@ namespace PGUI::UI
 
 		clip.CreateClip();
 	}
+
+	auto UIComponent::HitTest(const PointF point) const noexcept -> bool
+	{
+		if (!HitTestBounds(point))
+		{
+			return false;
+		}
+
+		if (!hitTestClip || !clip)
+		{
+			return GetBounds().IsPointInside(point);
+		}
+
+		const auto& geometry = clip.GetGeometry();
+		auto containsResult = geometry.FillContainsPoint(point);
+		if (!containsResult.has_value())
+		{
+			Logger::Error(containsResult.error(), L"Geometry hit test failed");
+			return false;
+		}
+
+		return containsResult.value();
+	}
+
+	auto UIComponent::HitTest(const RectF rect) const noexcept -> bool
+	{
+		if (!HitTestBounds(rect))
+		{
+			return false;
+		}
+
+		if (!hitTestClip || !clip)
+		{
+			return GetBounds().IsIntersectingRect(rect);
+		}
+
+		const auto& geometry = clip.GetGeometry();
+		const auto rectangleGeometry = D2D::D2DRectangleGeometry{ rect };
+		const auto comparisonResult = geometry.CompareWithGeometry(rectangleGeometry);
+
+		if (!comparisonResult.has_value())
+		{
+			Logger::Error(comparisonResult.error(), L"Geometry comparison failed");
+			return false;
+		}
+
+		const auto comparison = comparisonResult.value();
+		return comparison == D2D::GeometryRelation::Disjoint;
+	}
+
+	auto UIComponent::HitTestBounds(const PointF point) const noexcept -> bool
+	{
+		return GetBounds().IsPointInside(point);
+	}
+
+	auto UIComponent::HitTestBounds(const RectF rect) const noexcept -> bool
+	{
+		return GetBounds().IsIntersectingRect(rect);
+	}
 }

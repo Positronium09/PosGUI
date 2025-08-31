@@ -54,6 +54,8 @@
     <ClCompile Include="modules\ScopedTimer.ixx" />
     <ClCompile Include="modules\UI\UIBase\Interface.ixx" />
     <ClCompile Include="modules\UI\UIBase\UIBase.ixx" />
+    <ClCompile Include="modules\UI\UIBase\UIComponentEvents.ixx" />
+    <ClCompile Include="modules\UI\UIBase\UIContainer.ixx" />
     <ClCompile Include="modules\UI\UIBase\UIWindow.ixx" />
     <ClCompile Include="modules\Utils\EnumUtils.ixx" />
     <ClCompile Include="modules\Window.ixx" />
@@ -185,6 +187,7 @@
     <ClCompile Include="src\UI\TextLayout.cpp" />
     <ClCompile Include="src\UI\Theming\Theme.cpp" />
     <ClCompile Include="src\UI\UIBase\UIComponent.cpp" />
+    <ClCompile Include="src\UI\UIBase\UIContainer.cpp" />
     <ClCompile Include="src\UI\UIBase\UIWindow.cpp" />
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
     <ClCompile Include="src\Utils\IEnumStringIterator.cpp" />

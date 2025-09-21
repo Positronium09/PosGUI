@@ -196,6 +196,11 @@
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\WindowClass.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TypeErasure\TypeErasure\TypeErasure.vcxproj">
+      <Project>{196f60d8-de87-46b9-8a7e-6a07e98818a9}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

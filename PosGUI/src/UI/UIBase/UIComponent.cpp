@@ -4,6 +4,7 @@ import std;
 
 import PGUI.Shape2D;
 import PGUI.WindowClass;
+import PGUI.ErrorHandling;
 import PGUI.UI.Colors;
 import PGUI.UI.Clip;
 import PGUI.UI.D2D;

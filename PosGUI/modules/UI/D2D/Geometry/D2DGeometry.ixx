@@ -174,7 +174,7 @@ export namespace PGUI::UI::D2D
 		{
 			D2D1_GEOMETRY_RELATION relation;
 			if (auto hr = this->Get()->CompareWithGeometry(
-				inputGeometry.Get(), inputGeometryTransform,
+				inputGeometry.GetRaw(), inputGeometryTransform,
 				flatteningTolerance, &relation);
 				FAILED(hr))
 			{

@@ -293,7 +293,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -321,7 +321,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -349,7 +349,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -377,7 +377,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>

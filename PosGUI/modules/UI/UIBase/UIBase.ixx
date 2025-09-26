@@ -1,5 +1,6 @@
 export module PGUI.UI.UIBase;
 
 export import :Interface;
-export import :UIComponent;
+export import :UIElement;
+export import :UIContainer;
 export import :UIWindow;

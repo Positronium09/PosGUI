@@ -9,7 +9,6 @@ import PGUI.Window;
 import PGUI.Shape2D;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
-import PGUI.UI.UIBase;
 
 export namespace PGUI::UI::Layout
 {

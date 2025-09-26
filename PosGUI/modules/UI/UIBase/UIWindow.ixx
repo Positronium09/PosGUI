@@ -1,16 +1,10 @@
-﻿module;
-#include <Windows.h>
-
 export module PGUI.UI.UIBase:UIWindow;
 
 import std;
 
-import :Interface;
-import PGUI.Event;
-import PGUI.Shape2D;
+import :UIElement;
+import :UIContainer;
 import PGUI.Window;
-import PGUI.UI.Graphics;
-import PGUI.ErrorHandling;
 import PGUI.WindowClass;
 import PGUI.UI.DirectXCompositionWindow;
 
@@ -19,20 +13,27 @@ export namespace PGUI::UI
 	class UIWindow : public DirectXCompositionWindow
 	{
 		public:
-		UIWindow() noexcept;
-		explicit UIWindow(const WindowClassPtr& wndClass) noexcept;
+		UIWindow();
+		explicit UIWindow(const WindowClassPtr&);
+
+		[[nodiscard]] auto& GetChildren() noexcept
+		{
+			return childrenContainer;
+		}
+		[[nodiscard]] const auto& GetChildren() const noexcept
+		{
+			return childrenContainer;
+		}
+
+		protected:
+		virtual auto Render(Graphics) -> void
+		{
+			/*  */
+		}
 
 		private:
-		RawUIComponentPtr<> hovered;
-		RawUIComponentPtr<> pressed;
-		RawUIComponentPtr<> focused;
+		UIContainer childrenContainer;
 
 		auto Draw(Graphics graphics) -> void override;
-
-		auto OnMouseMove(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
-		auto OnLButtonDown(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
-		auto OnLButtonUp(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
-		auto OnRButtonDown(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
-		auto OnRButtonUp(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
 	};
 }

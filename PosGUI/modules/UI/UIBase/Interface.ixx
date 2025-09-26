@@ -4,38 +4,25 @@ import std;
 
 export namespace PGUI::UI
 {
+	class UIElement;
 	class UIContainer;
-	class UIComponent;
-	class UIWindow;
 
 	template <typename T>
-	concept UIContainerType = std::derived_from<T, UIContainer>;
-	template<UIContainerType T = UIContainer>
-	using UIContainerPtr = std::shared_ptr<T>;
-	template<UIContainerType T = UIContainer>
-	using RawUIContainerPtr = T*;
-	template<UIContainerType T = UIContainer>
-	using CRawUIContainerPtr = const T*;
+	concept UIElementType = std::derived_from<T, UIElement>;
 
-	template <typename T>
-	concept UIComponentType = std::derived_from<T, UIComponent>;
-	template<UIComponentType T = UIComponent>
-	using UIComponentPtr = std::shared_ptr<T>;
-	template<UIComponentType T = UIComponent>
-	using RawUIComponentPtr = T*;
-	template<UIComponentType T = UIComponent>
-	using CRawUIComponentPtr = const T*;
+	using UIElementPtr = std::shared_ptr<UIElement>;
+	using RawUIElementPtr = UIElement*;
+	// ReSharper disable once CppInconsistentNaming
 
-	template <typename T>
-	concept UIWindowType = std::derived_from<T, UIWindow>;
-	template <UIWindowType T = UIWindow>
-	using UIWindowPtr = std::shared_ptr<T>;
-	template <UIWindowType T = UIWindow>
-	using RawUIWindowPtr = T*;
-	template <UIWindowType T = UIWindow>
-	using CRawUIWindowPtr = const T*;
+	using RawCUIElementPtr = const UIElement*;
 
+	using UIContainerPtr = std::shared_ptr<UIContainer>;
+	using RawUIContainerPtr = UIContainer*;
+	// ReSharper disable once CppInconsistentNaming
 
+	using RawCUIContainerPtr = const UIContainer*;
+
+	using ID = std::uint64_t;
 	using ZIndex = int;
 	namespace ZIndices
 	{

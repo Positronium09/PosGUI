@@ -76,7 +76,11 @@ namespace PGUI
 	auto Window::_OnDpiChanged(const UINT msg, const WPARAM, const LPARAM lParam) -> MessageHandlerResult
 	{
 		LRESULT result = 0;
-		logicalRect.SetDpi(GetDpi());
+		if (const auto error = logicalRect.SetDpi(GetDpi());
+			error.IsFailure())
+		{
+			Logger::Error(error, L"SetDpi failed in _OnDpiChanged");
+		}
 
 		if (msg == WM_DPICHANGED)
 		{
@@ -709,7 +713,11 @@ namespace PGUI
 
 			window->hWnd = hWnd;
 			window->parentHwnd = createStruct->hwndParent;
-			window->logicalRect.SetDpi(window->GetDpi());
+			if (const auto error = window->logicalRect.SetDpi(window->GetDpi());
+				error.IsFailure())
+			{
+				Logger::Error(error, L"SetDpi failed in WM_NCCREATE");
+			}
 
 			SetWindowLongPtrW(hWnd, GWLP_USERDATA, std::bit_cast<LONG_PTR>(window));
 		}

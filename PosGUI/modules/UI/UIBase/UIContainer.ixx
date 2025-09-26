@@ -1,22 +1,102 @@
-﻿export module PGUI.UI.UIBase:UIContainer;
+export module PGUI.UI.UIBase:UIContainer;
 
 import std;
 
 import :Interface;
-import PGUI.Event;
+import :UIElement;
 import PGUI.ErrorHandling;
-import PGUI.Shape2D;
+import PGUI.UI.Layout.LayoutPanel;
 
 export namespace PGUI::UI
 {
-	class UIContainer
+	class UIContainer : public UIElement
 	{
 		public:
-		EventSRWM<const UIComponentPtr<>&, std::size_t> childAdded;
-		EventSRWM<const UIComponentPtr<>&, std::size_t> childRemoved;
-		EventSRWM<const UIComponentPtr<>&, std::size_t, std::size_t> childMoved;
-		EventSRWM<> childrenCleared;
+		template <UIElementType T, typename... Args>
+		const auto& CreateAndAdd(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
+		{
+			elements.emplace_back(std::make_shared<T>(std::forward<Args>(args)...));
+			const auto& element = elements.back();
+			element->SetParent(this);
 
+			zOrderDirty = true;
 
+			return element;
+		}
+		auto AddElement(const UIElementPtr& ptr) noexcept -> void;
+
+		[[nodiscard]] const auto& GetElements() const noexcept
+		{
+			return elements;
+		}
+		[[nodiscard]] auto& GetElements() noexcept
+		{
+			return elements;
+		}
+		[[nodiscard]] auto GetElementCount() const noexcept
+		{
+			return elements.size();
+		}
+
+		[[nodiscard]] auto GetElement(std::size_t index) const noexcept -> Result<UIElementPtr>;
+		[[nodiscard]] auto GetElement(std::size_t index) noexcept -> Result<UIElementPtr>;
+
+		auto RemoveElement(std::size_t index) noexcept -> Result<UIElementPtr>;
+		auto RemoveElement(RawUIElementPtr ptr) noexcept -> Result<UIElementPtr>;
+
+		auto GetElementIndex(RawCUIElementPtr ptr) const noexcept -> Result<std::size_t>;
+
+		auto EnsureZOrder() noexcept -> void;
+
+		auto ChildRemoved(RawCUIElementPtr ptr) noexcept -> void override
+		{
+			const auto [begin, end] = std::ranges::remove_if(
+				elements, 
+				[&ptr](const auto& elem)
+				{
+					return elem.get() == ptr;
+				});
+
+			elements.erase(begin, end);
+		}
+
+		[[nodiscard]] auto GetPosition() const noexcept -> PointF override
+		{
+			return rect.TopLeft();
+		}
+		[[nodiscard]] auto GetRect() const noexcept -> RectF override
+		{
+			return rect;
+		}
+		[[nodiscard]] auto GetSize() const noexcept -> SizeF override
+		{
+			return rect.Size();
+		}
+
+		[[nodiscard]] auto HitTest(PointF point) noexcept -> bool override;
+
+		auto Render(Graphics graphics) -> void override;
+
+		auto Move(const PointF position) -> void override
+		{
+			rect = RectF{ position, rect.Size() };
+		}
+		auto Resize(const SizeF size) -> void override
+		{
+			rect = RectF{ rect.TopLeft(), size };
+		}
+		auto MoveAndResize(const PointF position, const SizeF size) -> void override
+		{
+			rect = RectF{ position, size };
+		}
+		auto MoveAndResize(const RectF newRect) -> void override
+		{
+			rect = newRect;
+		}
+
+		private:
+		bool zOrderDirty = false;
+		RectF rect;
+		std::vector<UIElementPtr> elements;
 	};
 }

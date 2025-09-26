@@ -65,17 +65,17 @@ export namespace PGUI
 
 		[[nodiscard]] constexpr auto operator==(const Rect& other) const noexcept -> bool = default;
 
-		[[nodiscard]] constexpr auto operator*(T factor) const noexcept
+		[[nodiscard]] constexpr auto operator*(const T factor) const noexcept
 		{
 			return Rect{ left * factor, top * factor, right * factor, bottom * factor };
 		}
 
-		[[nodiscard]] constexpr auto operator/(T factor) const noexcept
+		[[nodiscard]] constexpr auto operator/(const T factor) const noexcept
 		{
 			return Rect{ left / factor, top / factor, right / factor, bottom / factor };
 		}
 
-		constexpr auto& operator*=(T factor) noexcept
+		constexpr auto& operator*=(const T factor) noexcept
 		{
 			left *= factor;
 			top *= factor;
@@ -83,7 +83,7 @@ export namespace PGUI
 			bottom *= factor;
 			return *this;
 		}
-		constexpr auto& operator/=(T factor) noexcept
+		constexpr auto& operator/=(const T factor) noexcept
 		{
 			left /= factor;
 			top /= factor;
@@ -127,33 +127,122 @@ export namespace PGUI
 			return PGUI::Size<T>{ Width(), Height() };
 		}
 
-		[[nodiscard]] constexpr auto IsPointInside(Point<T> p) const noexcept
+		[[nodiscard]] constexpr auto IsEmpty() const noexcept
+		{
+			return left == right || top == bottom;
+		}
+
+		[[nodiscard]] constexpr auto IsPoint() const noexcept
+		{
+			return left == right && top == bottom;
+		}
+
+		[[nodiscard]] constexpr auto IsZeroRect() const noexcept
+		{
+			return left == 0 && top == 0 && right == 0 && bottom == 0;
+		}
+
+		[[nodiscard]] constexpr auto Contains(const Point<T> p) const noexcept
 		{
 			return
 				left <= p.x && p.x <= right &&
 				top <= p.y && p.y <= bottom;
 		}
 
-		[[nodiscard]] constexpr auto IsIntersectingRect(Rect rect) const noexcept
+		[[nodiscard]] constexpr auto Contains(const Rect rect) const noexcept
+		{
+			return
+				left <= rect.left && right >= rect.right &&
+				top <= rect.top && bottom >= rect.bottom;
+		}
+
+		[[nodiscard]] constexpr auto IsIntersecting(const Rect rect) const noexcept
 		{
 			return left < rect.right
 			       && right > rect.left
 			       && top < rect.bottom
-			       && bottom > top;
+			       && bottom > rect.top;
 		}
 
-		[[nodiscard]] constexpr auto IntersectRect(Rect rect) const noexcept
+		[[nodiscard]] constexpr auto IntersectionRect(const Rect rect) const noexcept -> std::optional<Rect>
 		{
-			if (!IsIntersectingRect(rect))
+			if (!IsIntersecting(rect))
 			{
-				return Rect{ };
+				return std::nullopt;
 			}
-			return Rect{
+			return std::make_optional(Rect{
 				std::max(left, rect.left),
 				std::max(top, rect.top),
 				std::min(right, rect.right),
-				std::min(bottom, rect.bottom)
-			};
+				std::min(bottom, rect.bottom) });
+		}
+
+		[[nodiscard]] constexpr auto Subtract(const Rect rect) const noexcept
+		{
+			std::vector<Rect> result;
+			result.reserve(4);
+			if (!IsIntersecting(rect))
+			{
+				result.push_back(*this);
+				result.shrink_to_fit();
+				return result;
+			}
+
+			const auto intersection = IntersectionRect(rect);
+			if (!intersection.has_value())
+			{
+				result.push_back(*this);
+				result.shrink_to_fit();
+				return result;
+			}
+
+			if (top < intersection->top)
+			{
+				result.emplace_back(left, top, right, intersection->top);
+			}
+			if (bottom > intersection->bottom)
+			{
+				result.emplace_back(left, intersection->bottom, right, bottom);
+			}
+			if (left < intersection->left)
+			{
+				result.emplace_back(left, intersection->top, intersection->left, intersection->bottom);
+			}
+			if (right > intersection->right)
+			{
+				result.emplace_back(intersection->right, intersection->top, right, intersection->bottom);
+			}
+
+			result.shrink_to_fit();
+			return result;
+		}
+
+		[[nodiscard]] constexpr auto ContainedBy(const Rect rect) const noexcept
+		{
+			return rect.Contains(*this);
+		}
+
+		[[nodiscard]] constexpr auto ContainedBy(const std::span<const Rect> rect) const noexcept
+		{
+			std::vector<Rect> uncovered{ *this };
+
+			for (const auto& r : rect)
+			{
+				std::vector<Rect> newUncovered;
+				newUncovered.reserve(uncovered.size() * 4);
+				for (const auto& ur : uncovered)
+				{
+					const auto subtracted = ur.Subtract(r);
+					newUncovered.insert(newUncovered.end(), subtracted.begin(), subtracted.end());
+				}
+				uncovered = std::move(newUncovered);
+				if (uncovered.empty())
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		[[nodiscard]] constexpr auto Area() const noexcept
@@ -162,7 +251,7 @@ export namespace PGUI
 			return size.cx * size.cy;
 		}
 
-		constexpr auto Shift(T xOffset, T yOffset) noexcept -> void
+		constexpr auto Shift(const T xOffset, const T yOffset) noexcept -> void
 		{
 			left += xOffset;
 			right += xOffset;
@@ -170,24 +259,24 @@ export namespace PGUI
 			bottom += yOffset;
 		}
 
-		constexpr auto Shift(Point<T> offset) noexcept -> void
+		constexpr auto Shift(const Point<T> offset) noexcept -> void
 		{
 			Shift(offset.x, offset.y);
 		}
 
-		[[nodiscard]] constexpr auto Shifted(T xOffset, T yOffset) const noexcept
+		[[nodiscard]] constexpr auto Shifted(const T xOffset, const T yOffset) const noexcept
 		{
 			auto rect = *this;
 			rect.Shift(xOffset, yOffset);
 			return rect;
 		}
 
-		[[nodiscard]] constexpr auto Shifted(Point<T> offset) noexcept
+		[[nodiscard]] constexpr auto Shifted(const Point<T> offset) noexcept
 		{
 			return Shifted(offset.x, offset.y);
 		}
 
-		constexpr auto Inflate(T dx, T dy) noexcept -> void
+		constexpr auto Inflate(const T dx, const T dy) noexcept -> void
 		{
 			left += -dx;
 			right += dx;
@@ -195,7 +284,7 @@ export namespace PGUI
 			bottom += dy;
 		}
 
-		[[nodiscard]] constexpr auto Inflated(T dx, T dy) const noexcept
+		[[nodiscard]] constexpr auto Inflated(const T dx, const T dy) const noexcept
 		{
 			auto rect = *this;
 			rect.Inflate(dx, dy);
@@ -207,7 +296,7 @@ export namespace PGUI
 			return Point<T>((left + right) / 2, (top + bottom) / 2);
 		}
 
-		constexpr auto CenterAround(Point<T> p) noexcept -> void
+		constexpr auto CenterAround(const Point<T> p) noexcept -> void
 		{
 			auto size = Size() / static_cast<T>(2);
 
@@ -217,7 +306,7 @@ export namespace PGUI
 			bottom = p.y + size.cy;
 		}
 
-		[[nodiscard]] constexpr auto CenteredAround(Point<T> p) const noexcept
+		[[nodiscard]] constexpr auto CenteredAround(const Point<T> p) const noexcept
 		{
 			auto size = Size() / static_cast<T>(2);
 

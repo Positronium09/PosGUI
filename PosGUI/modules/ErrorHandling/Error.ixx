@@ -15,11 +15,11 @@ export namespace PGUI
 	class Error;
 
 	template <typename T>
-	using Result = std::expected<T, Error>;
+	[[nodiscard]] using Result = std::expected<T, Error>;
 
 	using Unexpected = std::unexpected<Error>;
 
-	class Error
+	class [[nodiscard]] Error
 	{
 		public:
 		explicit Error(

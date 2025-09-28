@@ -537,5 +537,8 @@
     <ClCompile Include="src\UI\UIBase\UIWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\UI\UIBase\UIEvent.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

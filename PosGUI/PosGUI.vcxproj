@@ -56,6 +56,7 @@
     <ClCompile Include="modules\UI\UIBase\UIBase.ixx" />
     <ClCompile Include="modules\UI\UIBase\UIContainer.ixx" />
     <ClCompile Include="modules\UI\UIBase\UIElement.ixx" />
+    <ClCompile Include="modules\UI\UIBase\UIEvent.ixx" />
     <ClCompile Include="modules\UI\UIBase\UIWindow.ixx" />
     <ClCompile Include="modules\Utils\EnumUtils.ixx" />
     <ClCompile Include="modules\Window.ixx" />

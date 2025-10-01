@@ -1,7 +1,11 @@
+module;
+#include <Windows.h>
+
 export module PGUI.UI.UIBase:UIWindow;
 
 import std;
 
+import :Interface;
 import :UIElement;
 import :UIContainer;
 import PGUI.Window;
@@ -33,7 +37,98 @@ export namespace PGUI::UI
 
 		private:
 		UIContainer childrenContainer;
+		RawUIElementPtr focusedElement = nullptr;
+		RawUIElementPtr hoveredElement = nullptr;
+
+		[[nodiscard]] static auto GetMousePosFromLparam(const LPARAM lParam) noexcept -> PointF
+		{
+			return MAKEPOINTS(lParam);
+		}
+		[[nodiscard]] static auto GetMouseButtonsFromWparam(const WPARAM wParam) noexcept
+		{
+			auto mouseButton = MouseButton::None;
+			mouseButton |= (wParam & MK_LBUTTON) != 0 ? MouseButton::Left : MouseButton::None;
+			mouseButton |= (wParam & MK_MBUTTON) != 0 ? MouseButton::Middle : MouseButton::None;
+			mouseButton |= (wParam & MK_RBUTTON) != 0 ? MouseButton::Right : MouseButton::None;
+			mouseButton |= (wParam & MK_XBUTTON1) != 0 ? MouseButton::XButton1 : MouseButton::None;
+			mouseButton |= (wParam & MK_XBUTTON2) != 0 ? MouseButton::XButton2 : MouseButton::None;
+
+			return mouseButton;
+		}
+		[[nodiscard]] static auto GetModifierKeysFromWparam(const WPARAM wParam) noexcept -> ModifierKeys
+		{
+			ModifierKeys modifierKeys;
+			modifierKeys.shift = (wParam & MK_SHIFT) != 0;
+			modifierKeys.control = (wParam & MK_CONTROL) != 0;
+			modifierKeys.alt = (GetKeyState(VK_MENU) & 0x8000) != 0;
+			modifierKeys.super = (GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0;
+			return modifierKeys;
+		}
+		[[nodiscard]] static auto GetMouseWheelDeltaFromWparam(const WPARAM wParam) noexcept
+		{
+			return static_cast<int>(HIWORD(wParam));
+		}
+		[[nodiscard]] static auto GetKeyInfoFromLparam(const LPARAM lParam) noexcept
+		{
+			const auto keyFlags = HIWORD(lParam);
+
+			KeyInfo keyInfo;
+			keyInfo.repeatCount = LOWORD(lParam);
+			keyInfo.isAltPressed = (keyFlags & KF_ALTDOWN) != 0;
+			keyInfo.isExtended = (keyFlags & KF_EXTENDED) != 0;
+			keyInfo.wasDown = (keyFlags & KF_REPEAT) == KF_REPEAT;
+			keyInfo.isDown = (keyFlags & KF_UP) == KF_UP;
+
+			return keyInfo;
+		}
+
+		auto ChangeFocusedElement(const RawUIElementPtr newFocused) noexcept -> void
+		{
+			if (!newFocused)
+			{
+				if (focusedElement)
+				{
+					focusedElement->RemoveFocus();
+					focusedElement = nullptr;
+				}
+				return;
+			}
+
+			if (focusedElement == newFocused)
+			{
+				return;
+			}
+			if (focusedElement)
+			{
+				focusedElement->RemoveFocus();
+			}
+			if (newFocused)
+			{
+				newFocused->SetFocus();
+			}
+			focusedElement = newFocused;
+		}
 
 		auto Draw(Graphics graphics) -> void override;
+		auto OnSizeChanged(SizeL) -> void override;
+
+		auto OnNCCreate(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+
+		auto OnFocusChanged(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+
+		auto OnChar(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+		auto OnKey(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+
+		// ReSharper disable CommentTypo
+		// TODO Maybe implement WM_SYSKEYDOWN, WM_SYSKEYUP, WM_SYSDEADCHAR and WM_HOTKEY
+		// ReSharper restore CommentTypo
+
+		auto OnMouseMove(UINT, WPARAM, LPARAM) -> MessageHandlerResult;
+		auto OnMouseLeave(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
+		auto OnMouseHover(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+		auto OnMouseWheel(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+		auto OnMouseButtonDown(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
+		auto OnMouseButtonUp(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
+		auto OnMouseDoubleClick(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
 	};
 }

@@ -1,6 +1,7 @@
 export module PGUI.UI.UIBase:UIElement;
 
 import :Interface;
+import :UIEvent;
 
 import PGUI.DataBinding.Property;
 import PGUI.UI.Graphics;
@@ -30,6 +31,11 @@ export namespace PGUI::UI
 			}
 		}
 
+		virtual auto HandleEvent(UIEvent&) -> void
+		{
+			/*  */
+		}
+
 		virtual auto Move(PointF position) -> void = 0;
 		virtual auto Resize(SizeF size) -> void = 0;
 		virtual auto MoveAndResize(PointF position, SizeF size) -> void = 0;
@@ -40,6 +46,35 @@ export namespace PGUI::UI
 		[[nodiscard]] virtual auto GetSize() const noexcept -> SizeF = 0;
 
 		[[nodiscard]] virtual auto HitTest(PointF point) noexcept -> bool = 0;
+
+		auto SetFocus() noexcept -> void
+		{
+			if (!focusable)
+			{
+				return;
+			}
+			if (parent != nullptr)
+			{
+				parent->SetFocus();
+			}
+			hasFocus = true;
+		}
+		auto RemoveFocus() noexcept
+		{
+			if (!focusable)
+			{
+				return;
+			}
+			hasFocus = false;
+		}
+		[[nodiscard]] auto HasFocus() const noexcept
+		{
+			return *hasFocus;
+		}
+		[[nodiscard]] auto IsFocusable() const noexcept
+		{
+			return focusable;
+		}
 
 		virtual auto ChildRemoved(RawCUIElementPtr) noexcept -> void
 		{
@@ -121,9 +156,17 @@ export namespace PGUI::UI
 			return std::bit_cast<std::uintptr_t>(this);
 		}
 
+		protected:
+		auto SetFocusable(const bool isFocusable) noexcept -> void
+		{
+			focusable = isFocusable;
+		}
+
 		private:
 		RawUIElementPtr parent = nullptr;
-		DataBinding::PropertyNM<bool> enabled = true;
-		DataBinding::PropertyNM<ZIndex> zIndex = ZIndices::Normal;
+		bool focusable = false;
+		DataBinding::PropertyNM<bool> hasFocus{ false };
+		DataBinding::PropertyNM<bool> enabled{ true };
+		DataBinding::PropertyNM<ZIndex> zIndex{ ZIndices::Normal };
 	};
 }

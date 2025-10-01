@@ -93,6 +93,71 @@ namespace PGUI::UI
 		return std::distance(elements.begin(), found);
 	}
 
+	auto UIContainer::GetElementAtPosition(const PointF point) const noexcept -> Result<RawCUIElementPtr>
+	{
+		if (!rect.Contains(point))
+		{
+			return Unexpected{
+				Error{
+					ErrorCode::InvalidArgument
+				}.AddDetail(L"Point", std::format(L"{}", point))
+			};
+		}
+
+		for (const auto& element : elements | std::views::reverse)
+		{
+			if (!*element->IsEnabled())
+			{
+				continue;
+			}
+			if (element->HitTest(point))
+			{
+				return element.get();
+			}
+		}
+
+		return Unexpected{
+			Error{
+				ErrorCode::NotFound
+			}.AddDetail(L"Point", std::format(L"{}", point))
+		};
+	}
+
+	auto UIContainer::GetElementAtPosition(const PointF point) noexcept -> Result<RawUIElementPtr>
+	{
+		if (!rect.Contains(point))
+		{
+			return Unexpected{
+				Error{
+					ErrorCode::InvalidArgument
+				}.AddDetail(L"Point", std::format(L"({}, {})", point.x, point.y))
+			};
+		}
+
+		for (const auto& element : elements | std::views::reverse)
+		{
+			if (!*element->IsEnabled())
+			{
+				continue;
+			}
+			if (element->HitTest(point))
+			{
+				return element.get();
+			}
+		}
+
+		return Unexpected{
+			Error{
+				ErrorCode::NotFound
+			}.AddDetail(L"Point", std::format(L"{}", point))
+		};
+	}
+
+	auto UIContainer::HandleEvent(UIEvent&) -> void
+	{
+		/*  */
+	}
+
 	auto UIContainer::EnsureZOrder() noexcept -> void
 	{
 		if (!zOrderDirty)

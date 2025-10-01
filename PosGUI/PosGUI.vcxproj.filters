@@ -540,5 +540,11 @@
     <ClCompile Include="modules\UI\UIBase\UIEvent.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\UI\UIBase\UIComponent.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\UIBase\UIComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

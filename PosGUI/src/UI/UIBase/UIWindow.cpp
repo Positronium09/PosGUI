@@ -129,7 +129,7 @@ namespace PGUI::UI
 		keyEvent.scanCode = LOBYTE(HIWORD(lParam));
 		if (keyEvent.keyInfo.isExtended)
 		{
-			keyEvent.scanCode = MAKEWORD(keyEvent.scanCode, 0xE0);
+			keyEvent.scanCode = static_cast<ScanCode>(MAKEWORD(keyEvent.scanCode, 0xE0));
 		}
 		if (keyEvent.keyInfo.isDown)
 		{
@@ -159,7 +159,7 @@ namespace PGUI::UI
 		keyEvent.scanCode = LOBYTE(HIWORD(lParam));
 		if (keyEvent.keyInfo.isExtended)
 		{
-			keyEvent.scanCode = MAKEWORD(keyEvent.scanCode, 0xE0);
+			keyEvent.scanCode = static_cast<ScanCode>(MAKEWORD(keyEvent.scanCode, 0xE0));
 		}
 		if (msg == WM_KEYUP)
 		{

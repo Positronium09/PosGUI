@@ -173,7 +173,7 @@ export namespace PGUI::UI::D2D
 			return D2DBitmap{ bitmap1 };
 		}
 
-		[[nodiscard]] auto CreateLayer(SizeF size = SizeF{ }) noexcept -> Result<D2DLayer>
+		[[nodiscard]] auto CreateLayer(SizeF size) noexcept -> Result<D2DLayer>
 		{
 			ComPtr<ID2D1Layer> layer;
 
@@ -183,6 +183,19 @@ export namespace PGUI::UI::D2D
 				Error error{ hr };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size));
+				Logger::Error(error, L"Cannot create layer {}");
+				return Unexpected{ error };
+			}
+			return D2DLayer{ layer };
+		}
+
+		[[nodiscard]] auto CreateLayer() noexcept -> Result<D2DLayer>
+		{
+			ComPtr<ID2D1Layer> layer;
+			if (auto hr = this->Get()->CreateLayer(&layer); 
+				FAILED(hr))
+			{
+				Error error{ hr };
 				Logger::Error(error, L"Cannot create layer {}");
 				return Unexpected{ error };
 			}

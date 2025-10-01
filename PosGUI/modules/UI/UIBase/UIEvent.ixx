@@ -84,4 +84,22 @@ export namespace PGUI::UI
 		KeyInfo keyInfo;
 		ScanCode scanCode = 0;
 	};
+
+	struct RectChangedEvent : UIEvent
+	{
+		RectF oldRect;
+		RectF newRect;
+	};
+
+	struct SizeChangedEvent : UIEvent
+	{
+		SizeF oldSize;
+		SizeF newSize;
+	};
+
+	struct PositionChangedEvent : UIEvent
+	{
+		PointF oldPosition;
+		PointF newPosition;
+	};
 }

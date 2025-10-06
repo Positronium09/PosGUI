@@ -4,6 +4,7 @@ import :UIElement;
 import PGUI.Shape2D;
 import PGUI.UI.Clip;
 import PGUI.UI.D2D;
+import PGUI.ErrorHandling;
 
 namespace PGUI::UI
 {
@@ -15,7 +16,7 @@ namespace PGUI::UI
 		if (!clip)
 		{
 			axisAligned = true;
-			graphics.PushAxisAlignedClip(rect, D2D::AntiAliasingMode::PerPrimitive);
+			graphics.PushAxisAlignedClip(GetRect(), D2D::AntiAliasingMode::PerPrimitive);
 		}
 		else
 		{
@@ -23,9 +24,21 @@ namespace PGUI::UI
 				layerResult.has_value())
 			{
 				const auto& layer = layerResult.value();
-				const D2D::LayerParameters layerParams{ rect };
+				const D2D::LayerParameters layerParams{
+					GetRect(),
+					D2D::AntiAliasingMode::PerPrimitive,
+					D2D::LayerOptions::None,
+					GetClip().GetGeometry(),
+					D2D::Matrix3x2::Translation(GetRect().left, GetRect().top)
+				};
 				graphics.PushLayer(layer, layerParams);
 				pushed = true;
+			}
+			else
+			{
+				Logger::Error(layerResult.error(), L"Cannot create layer for clipping");
+				axisAligned = true;
+				graphics.PushAxisAlignedClip(GetRect(), D2D::AntiAliasingMode::PerPrimitive);
 			}
 		}
 
@@ -53,6 +66,7 @@ namespace PGUI::UI
 		rect.Move(position);
 		event.newPosition = GetPosition();
 		HandleEvent(event);
+		Invalidate();
 	}
 
 	auto UIComponent::Resize(const SizeF size) -> void
@@ -67,6 +81,7 @@ namespace PGUI::UI
 		rect.Resize(size);
 		event.newSize = GetSize();
 		HandleEvent(event);
+		Invalidate();
 	}
 
 	auto UIComponent::MoveAndResize(const RectF newRect) -> void
@@ -81,6 +96,7 @@ namespace PGUI::UI
 		rect = newRect;
 		event.newRect = GetRect();
 		HandleEvent(event);
+		Invalidate();
 	}
 
 	auto UIComponent::HitTest(const PointF point) noexcept -> bool
@@ -94,7 +110,7 @@ namespace PGUI::UI
 			return true;
 		}
 
-		if (const auto result = clip.GetGeometry().FillContainsPoint(point);
+		if (const auto result = clip.GetGeometry().FillContainsPoint(point - GetPosition());
 			result.has_value())
 		{
 			return result.value();

@@ -81,6 +81,51 @@ export namespace PGUI::UI
 
 			return keyInfo;
 		}
+		[[nodiscard]] static auto GetMouseButtonForMessage(const UINT msg, const WPARAM wParam) noexcept
+		{
+			auto mouseButton = MouseButton::None;
+
+			switch (msg)
+			{
+				case WM_LBUTTONDOWN:
+				case WM_LBUTTONUP:
+				case WM_LBUTTONDBLCLK:
+				{
+					mouseButton |= MouseButton::Left;
+					break;
+				}
+				case WM_RBUTTONDOWN:
+				case WM_RBUTTONUP:
+				case WM_RBUTTONDBLCLK:
+				{
+					mouseButton |= MouseButton::Right;
+					break;
+				}
+				case WM_MBUTTONDOWN:
+				case WM_MBUTTONUP:
+				case WM_MBUTTONDBLCLK:
+				{
+					mouseButton |= MouseButton::Middle;
+					break;
+				}
+				case WM_XBUTTONDOWN:
+				case WM_XBUTTONUP:
+				case WM_XBUTTONDBLCLK:
+				{
+					if (HIWORD(wParam) == XBUTTON1)
+					{
+						mouseButton |= MouseButton::XButton1;
+					}
+					else if (HIWORD(wParam) == XBUTTON2)
+					{
+						mouseButton |= MouseButton::XButton2;
+					}
+					break;
+				}
+				default: ;
+			}
+			return mouseButton;
+		}
 
 		auto ChangeFocusedElement(const RawUIElementPtr newFocused) noexcept -> void
 		{
@@ -91,6 +136,11 @@ export namespace PGUI::UI
 					focusedElement->RemoveFocus();
 					focusedElement = nullptr;
 				}
+				return;
+			}
+
+			if (!newFocused->IsFocusable() || !*newFocused->IsEnabled())
+			{
 				return;
 			}
 
@@ -112,7 +162,7 @@ export namespace PGUI::UI
 		auto Draw(Graphics graphics) -> void override;
 		auto OnSizeChanged(SizeL) -> void override;
 
-		auto OnNCCreate(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+		auto OnNCCreate(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
 
 		auto OnFocusChanged(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
 

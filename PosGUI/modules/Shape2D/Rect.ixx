@@ -156,7 +156,7 @@ export namespace PGUI
 				top <= rect.top && bottom >= rect.bottom;
 		}
 
-		[[nodiscard]] constexpr auto IsIntersecting(const Rect rect) const noexcept
+		[[nodiscard]] constexpr auto Intersects(const Rect rect) const noexcept
 		{
 			return left < rect.right
 			       && right > rect.left
@@ -166,7 +166,7 @@ export namespace PGUI
 
 		[[nodiscard]] constexpr auto IntersectionRect(const Rect rect) const noexcept -> std::optional<Rect>
 		{
-			if (!IsIntersecting(rect))
+			if (!Intersects(rect))
 			{
 				return std::nullopt;
 			}
@@ -181,7 +181,7 @@ export namespace PGUI
 		{
 			std::vector<Rect> result;
 			result.reserve(4);
-			if (!IsIntersecting(rect))
+			if (!Intersects(rect))
 			{
 				result.push_back(*this);
 				result.shrink_to_fit();
@@ -271,7 +271,7 @@ export namespace PGUI
 			return rect;
 		}
 
-		[[nodiscard]] constexpr auto Shifted(const Point<T> offset) noexcept
+		[[nodiscard]] constexpr auto Shifted(const Point<T> offset) const noexcept
 		{
 			return Shifted(offset.x, offset.y);
 		}

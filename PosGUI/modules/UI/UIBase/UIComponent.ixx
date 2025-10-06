@@ -39,6 +39,15 @@ export namespace PGUI::UI
 		{
 			return clip;
 		}
+		auto SetClip(Clip newClip) noexcept -> void
+		{
+			clip = std::move(newClip);
+			if (!clip)
+			{
+				clip.CreateClip();
+			}
+			Invalidate();
+		}
 
 		protected:
 		virtual auto ClippedRender(Graphics) -> void

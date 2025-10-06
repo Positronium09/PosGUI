@@ -275,41 +275,47 @@ struct std::formatter<PGUI::Error, Char>
 	template <typename FormatContext>
 	auto format(const PGUI::Error& error, FormatContext& ctx) const
 	{
+		auto needSeparator = false;
 		if (outCode)
 		{
 			std::format_to(ctx.out(), "Error Code: 0x{:08X}",
 				static_cast<unsigned int>(error.HResult()));
+			needSeparator = true;
 		}
 		if (outMessage)
 		{
 			std::format_to(ctx.out(), "{}Error Message: {}",
-				outCode || outMessage ? " | " : "",
+				needSeparator ? " | " : "",
 				error.Message());
+			needSeparator = true;
 		}
 		if (outTime)
 		{
-			std::format_to(ctx.out(), "{}Time Stamp: {}", outCode || outMessage ? " | " : "",
+			std::format_to(ctx.out(), 
+				"{}Time Stamp: {}", needSeparator ? " | " : "",
 				error.TimeStamp());
+			needSeparator = true;
 		}
 		if (outSource)
 		{
 			std::format_to(ctx.out(), "{}Source: {}:{} ({})",
-				outCode || outMessage || outTime ? " | " : "",
+				needSeparator ? " | " : "",
 				error.SourceLocation().file_name(),
 				error.SourceLocation().line(),
 				error.SourceLocation().function_name());
+			needSeparator = true;
 		}
 		if (outDetails)
 		{
 			if (!error.HasDetails())
 			{
 				std::format_to(ctx.out(), "{}No details specified.",
-					outCode || outMessage || outTime || outSource ? " | " : "");
+					needSeparator ? " | " : "");
 			}
 			else
 			{
 				std::format_to(ctx.out(), "{}Details: ",
-					outCode || outMessage || outTime || outSource ? " | " : "");
+					needSeparator ? " | " : "");
 				std::vector<std::wstring> details;
 				details.resize(error.Details().size());
 
@@ -324,28 +330,30 @@ struct std::formatter<PGUI::Error, Char>
 				std::format_to(ctx.out(), "{}",
 					PGUI::WStringToString(detailString));
 			}
+			needSeparator = true;
 		}
 		if (outCustomMessage)
 		{
 			if (!error.HasCustomMessage())
 			{
 				std::format_to(ctx.out(), "{}No custom message specified",
-					outCode || outMessage || outTime || outSource || outDetails ? " | " : "");
+					needSeparator ? " | " : "");
 			}
 			else
 			{
 				const auto customMessageString = *error.CustomMessage();
 
 				std::format_to(ctx.out(), L"{}Custom Message: {}",
-					outCode || outMessage || outTime || outSource || outDetails ? L" | " : L"", customMessageString);
+					needSeparator ? L" | " : L"", customMessageString);
 			}
+			needSeparator = true;
 		}
 		if (outSuggest)
 		{
 			if (!error.HasSuggestions())
 			{
 				std::format_to(ctx.out(), "{}No suggestions available",
-					outCode || outMessage || outTime || outSource || outDetails || outCustomMessage ? " | " : "");
+					needSeparator ? " | " : "");
 			}
 			else
 			{
@@ -358,7 +366,7 @@ struct std::formatter<PGUI::Error, Char>
 					| std::ranges::to<std::wstring>();
 				
 				std::format_to(ctx.out(), "{}Suggestions: {}",
-					outCode || outMessage || outTime || outSource || outDetails || outCustomMessage ? " | " : "",
+					needSeparator ? " | " : "",
 					PGUI::WStringToString(suggestionsString));
 			}
 		}

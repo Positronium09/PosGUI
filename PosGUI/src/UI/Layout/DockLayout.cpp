@@ -22,17 +22,6 @@ namespace PGUI::UI::Layout
 		dockPriorities.insert_or_assign(DockPosition::Bottom, DockPriority::Fourth);
 	}
 
-	auto DockLayout::AddItem(const LayoutItem& item, DockPosition position) noexcept -> void
-	{
-		dockPositions.insert_or_assign(GetItemCount(), position);
-		LayoutPanel::AddItem(item);
-	}
-
-	auto DockLayout::AddItem(const LayoutItem& item) noexcept -> void
-	{
-		AddItem(item, DockPosition::None);
-	}
-
 	auto DockLayout::SetDockPosition(const LayoutItem& item, const DockPosition position) -> void
 	{
 		if (const auto result = GetItemIndex(item);
@@ -154,12 +143,12 @@ namespace PGUI::UI::Layout
 				return ToUnderlying(priorityA) < ToUnderlying(priorityB);
 			});
 
-		const auto space = GetBounds();
+		const auto space = GetRect();
 		auto availableSpace = space;
 
-		for (const auto& [id, position] : dockedItems)
+		for (auto& [id, position] : dockedItems)
 		{
-			const auto item = *GetItem(id);
+			auto item = *GetItem(id);
 			switch (position)
 			{
 				case DockPosition::Top:
@@ -170,13 +159,13 @@ namespace PGUI::UI::Layout
 					{
 						topHeight = maxDockSizes[DockPosition::Top] - availableSpace.top;
 					}
-					const auto rect = RectF{
+					const auto itemRect = RectF{
 						availableSpace.left,
 						availableSpace.top,
 						availableSpace.right,
 						availableSpace.top + topHeight
 					};
-					ArrangeItem(item, rect);
+					ArrangeItem(item, itemRect);
 					availableSpace.top += topHeight;
 					break;
 				}
@@ -188,13 +177,13 @@ namespace PGUI::UI::Layout
 					{
 						bottomHeight = maxDockSizes[DockPosition::Bottom] - space.bottom + availableSpace.bottom;
 					}
-					const auto rect = RectF{
+					const auto itemRect = RectF{
 						availableSpace.left,
 						availableSpace.bottom - bottomHeight,
 						availableSpace.right,
 						availableSpace.bottom
 					};
-					ArrangeItem(item, rect);
+					ArrangeItem(item, itemRect);
 					availableSpace.bottom -= bottomHeight;
 					break;
 				}
@@ -206,13 +195,13 @@ namespace PGUI::UI::Layout
 					{
 						leftWidth = maxDockSizes[DockPosition::Left] - availableSpace.left;
 					}
-					const auto rect = RectF{
+					const auto itemRect = RectF{
 						availableSpace.left,
 						availableSpace.top,
 						availableSpace.left + leftWidth,
 						availableSpace.bottom
 					};
-					ArrangeItem(item, rect);
+					ArrangeItem(item, itemRect);
 					availableSpace.left += leftWidth;
 					break;
 				}
@@ -224,13 +213,13 @@ namespace PGUI::UI::Layout
 					{
 						rightWidth = maxDockSizes[DockPosition::Right] - space.right + availableSpace.right;
 					}
-					const auto rect = RectF{
+					const auto itemRect = RectF{
 						availableSpace.right - rightWidth,
 						availableSpace.top,
 						availableSpace.right,
 						availableSpace.bottom
 					};
-					ArrangeItem(item, rect);
+					ArrangeItem(item, itemRect);
 					availableSpace.right -= rightWidth;
 					break;
 				}
@@ -245,6 +234,18 @@ namespace PGUI::UI::Layout
 				}
 			}
 		}
+	}
+
+	auto DockLayout::OnItemAdded(const LayoutItem& layoutItem) -> void
+	{
+		if (const auto result = GetItemIndex(layoutItem);
+			result.has_value() && !dockPositions.contains(*result))
+		{
+			LayoutPanel::OnItemAdded(layoutItem);
+			return;
+		}
+		dockPositions.insert_or_assign(GetItemCount(), DockPosition::None);
+		LayoutPanel::OnItemAdded(layoutItem);
 	}
 
 	auto DockLayout::OnItemRemoved(const std::size_t id) -> void

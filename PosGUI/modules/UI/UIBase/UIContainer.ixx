@@ -13,7 +13,7 @@ export namespace PGUI::UI
 	{
 		public:
 		template <UIElementType T, typename... Args>
-		const auto& CreateAndAdd(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
+		auto CreateAndAdd(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
 		{
 			elements.emplace_back(std::make_shared<T>(std::forward<Args>(args)...));
 			const auto& element = elements.back();
@@ -21,7 +21,7 @@ export namespace PGUI::UI
 
 			zOrderDirty = true;
 
-			return element;
+			return std::dynamic_pointer_cast<T>(element);
 		}
 		auto AddElement(const UIElementPtr& ptr) noexcept -> void;
 
@@ -84,24 +84,87 @@ export namespace PGUI::UI
 
 		auto Move(const PointF position) -> void override
 		{
+			PositionChangedEvent positionChangedEvent;
+			positionChangedEvent.type = EventType::PositionChanged;
+			positionChangedEvent.oldPosition = rect.TopLeft();
+			positionChangedEvent.newPosition = position;
+
+			const auto offset = position - rect.TopLeft();
 			rect = RectF{ position, rect.Size() };
+			EnsureElementsAreRelative(offset);
+
+			HandleEvent(positionChangedEvent);
 		}
 		auto Resize(const SizeF size) -> void override
 		{
+			SizeChangedEvent sizeChangedEvent;
+			sizeChangedEvent.type = EventType::SizeChanged;
+			sizeChangedEvent.oldSize = rect.Size();
+			sizeChangedEvent.newSize = size;
+
 			rect = RectF{ rect.TopLeft(), size };
-		}
-		auto MoveAndResize(const PointF position, const SizeF size) -> void override
-		{
-			rect = RectF{ position, size };
+
+			HandleEvent(sizeChangedEvent);
 		}
 		auto MoveAndResize(const RectF newRect) -> void override
 		{
+			RectChangedEvent rectChangedEvent;
+			rectChangedEvent.type = EventType::RectChanged;
+			rectChangedEvent.oldRect = rect;
+			rectChangedEvent.newRect = newRect;
+
+			const auto offset = newRect.TopLeft() - rect.TopLeft();
 			rect = newRect;
+			EnsureElementsAreRelative(offset);
+			HandleEvent(rectChangedEvent);
+		}
+		auto MoveAndResize(const PointF position, const SizeF size) -> void override
+		{
+			MoveAndResize(RectF{ position, size });
+		}
+
+		[[nodiscard]] auto& GetLayoutPanel() noexcept
+		{
+			return *layoutPanel;
+		}
+		[[nodiscard]] const auto& GetLayoutPanel() const noexcept
+		{
+			return *layoutPanel;
+		}
+		auto SetLayoutPanel(std::unique_ptr<Layout::LayoutPanel> newLayoutPanel) noexcept -> void
+		{
+			layoutPanel = std::move(newLayoutPanel);
+			if (!layoutPanel)
+			{
+				return;
+			}
+			layoutPanel->MoveAndResize(GetRect());
+			for (auto& element : elements)
+			{
+				layoutPanel->AddItem(*element);
+			}
+		}
+		auto RemoveLayoutPanel() noexcept -> void
+		{
+			layoutPanel.reset();
 		}
 
 		private:
 		bool zOrderDirty = false;
 		RectF rect;
 		std::vector<UIElementPtr> elements;
+		std::unique_ptr<Layout::LayoutPanel> layoutPanel;
+
+		auto EnsureElementsAreRelative(const PointF offset) const noexcept -> void
+		{
+			if (offset.IsZero())
+			{
+				return;
+			}
+			for (const auto& element : elements)
+			{
+				element->Move(element->GetPosition() + offset);
+			}
+		}
 	};
 }

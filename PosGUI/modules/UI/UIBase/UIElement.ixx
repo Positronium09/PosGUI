@@ -5,6 +5,7 @@ import :UIEvent;
 
 import PGUI.DataBinding.Property;
 import PGUI.UI.Graphics;
+import PGUI.Event;
 import PGUI.Shape2D;
 
 export namespace PGUI::UI
@@ -29,6 +30,7 @@ export namespace PGUI::UI
 			{
 				parent->Invalidate();
 			}
+			invalidateRequest.Invoke(this);
 		}
 
 		virtual auto HandleEvent(UIEvent&) -> void
@@ -47,17 +49,46 @@ export namespace PGUI::UI
 
 		[[nodiscard]] virtual auto HitTest(PointF point) noexcept -> bool = 0;
 
+		[[nodiscard]] auto ConvertToRelative(const RectF rect) const noexcept
+		{
+			const auto pos = GetPosition();
+			return rect.Shifted(pos);
+		}
+		[[nodiscard]] auto ConvertToAbsolute(const RectF rect) const noexcept
+		{
+			const auto pos = GetPosition();
+			return rect.Shifted(-pos);
+		}
+		[[nodiscard]] auto ConvertToRelative(const PointF point) const noexcept
+		{
+			const auto pos = GetPosition();
+			return point.Shifted(pos);
+		}
+		[[nodiscard]] auto ConvertToAbsolute(const PointF point) const noexcept
+		{
+			const auto pos = GetPosition();
+			return point.Shifted(-pos);
+		}
+
+		[[nodiscard]] auto& InvalidateRequest() noexcept
+		{
+			return invalidateRequest;
+		}
+		[[nodiscard]] const auto& InvalidateRequest() const noexcept
+		{
+			return invalidateRequest;
+		}
+
 		auto SetFocus() noexcept -> void
 		{
 			if (!focusable)
 			{
 				return;
 			}
-			if (parent != nullptr)
-			{
-				parent->SetFocus();
-			}
 			hasFocus = true;
+			UIEvent focusEvent;
+			focusEvent.type = EventType::GotFocus;
+			HandleEvent(focusEvent);
 		}
 		auto RemoveFocus() noexcept
 		{
@@ -66,6 +97,9 @@ export namespace PGUI::UI
 				return;
 			}
 			hasFocus = false;
+			UIEvent focusEvent;
+			focusEvent.type = EventType::LostFocus;
+			HandleEvent(focusEvent);
 		}
 		[[nodiscard]] auto HasFocus() const noexcept
 		{
@@ -101,7 +135,7 @@ export namespace PGUI::UI
 		{
 			return parent;
 		}
-		[[nodiscard]] auto GetAncestor() const noexcept
+		[[nodiscard]] auto GetRoot() const noexcept
 		{
 			auto current = parent;
 			while (current && current->HasParent())
@@ -138,7 +172,7 @@ export namespace PGUI::UI
 		}
 		auto Enable() noexcept -> void
 		{
-			if (*enabled)
+			if (!*enabled)
 			{
 				SetEnabled(true);
 			}
@@ -156,6 +190,20 @@ export namespace PGUI::UI
 			return std::bit_cast<std::uintptr_t>(this);
 		}
 
+		[[nodiscard]] auto IsVisible() const noexcept -> bool
+		{
+			if (parent == nullptr)
+			{
+				return true;
+			}
+			return parent->GetRect().Intersects(GetRect());
+		}
+
+		auto operator==(const UIElement& other) const noexcept -> bool
+		{
+			return this == &other;
+		}
+
 		protected:
 		auto SetFocusable(const bool isFocusable) noexcept -> void
 		{
@@ -165,6 +213,7 @@ export namespace PGUI::UI
 		private:
 		RawUIElementPtr parent = nullptr;
 		bool focusable = false;
+		EventSRWM<RawCUIElementPtr> invalidateRequest;
 		DataBinding::PropertyNM<bool> hasFocus{ false };
 		DataBinding::PropertyNM<bool> enabled{ true };
 		DataBinding::PropertyNM<ZIndex> zIndex{ ZIndices::Normal };

@@ -26,6 +26,9 @@ export namespace PGUI::UI
 		KeyUp,
 		GotFocus,
 		LostFocus,
+		RectChanged,
+		SizeChanged,
+		PositionChanged
 	};
 
 	enum class MouseButton

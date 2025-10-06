@@ -33,8 +33,8 @@ namespace PGUI
 		(void)UI::Animation::AnimationTransitionLibrary::GetInstance();
 
 		UI::Theming::SystemTheme::RegisterSystemEventChanges();
-		
 		UI::Theming::ThemeContext::InitializeThemes();
+		
 		if (UI::Theming::SystemTheme::IsDarkMode())
 		{
 			UI::Theming::ThemeContext::ChangeCurrentTheme(UI::Theming::ThemeContext::DarkTheme);

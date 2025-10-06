@@ -3,6 +3,8 @@
 
 export module PGUI.UI.Layout.StackLayout;
 
+import std;
+
 import PGUI.UI.Graphics;
 import PGUI.UI.Layout.LayoutEnums;
 import PGUI.UI.Layout.LayoutStructs;
@@ -56,10 +58,10 @@ export namespace PGUI::UI::Layout
 		[[nodiscard]] auto GetWrapMode() const noexcept { return wrapMode; }
 
 		protected:
-		auto RearrangeHorizontalNoWrap() const noexcept -> void;
-		auto RearrangeVerticalNoWrap() const noexcept -> void;
-		auto RearrangeHorizontalWrap() const noexcept -> void;
-		auto RearrangeVerticalWrap() const noexcept -> void;
+		auto RearrangeHorizontalNoWrap() noexcept -> void;
+		auto RearrangeVerticalNoWrap() noexcept -> void;
+		auto RearrangeHorizontalWrap() noexcept -> void;
+		auto RearrangeVerticalWrap() noexcept -> void;
 
 		private:
 		LayoutOrientation orientation;
@@ -72,9 +74,9 @@ export namespace PGUI::UI::Layout
 
 		auto RearrangeHorizontalRow(
 			std::size_t startChildIndex, std::size_t endChildIndex,
-			float yPosition, std::size_t rowCount) const noexcept -> void;
+			float yPosition, std::size_t rowCount) noexcept -> void;
 		auto RearrangeVerticalColumn(
 			std::size_t startChildIndex, std::size_t endChildIndex,
-			float xPosition, std::size_t columnCount) const noexcept -> void;
+			float xPosition, std::size_t columnCount) noexcept -> void;
 	};
 }

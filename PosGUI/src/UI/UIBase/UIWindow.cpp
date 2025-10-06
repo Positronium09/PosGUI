@@ -63,13 +63,13 @@ namespace PGUI::UI
 		EndDraw();
 	}
 
-	auto UIWindow::OnSizeChanged(const SizeL sizeL) -> void
+	auto UIWindow::OnSizeChanged(const SizeL size) -> void
 	{
-		DirectXCompositionWindow::OnSizeChanged(sizeL);
-		childrenContainer.Resize(SizeF{ static_cast<float>(sizeL.cx), static_cast<float>(sizeL.cy) });
+		DirectXCompositionWindow::OnSizeChanged(size);
+		childrenContainer.Resize(GetClientSize());
 	}
 
-	auto UIWindow::OnNCCreate(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult
+	auto UIWindow::OnNCCreate(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
 	{
 		auto style = GetClassStyle();
 		style |= CS_DBLCLKS;
@@ -84,12 +84,19 @@ namespace PGUI::UI
 			}
 		}
 
+		childrenContainer.InvalidateRequest().AddCallback(
+			[this](RawCUIElementPtr)
+			{
+				Invalidate();
+			}
+		);
+
 		return 0;
 	}
 
 	auto UIWindow::OnFocusChanged(const UINT msg, WPARAM, LPARAM) const noexcept -> MessageHandlerResult
 	{
-		if (!focusedElement || msg != WM_SETFOCUS || msg != WM_KILLFOCUS)
+		if (!focusedElement || (msg != WM_SETFOCUS && msg != WM_KILLFOCUS))
 		{
 			return 0;
 		}
@@ -147,7 +154,7 @@ namespace PGUI::UI
 	auto UIWindow::OnKey(const UINT msg, const WPARAM wParam,
 	                     const LPARAM lParam) const noexcept -> MessageHandlerResult
 	{
-		if (!focusedElement || msg != WM_KEYDOWN || msg != WM_KEYUP)
+		if (!focusedElement || (msg != WM_KEYDOWN && msg != WM_KEYUP))
 		{
 			return 0;
 		}
@@ -293,51 +300,24 @@ namespace PGUI::UI
 	auto UIWindow::OnMouseButtonDown(const UINT msg, const WPARAM wParam,
 	                                 const LPARAM lParam) noexcept -> MessageHandlerResult
 	{
-		if (!hoveredElement && !focusedElement)
-		{
-			return 0;
-		}
+		const auto retVal = msg == WM_XBUTTONDOWN ? 1 : 0;
 
 		const auto modifierKeys = GetModifierKeysFromWparam(wParam);
-		auto mouseButton = GetMouseButtonsFromWparam(wParam);
+		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		switch (msg)
+		if (focusedElement && !focusedElement->HitTest(mousePos))
 		{
-			case WM_LBUTTONDOWN:
-			{
-				mouseButton |= MouseButton::Left;
-				break;
-			}
-			case WM_RBUTTONDOWN:
-			{
-				mouseButton |= MouseButton::Right;
-				break;
-			}
-			case WM_MBUTTONDOWN:
-			{
-				mouseButton |= MouseButton::Middle;
-				break;
-			}
-			case WM_XBUTTONDOWN:
-			{
-				if (HIWORD(wParam) == XBUTTON1)
-				{
-					mouseButton |= MouseButton::XButton1;
-				}
-				else if (HIWORD(wParam) == XBUTTON2)
-				{
-					mouseButton |= MouseButton::XButton2;
-				}
-				break;
-			}
-			default:
-				return 0;
+			ChangeFocusedElement(nullptr);
 		}
 
 		if (hoveredElement != nullptr)
 		{
 			ChangeFocusedElement(hoveredElement);
+		}
+		if (!focusedElement)
+		{
+			return retVal;
 		}
 
 		MouseEvent mouseEvent;
@@ -347,57 +327,25 @@ namespace PGUI::UI
 		mouseEvent.mouseButton = mouseButton;
 		focusedElement->HandleEvent(mouseEvent);
 
-		return 0;
+		return retVal;
 	}
 
 	auto UIWindow::OnMouseButtonUp(const UINT msg, const WPARAM wParam,
 	                               const LPARAM lParam) noexcept -> MessageHandlerResult
 	{
-		if (!hoveredElement && !focusedElement)
-		{
-			return 0;
-		}
+		const auto retVal = msg == WM_XBUTTONUP ? 1 : 0;
 
 		const auto modifierKeys = GetModifierKeysFromWparam(wParam);
-		auto mouseButton = GetMouseButtonsFromWparam(wParam);
+		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
-
-		switch (msg)
-		{
-			case WM_LBUTTONUP:
-			{
-				mouseButton |= MouseButton::Left;
-				break;
-			}
-			case WM_RBUTTONUP:
-			{
-				mouseButton |= MouseButton::Right;
-				break;
-			}
-			case WM_MBUTTONUP:
-			{
-				mouseButton |= MouseButton::Middle;
-				break;
-			}
-			case WM_XBUTTONUP:
-			{
-				if (HIWORD(wParam) == XBUTTON1)
-				{
-					mouseButton |= MouseButton::XButton1;
-				}
-				else if (HIWORD(wParam) == XBUTTON2)
-				{
-					mouseButton |= MouseButton::XButton2;
-				}
-				break;
-			}
-			default:
-				return 0;
-		}
 
 		if (hoveredElement != nullptr)
 		{
 			ChangeFocusedElement(hoveredElement);
+		}
+		if (!focusedElement)
+		{
+			return retVal;
 		}
 
 		MouseEvent mouseEvent;
@@ -407,57 +355,30 @@ namespace PGUI::UI
 		mouseEvent.mouseButton = mouseButton;
 		focusedElement->HandleEvent(mouseEvent);
 
-		return 0;
+		return retVal;
 	}
 
 	auto UIWindow::OnMouseDoubleClick(const UINT msg, const WPARAM wParam,
 	                                  const LPARAM lParam) noexcept -> MessageHandlerResult
 	{
-		if (!hoveredElement && !focusedElement)
-		{
-			return 0;
-		}
+		const auto retVal = msg == WM_XBUTTONDBLCLK ? 1 : 0;
 
 		const auto modifierKeys = GetModifierKeysFromWparam(wParam);
-		auto mouseButton = GetMouseButtonsFromWparam(wParam);
+		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		switch (msg)
+		if (focusedElement && !focusedElement->HitTest(mousePos))
 		{
-			case WM_LBUTTONDBLCLK:
-			{
-				mouseButton |= MouseButton::Left;
-				break;
-			}
-			case WM_RBUTTONDBLCLK:
-			{
-				mouseButton |= MouseButton::Right;
-				break;
-			}
-			case WM_MBUTTONDBLCLK:
-			{
-				mouseButton |= MouseButton::Middle;
-				break;
-			}
-			case WM_XBUTTONDBLCLK:
-			{
-				if (HIWORD(wParam) == XBUTTON1)
-				{
-					mouseButton |= MouseButton::XButton1;
-				}
-				else if (HIWORD(wParam) == XBUTTON2)
-				{
-					mouseButton |= MouseButton::XButton2;
-				}
-				break;
-			}
-			default:
-				return 0;
+			ChangeFocusedElement(nullptr);
 		}
 
 		if (hoveredElement != nullptr)
 		{
 			ChangeFocusedElement(hoveredElement);
+		}
+		if (!focusedElement)
+		{
+			return retVal;
 		}
 
 		MouseEvent mouseEvent;
@@ -467,6 +388,6 @@ namespace PGUI::UI
 		mouseEvent.mouseButton = mouseButton;
 		focusedElement->HandleEvent(mouseEvent);
 
-		return 0;
+		return retVal;
 	}
 }

@@ -33,37 +33,16 @@ export namespace PGUI::UI::Layout
 		public:
 		explicit DockLayout(RectF bounds) noexcept;
 
-		auto AddItem(const LayoutItem& item, DockPosition position) noexcept -> void;
+		template <typename T>
+		auto AddItem(const T& item, DockPosition position) noexcept -> void
+		{
+			dockPositions.insert_or_assign(GetItemCount() - 1, position);
+			LayoutPanel::AddItem(item);
+		}
 
 		auto SetDockPosition(const LayoutItem& item, DockPosition position) -> void;
-		auto SetDockPosition(const RawPtr<LayoutItem> item, const DockPosition position) -> void
-		{
-			SetDockPosition(*item, position);
-		}
-		auto SetDockPosition(const RawWindowPtr<> wnd, const DockPosition position) noexcept -> void
-		{
-			const LayoutItem item = wnd;
-			SetDockPosition(item, position);
-		}
-		auto SetDockPosition(LayoutPanel& panel, const DockPosition position)
-		{
-			SetDockPosition(&panel, position);
-		}
 
 		[[nodiscard]] auto GetDockPosition(const LayoutItem& item) const noexcept -> Result<DockPosition>;
-		[[nodiscard]] auto GetDockPosition(const RawPtr<LayoutItem> item) const noexcept -> Result<DockPosition>
-		{
-			return GetDockPosition(*item);
-		}
-		[[nodiscard]] auto GetDockPosition(const RawWindowPtr<> wnd) const noexcept
-		{
-			const LayoutItem item = wnd;
-			return GetDockPosition(item);
-		}
-		[[nodiscard]] auto GetDockPosition(LayoutPanel& panel) const noexcept
-		{
-			return GetDockPosition(&panel);
-		}
 
 		auto SetMaxDockSize(DockPosition position, float size) noexcept -> Error;
 		auto ClearMaxDockSize(DockPosition position) noexcept -> void;
@@ -79,13 +58,12 @@ export namespace PGUI::UI::Layout
 		std::unordered_map<DockPosition, float> maxDockSizes;
 		std::unordered_map<DockPosition, DockPriority> dockPriorities;
 
-		auto AddItem(const LayoutItem& item) noexcept -> void override;
-
 		auto SetDockPosition(std::size_t id, DockPosition position) noexcept -> void;
 		[[nodiscard]] auto GetItemPosition(std::size_t id) const noexcept -> Result<DockPosition>;
 
 		auto RearrangeItems() noexcept -> void override;
 
+		auto OnItemAdded(const LayoutItem&) -> void override;
 		auto OnItemRemoved(std::size_t id) -> void override;
 	};
 }

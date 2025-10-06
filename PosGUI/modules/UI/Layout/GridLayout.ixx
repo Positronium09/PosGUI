@@ -122,30 +122,16 @@ export namespace PGUI::UI::Layout
 			return std::make_pair(rowGap, columnGap);
 		}
 
-		auto AddItem(const LayoutItem& item, const GridItemProperties& properties) noexcept -> void;
-		auto AddItem(const LayoutItem& item) noexcept -> void override;
+		template <typename T>
+		auto AddItem(const T& item, const GridItemProperties& properties) noexcept -> void
+		{
+			SetItemProperty(GetItemCount(), properties);
+			LayoutPanel::AddItem(item);
+		}
 
 		auto SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void;
-		auto SetItemProperty(const RawWindowPtr<> wnd, const GridItemProperties& properties) noexcept -> void
-		{
-			const LayoutItem item = wnd;
-			SetItemProperty(item, properties);
-		}
-		auto SetItemProperty(LayoutPanel& panel, const GridItemProperties& properties)
-		{
-			SetItemProperty(&panel, properties);
-		}
 
 		[[nodiscard]] auto GetItemProperty(const LayoutItem& item) const noexcept -> Result<GridItemProperties>;
-		[[nodiscard]] auto GetItemProperty(const RawWindowPtr<> wnd) const noexcept
-		{
-			const LayoutItem item = wnd;
-			return GetItemProperty(item);
-		}
-		[[nodiscard]] auto GetItemProperty(LayoutPanel& panel) const noexcept
-		{
-			return GetItemProperty(&panel);
-		}
 
 		auto SetMinCellSize(FixedSize size) noexcept -> void;
 		[[nodiscard]] auto GetMinCellSize() const noexcept
@@ -195,9 +181,9 @@ export namespace PGUI::UI::Layout
 			return growToFit;
 		}
 
-		auto SetPadding(const GridLayoutPadding& padding_) noexcept -> void
+		auto SetPadding(const GridLayoutPadding& newPadding) noexcept -> void
 		{
-			padding = padding_;
+			padding = newPadding;
 			RearrangeItems();
 		}
 		[[nodiscard]] auto GetPadding() const noexcept
@@ -308,6 +294,7 @@ export namespace PGUI::UI::Layout
 			return column + value <= columnDefinitions.size();
 		}
 
+		auto OnItemAdded(const LayoutItem&) -> void override;
 		auto OnItemRemoved(std::size_t) -> void override;
 	};
 }

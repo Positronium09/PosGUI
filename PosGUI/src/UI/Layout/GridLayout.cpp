@@ -74,17 +74,6 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto GridLayout::AddItem(const LayoutItem& item) noexcept -> void
-	{
-		AddItem(item, GridItemProperties{ });
-	}
-
-	auto GridLayout::AddItem(const LayoutItem& item, const GridItemProperties& properties) noexcept -> void
-	{
-		SetItemProperty(GetItemCount(), properties);
-		LayoutPanel::AddItem(item);
-	}
-
 	auto GridLayout::SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void
 	{
 		if (const auto result = GetItemId(item);
@@ -342,8 +331,8 @@ namespace PGUI::UI::Layout
 		for (const auto& [id, positions] : itemPositions)
 		{
 			const auto& [row, column, rowSpan, columnSpan] = positions;
-			const auto rect = placeFixedPosition(row, column, rowSpan, columnSpan);
-			ArrangeItem(*GetItem(id), rect);
+			const auto itemRect = placeFixedPosition(row, column, rowSpan, columnSpan);
+			ArrangeItem(*GetItem(id), itemRect);
 		}
 	}
 
@@ -451,7 +440,7 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::GetRowSizes(const std::size_t rowCount) const noexcept -> std::vector<long>
 	{
-		const auto availableSpace = GetBoundsSize().cy - (
+		const auto availableSpace = GetSize().cy - (
 			                            padding.top + padding.bottom + static_cast<long>(rowCount - 1) * rowGap
 		                            );
 		const auto nonDefinedRowCount = std::clamp(
@@ -525,7 +514,7 @@ namespace PGUI::UI::Layout
 			                rowSizes.end(), 0L) +
 			(rowCount - 1) * rowGap;
 
-		if (const auto totalSpace = GetBoundsSize().cy - (padding.top + padding.bottom);
+		if (const auto totalSpace = GetSize().cy - (padding.top + padding.bottom);
 			totalRowSize < totalSpace)
 		{
 			const auto delta = totalSpace - totalRowSize;
@@ -542,7 +531,7 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::GetColumnSizes(const std::size_t columnCount) const noexcept -> std::vector<long>
 	{
-		const auto availableSpace = GetBoundsSize().cx - (
+		const auto availableSpace = GetSize().cx - (
 			                            padding.left + padding.right + static_cast<long>(columnCount - 1) * columnGap
 		                            );
 		const auto nonDefinedColumnCount = std::clamp(
@@ -613,7 +602,7 @@ namespace PGUI::UI::Layout
 			std::accumulate(columnSizes.begin(),
 			                columnSizes.end(), 0L) +
 			(columnCount - 1) * columnGap;
-		if (const auto totalSpace = GetBoundsSize().cx - (padding.left + padding.right);
+		if (const auto totalSpace = GetSize().cx - (padding.left + padding.right);
 			totalColumnSize < totalSpace)
 		{
 			const auto delta = totalSpace - totalColumnSize;
@@ -625,6 +614,12 @@ namespace PGUI::UI::Layout
 		}
 
 		return columnSizes;
+	}
+
+	auto GridLayout::OnItemAdded(const LayoutItem& layoutItem) -> void
+	{
+		LayoutPanel::OnItemAdded(layoutItem);
+		SetItemProperty(layoutItem, GridItemProperties{ });
 	}
 
 	auto GridLayout::OnItemRemoved(std::size_t size) -> void

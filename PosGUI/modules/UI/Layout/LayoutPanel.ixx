@@ -1,6 +1,8 @@
 ﻿module;
 #include <Windows.h>
 
+#undef GetObject
+
 export module PGUI.UI.Layout.LayoutPanel;
 
 import std;
@@ -9,42 +11,147 @@ import PGUI.Window;
 import PGUI.Shape2D;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
+import TypeErasure;
+
+export namespace PGUI::UI::Layout::Detail
+{
+	struct LayoutItemFeature
+	{
+		template <typename T>
+		struct Validator
+		{
+			static constexpr auto value =
+				requires (T& t)
+			{
+				t.MoveAndResize(RectF{ });
+				t.MoveAndResize(PointF{ }, SizeF{ });
+				t.Move(PointF{ });
+				t.Resize(SizeF{ });
+				{ t.GetRect() } -> std::same_as<RectF>;
+				{ t.GetSize() } -> std::same_as<SizeF>;
+				{ t.GetPosition() } -> std::same_as<PointF>;
+			};
+		};
+
+		template <typename V>
+		struct VTable : virtual V
+		{
+			virtual auto MoveAndResize(RectF) noexcept -> void = 0;
+			virtual auto MoveAndResize(PointF, SizeF) noexcept -> void = 0;
+			virtual auto Move(PointF) noexcept -> void = 0;
+			virtual auto Resize(SizeF) noexcept -> void = 0;
+			virtual auto GetRect() const noexcept -> RectF = 0;
+			virtual auto GetSize() const noexcept -> SizeF = 0;
+			virtual auto GetPosition() const noexcept -> PointF = 0;
+		};
+
+		template <typename M>
+		struct Model : M
+		{
+			using M::M;
+			auto MoveAndResize(const RectF rect) noexcept -> void override
+			{
+				this->GetObject().MoveAndResize(rect);
+			}
+			auto MoveAndResize(const PointF point, const SizeF size) noexcept -> void override
+			{
+				this->GetObject().MoveAndResize(point, size);
+			}
+			auto Move(const PointF point) noexcept -> void override
+			{
+				this->GetObject().Move(point);
+			}
+			auto Resize(const SizeF size) noexcept -> void override
+			{
+				this->GetObject().Resize(size);
+			}
+			auto GetRect() const noexcept -> RectF override
+			{
+				return this->GetObject().GetRect();
+			}
+			auto GetSize() const noexcept -> SizeF override
+			{
+				return this->GetObject().GetSize();
+			}
+			auto GetPosition() const noexcept -> PointF override
+			{
+				return this->GetObject().GetPosition();
+			}
+		};
+
+		template <typename I>
+		struct Interface : I
+		{
+			auto MoveAndResize(const RectF rect) noexcept -> void
+			{
+				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->MoveAndResize(rect);
+			}
+			auto MoveAndResize(const PointF point, const SizeF size) noexcept -> void
+			{
+				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->MoveAndResize(point, size);
+			}
+			auto Move(const PointF point) noexcept -> void
+			{
+				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->Move(point);
+			}
+			auto Resize(const SizeF size) noexcept -> void
+			{
+				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->Resize(size);
+			}
+			auto GetRect() const noexcept -> RectF
+			{
+				return dynamic_cast<const VTable<TypeErasure::VTableBase>*>(this->GetVTable())->GetRect();
+			}
+			auto GetSize() const noexcept -> SizeF
+			{
+				return dynamic_cast<const VTable<TypeErasure::VTableBase>*>(this->GetVTable())->GetSize();
+			}
+			auto GetPosition() const noexcept -> PointF
+			{
+				return dynamic_cast<const VTable<TypeErasure::VTableBase>*>(this->GetVTable())->GetPosition();
+			}
+			auto operator==(const Interface& other) const noexcept
+			{
+				return this->GetVTable() == other.GetVTable();
+			}
+		};
+	};
+	static_assert(TypeErasure::FeatureType<LayoutItemFeature>);
+}
 
 export namespace PGUI::UI::Layout
 {
-	class LayoutPanel;
+	using LayoutItemFeatures = TypeErasure::FeatureComposer<Detail::LayoutItemFeature, TypeErasure::Features::EqualityComparable>;
+	//using LayoutItemFeatures = TypeErasure::FeatureComposer<Detail::LayoutItemFeature>;
+	using LayoutItem = TypeErasure::Any<LayoutItemFeatures>;
 
-	using LayoutItem = std::variant<RawWindowPtr<>, RawPtr<LayoutPanel>>;
+	template <typename T>
+	auto MakeLayoutItem(T& item) noexcept
+	{
+		return TypeErasure::MakeAnyRef<LayoutItemFeatures>(item);
+	}
+
+	class LayoutPanel;
 
 	class LayoutPanel
 	{
 		public:
 		explicit LayoutPanel(const RectF bounds) noexcept :
-			bounds{ bounds }
+			rect{ bounds }
 		{
 		}
 		virtual ~LayoutPanel() noexcept = default;
 
 		virtual auto RearrangeItems() noexcept -> void = 0;
 
-		virtual auto AddItem(const LayoutItem& item) noexcept -> void
+		template <typename T> requires Detail::LayoutItemFeature::Validator<T>::value
+		auto AddItem(T& item) noexcept -> void
 		{
-			managedItems.push_back(item);
-			OnItemAdded(item);
+			managedItems.push_back(TypeErasure::MakeAnyRef<LayoutItemFeatures>(item));
+			OnItemAdded(managedItems.back());
 		}
-		auto AddItem(const WindowPtr<>& wnd) -> void
-		{
-			AddItem(wnd.get());
-		}
-		auto AddItem(const RawWindowPtr<>& wnd)
-		{
-			AddItem(LayoutItem{ wnd });
-		}
-		auto AddItem(LayoutPanel& panel)
-		{
-			AddItem(&panel);
-		}
-		virtual auto RemoveItem(const std::size_t index) -> Error
+
+		auto RemoveItem(const std::size_t index) -> Error
 		{
 			if (index >= managedItems.size())
 			{
@@ -56,34 +163,15 @@ export namespace PGUI::UI::Layout
 
 			return Error{ ErrorCode::Success };
 		}
-		auto RemoveItem(const HWND hwnd) noexcept
-		{
-			if (const auto it = std::ranges::find_if(managedItems,
-				[&hwnd](const LayoutItem& item)
-			{
-				if (std::holds_alternative<RawWindowPtr<>>(item))
-				{
-					return std::get<RawWindowPtr<>>(item)->Hwnd() == hwnd;
-				}
-				return false;
-			});
-			it != managedItems.end())
-			{
-				managedItems.erase(it);
-				OnItemRemoved(std::distance(managedItems.begin(), it));
-				return Error{ ErrorCode::Success };
-			}
-			return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given HWND not found in managed items");
-		}
-		auto RemoveItem(const RawWindowPtr<> wnd) noexcept
-		{
-			return RemoveItem(wnd->Hwnd());
-		}
 		[[nodiscard]] const auto& GetItems() const noexcept
 		{
 			return managedItems;
 		}
-		[[nodiscard]] auto GetItem(const std::size_t& index) const noexcept -> Result<LayoutItem>
+		[[nodiscard]] auto& GetItems() noexcept
+		{
+			return managedItems;
+		}
+		[[nodiscard]] auto GetItem(const std::size_t& index) const noexcept -> Result<std::reference_wrapper<const LayoutItem>>
 		{
 			if (index >= managedItems.size())
 			{
@@ -91,50 +179,19 @@ export namespace PGUI::UI::Layout
 					Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range")
 				};
 			}
+
 			return managedItems.at(index);
 		}
-		[[nodiscard]] auto GetItem(const HWND hwnd) const noexcept -> Result<LayoutItem>
+		[[nodiscard]] auto GetItem(const std::size_t& index) noexcept -> Result<std::reference_wrapper<LayoutItem>>
 		{
-			if (const auto it = std::ranges::find_if(managedItems,
-				[&hwnd](const LayoutItem& item)
+			if (index >= managedItems.size())
 			{
-				if (std::holds_alternative<RawWindowPtr<>>(item))
-				{
-					return std::get<RawWindowPtr<>>(item)->Hwnd() == hwnd;
-				}
-				return false;
-			});
-			it != managedItems.end())
-			{
-				return *it;
-			}
-			return Unexpected{
-				Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given HWND not found in managed items")
-			};
-		}
-		[[nodiscard]] auto GetItem(const RawWindowPtr<> wnd) const noexcept
-		{
-			return GetItem(wnd->Hwnd());
-		}
-		[[nodiscard]] auto GetItem(const LayoutPanel& panel) const noexcept -> Result<LayoutItem>
-		{
-			if (const auto it = std::ranges::find_if(managedItems,
-				[&panel](const LayoutItem& item)
-			{
-				if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
-				{
-					return std::get<RawPtr<LayoutPanel>>(item) == &panel;
-				}
-				return false;
-			});
-			it != managedItems.end())
-			{
-				return *it;
+				return Unexpected{
+					Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range")
+				};
 			}
 
-			return Unexpected{
-				Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given panel not found in managed items")
-			};
+			return managedItems.at(index);
 		}
 
 		[[nodiscard]] auto GetItemCount() const noexcept
@@ -189,30 +246,9 @@ export namespace PGUI::UI::Layout
 			return totalSize;
 		}
 
-		auto SetBounds(const RectF newBounds) noexcept
-		{
-			bounds = newBounds;
-			RearrangeItems();
-		}
-		[[nodiscard]] auto GetBounds() const noexcept
-		{
-			return bounds;
-		}
-		[[nodiscard]] auto GetBoundsSize() const noexcept
-		{
-			return bounds.Size();
-		}
 		static auto MeasureItem(const LayoutItem& item) noexcept -> SizeF
 		{
-			if (std::holds_alternative<RawWindowPtr<>>(item))
-			{
-				return std::get<RawWindowPtr<>>(item)->GetClientSize();
-			}
-			if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
-			{
-				return std::get<RawPtr<LayoutPanel>>(item)->GetBoundsSize();
-			}
-			std::unreachable();
+			return item.GetSize();
 		}
 		auto MeasureItem(const std::size_t index) const noexcept -> SizeF
 		{
@@ -223,18 +259,37 @@ export namespace PGUI::UI::Layout
 
 			return SizeF{ 0, 0 };
 		}
-
+		auto MoveAndResize(const RectF newRect) noexcept
+		{
+			rect = newRect;
+			RearrangeItems();
+		}
+		auto MoveAndResize(const PointF point, const SizeF size) noexcept
+		{
+			rect = { point, size };
+			RearrangeItems();
+		}
 		auto Move(const PointF point) noexcept
 		{
-			auto size = bounds.Size();
-			bounds = { point, size };
+			rect.Move(point);
 			RearrangeItems();
 		}
 		auto Resize(const SizeF size) noexcept
 		{
-			auto topLeft = bounds.TopLeft();
-			bounds = { topLeft, size };
+			rect.Resize(size);
 			RearrangeItems();
+		}
+		[[nodiscard]] auto GetRect() const noexcept -> RectF
+		{
+			return rect;
+		}
+		[[nodiscard]] auto GetSize() const noexcept -> SizeF
+		{
+			return rect.Size();
+		}
+		[[nodiscard]] auto GetPosition() const noexcept -> PointF
+		{
+			return rect.TopLeft();
 		}
 
 		protected:
@@ -244,19 +299,7 @@ export namespace PGUI::UI::Layout
 				GetItems(),
 				[&item](const auto& other)
 			{
-				if (item.index() != other.index())
-				{
-					return false;
-				}
-				if (std::holds_alternative<RawWindowPtr<>>(item))
-				{
-					return std::get<RawWindowPtr<>>(item)->Hwnd() == std::get<RawWindowPtr<>>(other)->Hwnd();
-				}
-				if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
-				{
-					return std::get<RawPtr<LayoutPanel>>(item) == std::get<RawPtr<LayoutPanel>>(other);
-				}
-				std::unreachable();
+				return item == other;
 			}); it != GetItems().end())
 			{
 				return std::distance(GetItems().begin(), it);
@@ -266,48 +309,23 @@ export namespace PGUI::UI::Layout
 				Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given item not found in managed items")
 			};
 		}
-		auto ArrangeItem(const LayoutItem& item, const RectF assignedBounds) const noexcept -> void
+		auto ArrangeItem(LayoutItem& item, const RectF assignedBounds) const noexcept -> void
 		{
 			auto converted = assignedBounds;
-			converted.Shift(bounds.TopLeft());
-			if (std::holds_alternative<RawWindowPtr<>>(item))
-			{
-				std::get<RawWindowPtr<>>(item)->MoveAndResize(converted);
-			}
-			else if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
-			{
-				std::get<RawPtr<LayoutPanel>>(item)->SetBounds(converted);
-			}
+			converted.Shift(rect.TopLeft());
+			item.MoveAndResize(converted);
 		}
-		auto MoveItem(const LayoutItem& item, const PointF point) const noexcept -> void
+		auto MoveItem(LayoutItem& item, const PointF point) const noexcept -> void
 		{
 			auto converted = point;
-			converted.Shift(bounds.TopLeft());
-			if (std::holds_alternative<RawWindowPtr<>>(item))
-			{
-				std::get<RawWindowPtr<>>(item)->Move(converted);
-			}
-			else if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
-			{
-				const auto currentBounds = std::get<RawPtr<LayoutPanel>>(item)->GetBounds();
-				const RectF assignedBounds{ converted, currentBounds.Size() };
-				std::get<RawPtr<LayoutPanel>>(item)->SetBounds(assignedBounds);
-			}
+			converted.Shift(rect.TopLeft());
+			item.Move(converted);
 		}
-		static auto ResizeItem(const LayoutItem& item, const SizeF size) noexcept -> void
+		static auto ResizeItem(LayoutItem& item, const SizeF size) noexcept -> void
 		{
-			if (std::holds_alternative<RawWindowPtr<>>(item))
-			{
-				std::get<RawWindowPtr<>>(item)->Resize(size);
-			}
-			else if (std::holds_alternative<RawPtr<LayoutPanel>>(item))
-			{
-				const auto currentBounds = std::get<RawPtr<LayoutPanel>>(item)->GetBounds();
-				const RectF assignedBounds{ currentBounds.TopLeft(), size };
-				std::get<RawPtr<LayoutPanel>>(item)->SetBounds(assignedBounds);
-			}
+			item.Resize(size);
 		}
-		auto ArrangeItem(const std::size_t index, const RectF assignedBounds) const noexcept -> Error
+		auto ArrangeItem(const std::size_t index, const RectF assignedBounds) noexcept -> Error
 		{
 			if (index >= managedItems.size())
 			{
@@ -316,7 +334,7 @@ export namespace PGUI::UI::Layout
 			ArrangeItem(managedItems.at(index), assignedBounds);
 			return Error{ ErrorCode::Success };
 		}
-		auto MoveItem(const std::size_t index, const PointF point) const noexcept -> Error
+		auto MoveItem(const std::size_t index, const PointF point) noexcept -> Error
 		{
 			if (index >= managedItems.size())
 			{
@@ -325,7 +343,7 @@ export namespace PGUI::UI::Layout
 			MoveItem(managedItems.at(index), point);
 			return Error{ ErrorCode::Success };
 		}
-		auto ResizeItem(const std::size_t index, const SizeF size) const noexcept -> Error
+		auto ResizeItem(const std::size_t index, const SizeF size) noexcept -> Error
 		{
 			if (index >= managedItems.size())
 			{
@@ -344,8 +362,13 @@ export namespace PGUI::UI::Layout
 			RearrangeItems();
 		}
 
+		auto operator==(const LayoutPanel& other) const noexcept -> bool
+		{
+			return this == &other;
+		}
+
 		private:
 		std::vector<LayoutItem> managedItems;
-		RectF bounds;
+		RectF rect;
 	};
 }

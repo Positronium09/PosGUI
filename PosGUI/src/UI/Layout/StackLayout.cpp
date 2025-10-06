@@ -115,9 +115,9 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto StackLayout::RearrangeHorizontalNoWrap() const noexcept -> void
+	auto StackLayout::RearrangeHorizontalNoWrap() noexcept -> void
 	{
-		const auto size = GetBoundsSize();
+		const auto size = GetSize();
 		const auto totalItemSize = GetTotalItemSize().cx;
 		const auto requiredSpace =
 			totalItemSize +
@@ -134,7 +134,7 @@ namespace PGUI::UI::Layout
 			position = (size.cx + padding.startPad - padding.endingPad - requiredSpace) / 2;
 		}
 
-		for (const auto& item : GetItems())
+		for (auto& item : GetItems())
 		{
 			const auto itemSize = MeasureItem(item);
 			float top = 0;
@@ -167,9 +167,9 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto StackLayout::RearrangeVerticalNoWrap() const noexcept -> void
+	auto StackLayout::RearrangeVerticalNoWrap() noexcept -> void
 	{
-		const auto size = GetBoundsSize();
+		const auto size = GetSize();
 		const auto totalItemSize = GetTotalItemSize().cy;
 		const auto requiredSpace =
 			totalItemSize +
@@ -186,7 +186,7 @@ namespace PGUI::UI::Layout
 			position = (size.cy + padding.startPad - padding.endingPad - requiredSpace) / 2;
 		}
 
-		for (const auto& item : GetItems())
+		for (auto& item : GetItems())
 		{
 			const auto itemSize = MeasureItem(item);
 			float left = 0;
@@ -219,9 +219,9 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto StackLayout::RearrangeHorizontalWrap() const noexcept -> void
+	auto StackLayout::RearrangeHorizontalWrap() noexcept -> void
 	{
-		const auto clientSize = GetBoundsSize();
+		const auto clientSize = GetSize();
 		const auto totalItemSize = GetTotalItemSize();
 		const auto availableWidth = clientSize.cx - padding.startPad - padding.endingPad;
 
@@ -265,7 +265,7 @@ namespace PGUI::UI::Layout
 		if (crossAxisAlignment == CrossAxisAlignment::Stretch)
 		{
 			const auto rowCount = rowSizes.size();
-			const auto height = (GetBoundsSize().cy -
+			const auto height = (GetSize().cy -
 			                     (padding.crossStartPad + padding.crossEndPad +
 			                      static_cast<float>(rowCount - 1) * crossAxisGap)) /
 			                    static_cast<float>(rowCount);
@@ -315,9 +315,9 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto StackLayout::RearrangeVerticalWrap() const noexcept -> void
+	auto StackLayout::RearrangeVerticalWrap() noexcept -> void
 	{
-		const auto clientSize = GetBoundsSize();
+		const auto clientSize = GetSize();
 		const auto totalItemSize = GetTotalItemSize();
 		const auto availableHeight = clientSize.cy - padding.startPad - padding.endingPad;
 
@@ -363,7 +363,7 @@ namespace PGUI::UI::Layout
 		if (crossAxisAlignment == CrossAxisAlignment::Stretch)
 		{
 			const auto columnCount = columnSizes.size();
-			const auto width = (GetBoundsSize().cx -
+			const auto width = (GetSize().cx -
 			                    (padding.crossStartPad + padding.crossEndPad +
 			                     static_cast<float>(columnCount - 1) * crossAxisGap)) /
 			                   static_cast<float>(columnCount);
@@ -419,10 +419,10 @@ namespace PGUI::UI::Layout
 	auto StackLayout::RearrangeHorizontalRow(
 		const std::size_t startChildIndex,
 		const std::size_t endChildIndex,
-		float yPosition, const std::size_t rowCount) const noexcept -> void
+		float yPosition, const std::size_t rowCount) noexcept -> void
 	{
 		auto currentX = padding.startPad;
-		const auto height = (GetBoundsSize().cy -
+		const auto height = (GetSize().cy -
 		                     (padding.crossStartPad + padding.crossEndPad +
 		                      static_cast<float>(rowCount - 1) * crossAxisGap)) /
 		                    static_cast<float>(rowCount);
@@ -439,7 +439,7 @@ namespace PGUI::UI::Layout
 						{
 							return sum + MeasureItem(item).cx;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableWidth = GetBoundsSize().cx -
+				const auto availableWidth = GetSize().cx -
 				                            padding.startPad - padding.endingPad;
 				currentX += (availableWidth - totalWidth) / 2;
 				break;
@@ -454,7 +454,7 @@ namespace PGUI::UI::Layout
 						{
 							return sum + MeasureItem(item).cx;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableWidth = GetBoundsSize().cx -
+				const auto availableWidth = GetSize().cx -
 				                            padding.startPad - padding.endingPad;
 				currentX += availableWidth - totalWidth;
 				break;
@@ -465,8 +465,8 @@ namespace PGUI::UI::Layout
 			}
 		}
 
-		for (const auto& item : GetItems() | std::views::drop(startChildIndex) |
-		                        std::views::take(endChildIndex - startChildIndex + 1))
+		for (auto& item : GetItems() | std::views::drop(startChildIndex) |
+		                  std::views::take(endChildIndex - startChildIndex + 1))
 		{
 			MoveItem(item, { currentX, yPosition });
 			if (GetCrossAxisAlignment() == CrossAxisAlignment::Stretch)
@@ -480,10 +480,10 @@ namespace PGUI::UI::Layout
 	auto StackLayout::RearrangeVerticalColumn(
 		const std::size_t startChildIndex,
 		const std::size_t endChildIndex,
-		float xPosition, const std::size_t columnCount) const noexcept -> void
+		float xPosition, const std::size_t columnCount) noexcept -> void
 	{
 		auto currentY = padding.startPad;
-		const auto width = (GetBoundsSize().cx -
+		const auto width = (GetSize().cx -
 		                    (padding.crossStartPad + padding.crossEndPad +
 		                     static_cast<float>(columnCount - 1) * crossAxisGap)) /
 		                   static_cast<float>(columnCount);
@@ -500,7 +500,7 @@ namespace PGUI::UI::Layout
 						{
 							return sum + MeasureItem(item).cy;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableHeight = GetBoundsSize().cy -
+				const auto availableHeight = GetSize().cy -
 				                             padding.startPad - padding.endingPad;
 				currentY += (availableHeight - totalHeight) / 2;
 				break;
@@ -515,7 +515,7 @@ namespace PGUI::UI::Layout
 						{
 							return sum + MeasureItem(item).cy;
 						}) + static_cast<float>(endChildIndex - startChildIndex) * mainAxisGap;
-				const auto availableHeight = GetBoundsSize().cy -
+				const auto availableHeight = GetSize().cy -
 				                             padding.startPad - padding.endingPad;
 				currentY += availableHeight - totalHeight;
 				break;
@@ -526,8 +526,8 @@ namespace PGUI::UI::Layout
 			}
 		}
 
-		for (const auto& item : GetItems() | std::views::drop(startChildIndex) |
-		                        std::views::take(endChildIndex - startChildIndex + 1))
+		for (auto& item : GetItems() | std::views::drop(startChildIndex) |
+		                  std::views::take(endChildIndex - startChildIndex + 1))
 		{
 			MoveItem(item, { xPosition, currentY });
 

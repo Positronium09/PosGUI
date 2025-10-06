@@ -130,7 +130,7 @@ namespace PGUI::UI
 			return Unexpected{
 				Error{
 					ErrorCode::InvalidArgument
-				}.AddDetail(L"Point", std::format(L"({}, {})", point.x, point.y))
+				}.AddDetail(L"Point", std::format(L"{}", point))
 			};
 		}
 
@@ -153,9 +153,16 @@ namespace PGUI::UI
 		};
 	}
 
-	auto UIContainer::HandleEvent(UIEvent&) -> void
+	auto UIContainer::HandleEvent(UIEvent& event) -> void
 	{
-		/*  */
+		if (event.type == EventType::RectChanged && layoutPanel)
+		{
+			layoutPanel->MoveAndResize(GetRect());
+		}
+		else if (event.type == EventType::SizeChanged && layoutPanel)
+		{
+			layoutPanel->Resize(GetSize());
+		}
 	}
 
 	auto UIContainer::EnsureZOrder() noexcept -> void
@@ -204,22 +211,18 @@ namespace PGUI::UI
 	{
 		EnsureZOrder();
 
-		std::vector<RectF> renderedRegions;
-		renderedRegions.reserve(elements.size());
-
 		for (const auto& element : elements | std::views::reverse)
 		{
 			if (!*element->IsEnabled())
 			{
 				continue;
 			}
-			if (element->GetRect().ContainedBy(renderedRegions))
+			if (!GetRect().Intersects(element->GetRect()))
 			{
 				continue;
 			}
 
 			element->Render(graphics);
-			renderedRegions.push_back(element->GetRect());
 		}
 	}
 }

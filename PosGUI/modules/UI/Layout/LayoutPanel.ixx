@@ -13,7 +13,7 @@ import PGUI.Utils;
 import PGUI.ErrorHandling;
 import TypeErasure;
 
-export namespace PGUI::UI::Layout::Detail
+namespace PGUI::UI::Layout::Detail
 {
 	struct LayoutItemFeature
 	{

@@ -33,6 +33,7 @@ export namespace PGUI::UI
 			return rect.Size();
 		}
 
+		auto HandleEvent(UIEvent&) -> void override;
 		[[nodiscard]] auto HitTest(PointF point) noexcept -> bool override;
 
 		[[nodiscard]] const auto& GetClip() const noexcept

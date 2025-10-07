@@ -619,7 +619,7 @@ namespace PGUI::UI::Layout
 	auto GridLayout::OnItemAdded(const LayoutItem& layoutItem) -> void
 	{
 		LayoutPanel::OnItemAdded(layoutItem);
-		SetItemProperty(layoutItem, GridItemProperties{ });
+		SetItemProperty(GetItemCount() - 1, GridItemProperties{ });
 	}
 
 	auto GridLayout::OnItemRemoved(std::size_t size) -> void

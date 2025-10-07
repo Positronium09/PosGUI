@@ -54,6 +54,14 @@ export namespace PGUI
 			Rect<float>{ rrc.rect }, xRadius{ rrc.radiusX }, yRadius{ rrc.radiusY }
 		{ }
 
+		constexpr auto MoveAndResize(const RectF rect) noexcept -> void
+		{
+			left = rect.left;
+			top = rect.top;
+			right = rect.right;
+			bottom = rect.bottom;
+		}
+
 		[[nodiscard]] constexpr auto operator==(const RoundedRect& other) const noexcept -> bool = default;
 
 		explicit(false) operator D2D1_ROUNDED_RECT() const noexcept

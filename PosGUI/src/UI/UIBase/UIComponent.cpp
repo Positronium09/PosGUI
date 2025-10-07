@@ -28,8 +28,7 @@ namespace PGUI::UI
 					GetRect(),
 					D2D::AntiAliasingMode::PerPrimitive,
 					D2D::LayerOptions::None,
-					GetClip().GetGeometry(),
-					D2D::Matrix3x2::Translation(GetRect().left, GetRect().top)
+					GetClip().GetGeometry()
 				};
 				graphics.PushLayer(layer, layerParams);
 				pushed = true;
@@ -97,6 +96,46 @@ namespace PGUI::UI
 		event.newRect = GetRect();
 		HandleEvent(event);
 		Invalidate();
+	}
+
+	auto UIComponent::HandleEvent(UIEvent& uiEvent) -> void
+	{
+		UIElement::HandleEvent(uiEvent);
+		if (uiEvent.handled)
+		{
+			return;
+		}
+
+		if (uiEvent.type != EventType::RectChanged && uiEvent.type == EventType::SizeChanged)
+		{
+			return;
+		}
+
+		if (auto parameters = GetClip().GetParameters();
+			std::holds_alternative<RoundedRectangleClipParameters>(parameters))
+		{
+			auto& params = std::get<RoundedRectangleClipParameters>(parameters);
+			params.rect.MoveAndResize(GetRect());
+			SetClip(Clip{ params });
+		}
+		else if (std::holds_alternative<RectangleClipParameters>(parameters))
+		{
+			auto& params = std::get<RectangleClipParameters>(parameters);
+			params.rect = GetRect();
+			SetClip(Clip{ params });
+		}
+		else if (std::holds_alternative<EllipseClipParameters>(parameters))
+		{
+			auto& params = std::get<EllipseClipParameters>(parameters);
+			params.ellipse.center = GetRect().Center();
+			SetClip(Clip{ params });
+		}
+		else if (std::holds_alternative<RoundCornerClipParameters>(parameters))
+		{
+			auto& params = std::get<RoundCornerClipParameters>(parameters);
+			params.rect = GetRect();
+			SetClip(Clip{ params });
+		}
 	}
 
 	auto UIComponent::HitTest(const PointF point) noexcept -> bool

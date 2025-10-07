@@ -41,7 +41,9 @@ export namespace PGUI::UI::Layout
 		}
 
 		auto SetDockPosition(const LayoutItem& item, DockPosition position) -> void;
+		auto SetDockPosition(std::size_t id, DockPosition position) noexcept -> void;
 
+		[[nodiscard]] auto GetItemPosition(std::size_t id) const noexcept -> Result<DockPosition>;
 		[[nodiscard]] auto GetDockPosition(const LayoutItem& item) const noexcept -> Result<DockPosition>;
 
 		auto SetMaxDockSize(DockPosition position, float size) noexcept -> Error;
@@ -57,9 +59,6 @@ export namespace PGUI::UI::Layout
 		std::unordered_map<std::size_t, DockPosition> dockPositions;
 		std::unordered_map<DockPosition, float> maxDockSizes;
 		std::unordered_map<DockPosition, DockPriority> dockPriorities;
-
-		auto SetDockPosition(std::size_t id, DockPosition position) noexcept -> void;
-		[[nodiscard]] auto GetItemPosition(std::size_t id) const noexcept -> Result<DockPosition>;
 
 		auto RearrangeItems() noexcept -> void override;
 

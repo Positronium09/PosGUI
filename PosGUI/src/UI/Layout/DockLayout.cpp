@@ -244,7 +244,7 @@ namespace PGUI::UI::Layout
 			LayoutPanel::OnItemAdded(layoutItem);
 			return;
 		}
-		dockPositions.insert_or_assign(GetItemCount(), DockPosition::None);
+		dockPositions.insert_or_assign(GetItemCount() - 1, DockPosition::None);
 		LayoutPanel::OnItemAdded(layoutItem);
 	}
 

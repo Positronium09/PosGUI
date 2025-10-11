@@ -12,12 +12,14 @@ export namespace PGUI::UI
 
 	using UIElementPtr = std::shared_ptr<UIElement>;
 	using RawUIElementPtr = UIElement*;
+	using WeakUIElementPtr = std::weak_ptr<UIElement>;
 	// ReSharper disable once CppInconsistentNaming
 
 	using RawCUIElementPtr = const UIElement*;
 
 	using UIContainerPtr = std::shared_ptr<UIContainer>;
 	using RawUIContainerPtr = UIContainer*;
+	using WeakUIContainerPtr = std::weak_ptr<UIContainer>;
 	// ReSharper disable once CppInconsistentNaming
 
 	using RawCUIContainerPtr = const UIContainer*;

@@ -21,6 +21,11 @@ export namespace PGUI::UI
 
 			zOrderDirty = true;
 
+			if (layoutPanel)
+			{
+				layoutPanel->AddItem(*element);
+			}
+
 			return std::dynamic_pointer_cast<T>(element);
 		}
 		auto AddElement(const UIElementPtr& ptr) noexcept -> void;

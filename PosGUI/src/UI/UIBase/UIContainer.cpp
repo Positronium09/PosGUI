@@ -14,6 +14,11 @@ namespace PGUI::UI
 		ptr->SetParent(this);
 		elements.push_back(ptr);
 
+		if (layoutPanel)
+		{
+			layoutPanel->AddItem(*ptr);
+		}
+
 		zOrderDirty = true;
 	}
 
@@ -142,6 +147,10 @@ namespace PGUI::UI
 			}
 			if (element->HitTest(point))
 			{
+				if (const auto container = std::dynamic_pointer_cast<UIContainer>(element))
+				{
+					return container->GetElementAtPosition(point);
+				}
 				return element.get();
 			}
 		}
@@ -210,6 +219,7 @@ namespace PGUI::UI
 	auto UIContainer::Render(const Graphics graphics) -> void
 	{
 		EnsureZOrder();
+		(void)layoutPanel;
 
 		for (const auto& element : elements | std::views::reverse)
 		{
@@ -217,7 +227,8 @@ namespace PGUI::UI
 			{
 				continue;
 			}
-			if (!GetRect().Intersects(element->GetRect()))
+			if (const auto rc = GetRect();
+				!rc.Intersects(element->GetRect()))
 			{
 				continue;
 			}

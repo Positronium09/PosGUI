@@ -105,4 +105,38 @@ export namespace PGUI::UI
 		PointF oldPosition;
 		PointF newPosition;
 	};
+
+	constexpr auto IsMouseEvent(const UIEvent& event) noexcept -> bool
+	{
+		switch (event.type)
+		{
+			case EventType::MouseMove:
+			case EventType::MouseEnter:
+			case EventType::MouseLeave:
+			case EventType::MouseHover:
+			case EventType::MouseButtonDown:
+			case EventType::MouseButtonUp:
+			case EventType::MouseDoubleClick:
+			case EventType::MouseWheel:
+			{
+				return true;
+			}
+			default: ;
+		}
+		return false;
+	}
+
+	constexpr auto IsKeyboardEvent(const UIEvent& event) noexcept -> bool
+	{
+		switch (event.type)
+		{
+			case EventType::KeyDown:
+			case EventType::KeyUp:
+			{
+				return true;
+			}
+			default: ;
+		}
+		return false;
+	}
 }

@@ -14,7 +14,7 @@ namespace PGUI::UI
 	{ }
 
 	Dialog::Dialog(const WindowClassPtr& wndClass) noexcept :
-		DirectXCompositionWindow{ wndClass }
+		UIWindow{ wndClass }
 	{
 		RegisterHandler(WM_INITDIALOG, &Dialog::OnInitDialog);
 	}

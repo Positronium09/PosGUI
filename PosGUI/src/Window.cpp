@@ -805,6 +805,11 @@ namespace PGUI
 						result = handler(msg, wParam, lParam);
 					}
 				}, handlerVariant);
+
+				if (IsFlagSet(result.flags, MessageHandlerReturnFlags::NoFurtherHandling)) [[unlikely]]
+				{
+					break;
+				}
 			}
 			if (IsFlagSet(result.flags, MessageHandlerReturnFlags::PassToDefProc)) [[unlikely]]
 			{
@@ -851,12 +856,14 @@ namespace PGUI
 				           static_cast<float>(createStruct->cx),
 				           static_cast<float>(createStruct->cy)
 			           } * window->GetDpiScaleFactor();
+
 			AdjustWindowRectExForDpi(
 				std::bit_cast<LPRECT>(&rc),
 				window->GetStyle(),
 				FALSE,
 				window->GetExStyle(),
-				GetDpiForWindow(hWnd));
+				window->GetDpi());
+
 			const PointF p{ static_cast<float>(createStruct->x), static_cast<float>(createStruct->y) };
 			const RectF rect{ p * window->GetDpiScaleFactor(), rc.Size() };
 

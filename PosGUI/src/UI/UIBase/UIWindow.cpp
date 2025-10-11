@@ -148,7 +148,7 @@ namespace PGUI::UI
 		}
 		focusedElement->HandleEvent(keyEvent);
 
-		return 0;
+		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnKey(const UINT msg, const WPARAM wParam,
@@ -174,7 +174,7 @@ namespace PGUI::UI
 		}
 		focusedElement->HandleEvent(keyEvent);
 
-		return 0;
+		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseMove(UINT, const WPARAM wParam, const LPARAM lParam) -> MessageHandlerResult
@@ -210,7 +210,7 @@ namespace PGUI::UI
 				mouseEnterEvent.mouseButton = mouseButton;
 				hoveredElement->HandleEvent(mouseEnterEvent);
 
-				return 0;
+				return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 			}
 			return 0;
 		}
@@ -234,7 +234,7 @@ namespace PGUI::UI
 		mouseMoveEvent.mouseButton = mouseButton;
 		hoveredElement->HandleEvent(mouseMoveEvent);
 
-		return 0;
+		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseLeave(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
@@ -271,7 +271,7 @@ namespace PGUI::UI
 		mouseHoverEvent.mouseButton = mouseButton;
 		hoveredElement->HandleEvent(mouseHoverEvent);
 
-		return 0;
+		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseWheel(UINT, const WPARAM wParam, const LPARAM lParam) const noexcept -> MessageHandlerResult
@@ -294,7 +294,7 @@ namespace PGUI::UI
 		mouseWheelEvent.wheelDelta = wheelDelta;
 		hoveredElement->HandleEvent(mouseWheelEvent);
 
-		return 0;
+		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseButtonDown(const UINT msg, const WPARAM wParam,
@@ -327,7 +327,7 @@ namespace PGUI::UI
 		mouseEvent.mouseButton = mouseButton;
 		focusedElement->HandleEvent(mouseEvent);
 
-		return retVal;
+		return { retVal, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseButtonUp(const UINT msg, const WPARAM wParam,
@@ -355,7 +355,7 @@ namespace PGUI::UI
 		mouseEvent.mouseButton = mouseButton;
 		focusedElement->HandleEvent(mouseEvent);
 
-		return retVal;
+		return { retVal, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseDoubleClick(const UINT msg, const WPARAM wParam,
@@ -388,6 +388,6 @@ namespace PGUI::UI
 		mouseEvent.mouseButton = mouseButton;
 		focusedElement->HandleEvent(mouseEvent);
 
-		return retVal;
+		return { retVal, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 }

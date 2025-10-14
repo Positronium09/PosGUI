@@ -37,6 +37,9 @@ export namespace PGUI::UI
 
 		private:
 		UIContainer childrenContainer;
+		//If focused or hovered elements are destroyed crash due to dangling pointer
+		//TODO Fix it when it happens prolly use weak_ptr but too lazy rn
+
 		RawUIElementPtr focusedElement = nullptr;
 		RawUIElementPtr hoveredElement = nullptr;
 

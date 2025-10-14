@@ -862,7 +862,7 @@ namespace PGUI
 				window->GetStyle(),
 				FALSE,
 				window->GetExStyle(),
-				window->GetDpi());
+				static_cast<UINT>(window->GetDpi()));
 
 			const PointF p{ static_cast<float>(createStruct->x), static_cast<float>(createStruct->y) };
 			const RectF rect{ p * window->GetDpiScaleFactor(), rc.Size() };

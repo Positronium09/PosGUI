@@ -151,48 +151,55 @@ namespace PGUI::UI
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
-	static auto GetLinearNthItem(const RawUIContainerPtr container,
-	                             const std::size_t index) noexcept -> Result<RawUIElementPtr>
+	static auto GetLinearItemCount(const RawUIContainerPtr container) noexcept -> std::size_t
 	{
-		auto iteratedCount = 0ULL;
-		RawUIElementPtr element = nullptr;
+		std::size_t count = 0;
 
 		for (const auto& containerElement : container->GetElements())
 		{
-			if (iteratedCount > index)
-			{
-				break;
-			}
-
-			element = containerElement.get();
-
-			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(element);
+			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
 				asContainer != nullptr)
 			{
-				if (const auto subElementResult = GetLinearNthItem(asContainer, index - iteratedCount);
-					subElementResult.has_value())
-				{
-					return subElementResult;
-				}
-				iteratedCount += asContainer->GetElementCount();
+				count += GetLinearItemCount(asContainer);
 				continue;
 			}
-
-			iteratedCount++;
+			count++;
 		}
 
-		if (iteratedCount > index + 1 || iteratedCount == index)
-		{
-			element = nullptr;
-		}
-		
+		return count;
+	}
 
-		if (element == nullptr)
+	static auto GetLinearNthItem(const RawUIContainerPtr container,
+	                             std::size_t index) noexcept -> Result<RawUIElementPtr>
+	{
+		if (index >= GetLinearItemCount(container))
 		{
 			return Unexpected{ Error{ ErrorCode::OutOfRange } };
 		}
 
-		return element;
+		for (const auto& containerElement : container->GetElements())
+		{
+			if (const auto asContainer = std::dynamic_pointer_cast<UIContainer>(containerElement);
+				asContainer != nullptr)
+			{
+				const auto subCount = GetLinearItemCount(asContainer.get());
+				if (index < subCount)
+				{
+					return GetLinearNthItem(asContainer.get(), index);
+				}
+				index -= subCount;
+				continue;
+			}
+
+			if (index == 0)
+			{
+				return containerElement.get();
+			}
+
+			index--;
+		}
+
+		return Unexpected{ Error{ ErrorCode::NotFound } };
 	}
 
 	static auto GetElementLinearIndex(const RawUIContainerPtr container,
@@ -215,28 +222,13 @@ namespace PGUI::UI
 				}
 				offset += asContainer->GetElementCount();
 			}
-			offset++;
+			//else
+			{
+				offset++;
+			}
 		}
 
 		return Unexpected{ Error{ ErrorCode::NotFound } };
-	}
-
-	static auto GetLinearItemCount(RawUIContainerPtr container) noexcept -> std::size_t
-	{
-		std::size_t count = 0;
-
-		for (const auto& containerElement : container->GetElements())
-		{
-			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
-				asContainer != nullptr)
-			{
-				count += GetLinearItemCount(asContainer);
-				continue;
-			}
-			count++;
-		}
-
-		return count;
 	}
 
 	auto UIWindow::OnKey(const UINT msg, const WPARAM wParam,
@@ -255,7 +247,7 @@ namespace PGUI::UI
 				}
 			}
 
-			focusIndex %= GetLinearItemCount(&childrenContainer) + 1;
+			focusIndex %= GetLinearItemCount(&childrenContainer);
 
 			const auto element = GetLinearNthItem(&childrenContainer, focusIndex);
 			if (!element.has_value())

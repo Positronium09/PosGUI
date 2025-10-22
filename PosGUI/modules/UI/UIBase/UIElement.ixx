@@ -158,6 +158,15 @@ export namespace PGUI::UI
 			zIndex = newZIndex;
 		}
 
+		auto SetTabStop(const bool tabStop) noexcept
+		{
+			isTabStop = tabStop;
+		}
+		[[nodiscard]] auto IsTabStop() const noexcept
+		{
+			return isTabStop;
+		}
+
 		[[nodiscard]] const auto& IsEnabled() const noexcept
 		{
 			return enabled;
@@ -213,6 +222,7 @@ export namespace PGUI::UI
 		private:
 		RawUIElementPtr parent = nullptr;
 		bool focusable = false;
+		bool isTabStop = false;
 		EventSRWM<RawCUIElementPtr> invalidateRequest;
 		DataBinding::PropertyNM<bool> hasFocus{ false };
 		DataBinding::PropertyNM<bool> enabled{ true };

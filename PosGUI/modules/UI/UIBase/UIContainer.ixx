@@ -43,8 +43,8 @@ export namespace PGUI::UI
 			return elements.size();
 		}
 
-		auto GetElement(std::size_t index) const noexcept -> Result<UIElementPtr>;
-		auto GetElement(std::size_t index) noexcept -> Result<UIElementPtr>;
+		auto GetElementAtIndex(std::size_t index) const noexcept -> Result<UIElementPtr>;
+		auto GetElementAtIndex(std::size_t index) noexcept -> Result<UIElementPtr>;
 
 		auto RemoveElement(std::size_t index) noexcept -> Result<UIElementPtr>;
 		auto RemoveElement(RawUIElementPtr ptr) noexcept -> Result<UIElementPtr>;

@@ -151,9 +151,131 @@ namespace PGUI::UI
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
-	auto UIWindow::OnKey(const UINT msg, const WPARAM wParam,
-	                     const LPARAM lParam) const noexcept -> MessageHandlerResult
+	static auto GetLinearNthItem(const RawUIContainerPtr container,
+	                             const std::size_t index) noexcept -> Result<RawUIElementPtr>
 	{
+		auto iteratedCount = 0ULL;
+		RawUIElementPtr element = nullptr;
+
+		for (const auto& containerElement : container->GetElements())
+		{
+			if (iteratedCount > index)
+			{
+				break;
+			}
+
+			element = containerElement.get();
+
+			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(element);
+				asContainer != nullptr)
+			{
+				if (const auto subElementResult = GetLinearNthItem(asContainer, index - iteratedCount);
+					subElementResult.has_value())
+				{
+					return subElementResult;
+				}
+				iteratedCount += asContainer->GetElementCount();
+				continue;
+			}
+
+			iteratedCount++;
+		}
+
+		if (iteratedCount > index + 1 || iteratedCount == index)
+		{
+			element = nullptr;
+		}
+		
+
+		if (element == nullptr)
+		{
+			return Unexpected{ Error{ ErrorCode::OutOfRange } };
+		}
+
+		return element;
+	}
+
+	static auto GetElementLinearIndex(const RawUIContainerPtr container,
+	                                  const RawUIElementPtr element) noexcept -> Result<std::size_t>
+	{
+		std::size_t offset = 0;
+		for (const auto& [index, containerElement] : container->GetElements() | std::views::enumerate)
+		{
+			if (containerElement.get() == element)
+			{
+				return offset;
+			}
+			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
+				asContainer != nullptr)
+			{
+				if (const auto subIndexResult = GetElementLinearIndex(asContainer, element);
+					subIndexResult.has_value())
+				{
+					return offset + subIndexResult.value();
+				}
+				offset += asContainer->GetElementCount();
+			}
+			offset++;
+		}
+
+		return Unexpected{ Error{ ErrorCode::NotFound } };
+	}
+
+	static auto GetLinearItemCount(RawUIContainerPtr container) noexcept -> std::size_t
+	{
+		std::size_t count = 0;
+
+		for (const auto& containerElement : container->GetElements())
+		{
+			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
+				asContainer != nullptr)
+			{
+				count += GetLinearItemCount(asContainer);
+				continue;
+			}
+			count++;
+		}
+
+		return count;
+	}
+
+	auto UIWindow::OnKey(const UINT msg, const WPARAM wParam,
+	                     const LPARAM lParam) noexcept -> MessageHandlerResult
+	{
+		if (msg == WM_KEYDOWN && tabStopEnabled && wParam == VK_TAB)
+		{
+			std::size_t focusIndex = 0;
+
+			if (focusedElement != nullptr)
+			{
+				if (const auto result = GetElementLinearIndex(&childrenContainer, focusedElement);
+					result.has_value())
+				{
+					focusIndex = result.value() + 1;
+				}
+			}
+
+			focusIndex %= GetLinearItemCount(&childrenContainer) + 1;
+
+			const auto element = GetLinearNthItem(&childrenContainer, focusIndex);
+			if (!element.has_value())
+			{
+				const auto firstElement = GetLinearNthItem(&childrenContainer, 0);
+
+				if (!firstElement.has_value())
+				{
+					return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
+				}
+
+				ChangeFocusedElement(firstElement.value());
+				return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
+			}
+
+			ChangeFocusedElement(element.value());
+
+			return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
+		}
+
 		if (!focusedElement || (msg != WM_KEYDOWN && msg != WM_KEYUP))
 		{
 			return 0;

@@ -22,7 +22,7 @@ namespace PGUI::UI
 		zOrderDirty = true;
 	}
 
-	auto UIContainer::GetElement(const std::size_t index) const noexcept -> Result<UIElementPtr>
+	auto UIContainer::GetElementAtIndex(const std::size_t index) const noexcept -> Result<UIElementPtr>
 	{
 		if (index >= elements.size())
 		{
@@ -36,7 +36,7 @@ namespace PGUI::UI
 		return elements.at(index);
 	}
 
-	auto UIContainer::GetElement(const std::size_t index) noexcept -> Result<UIElementPtr>
+	auto UIContainer::GetElementAtIndex(const std::size_t index) noexcept -> Result<UIElementPtr>
 	{
 		if (index >= elements.size())
 		{

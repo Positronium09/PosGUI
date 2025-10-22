@@ -29,6 +29,28 @@ export namespace PGUI::UI
 			return childrenContainer;
 		}
 
+		auto EnableTabStop() noexcept
+		{
+			tabStopEnabled = true;
+		}
+		auto DisableTabStop() noexcept
+		{
+			tabStopEnabled = false;
+		}
+		[[nodiscard]] auto IsTabStopEnabled() const noexcept
+		{
+			return tabStopEnabled;
+		}
+
+		[[nodiscard]] auto GetFocusedElement() const noexcept
+		{
+			return focusedElement;
+		}
+		[[nodiscard]] auto GetHoveredElement() const noexcept
+		{
+			return hoveredElement;
+		}
+
 		protected:
 		virtual auto Render(Graphics) -> void
 		{
@@ -36,6 +58,7 @@ export namespace PGUI::UI
 		}
 
 		private:
+		bool tabStopEnabled = false;
 		UIContainer childrenContainer;
 		//If focused or hovered elements are destroyed crash due to dangling pointer
 		//TODO Fix it when it happens prolly use weak_ptr but too lazy rn
@@ -170,7 +193,7 @@ export namespace PGUI::UI
 		auto OnFocusChanged(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
 
 		auto OnChar(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
-		auto OnKey(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
+		auto OnKey(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
 
 		// ReSharper disable CommentTypo
 		// TODO Maybe implement WM_SYSKEYDOWN, WM_SYSKEYUP, WM_SYSDEADCHAR and WM_HOTKEY

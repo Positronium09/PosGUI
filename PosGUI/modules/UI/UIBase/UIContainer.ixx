@@ -54,6 +54,10 @@ export namespace PGUI::UI
 		auto GetElementAtPosition(PointF point) const noexcept -> Result<RawCUIElementPtr>;
 		auto GetElementAtPosition(PointF point) noexcept -> Result<RawUIElementPtr>;
 
+		auto GetLinearElementCount() const noexcept -> std::size_t;
+		auto GetElementAtLinearIndex(std::size_t index) const noexcept -> Result<RawUIElementPtr>;
+		auto GetElementLinearIndex(RawCUIElementPtr ptr) const noexcept -> Result<std::size_t>;
+
 		auto HandleEvent(UIEvent&) -> void override;
 
 		auto EnsureZOrder() noexcept -> void;

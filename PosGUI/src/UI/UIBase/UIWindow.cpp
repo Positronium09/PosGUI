@@ -151,86 +151,6 @@ namespace PGUI::UI
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
-	static auto GetLinearItemCount(const RawUIContainerPtr container) noexcept -> std::size_t
-	{
-		std::size_t count = 0;
-
-		for (const auto& containerElement : container->GetElements())
-		{
-			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
-				asContainer != nullptr)
-			{
-				count += GetLinearItemCount(asContainer);
-				continue;
-			}
-			count++;
-		}
-
-		return count;
-	}
-
-	static auto GetLinearNthItem(const RawUIContainerPtr container,
-	                             std::size_t index) noexcept -> Result<RawUIElementPtr>
-	{
-		if (index >= GetLinearItemCount(container))
-		{
-			return Unexpected{ Error{ ErrorCode::OutOfRange } };
-		}
-
-		for (const auto& containerElement : container->GetElements())
-		{
-			if (const auto asContainer = std::dynamic_pointer_cast<UIContainer>(containerElement);
-				asContainer != nullptr)
-			{
-				const auto subCount = GetLinearItemCount(asContainer.get());
-				if (index < subCount)
-				{
-					return GetLinearNthItem(asContainer.get(), index);
-				}
-				index -= subCount;
-				continue;
-			}
-
-			if (index == 0)
-			{
-				return containerElement.get();
-			}
-
-			index--;
-		}
-
-		return Unexpected{ Error{ ErrorCode::NotFound } };
-	}
-
-	static auto GetElementLinearIndex(const RawUIContainerPtr container,
-	                                  const RawUIElementPtr element) noexcept -> Result<std::size_t>
-	{
-		std::size_t offset = 0;
-		for (const auto& [index, containerElement] : container->GetElements() | std::views::enumerate)
-		{
-			if (containerElement.get() == element)
-			{
-				return offset;
-			}
-			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
-				asContainer != nullptr)
-			{
-				if (const auto subIndexResult = GetElementLinearIndex(asContainer, element);
-					subIndexResult.has_value())
-				{
-					return offset + subIndexResult.value();
-				}
-				offset += asContainer->GetElementCount();
-			}
-			//else
-			{
-				offset++;
-			}
-		}
-
-		return Unexpected{ Error{ ErrorCode::NotFound } };
-	}
-
 	auto UIWindow::OnKey(const UINT msg, const WPARAM wParam,
 	                     const LPARAM lParam) noexcept -> MessageHandlerResult
 	{
@@ -240,19 +160,19 @@ namespace PGUI::UI
 
 			if (focusedElement != nullptr)
 			{
-				if (const auto result = GetElementLinearIndex(&childrenContainer, focusedElement);
+				if (const auto result = childrenContainer.GetElementLinearIndex(focusedElement);
 					result.has_value())
 				{
 					focusIndex = result.value() + 1;
 				}
 			}
 
-			focusIndex %= GetLinearItemCount(&childrenContainer);
+			focusIndex %= childrenContainer.GetLinearElementCount();
 
-			const auto element = GetLinearNthItem(&childrenContainer, focusIndex);
+			const auto element = childrenContainer.GetElementAtLinearIndex(focusIndex);
 			if (!element.has_value())
 			{
-				const auto firstElement = GetLinearNthItem(&childrenContainer, 0);
+				const auto firstElement = childrenContainer.GetElementAtLinearIndex(0);
 
 				if (!firstElement.has_value())
 				{

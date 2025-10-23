@@ -162,6 +162,81 @@ namespace PGUI::UI
 		};
 	}
 
+	auto UIContainer::GetLinearElementCount() const noexcept -> std::size_t
+	{
+		std::size_t count = 0;
+
+		for (const auto& containerElement : GetElements())
+		{
+			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
+				asContainer != nullptr)
+			{
+				count += asContainer->GetLinearElementCount();
+				continue;
+			}
+			count++;
+		}
+
+		return count;
+	}
+
+	auto UIContainer::GetElementAtLinearIndex(std::size_t index) const noexcept -> Result<RawUIElementPtr>
+	{
+		if (index >= GetLinearElementCount())
+		{
+			return Unexpected{ Error{ ErrorCode::OutOfRange } };
+		}
+
+		for (const auto& containerElement : GetElements())
+		{
+			if (const auto asContainer = std::dynamic_pointer_cast<UIContainer>(containerElement);
+				asContainer != nullptr)
+			{
+				const auto subCount = asContainer->GetLinearElementCount();
+				if (index < subCount)
+				{
+					return asContainer->GetElementAtLinearIndex(index);
+				}
+				index -= subCount;
+				continue;
+			}
+
+			if (index == 0)
+			{
+				return containerElement.get();
+			}
+
+			index--;
+		}
+
+		return Unexpected{ Error{ ErrorCode::NotFound } };
+	}
+
+	auto UIContainer::GetElementLinearIndex(const RawCUIElementPtr ptr) const noexcept -> Result<std::size_t>
+	{
+		std::size_t offset = 0;
+		for (const auto& [index, containerElement] : GetElements() | std::views::enumerate)
+		{
+			if (containerElement.get() == ptr)
+			{
+				return offset;
+			}
+			if (const auto asContainer = dynamic_cast<RawUIContainerPtr>(containerElement.get());
+				asContainer != nullptr)
+			{
+				if (const auto subIndexResult = asContainer->GetElementLinearIndex(ptr);
+					subIndexResult.has_value())
+				{
+					return offset + subIndexResult.value();
+				}
+				offset += asContainer->GetElementCount();
+			}
+			offset++;
+		}
+
+		return Unexpected{ Error{ ErrorCode::NotFound } };
+	}
+
 	auto UIContainer::HandleEvent(UIEvent& event) -> void
 	{
 		if (event.type == EventType::RectChanged && layoutPanel)

@@ -39,7 +39,7 @@ export namespace PGUI::UI
 			a{ a / 255.0F }
 		{ }
 
-		explicit(false) constexpr RGBA(const std::uint32_t rgb, const FLOAT a = 1.0F) noexcept :
+		explicit(false) constexpr RGBA(const std::uint32_t rgb, const float a = 1.0F) noexcept :
 			r{ ((rgb & 0xff << 16) >> 16) / 255.0F },
 			g{ ((rgb & 0xff << 8) >> 8) / 255.0F },
 			b{ (rgb & 0xff) / 255.0F },
@@ -111,38 +111,65 @@ export namespace PGUI::UI
 
 		[[nodiscard]] constexpr auto operator==(const RGBA& other) const noexcept -> bool = default;
 
-		constexpr auto Lighten(const FLOAT amount) noexcept -> void
+		constexpr auto Lighten(const float amount) noexcept -> void
 		{
 			r = std::clamp(r + amount, 0.0F, 1.0F);
 			g = std::clamp(g + amount, 0.0F, 1.0F);
 			b = std::clamp(b + amount, 0.0F, 1.0F);
 		}
 
-		constexpr auto Darken(const FLOAT amount) noexcept -> void
+		constexpr auto Darken(const float amount) noexcept -> void
 		{
 			r = std::clamp(r - amount, 0.0F, 1.0F);
 			g = std::clamp(g - amount, 0.0F, 1.0F);
 			b = std::clamp(b - amount, 0.0F, 1.0F);
 		}
 
-		[[nodiscard]] constexpr auto Lightened(const FLOAT amount) const noexcept
+		[[nodiscard]] constexpr auto Lightened(const float amount) const noexcept
 		{
 			auto color = *this;
 			color.Lighten(amount);
 			return color;
 		}
 
-		[[nodiscard]] constexpr auto Darkened(const FLOAT amount) const noexcept
+		[[nodiscard]] constexpr auto Darkened(const float amount) const noexcept
 		{
 			auto color = *this;
 			color.Darken(amount);
 			return color;
 		}
 
-		FLOAT r = 0.0F;
-		FLOAT g = 0.0F;
-		FLOAT b = 0.0F;
-		FLOAT a = 0.0F;
+		[[nodiscard]] constexpr auto ToArray() const noexcept -> std::array<float, 4>
+		{
+			return { r, g, b, a };
+		}
+
+		template <std::floating_point T>
+		[[nodiscard]] constexpr auto ToArray() const noexcept -> std::array<T, 4>
+		{
+			return {
+				static_cast<T>(r),
+				static_cast<T>(g),
+				static_cast<T>(b),
+				static_cast<T>(a)
+			};
+		}
+
+		template <template <std::floating_point> typename Container, std::floating_point T = float>
+		[[nodiscard]] constexpr auto ToContainer() const noexcept -> Container<T>
+		{
+			return Container<T>{
+				static_cast<T>(r),
+				static_cast<T>(g),
+				static_cast<T>(b),
+				static_cast<T>(a)
+			};
+		}
+
+		float r = 0.0F;
+		float g = 0.0F;
+		float b = 0.0F;
+		float a = 0.0F;
 	};
 
 	class HSL
@@ -150,7 +177,7 @@ export namespace PGUI::UI
 		public:
 		constexpr HSL() noexcept = default;
 
-		constexpr HSL(const FLOAT h, const FLOAT s, const FLOAT l) noexcept :
+		constexpr HSL(const float h, const float s, const float l) noexcept :
 			h{ h }, s{ s }, l{ l }
 		{ }
 
@@ -160,9 +187,9 @@ export namespace PGUI::UI
 
 		[[nodiscard]] constexpr auto operator==(const HSL& other) const noexcept -> bool = default;
 
-		FLOAT h = 0.0F;
-		FLOAT s = 0.0F;
-		FLOAT l = 0.0F;
+		float h = 0.0F;
+		float s = 0.0F;
+		float l = 0.0F;
 	};
 
 	class HSV
@@ -170,7 +197,7 @@ export namespace PGUI::UI
 		public:
 		constexpr HSV() noexcept = default;
 
-		constexpr HSV(const FLOAT h, const FLOAT s, const FLOAT v) noexcept :
+		constexpr HSV(const float h, const float s, const float v) noexcept :
 			h{ h }, s{ s }, v{ v }
 		{ }
 
@@ -180,9 +207,9 @@ export namespace PGUI::UI
 
 		[[nodiscard]] constexpr auto operator==(const HSV& other) const noexcept -> bool = default;
 
-		FLOAT h = 0.0F;
-		FLOAT s = 0.0F;
-		FLOAT v = 0.0F;
+		float h = 0.0F;
+		float s = 0.0F;
+		float v = 0.0F;
 	};
 
 	class CMYK
@@ -190,7 +217,7 @@ export namespace PGUI::UI
 		public:
 		constexpr CMYK() noexcept = default;
 
-		constexpr CMYK(const FLOAT c, const FLOAT m, const FLOAT y, const FLOAT k) noexcept :
+		constexpr CMYK(const float c, const float m, const float y, const float k) noexcept :
 			c{ c }, m{ m }, y{ y }, k{ k }
 		{ }
 
@@ -210,10 +237,10 @@ export namespace PGUI::UI
 
 		[[nodiscard]] constexpr auto operator==(const CMYK& other) const noexcept -> bool = default;
 
-		FLOAT c = 0.0F;
-		FLOAT m = 0.0F;
-		FLOAT y = 0.0F;
-		FLOAT k = 0.0F;
+		float c = 0.0F;
+		float m = 0.0F;
+		float y = 0.0F;
+		float k = 0.0F;
 	};
 
 	[[nodiscard]] constexpr auto WICColorToRGBA(const WICColor color) noexcept

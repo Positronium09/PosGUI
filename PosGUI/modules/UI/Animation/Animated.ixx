@@ -14,38 +14,6 @@ import PGUI.ErrorHandling;
 import PGUI.UI.Color;
 import PGUI.Shape2D;
 
-/*
-	class Animated
-	{
-		public:
-		explicit Animated(const float f)
-		{
-			var = AnimationManager::GetGlobalInstance().CreateAnimationVariable(f).value();
-		}
-
-		auto AnimateTo(float f) const -> void
-		{
-			const auto storyboardResult = AnimationManager::GetGlobalInstance().CreateStoryboard();
-			if (!storyboardResult.has_value())
-			{
-				throw std::runtime_error("Failed to create storyboard");
-			}
-			const auto& storyboard = storyboardResult.value();
-			auto res = storyboard.AddTransition(var, AnimationTransitionLibrary::LinearTransition(1.0F, f).value());
-			const auto& timer = AnimationTimer::GetGlobalInstance();
-			(void)storyboard.Schedule(timer.GetTime().value());
-		}
-
-		auto Get() const noexcept
-		{
-			return static_cast<float>(*var.GetValue());
-		}
-
-		private:
-		AnimationVariable var;
-	};
- */
-
 export namespace PGUI::UI::Animation
 {
 	template <typename, std::size_t = 1>
@@ -71,7 +39,7 @@ export namespace PGUI::UI::Animation
 
 		auto AnimateTo(const T& newValue, const double duration = 1.0) const noexcept -> Error
 		{
-			const auto storyboardResult = AnimationManager::GetGlobalInstance().CreateStoryboard();
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
 				return storyboardResult.error();
@@ -80,6 +48,26 @@ export namespace PGUI::UI::Animation
 			auto res = storyboard.AddTransition(
 				var,
 				AnimationTransitionLibrary::LinearTransition(duration, newValue).value());
+			const auto& timer = AnimationTimer::GetGlobalInstance();
+
+			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
+				!scheduleResult.has_value())
+			{
+				return scheduleResult.error();
+			}
+
+			return Error{ ErrorCode::Success };
+		}
+
+		auto AnimateTo(const AnimationTransition& transition) const noexcept -> Error
+		{
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
+			if (!storyboardResult.has_value())
+			{
+				return storyboardResult.error();
+			}
+			const auto& storyboard = storyboardResult.value();
+			auto res = storyboard.AddTransition(var, transition);
 			const auto& timer = AnimationTimer::GetGlobalInstance();
 
 			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
@@ -180,7 +168,7 @@ export namespace PGUI::UI::Animation
 
 		auto AnimateTo(const std::span<const T, Count> newValue, const double duration = 1.0) const noexcept -> Error
 		{
-			const auto storyboardResult = AnimationManager::GetGlobalInstance().CreateStoryboard();
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
 				return storyboardResult.error();
@@ -191,6 +179,24 @@ export namespace PGUI::UI::Animation
 				AnimationTransitionLibrary::LinearTransition(
 					duration, 
 					newValue | std::ranges::to<const std::span<const double>>()).value());
+			const auto& timer = AnimationTimer::GetGlobalInstance();
+			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
+				!scheduleResult.has_value())
+			{
+				return scheduleResult.error();
+			}
+			return Error{ ErrorCode::Success };
+		}
+
+		auto AnimateTo(const AnimationTransition& transition) const noexcept -> Error
+		{
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
+			if (!storyboardResult.has_value())
+			{
+				return storyboardResult.error();
+			}
+			const auto& storyboard = storyboardResult.value();
+			auto res = storyboard.AddTransition(var, transition);
 			const auto& timer = AnimationTimer::GetGlobalInstance();
 			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
 				!scheduleResult.has_value())
@@ -310,7 +316,7 @@ export namespace PGUI::UI::Animation
 
 		auto AnimateTo(const RGBA& newValue, const double duration = 1.0) const noexcept -> Error
 		{
-			const auto storyboardResult = AnimationManager::GetGlobalInstance().CreateStoryboard();
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
 				return storyboardResult.error();
@@ -331,6 +337,26 @@ export namespace PGUI::UI::Animation
 			{
 				return scheduleResult.error();
 			}
+			return Error{ ErrorCode::Success };
+		}
+
+		auto AnimateTo(const AnimationTransition& transition) const noexcept -> Error
+		{
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
+			if (!storyboardResult.has_value())
+			{
+				return storyboardResult.error();
+			}
+			const auto& storyboard = storyboardResult.value();
+			auto res = storyboard.AddTransition(var, transition);
+			const auto& timer = AnimationTimer::GetGlobalInstance();
+
+			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
+				!scheduleResult.has_value())
+			{
+				return scheduleResult.error();
+			}
+
 			return Error{ ErrorCode::Success };
 		}
 
@@ -418,7 +444,7 @@ export namespace PGUI::UI::Animation
 
 		auto AnimateTo(const PointF& newValue, const double duration = 1.0) const noexcept -> Error
 		{
-			const auto storyboardResult = AnimationManager::GetGlobalInstance().CreateStoryboard();
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
 				return storyboardResult.error();
@@ -437,6 +463,26 @@ export namespace PGUI::UI::Animation
 			{
 				return scheduleResult.error();
 			}
+			return Error{ ErrorCode::Success };
+		}
+
+		auto AnimateTo(const AnimationTransition& transition) const noexcept -> Error
+		{
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
+			if (!storyboardResult.has_value())
+			{
+				return storyboardResult.error();
+			}
+			const auto& storyboard = storyboardResult.value();
+			auto res = storyboard.AddTransition(var, transition);
+			const auto& timer = AnimationTimer::GetGlobalInstance();
+
+			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
+				!scheduleResult.has_value())
+			{
+				return scheduleResult.error();
+			}
+
 			return Error{ ErrorCode::Success };
 		}
 
@@ -520,7 +566,7 @@ export namespace PGUI::UI::Animation
 
 		auto AnimateTo(const RectF& newValue, const double duration = 1.0) const noexcept -> Error
 		{
-			const auto storyboardResult = AnimationManager::GetGlobalInstance().CreateStoryboard();
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
 				return storyboardResult.error();
@@ -541,6 +587,26 @@ export namespace PGUI::UI::Animation
 			{
 				return scheduleResult.error();
 			}
+			return Error{ ErrorCode::Success };
+		}
+
+		auto AnimateTo(const AnimationTransition& transition) const noexcept -> Error
+		{
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
+			if (!storyboardResult.has_value())
+			{
+				return storyboardResult.error();
+			}
+			const auto& storyboard = storyboardResult.value();
+			auto res = storyboard.AddTransition(var, transition);
+			const auto& timer = AnimationTimer::GetGlobalInstance();
+
+			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
+				!scheduleResult.has_value())
+			{
+				return scheduleResult.error();
+			}
+
 			return Error{ ErrorCode::Success };
 		}
 
@@ -626,7 +692,7 @@ export namespace PGUI::UI::Animation
 
 		auto AnimateTo(const SizeF& newValue, const double duration = 1.0) const noexcept -> Error
 		{
-			const auto storyboardResult = AnimationManager::GetGlobalInstance().CreateStoryboard();
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
 				return storyboardResult.error();
@@ -645,6 +711,26 @@ export namespace PGUI::UI::Animation
 			{
 				return scheduleResult.error();
 			}
+			return Error{ ErrorCode::Success };
+		}
+
+		auto AnimateTo(const AnimationTransition& transition) const noexcept -> Error
+		{
+			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
+			if (!storyboardResult.has_value())
+			{
+				return storyboardResult.error();
+			}
+			const auto& storyboard = storyboardResult.value();
+			auto res = storyboard.AddTransition(var, transition);
+			const auto& timer = AnimationTimer::GetGlobalInstance();
+
+			if (const auto scheduleResult = storyboard.Schedule(timer.GetTime().value());
+				!scheduleResult.has_value())
+			{
+				return scheduleResult.error();
+			}
+
 			return Error{ ErrorCode::Success };
 		}
 

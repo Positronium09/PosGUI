@@ -546,5 +546,8 @@
     <ClCompile Include="src\UI\UIBase\UIComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

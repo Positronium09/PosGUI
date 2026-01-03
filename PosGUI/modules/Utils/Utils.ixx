@@ -14,8 +14,6 @@ export namespace PGUI
 	template <typename T> requires !std::is_same_v<T, void>
 	using ConstRawPtr = const T*;
 
-	
-
 	template <typename T, typename... Types>
 	concept IsAnyOf = (std::same_as<T, Types> || ...);
 

@@ -8,6 +8,7 @@ import :AnimationManager;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import :Storyboard;
+import :AnimationTimeTypes;
 import :AnimationVariable;
 import :AnimationTransition;
 import :AnimationManagerEventHandler;
@@ -177,10 +178,10 @@ namespace PGUI::UI::Animation
 		return error;
 	}
 
-	auto AnimationManager::SetDefaultLongestAcceptableDelay(const double delay) const noexcept -> Error
+	auto AnimationManager::SetDefaultLongestAcceptableDelay(const Seconds delay) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetDefaultLongestAcceptableDelay(delay)
+			Get()->SetDefaultLongestAcceptableDelay(delay.count())
 		};
 		LogIfFailed(error, L"SetDefaultLongestAcceptableDelay failed");
 		return error;

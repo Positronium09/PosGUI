@@ -9,6 +9,7 @@ import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import :AnimationInterface;
 import :AnimationEnums;
+import :AnimationTimeTypes;
 
 export namespace PGUI::UI::Animation
 {
@@ -41,7 +42,7 @@ export namespace PGUI::UI::Animation
 
 		auto SetAnimationMode(AnimationMode mode) const noexcept -> Error;
 
-		auto SetDefaultLongestAcceptableDelay(double delay) const noexcept -> Error;
+		auto SetDefaultLongestAcceptableDelay(Seconds delay) const noexcept -> Error;
 
 		[[nodiscard]] auto GetStoryboardFromTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<Storyboard>;
 

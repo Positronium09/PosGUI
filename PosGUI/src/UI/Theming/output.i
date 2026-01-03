@@ -1,4 +1,5 @@
-module PGUI.UI.Theming.Theme;
+#line 1 ".\\Theme.cpp"
+__preprocessed_module PGUI.UI.Theming.Theme;
 
 import std;
 

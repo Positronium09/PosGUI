@@ -12,15 +12,15 @@ export namespace PGUI::UI::Theming
 {
 	enum class ColorType
 	{
-		Background = winrt::Windows::UI::ViewManagement::UIColorType::Background,
-		Foreground = winrt::Windows::UI::ViewManagement::UIColorType::Foreground,
-		AccentDark3 = winrt::Windows::UI::ViewManagement::UIColorType::AccentDark3,
-		AccentDark2 = winrt::Windows::UI::ViewManagement::UIColorType::AccentDark2,
-		AccentDark1 = winrt::Windows::UI::ViewManagement::UIColorType::AccentDark1,
-		Accent = winrt::Windows::UI::ViewManagement::UIColorType::Accent,
-		AccentLight1 = winrt::Windows::UI::ViewManagement::UIColorType::AccentLight1,
-		AccentLight2 = winrt::Windows::UI::ViewManagement::UIColorType::AccentLight2,
-		AccentLight3 = winrt::Windows::UI::ViewManagement::UIColorType::AccentLight3
+		Background = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::Background),
+		Foreground = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::Foreground),
+		AccentDark3 = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::AccentDark3),
+		AccentDark2 = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::AccentDark2),
+		AccentDark1 = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::AccentDark1),
+		Accent = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::Accent),
+		AccentLight1 = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::AccentLight1),
+		AccentLight2 = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::AccentLight2),
+		AccentLight3 = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::AccentLight3)
 	};
 
 	class SystemTheme final

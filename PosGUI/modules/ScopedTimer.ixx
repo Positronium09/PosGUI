@@ -64,4 +64,25 @@ export namespace PGUI
 		std::source_location sourceLocation;
 		std::chrono::high_resolution_clock::time_point startTime;
 	};
+
+	struct NullTimer
+	{
+		static auto SetTimeThreshold(
+			[[maybe_unused]] const std::chrono::nanoseconds threshold) noexcept -> void
+		{
+		}
+
+		explicit NullTimer(
+			[[maybe_unused]] const std::wstring_view name,
+			[[maybe_unused]] const bool overrideThreshold = false,
+			[[maybe_unused]] const std::source_location& location = std::source_location::current()) noexcept
+		{
+		}
+	};
+
+#ifdef _DEBUG
+	using DebugTimer = ScopedTimer;
+#else
+	using DebugTimer = NullTimer;
+#endif
 }

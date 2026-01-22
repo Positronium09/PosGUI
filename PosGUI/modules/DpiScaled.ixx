@@ -10,11 +10,6 @@ import PGUI.Utils;
 
 export namespace PGUI
 {
-	template <typename T = float> requires std::is_arithmetic_v<T>
-	constexpr auto DEFAULT_SCREEN_DPI_T = static_cast<T>(USER_DEFAULT_SCREEN_DPI);
-
-	constexpr auto DEFAULT_SCREEN_DPI = DEFAULT_SCREEN_DPI_T<float>;
-
 	template <typename T>
 	concept DpiMulScale = requires(std::remove_cvref_t<std::remove_pointer_t<T>> value)
 	{

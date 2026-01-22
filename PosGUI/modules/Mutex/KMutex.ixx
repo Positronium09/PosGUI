@@ -13,6 +13,27 @@ export namespace PGUI::Mutex
 			static_assert(true, "WIP");
 			mutexHandle = CreateMutexW(nullptr, false, nullptr);
 		}
+		KMutex(const KMutex&) = delete;
+		auto operator=(const KMutex&) -> KMutex & = delete;
+		KMutex(KMutex&& other) noexcept :
+			mutexHandle{ other.mutexHandle }
+		{
+			other.mutexHandle = nullptr;
+		}
+		auto operator=(KMutex&& other) noexcept -> KMutex &
+		{
+			if (this != &other)
+			{
+				if (mutexHandle)
+				{
+					CloseHandle(mutexHandle);
+				}
+				mutexHandle = other.mutexHandle;
+				other.mutexHandle = nullptr;
+			}
+
+			return *this;
+		}
 
 		~KMutex() noexcept
 		{

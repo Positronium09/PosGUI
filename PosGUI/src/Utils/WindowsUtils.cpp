@@ -1086,14 +1086,14 @@ namespace PGUI
 
 	auto WindowMsgToText(const UINT msg) noexcept -> std::wstring_view
 	{
-		if (msg >= messageStrings.size())
-		{
-			return L"<undefined>";
-		}
 		if (msg == WM_USER + 7)
 		{
 			// ReSharper disable once StringLiteralTypo
 			return L"WM_GETISHELLBROWSER";
+		}
+		if (msg >= messageStrings.size())
+		{
+			return L"<undefined>";
 		}
 		return messageStrings.at(msg);
 	}

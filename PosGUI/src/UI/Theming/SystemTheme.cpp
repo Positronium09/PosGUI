@@ -1,5 +1,7 @@
 module;
 #include <Windows.h>
+#define WIL_SUPPRESS_EXCEPTIONS 0
+#include <wil/registry.h>
 #include <winrt/windows.ui.viewmanagement.h>
 
 module PGUI.UI.Theming.SystemTheme;
@@ -11,19 +13,20 @@ namespace PGUI::UI::Theming
 {
 	auto SystemTheme::IsDarkMode() -> bool
 	{
-		auto value = 0UL;
-		DWORD size = sizeof(value);
+		DWORD value = 0;
 
-		if (const auto status = RegGetValueW(
-				HKEY_CURRENT_USER,
-				LR"(Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
-				L"AppsUseLightTheme", RRF_RT_DWORD, nullptr, &value, &size);
-			status != ERROR_SUCCESS)
+		if (const Error error{
+				wil::reg::get_value_dword_nothrow(
+					HKEY_CURRENT_USER,
+					LR"(Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
+					L"AppsUseLightTheme", &value)
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ status }, L"Cannot read AppsUseLightTheme registry key");
+			Logger::Error(L"Cannot read AppsUseLightTheme registry key");
 		}
 
-		return !value;
+		return value == 0;
 	}
 
 	auto SystemTheme::GetColor(ColorType colorType) -> RGBA

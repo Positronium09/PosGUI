@@ -24,6 +24,8 @@ export namespace PGUI
 	template <WindowType T = Window>
 	using RawWindowPtr = T*;
 
+	constexpr auto WindowPointerOffset = 0uz;
+
 	enum class MessageHandlerReturnFlags
 	{
 		None,
@@ -229,7 +231,7 @@ export namespace PGUI
 
 	[[nodiscard]] auto GetWindowPtrFromHWND(const HWND hWnd) noexcept
 	{
-		return std::bit_cast<RawWindowPtr<>>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
+		return std::bit_cast<RawWindowPtr<>>(GetWindowLongPtrW(hWnd, WindowPointerOffset));
 	}
 
 	class MessageHooker
@@ -311,14 +313,10 @@ export namespace PGUI
 
 		public:
 		virtual ~Window();
-
 		Window(const Window&) = delete;
-
-		auto operator=(const Window&) -> Window & = delete;
-
-		Window(Window&&) noexcept = delete;
-
-		auto operator=(Window&&) noexcept -> Window && = delete;
+		auto operator=(const Window&) -> Window& = delete;
+		Window(Window&&) noexcept = default;
+		auto operator=(Window&&) noexcept -> Window& = default;
 
 		template <WindowType T, typename... Args>
 		[[nodiscard]] static auto Create(const WindowCreateInfo& info, Args&&... args)

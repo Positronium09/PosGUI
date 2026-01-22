@@ -8,32 +8,63 @@ import PGUI.ErrorHandling;
 
 namespace PGUI
 {
-	PropVariant::PropVariant() noexcept
+	PropVariant::PropVariant(const PROPVARIANT& otherVar) noexcept
 	{
-		PropVariantInit(&var);
+		if (const auto error = Error{ PropVariantCopy(&propVariant, &otherVar) };
+			error.IsFailure())
+		{
+			LogIfFailed(error, L"Failed to copy the propvariant");
+			propVariant.reset();
+		}
 	}
 
-	PropVariant::PropVariant(PROPVARIANT var) noexcept :
-		var{ var }
+	PropVariant::PropVariant(PROPVARIANT&& otherVar) noexcept :
+		propVariant{ otherVar }
 	{
+		PropVariantInit(&otherVar);
 	}
 
-	PropVariant::~PropVariant() noexcept
+	PropVariant::PropVariant(const PropVariant& other)
 	{
-		const auto hr = PropVariantClear(&var);
-		LogIfFailed(Error{ hr });
+		if (const auto error = Error{ PropVariantCopy(&propVariant, &other.propVariant) };
+			error.IsFailure())
+		{
+			LogIfFailed(error, L"Failed to copy the propvariant");
+			propVariant.reset();
+		}
+	}
+
+	auto PropVariant::operator=(const PropVariant& other) -> PropVariant&
+	{
+		if (this == &other)
+		{
+			return *this;
+		}
+
+		propVariant.reset();
+		if (const auto error = Error{ PropVariantCopy(&propVariant, &other.propVariant) };
+			error.IsFailure())
+		{
+			LogIfFailed(error, L"Failed to copy the propvariant");
+			propVariant.reset();
+		}
+
+		return *this;
 	}
 
 	auto PropVariant::operator&() noexcept -> PROPVARIANT*
 	{
-		const auto hr = PropVariantClear(&var);
-		LogIfFailed(Error{ hr });
-
-		return &var;
+		return ReleaseAndGetAddress();
 	}
+
+	auto PropVariant::ReleaseAndGetAddress() noexcept -> PROPVARIANT*
+	{
+		return propVariant.reset_and_addressof();
+	}
+
 	PropVariant::operator PROPVARIANT() const noexcept
 	{
-		return var;
+		return propVariant;
 	}
 	PropVariant::operator PropVariantValue() const noexcept
 	{
@@ -42,6 +73,8 @@ namespace PGUI
 
 	auto PropVariant::GetValue() const noexcept -> PropVariantValue
 	{
+		const PROPVARIANT& var = propVariant;
+
 		switch (Type())
 		{
 			using enum PropVariantType;
@@ -230,7 +263,8 @@ namespace PGUI
 
 			case Vector | Bool:
 			{
-				std::vector<bool> vec(var.cabool.cElems);
+				std::vector<bool> vec;
+				vec.reserve(var.cabool.cElems);
 				for (ULONG i = 0; i < var.cabool.cElems; i++)
 				{
 					vec.push_back(var.cabool.pElems[i]);

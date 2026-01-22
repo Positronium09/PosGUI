@@ -7,37 +7,45 @@ import std;
 
 export
 {
+	template <typename T = float> requires std::is_arithmetic_v<T>
+	constexpr auto DEFAULT_SCREEN_DPI_T = static_cast<T>(USER_DEFAULT_SCREEN_DPI);
+
+	constexpr auto DEFAULT_SCREEN_DPI = DEFAULT_SCREEN_DPI_T<float>;
+	constexpr auto DEFAULT_SCREEN_DPI_D = DEFAULT_SCREEN_DPI_T<double>;
+
 	// ReSharper disable CommentTypo
 	// ReSharper disable IdentifierTypo
 	// ReSharper disable CppInconsistentNaming
 	// ReSharper disable CppEnforceTypeAliasCodeStyle
-
-	constexpr auto WM_FULLSCREEN = 0x003A;
-	constexpr auto WM_CLIENTSHUTDOWN = 0x003B;
-	constexpr auto WM_DDEMLEVENT = 0x003C;
-	constexpr auto WM_CALCSCROLL = 0x003F;
-	// Handled by DefWindowProc
-	constexpr auto WM_UAHDESTROYWINDOW = 0x0090;
-	// lParam is UAHMENU
-	constexpr auto WM_UAHDRAWMENU = 0x0091;
-	// lParam is UAHDRAWMENUITEM
-	constexpr auto WM_UAHDRAWMENUITEM = 0x0092;
-	// Handled by DefWindowProc
-	constexpr auto WM_UAHINITMENU = 0x0093;
-	// lParam is UAHMEASUREMENUITEM
-	constexpr auto WM_UAHMEASUREMENUITEM = 0x0094;
-	// Handled by DefWindowProc
-	constexpr auto WM_UAHNCPAINTMENUPOPUP = 0x0095;
-	constexpr auto WM_UAHUPDATE = 0x0096;
-	// Draw Caption mode.
-	// wParam are DC_* flags.
-	constexpr auto WM_NCUAHDRAWCAPTION = 0x00AE;
-	// Draw Frame mode.
-	// wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
-	constexpr auto WM_NCUAHDRAWFRAME = 0x00AF;
-	constexpr auto EM_MSGMAX = 0x00DA;
-	constexpr auto WM_SYSTIMER = 0x0118;
-	constexpr auto WM_GETISHELLBROWSER = (WM_USER + 7);
+	namespace UndocumentedMessages
+	{
+		constexpr auto WM_FULLSCREEN = 0x003A;
+		constexpr auto WM_CLIENTSHUTDOWN = 0x003B;
+		constexpr auto WM_DDEMLEVENT = 0x003C;
+		constexpr auto WM_CALCSCROLL = 0x003F;
+		// Handled by DefWindowProc
+		constexpr auto WM_UAHDESTROYWINDOW = 0x0090;
+		// lParam is UAHMENU
+		constexpr auto WM_UAHDRAWMENU = 0x0091;
+		// lParam is UAHDRAWMENUITEM
+		constexpr auto WM_UAHDRAWMENUITEM = 0x0092;
+		// Handled by DefWindowProc
+		constexpr auto WM_UAHINITMENU = 0x0093;
+		// lParam is UAHMEASUREMENUITEM
+		constexpr auto WM_UAHMEASUREMENUITEM = 0x0094;
+		// Handled by DefWindowProc
+		constexpr auto WM_UAHNCPAINTMENUPOPUP = 0x0095;
+		constexpr auto WM_UAHUPDATE = 0x0096;
+		// Draw Caption mode.
+		// wParam are DC_* flags.
+		constexpr auto WM_NCUAHDRAWCAPTION = 0x00AE;
+		// Draw Frame mode.
+		// wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
+		constexpr auto WM_NCUAHDRAWFRAME = 0x00AF;
+		constexpr auto EM_MSGMAX = 0x00DA;
+		constexpr auto WM_SYSTIMER = 0x0118;
+		constexpr auto WM_GETISHELLBROWSER = (WM_USER + 7);
+	}
 
 	constexpr auto SWP_STATECHANGED = 0x8000;
 	constexpr auto SWP_NOCLIENTSIZE = 0x0800;
@@ -131,12 +139,12 @@ export namespace PGUI
 	template <typename T, std::floating_point U>
 	[[nodiscard]] auto AdjustForDpi(T value, U dpi) noexcept -> T
 	{
-		return static_cast<T>(value * dpi / static_cast<U>(96.0));
+		return static_cast<T>(value * dpi / DEFAULT_SCREEN_DPI_T<U>);
 	}
 
 	template <typename T, std::floating_point U>
 	[[nodiscard]] auto RemoveDpiAdjustment(T value, U dpi) noexcept -> T
 	{
-		return static_cast<T>(value * static_cast<U>(96.0) / dpi);
+		return static_cast<T>(value * DEFAULT_SCREEN_DPI_T<U> / dpi);
 	}
 }

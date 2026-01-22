@@ -32,7 +32,7 @@ namespace PGUI
 		wc.style = style;
 		wc.lpfnWndProc = _WindowProc;
 		wc.cbClsExtra = 0;
-		wc.cbWndExtra = 0;
+		wc.cbWndExtra = sizeof(nullptr);
 		wc.hInstance = GetHInstance();
 		wc.hbrBackground = backgroundBrush;
 		wc.lpszMenuName = nullptr;

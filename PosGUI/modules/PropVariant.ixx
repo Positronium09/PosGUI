@@ -1,5 +1,6 @@
 module;
 #include <Windows.h>
+#include <wil/resource.h>
 
 export module PGUI.PropVariant;
 
@@ -89,22 +90,35 @@ export namespace PGUI
 
 	struct PropVariant final
 	{
-		PropVariant() noexcept;
+		PropVariant() noexcept = default;
 
-		explicit(false) PropVariant(PROPVARIANT var) noexcept;
+		explicit(false) PropVariant(const PROPVARIANT& otherVar) noexcept;
+		explicit(false) PropVariant(PROPVARIANT&& otherVar) noexcept;
 
-		~PropVariant() noexcept;
+		PropVariant(const PropVariant& other);
+		PropVariant(PropVariant&& other) noexcept = default;
+		auto operator=(const PropVariant& other) -> PropVariant&;
+		auto operator=(PropVariant&& other) noexcept -> PropVariant& = default;
+
+		~PropVariant() noexcept = default;
 
 		auto operator&() noexcept -> PROPVARIANT*;
+
+		[[nodiscard]] auto GetAddress() const noexcept -> const PROPVARIANT* { return &propVariant; }
+		[[nodiscard]] auto GetAddress() noexcept -> PROPVARIANT* { return propVariant.addressof(); }
+		
+		[[nodiscard]] auto ReleaseAndGetAddress() noexcept -> PROPVARIANT*;
 
 		explicit(false) operator PROPVARIANT() const noexcept;
 
 		explicit(false) operator PropVariantValue() const noexcept;
 
-		[[nodiscard]] auto Type() const noexcept { return static_cast<PropVariantType>(var.vt); }
+		[[nodiscard]] auto Type() const noexcept { return static_cast<PropVariantType>(propVariant.vt); }
+
+		[[nodiscard]] auto IsEmpty() const noexcept -> bool { return Type() == PropVariantType::Empty; }
 
 		[[nodiscard]] auto GetValue() const noexcept -> PropVariantValue;
 
-		PROPVARIANT var{ };
+		wil::unique_prop_variant propVariant;
 	};
 }

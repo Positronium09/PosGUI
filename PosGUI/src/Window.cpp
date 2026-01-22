@@ -14,6 +14,11 @@ import PGUI.ErrorHandling;
 
 namespace PGUI
 {
+	static auto SetWindowPtrToHWND(const HWND hWnd, const RawWindowPtr<const Window> ptr) noexcept -> void
+	{
+		SetWindowLongPtrW(hWnd, WindowPointerOffset, std::bit_cast<LONG_PTR>(ptr));
+	}
+
 	Window::Window(const WindowClassPtr& windowClass) noexcept :
 		windowClass{ windowClass }
 	{
@@ -43,23 +48,32 @@ namespace PGUI
 		childWindows.clear();
 
 
-		std::ranges::for_each(beforeHookers,
-		                      [](auto& hook)
-		                      {
-			                      hook.get().UnhookFromWindow();
-		                      });
-		std::ranges::for_each(afterHookers,
+		std::ranges::for_each(
+			beforeHookers,
 			[](auto& hook)
-		{
-			hook.get().UnhookFromWindow();
-		});
+			{
+				hook.get().UnhookFromWindow();
+			});
+
+		std::ranges::for_each(
+			afterHookers,
+			[](auto& hook)
+			{
+				hook.get().UnhookFromWindow();
+			});
+
 		beforeHookers.clear();
 		afterHookers.clear();
 
-		hWnd = nullptr;
 		parentHwnd = nullptr;
+		if (const auto copyHwnd = hWnd;
+			copyHwnd != nullptr)
+		{
+			hWnd = nullptr;
 
-		DestroyWindow(hWnd);
+			SetWindowPtrToHWND(copyHwnd, nullptr);
+			DestroyWindow(copyHwnd);
+		}
 	}
 
 	// ReSharper disable CppInconsistentNaming
@@ -702,7 +716,7 @@ namespace PGUI
 	// ReSharper disable once CppInconsistentNaming
 	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 	{
-		ScopedTimer timer{
+		DebugTimer timer{
 			std::format(L"MSG {}", WindowMsgToText(msg))
 		};
 
@@ -719,7 +733,7 @@ namespace PGUI
 				Logger::Error(error, L"SetDpi failed in WM_NCCREATE");
 			}
 
-			SetWindowLongPtrW(hWnd, GWLP_USERDATA, std::bit_cast<LONG_PTR>(window));
+			SetWindowPtrToHWND(hWnd, window);
 		}
 
 		if (LRESULT result = 0;
@@ -729,6 +743,10 @@ namespace PGUI
 		}
 
 		const RawWindowPtr<Window> window = GetWindowPtrFromHWND(hWnd);
+		if (window == nullptr) [[unlikely]]
+		{
+			return DefWindowProcW(hWnd, msg, wParam, lParam);
+		}
 
 		if (msg == WM_TIMER)
 		{
@@ -870,6 +888,13 @@ namespace PGUI
 			window->logicalRect.SetPhysicalValue(rect);
 
 			window->MoveAndResize(*window->logicalRect);
+		}
+
+		if (msg == WM_NCDESTROY) [[unlikely]]
+		{
+			SetWindowPtrToHWND(hWnd, nullptr);
+			window->hWnd = nullptr;
+			window->parentHwnd = nullptr;
 		}
 
 		return result;

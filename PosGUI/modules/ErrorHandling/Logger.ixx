@@ -110,6 +110,11 @@ export namespace PGUI
 			return defaultLogLevel;
 		}
 
+		[[nodiscard]] static auto IsLogLevelEnabled(const LogLevel level) noexcept
+		{
+			return level >= defaultLogLevel;
+		}
+
 		static auto SetLogger(LogSink& loggerInstance) noexcept
 		{
 			std::scoped_lock lock{ loggingMutex };
@@ -135,6 +140,11 @@ export namespace PGUI
 		[[nodiscard]] static auto& GetLogger() noexcept
 		{
 			return *dynamic_cast<Sink*>(logger);
+		}
+
+		[[nodiscard]] static auto IsLoggerPresent() noexcept
+		{
+			return logger != nullptr;
 		}
 
 		static auto Log(const LogLevel logLevel, const std::wstring_view message)

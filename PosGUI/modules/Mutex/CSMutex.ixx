@@ -8,10 +8,29 @@ export namespace PGUI::Mutex
 	class CSMutex
 	{
 		public:
-		CSMutex() noexcept
+		explicit CSMutex(const int spinCount = 0) noexcept
 		{
-			InitializeCriticalSection(&criticalSection);
+			InitializeCriticalSectionEx(&criticalSection, spinCount, 0);
 		}
+		CSMutex(const CSMutex&) = delete;
+		auto operator=(CSMutex&) -> CSMutex& = delete;
+		CSMutex(CSMutex&& other) noexcept : 
+			criticalSection{ other.criticalSection }
+		{
+			InitializeCriticalSectionEx(&other.criticalSection, 0, 0);
+		}
+		auto operator=(CSMutex&& other) noexcept -> CSMutex&
+		{
+			if (this != &other)
+			{
+				DeleteCriticalSection(&criticalSection);
+				criticalSection = other.criticalSection;
+				InitializeCriticalSectionEx(&other.criticalSection, 0, 0);
+			}
+
+			return *this;
+		}
+
 		~CSMutex() noexcept
 		{
 			DeleteCriticalSection(&criticalSection);

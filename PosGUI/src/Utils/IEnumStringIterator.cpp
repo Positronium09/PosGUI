@@ -25,16 +25,17 @@ namespace PGUI
 		return &current;
 	}
 
-	auto IEnumStringIterator::operator++(int) -> void
-	{
-		MoveNext();
-	}
-
-	auto IEnumStringIterator::operator++() -> IEnumStringIterator&
+	auto IEnumStringIterator::operator++(int) -> IEnumStringIterator
 	{
 		auto temp = *this;
 		MoveNext();
 		return temp;
+	}
+
+	auto IEnumStringIterator::operator++() -> IEnumStringIterator&
+	{
+		MoveNext();
+		return *this;
 	}
 
 	auto IEnumStringIterator::operator==(const IEnumStringIterator& other) const -> bool

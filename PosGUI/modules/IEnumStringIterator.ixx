@@ -24,7 +24,7 @@ export namespace PGUI
 		auto operator*() const -> std::wstring_view;
 		auto operator->() -> pointer;
 		auto operator++() -> IEnumStringIterator&;
-		auto operator++(int) -> void;
+		auto operator++(int) -> IEnumStringIterator;
 
 		auto operator==(const IEnumStringIterator& other) const -> bool;
 

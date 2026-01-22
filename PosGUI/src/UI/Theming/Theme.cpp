@@ -46,7 +46,7 @@ namespace PGUI::UI::Theming
 				.captionColor = Colors::Transparent,
 				.captionTextColor = Colors::Transparent,
 				.darkMode = true,
-				.cornerPreference = Default
+				.cornerPreference = CornerPreference::Default
 			}
 		};
 
@@ -63,7 +63,7 @@ namespace PGUI::UI::Theming
 				.captionColor = Colors::Transparent,
 				.captionTextColor = Colors::Transparent,
 				.darkMode = false,
-				.cornerPreference = Default
+				.cornerPreference = CornerPreference::Default
 			}
 		};
 

@@ -11,7 +11,7 @@ import PGUI.UI.Colors;
 
 export namespace PGUI::UI::Theming
 {
-	enum CornerPreference
+	enum class CornerPreference
 	{
 		Default = DWMWCP_DEFAULT,
 		DontRound = DWMWCP_DONOTROUND,
@@ -25,7 +25,7 @@ export namespace PGUI::UI::Theming
 		RGBA captionColor = Colors::Transparent;
 		RGBA captionTextColor = Colors::Transparent;
 		bool darkMode = SystemTheme::IsDarkMode();
-		CornerPreference cornerPreference = Default;
+		CornerPreference cornerPreference = CornerPreference::Default;
 
 		constexpr auto operator==(const AppWindowStyle&) const noexcept -> bool = default;
 	};

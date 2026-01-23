@@ -115,9 +115,9 @@ namespace PGUI::UI
 		swapChainDesc.Height = 1;
 
 		if (const auto hr = dxgiFactory->CreateSwapChainForComposition(
-			dxgiDevice.Get(),
+				dxgiDevice.get(),
 			&swapChainDesc, nullptr,
-			GetAddress<IDXGISwapChain1>());
+			Put<IDXGISwapChain1>());
 			FAILED(hr))
 		{
 			throw Exception{
@@ -144,7 +144,7 @@ namespace PGUI::UI
 		}
 
 		ComPtr<IDXGISurface2> surface;
-		hr = swapChain->GetBuffer(0, IID_PPV_ARGS(surface.GetAddressOf()));
+		hr = swapChain->GetBuffer(0, __uuidof(IDXGISurface2), surface.put_void());
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -160,7 +160,7 @@ namespace PGUI::UI
 
 		ComPtr<ID2D1Bitmap1> bitmap;
 		hr = d2d1Dc->CreateBitmapFromDxgiSurface(
-			surface.Get(),
+			surface.get(),
 			properties,
 			&bitmap);
 		if (FAILED(hr))
@@ -171,7 +171,7 @@ namespace PGUI::UI
 			};
 		}
 
-		d2d1Dc->SetTarget(bitmap.Get());
+		d2d1Dc->SetTarget(bitmap.get());
 	}
 
 	auto DirectXCompositionWindow::InitDirectComposition() -> void
@@ -200,7 +200,7 @@ namespace PGUI::UI
 			};
 		}
 
-		hr = visual->SetContent(swapChain.Get());
+		hr = visual->SetContent(swapChain.get());
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -209,7 +209,7 @@ namespace PGUI::UI
 			};
 		}
 
-		hr = dcompTarget->SetRoot(visual.Get());
+		hr = dcompTarget->SetRoot(visual.get());
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -261,7 +261,8 @@ namespace PGUI::UI
 		ComPtr<IDXGIAdapter1> adapter;
 		auto hr = dxgiFactory->EnumAdapterByGpuPreference(
 			0, gpuPreference,
-			IID_PPV_ARGS(adapter.GetAddressOf()));
+			__uuidof(IDXGIAdapter1),
+			adapter.put_void());
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -291,7 +292,7 @@ namespace PGUI::UI
 		ComPtr<ID3D11Device> device;
 
 		hr = D3D11CreateDevice(
-			adapter.Get(),
+			adapter.get(),
 			D3D_DRIVER_TYPE_UNKNOWN, nullptr,
 			createDeviceFlags,
 			featureLevels.data(),
@@ -307,20 +308,20 @@ namespace PGUI::UI
 			};
 		}
 
-		hr = device.As(&d3d11Device);
-		if (FAILED(hr))
+		d3d11Device = device.try_query<ID3D11Device2>();
+		if (d3d11Device.get() == nullptr)
 		{
 			throw Exception{
-				Error{ hr },
+				Error{ E_NOINTERFACE },
 				L"Cannot query D3D11Device2 interface"
 			};
 		}
 
-		hr = d3d11Device.As(&dxgiDevice);
-		if (FAILED(hr))
+		dxgiDevice = d3d11Device.try_query<IDXGIDevice4>();
+		if (dxgiDevice.get() == nullptr)
 		{
 			throw Exception{
-				Error{ hr },
+				Error{ E_NOINTERFACE },
 				L"Cannot query IDXGIDevice4 interface"
 			};
 		}
@@ -336,7 +337,7 @@ namespace PGUI::UI
 		}
 
 		if (const auto hr = DCompositionCreateDevice(
-			dxgiDevice.Get(),
+				dxgiDevice.get(),
 			__uuidof(dcompDevice),
 			std::bit_cast<void**>(&dcompDevice));
 			FAILED(hr))
@@ -359,7 +360,7 @@ namespace PGUI::UI
 		const auto d2Factory = Factories::D2DFactory::GetFactory();
 
 		if (const auto hr = d2Factory->CreateDevice(
-			dxgiDevice.Get(),
+				dxgiDevice.get(),
 			&d2d1Device);
 			FAILED(hr))
 		{
@@ -394,7 +395,7 @@ namespace PGUI::UI
 			ComPtr<IDWriteRenderingParams> renderingParams;
 			const auto hr = factory->CreateMonitorRenderingParams(
 				currentMonitor,
-				renderingParams.GetAddressOf());
+				renderingParams.put());
 
 			LogIfFailed(
 				Error{
@@ -406,7 +407,7 @@ namespace PGUI::UI
 
 			if (!FAILED(hr))
 			{
-				GetAs<ID2D1DeviceContext7, ID2D1RenderTarget>()->SetTextRenderingParams(renderingParams.Get());
+				GetAs<ID2D1DeviceContext7, ID2D1RenderTarget>()->SetTextRenderingParams(renderingParams.get());
 			}
 		}
 

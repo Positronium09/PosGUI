@@ -158,7 +158,7 @@ export namespace PGUI::UI::Imaging
 		BitmapSourceScaler(BitmapSource<> source, const SizeU targetSize, InterpolationMode interpolationMode) noexcept
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
-			auto hr = factory->CreateBitmapScaler(GetAddress());
+			auto hr = factory->CreateBitmapScaler(Put());
 			if (FAILED(hr))
 			{
 				Error error{ hr };
@@ -185,7 +185,7 @@ export namespace PGUI::UI::Imaging
 		BitmapSourceClipper(BitmapSource<> source, const RectI clipRect) noexcept
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
-			auto hr = factory->CreateBitmapClipper(GetAddress());
+			auto hr = factory->CreateBitmapClipper(Put());
 			if (FAILED(hr))
 			{
 				Error error{ hr };
@@ -212,7 +212,7 @@ export namespace PGUI::UI::Imaging
 		BitmapSourceFlipRotator(BitmapSource<> source, TransformOptions transformOptions) noexcept
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
-			auto hr = factory->CreateBitmapFlipRotator(GetAddress());
+			auto hr = factory->CreateBitmapFlipRotator(Put());
 			if (FAILED(hr))
 			{
 				Error error{ hr };

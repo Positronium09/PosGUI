@@ -36,7 +36,7 @@ export namespace PGUI::UI::D2D
 		auto CreateEffect(const IID& effectID) const noexcept -> Result<Effect>
 		{
 			Effect effect{ };
-			if (auto hr = this->Get()->CreateEffect(effectID, effect.GetAddress()); 
+			if (auto hr = this->Get()->CreateEffect(effectID, effect.Put()); 
 				FAILED(hr))
 			{
 				Error error{ hr };

@@ -24,7 +24,7 @@ namespace PGUI::UI::Imaging
 		std::optional<Palette> palette, const WICBitmapPaletteType paletteType) noexcept
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		if (const auto hr = factory->CreateFormatConverter(GetAddress());
+		if (const auto hr = factory->CreateFormatConverter(Put());
 			FAILED(hr))
 		{
 			Logger::Error(

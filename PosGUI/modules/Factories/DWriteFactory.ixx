@@ -33,7 +33,7 @@ export namespace PGUI::Factories
 				if (const auto hr = DWriteCreateFactory(
 					DWRITE_FACTORY_TYPE_SHARED,
 					__uuidof(IDWriteFactory8),
-					std::bit_cast<IUnknown**>(directWriteFactory.GetAddressOf()));
+					directWriteFactory.put_unknown());
 					FAILED(hr))
 				{
 					const Error error{ hr };

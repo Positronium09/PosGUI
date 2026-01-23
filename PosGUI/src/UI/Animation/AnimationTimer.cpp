@@ -26,7 +26,7 @@ namespace PGUI::UI::Animation
 			nullptr,
 			CLSCTX_INPROC_SERVER,
 			__uuidof(IUIAnimationTimer),
-			GetVoidAddress());
+			PutVoid());
 			FAILED(hr))
 		{
 			throw Exception{

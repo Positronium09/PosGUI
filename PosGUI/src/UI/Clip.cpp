@@ -24,7 +24,7 @@ namespace PGUI::UI
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		const auto hr = factory->CreateRoundedRectangleGeometry(rect, GetAddress());
+		const auto hr = factory->CreateRoundedRectangleGeometry(rect, Put());
 		LogIfFailed(
 			Error{
 				hr
@@ -41,7 +41,7 @@ namespace PGUI::UI
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
+		const auto hr = factory->CreateRectangleGeometry(rect, Put());
 		LogIfFailed(
 			Error{
 				hr
@@ -58,7 +58,7 @@ namespace PGUI::UI
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		const auto hr = factory->CreateEllipseGeometry(ellipse, GetAddress());
+		const auto hr = factory->CreateEllipseGeometry(ellipse, Put());
 		LogIfFailed(
 			Error{
 				hr

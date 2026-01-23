@@ -1,5 +1,7 @@
 module;
-#include <wrl.h>
+#define WIL_SUPPRESS_EXCEPTIONS 0
+#include <bit>
+#include <wil/com.h>
 
 export module PGUI.ComPtr;
 
@@ -11,7 +13,7 @@ import PGUI.ErrorHandling;
 export namespace PGUI
 {
 	template <typename T>
-	using ComPtr = Microsoft::WRL::ComPtr<T>;
+	using ComPtr = wil::com_ptr_nothrow<T>;
 
 	template <typename... Interfaces>
 	class ComPtrHolder
@@ -28,7 +30,7 @@ export namespace PGUI
 		{ }
 
 		explicit(false) ComPtrHolder(ComPtr<Interfaces>&&... args) noexcept :
-			interfaces{ std::make_tuple(std::move(args)...) }
+			interfaces{ std::make_tuple(std::forward<ComPtr<Interfaces>>(args)...) }
 		{ }
 
 		explicit(false) ComPtrHolder(std::nullptr_t) noexcept
@@ -36,6 +38,13 @@ export namespace PGUI
 
 		template <IsAnyOf<Interfaces...> T>
 		constexpr auto operator=(const ComPtr<T>& ptr) -> ComPtrHolder&
+		{
+			Set(ptr);
+			return *this;
+		}
+
+		template <IsAnyOf<Interfaces...> T>
+		constexpr auto operator=(ComPtr<T>&& ptr) -> ComPtrHolder&
 		{
 			Set(ptr);
 			return *this;
@@ -81,143 +90,86 @@ export namespace PGUI
 		template <IsAnyOf<Interfaces...> T, typename U>
 		[[nodiscard]] auto GetAs() const noexcept
 		{
-			ComPtr<U> ptr;
-			Get<T>().As(&ptr);
-			return ptr;
+			return Get<T>().template try_query<U>();
 		}
 
 		template <typename U>
 		[[nodiscard]] auto GetAs() const noexcept
 		{
-			ComPtr<U> ptr;
-			Get<FirstType>().As(&ptr);
-			return ptr;
+			return Get<FirstType>().template try_query<U>();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
-		[[nodiscard]] auto GetVoidAddress() const noexcept
+		[[nodiscard]] auto PutVoid() noexcept
 		{
-			return std::bit_cast<void**>(Get<T>().GetAddressOf());
+			return Get<T>().put_void();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
-		[[nodiscard]] auto GetAddress() const noexcept
+		[[nodiscard]] auto Put() noexcept
 		{
-			return Get<T>().GetAddressOf();
+			return Get<T>().put();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
-		[[nodiscard]] auto GetAddress() noexcept
+		[[nodiscard]] auto PutUnknown() noexcept
 		{
-			return Get<T>().GetAddressOf();
+			return Get<T>().put_unknown();
 		}
 
 		template <IsAnyOf<Interfaces...> T, typename U>
-		[[nodiscard]] auto GetAddressAs() const noexcept
+		[[nodiscard]] auto PutAs() noexcept
 		{
-			return GetAs<T, U>().GetAddressOf();
+			return GetAs<T, U>().put();
 		}
 
-		template <IsAnyOf<Interfaces...> T, typename U>
-		[[nodiscard]] auto GetAddressAs() noexcept
+		template <IsAnyOf<Interfaces...> T = FirstType>
+		[[nodiscard]] auto AddressOf() noexcept
 		{
-			return GetAs<T, U>().GetAddressOf();
+			return Get<T>().addressof();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
 		[[nodiscard]] auto GetRaw() const noexcept
 		{
-			return Get<T>().Get();
+			return Get<T>().get();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
 		[[nodiscard]] auto GetRaw() noexcept
 		{
-			return Get<T>().Get();
+			return Get<T>().get();
 		}
 
 		template <IsAnyOf<Interfaces...> T, typename U>
 		[[nodiscard]] auto GetRawAs() const noexcept
 		{
-			ComPtr<U> ptr;
-			Get<T>().As(&ptr);
-			return ptr.Get();
+			return GetAs<T, U>().get();
 		}
 
 		template <typename U>
 		[[nodiscard]] auto GetRawAs() const noexcept
 		{
-			ComPtr<U> ptr;
-			Get<FirstType>().As(&ptr);
-			return ptr.Get();
-		}
-
-		template <IsAnyOf<Interfaces...> T, typename U>
-		[[nodiscard]] auto CastRawAs() noexcept
-		{
-			return std::bit_cast<U**>(Get<T>().GetAddressOf());
-		}
-
-		template <typename U>
-		[[nodiscard]] auto CastRawAs() noexcept
-		{
-			return std::bit_cast<U**>(Get<FirstType>().GetAddressOf());
+			return GetAs<U>().get();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
 		[[nodiscard]] auto Detach() noexcept
 		{
-			return Get<T>().Detach();
+			return Get<T>().detach();
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
 		auto Attach(T* ptr) noexcept -> void
 		{
-			Get<T>().Attach(ptr);
-		}
-
-		template <IsAnyOf<Interfaces...> T, typename U>
-		auto As(const std::nothrow_t&) const noexcept -> Result<ComPtr<U>>
-		{
-			ComPtr<U> ptr;
-
-			if (auto hresult = Get<T>().As(&ptr);
-				FAILED(hresult))
-			{
-				Error error{ hresult };
-				error
-					.AddDetail(L"From", StringToWString(typeid(T).name()))
-					.AddDetail(L"To", StringToWString(typeid(U).name()));
-				Logger::Error(error, L"Cannot cast between interfaces");
-				return Unexpected{ error };
-			}
-
-			return ptr;
-		}
-
-		template <IsAnyOf<Interfaces...> T, typename U>
-		auto As() const -> ComPtr<U>
-		{
-			ComPtr<U> ptr;
-
-			if (auto hresult = Get<T>().As(&ptr);
-				FAILED(hresult))
-			{
-				Error error{ hresult };
-				error
-					.AddDetail(L"From", StringToWString(typeid(T).name()))
-					.AddDetail(L"To", StringToWString(typeid(U).name()));
-				throw Exception{ error };
-			}
-
-			return ptr;
+			Get<T>().attach(ptr);
 		}
 
 		template <IsAnyOf<Interfaces...> T, IsAnyOf<Interfaces...> U>
 		auto AsAssign() noexcept -> Error
 		{
-			ComPtr<U> ptr;
-			auto error = Error{ Get<T>().As(&ptr) };
+			auto ptr = GetAs<T, U>();
+			auto error = Error{ ptr.get() == nullptr ? E_NOINTERFACE : S_OK };
 			error
 				.AddDetail(L"From", StringToWString(typeid(T).name()))
 				.AddDetail(L"To", StringToWString(typeid(U).name()));
@@ -230,13 +182,12 @@ export namespace PGUI
 
 			Set(ptr);
 			return error;
-
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
 		[[nodiscard]] constexpr auto IsInitialized() const noexcept -> bool
 		{
-			return std::get<ComPtr<T>>(interfaces);
+			return Get<T>().get() != nullptr;
 		}
 
 		template <IsAnyOf<Interfaces...> T = FirstType>
@@ -248,7 +199,7 @@ export namespace PGUI
 		template <IsAnyOf<Interfaces...> T = FirstType>
 		explicit(false) constexpr operator T*() const noexcept
 		{
-			return Get<ComPtr<T>>().Get();
+			return GetRaw<T>();
 		}
 
 		private:
@@ -279,5 +230,45 @@ struct std::formatter<IID, Char>
 			iid.Data1, iid.Data2, iid.Data3,
 			iid.Data4[0], iid.Data4[1],
 			iid.Data4[2], iid.Data4[3], iid.Data4[4], iid.Data4[5], iid.Data4[6], iid.Data4[7]);
+	}
+};
+
+
+export template <typename T, typename Char, typename... Policies>
+struct std::formatter<wil::com_ptr_t<T, Policies...>, Char>
+{
+	template <typename FormatParseContext>
+	constexpr auto parse(FormatParseContext& ctx)
+	{
+		auto iter = ctx.begin();
+		const auto end = ctx.end();
+		if (iter == end || *iter == '}')
+		{
+			return iter;
+		}
+		throw std::format_error{ "No format specifiers is supported" };
+	}
+
+	template <typename FormatContext>
+	auto format(const wil::com_ptr_t<T, Policies...>& ptr, FormatContext& ctx) const
+	{
+		std::string_view name = typeid(T).name();
+
+		if (name.starts_with("struct "))
+		{
+			name.remove_prefix(7);
+		}
+		else if (name.starts_with("class "))
+		{
+			name.remove_prefix(6);
+		}
+
+		constexpr auto width = 2 * sizeof(nullptr);
+
+		return std::format_to(
+			ctx.out(), "ComPtr<{}>(0x{:0{}x})",
+			name,
+			std::bit_cast<std::uintptr_t>(ptr.get()),
+			width);
 	}
 };

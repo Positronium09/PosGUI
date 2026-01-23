@@ -19,7 +19,7 @@ export namespace PGUI::UI
 
 		explicit RectangleClip(RectF rect) noexcept;
 
-		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};
 
 	struct RoundedRectangleClip : ComPtrHolder<ID2D1RoundedRectangleGeometry>
@@ -28,7 +28,7 @@ export namespace PGUI::UI
 
 		explicit RoundedRectangleClip(const RoundedRect& rect) noexcept;
 
-		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};
 
 	struct EllipseClip : ComPtrHolder<ID2D1EllipseGeometry>
@@ -37,7 +37,7 @@ export namespace PGUI::UI
 
 		explicit EllipseClip(Ellipse ellipse) noexcept;
 
-		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};
 
 	struct PathClip : ComPtrHolder<ID2D1PathGeometry1>
@@ -46,7 +46,7 @@ export namespace PGUI::UI
 
 		explicit PathClip(const D2D::D2DPathGeometry& geometry) noexcept;
 
-		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};
 
 	struct RoundCornerClip : PathClip
@@ -55,7 +55,7 @@ export namespace PGUI::UI
 
 		explicit RoundCornerClip(const D2D::D2DPathGeometry& geometry) noexcept;
 
-		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};
 
 	struct RectangleClipParameters

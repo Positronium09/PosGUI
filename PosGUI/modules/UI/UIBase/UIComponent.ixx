@@ -10,7 +10,7 @@ export namespace PGUI::UI
 	class UIComponent : public UIElement
 	{
 		public:
-		auto Render(Graphics graphics) -> void override;
+		auto Render(const Graphics& graphics) -> void override;
 
 		auto Move(PointF position) -> void override;
 		auto Resize(SizeF size) -> void override;

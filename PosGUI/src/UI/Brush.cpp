@@ -21,7 +21,7 @@ namespace PGUI::UI
 
 	SolidBrush::SolidBrush(const ComPtr<ID2D1RenderTarget>& renderTarget, const RGBA color) noexcept
 	{
-		if (const auto hr = renderTarget->CreateSolidColorBrush(color, GetAddress());
+		if (const auto hr = renderTarget->CreateSolidColorBrush(color, Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr }
@@ -65,8 +65,8 @@ namespace PGUI::UI
 
 		hr = renderTarget->CreateLinearGradientBrush(
 			D2D1::LinearGradientBrushProperties(gradient.Start(), gradient.End()),
-			gradientStopCollection.Get(),
-			GetAddress()
+			gradientStopCollection.get(),
+			Put()
 		);
 		if (FAILED(hr))
 		{
@@ -118,8 +118,8 @@ namespace PGUI::UI
 			D2D1::RadialGradientBrushProperties(
 				gradient.GetEllipse().center, gradient.Offset(),
 				gradient.GetEllipse().xRadius, gradient.GetEllipse().yRadius),
-			gradientStopCollection.Get(),
-			GetAddress()
+			gradientStopCollection.get(),
+			Put()
 		);
 		if (FAILED(hr))
 		{
@@ -144,7 +144,7 @@ namespace PGUI::UI
 	{
 		const auto hr = renderTarget->CreateBitmapBrush(
 			bitmap.GetRaw(),
-			bitmapBrushProperties, GetAddress());
+			bitmapBrushProperties, Put());
 		if (FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -194,17 +194,17 @@ namespace PGUI::UI
 		const ComPtr<ID2D1BitmapBrush>& ptr) noexcept -> Result<BitmapBrushParameters>
 	{
 		ComPtr<ID2D1Bitmap> bitmap;
-		ComPtr<ID2D1Bitmap1> bitmap1;
 		ptr->GetBitmap(&bitmap);
 
-		if (const auto hr = bitmap.As(&bitmap1);
-			FAILED(hr))
+		const auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
+		if (bitmap1.get() == nullptr)
 		{
-			Error error{ hr };
+			Error error{ E_NOINTERFACE };
 			Logger::Error(error,
 			              L"Failed to extract bitmap from BitmapBrush");
 			return Unexpected{ error };
 		}
+
 		const D2D::D2DBitmap bmp{ bitmap1 };
 
 		const auto extendModeX = static_cast<D2D::ExtendMode>(ptr->GetExtendModeX());
@@ -222,61 +222,65 @@ namespace PGUI::UI
 
 	Brush::Brush(const ComPtr<ID2D1Brush>& ptr) noexcept
 	{
-		ComPtr<ID2D1SolidColorBrush> solidBrush;
-		auto hr = ptr.As(&solidBrush);
+		ComPtrHolder<ID2D1Brush, ID2D1SolidColorBrush, ID2D1LinearGradientBrush,
+		             ID2D1RadialGradientBrush, ID2D1BitmapBrush> holder{ nullptr };
+		holder.Attach(ptr.get());
+		auto hrSolidColor = holder.AsAssign<ID2D1Brush, ID2D1SolidColorBrush>();
+		auto hrLinearGradient = holder.AsAssign<ID2D1Brush, ID2D1LinearGradientBrush>();
+		auto hrRadialGradient = holder.AsAssign<ID2D1Brush, ID2D1RadialGradientBrush>();
+		auto hrBitmapBrush = holder.AsAssign<ID2D1Brush, ID2D1BitmapBrush>();
+
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr },
+			Error{ hrSolidColor },
 			L"Given pointer is not a SolidColorBrush"
 		);
 
-		if (solidBrush)
+		if (holder.IsInitialized<ID2D1SolidColorBrush>())
 		{
+			const auto& solidBrush = holder.Get<ID2D1SolidColorBrush>();
 			parameters = ExtractSolidBrushParameters(solidBrush);
 			brush = SolidBrush{ solidBrush };
 			return;
 		}
 
-		ComPtr<ID2D1LinearGradientBrush> linearGradientBrush;
-		hr = ptr.As(&linearGradientBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr },
+			Error{ hrLinearGradient },
 			L"Given pointer is not a LinearGradientBrush"
 		);
 
-		if (linearGradientBrush)
+		if (holder.IsInitialized<ID2D1LinearGradientBrush>())
 		{
+			const auto& linearGradientBrush = holder.Get<ID2D1LinearGradientBrush>();
 			parameters = ExtractLinearGradientBrushParameters(linearGradientBrush);
 			brush = LinearGradientBrush{ linearGradientBrush };
 			return;
 		}
 
-		ComPtr<ID2D1RadialGradientBrush> radialGradientBrush;
-		hr = ptr.As(&radialGradientBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr },
+			Error{ hrRadialGradient },
 			L"Given pointer is not a RadialGradientBrush"
 		);
 
-		if (radialGradientBrush)
+		if (holder.IsInitialized<ID2D1RadialGradientBrush>())
 		{
+			const auto& radialGradientBrush = holder.Get<ID2D1RadialGradientBrush>();
 			parameters = ExtractRadialGradientBrushParameters(radialGradientBrush);
 			brush = RadialGradientBrush{ radialGradientBrush };
 			return;
 		}
 
-		ComPtr<ID2D1BitmapBrush> bitmapBrush;
-		hr = ptr.As(&bitmapBrush);
 		LogIfFailed(
 			LogLevel::Info,
-			Error{ hr },
+			Error{ hrBitmapBrush },
 			L"Given pointer is not a BitmapBrush"
 		);
 
-		if (bitmapBrush)
+		if (holder.IsInitialized<ID2D1BitmapBrush>())
 		{
+			const auto& bitmapBrush = holder.Get<ID2D1BitmapBrush>();
 			const auto result = ExtractBitmapBrushParameters(bitmapBrush);
 			if (!result.has_value())
 			{

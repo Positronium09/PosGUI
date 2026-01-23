@@ -209,7 +209,7 @@ namespace PGUI::UI::Animation
 	auto Storyboard::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetTag(obj.Get(), id)
+			Get()->SetTag(obj.get(), id)
 		};
 		error
 			.AddDetail(L"ID", std::to_wstring(id));

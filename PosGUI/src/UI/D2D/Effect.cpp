@@ -18,7 +18,7 @@ namespace PGUI::UI::D2D
 	auto Effect::GetInput(const UINT32 index) const noexcept -> D2DImage<>
 	{
 		D2DImage<> image;
-		Get()->GetInput(index, image.GetAddress());
+		Get()->GetInput(index, image.Put());
 
 		return image;
 	}
@@ -26,7 +26,7 @@ namespace PGUI::UI::D2D
 	auto Effect::GetOutput() const noexcept -> D2DImage<>
 	{
 		D2DImage<> image;
-		Get()->GetOutput(image.GetAddress());
+		Get()->GetOutput(image.Put());
 
 		return image;
 	}

@@ -22,7 +22,7 @@ namespace PGUI::UI::Animation
 			nullptr,
 			CLSCTX_INPROC_SERVER,
 			__uuidof(IUIAnimationManager2),
-			GetVoidAddress());
+			PutVoid());
 			FAILED(hr))
 		{
 			throw Exception{
@@ -95,7 +95,7 @@ namespace PGUI::UI::Animation
 		const double initialValue) const noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
-		if (const auto hr = Get()->CreateAnimationVariable(initialValue, variable.GetAddress());
+		if (const auto hr = Get()->CreateAnimationVariable(initialValue, variable.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -114,7 +114,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = Get()->CreateAnimationVectorVariable(
 			initialValues.data(),
 			static_cast<UINT>(initialValues.size()),
-			variable.GetAddress());
+			variable.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -130,7 +130,7 @@ namespace PGUI::UI::Animation
 	{
 		Storyboard storyboard;
 
-		if (const auto hr = Get()->CreateStoryboard(storyboard.GetAddress());
+		if (const auto hr = Get()->CreateStoryboard(storyboard.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -191,7 +191,7 @@ namespace PGUI::UI::Animation
 		const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Result<Storyboard>
 	{
 		Storyboard storyboard;
-		if (const auto hr = Get()->GetStoryboardFromTag(obj.Get(), id, storyboard.GetAddress());
+		if (const auto hr = Get()->GetStoryboardFromTag(obj.get(), id, storyboard.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -207,7 +207,7 @@ namespace PGUI::UI::Animation
 		const UINT32 id) const noexcept -> Result<AnimationVariable>
 	{
 		AnimationVariable variable;
-		if (const auto hr = Get()->GetVariableFromTag(obj.Get(), id, variable.GetAddress());
+		if (const auto hr = Get()->GetVariableFromTag(obj.get(), id, variable.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };

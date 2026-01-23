@@ -290,7 +290,7 @@ namespace PGUI::UI::Animation
 	auto AnimationVariable::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetTag(obj.Get(), id)
+			Get()->SetTag(obj.get(), id)
 		};
 		LogIfFailed(error, L"Failed to set tag");
 		return error;

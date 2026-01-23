@@ -1,6 +1,6 @@
 module PGUI.UI.Theming.Theme;
 
-import std.compat;
+import std;
 
 import PGUI.Event;
 import PGUI.UI.Color;

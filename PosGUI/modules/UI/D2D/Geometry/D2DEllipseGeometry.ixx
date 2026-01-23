@@ -28,7 +28,7 @@ export namespace PGUI::UI::D2D
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			if (const auto hr = factory->CreateEllipseGeometry(ellipse, GetAddress());
+			if (const auto hr = factory->CreateEllipseGeometry(ellipse, Put());
 				FAILED(hr))
 			{
 				Logger::Error(

@@ -291,7 +291,7 @@ namespace PGUI::UI
 		return false;
 	}
 
-	auto UIContainer::Render(const Graphics graphics) -> void
+	auto UIContainer::Render(const Graphics& graphics) -> void
 	{
 		EnsureZOrder();
 		(void)layoutPanel;

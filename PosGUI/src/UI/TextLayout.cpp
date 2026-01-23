@@ -26,7 +26,7 @@ namespace PGUI::UI
 			text.data(), static_cast<UINT32>(text.size()),
 			textFormat.GetRawAs<IDWriteTextFormat3, IDWriteTextFormat>(),
 			maxSize.cx, maxSize.cy,
-			std::bit_cast<IDWriteTextLayout**>(GetAddress()));
+			std::bit_cast<IDWriteTextLayout**>(Put()));
 
 		LogIfFailed(
 			Error{
@@ -233,7 +233,7 @@ namespace PGUI::UI
 	                                  const TextRange textRange) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetDrawingEffect(drawingEffect.Get(), textRange)
+			Get()->SetDrawingEffect(drawingEffect.get(), textRange)
 		};
 		error
 			.AddDetail(L"Text Range", std::format(L"{}", textRange));
@@ -245,7 +245,7 @@ namespace PGUI::UI
 	                                 const TextRange textRange) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetInlineObject(inlineObject.Get(), textRange)
+			Get()->SetInlineObject(inlineObject.get(), textRange)
 		};
 		error
 			.AddDetail(L"Text Range", std::format(L"{}", textRange));
@@ -257,7 +257,7 @@ namespace PGUI::UI
 	                               const TextRange textRange) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetTypography(typography.Get(), textRange)
+			Get()->SetTypography(typography.get(), textRange)
 		};
 		error
 			.AddDetail(L"Text Range", std::format(L"{}", textRange));
@@ -292,7 +292,7 @@ namespace PGUI::UI
 		Trimming trimming{ };
 		if (const auto hr = Get()->GetTrimming(
 			&trimming.trimmingOptions,
-			trimming.GetAddress());
+			trimming.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -363,7 +363,7 @@ namespace PGUI::UI
 	{
 		FontCollection fontCollection{ nullptr };
 		if (const auto hr = Get()->GetFontCollection(
-			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
+				fontCollection.PutAs<IDWriteFontCollection3, IDWriteFontCollection>());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -378,7 +378,7 @@ namespace PGUI::UI
 	{
 		FontCollection fontCollection{ nullptr };
 		if (const auto hr = Get()->GetFontCollection(
-			position, fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>());
+				position, fontCollection.PutAs<IDWriteFontCollection3, IDWriteFontCollection>());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -397,7 +397,7 @@ namespace PGUI::UI
 		FontCollection fontCollection{ nullptr };
 		if (const auto hr = Get()->GetFontCollection(
 			position,
-			fontCollection.GetAddressAs<IDWriteFontCollection3, IDWriteFontCollection>(),
+			fontCollection.PutAs<IDWriteFontCollection3, IDWriteFontCollection>(),
 			&textRange);
 			FAILED(hr))
 		{
@@ -690,7 +690,7 @@ namespace PGUI::UI
 	{
 		ComPtr<IUnknown> drawingEffect;
 		if (const auto hr = Get()->GetDrawingEffect(
-				position, drawingEffect.GetAddressOf(), nullptr);
+				position, drawingEffect.put(), nullptr);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -708,7 +708,7 @@ namespace PGUI::UI
 	{
 		ComPtr<IUnknown> drawingEffect;
 		if (const auto hr = Get()->GetDrawingEffect(
-				position, drawingEffect.GetAddressOf(), &textRange);
+				position, drawingEffect.put(), &textRange);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -726,7 +726,7 @@ namespace PGUI::UI
 	{
 		ComPtr<IDWriteInlineObject> inlineObject;
 		if (const auto hr = Get()->GetInlineObject(
-				position, inlineObject.GetAddressOf(), nullptr);
+				position, inlineObject.put(), nullptr);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -745,7 +745,7 @@ namespace PGUI::UI
 	{
 		ComPtr<IDWriteInlineObject> inlineObject;
 		if (const auto hr = Get()->GetInlineObject(
-				position, inlineObject.GetAddressOf(), &textRange);
+				position, inlineObject.put(), &textRange);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -763,7 +763,7 @@ namespace PGUI::UI
 	{
 		ComPtr<IDWriteTypography> typography;
 		if (const auto hr = Get()->GetTypography(
-				position, typography.GetAddressOf(), nullptr);
+				position, typography.put(), nullptr);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -781,7 +781,7 @@ namespace PGUI::UI
 	{
 		ComPtr<IDWriteTypography> typography;
 		if (const auto hr = Get()->GetTypography(
-				position, typography.GetAddressOf(), &textRange);
+				position, typography.put(), &textRange);
 			FAILED(hr))
 		{
 			Error error{ hr };

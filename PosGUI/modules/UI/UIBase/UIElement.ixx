@@ -10,7 +10,7 @@ import PGUI.Shape2D;
 
 export namespace PGUI::UI
 {
-	class UIElement
+	class UIElement : public std::enable_shared_from_this<UIElement>
 	{
 		public:
 		template <UIElementType T, typename... Args>
@@ -23,7 +23,7 @@ export namespace PGUI::UI
 
 		virtual ~UIElement() = default;
 
-		virtual auto Render(Graphics) -> void = 0;
+		virtual auto Render(const Graphics&) -> void = 0;
 		virtual auto Invalidate() const noexcept -> void
 		{
 			if (parent != nullptr)

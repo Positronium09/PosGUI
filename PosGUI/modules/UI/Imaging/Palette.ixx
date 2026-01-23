@@ -37,7 +37,7 @@ export namespace PGUI::UI::Imaging
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
 
-			auto hr = factory->CreatePalette(GetAddress());
+			auto hr = factory->CreatePalette(Put());
 			if (FAILED(hr))
 			{
 				Logger::Error(L"Failed to create palette");

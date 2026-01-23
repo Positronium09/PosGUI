@@ -22,7 +22,7 @@ namespace PGUI::UI::D2D
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		if (const auto hr = factory->CreatePathGeometry(GetAddress());
+		if (const auto hr = factory->CreatePathGeometry(Put());
 			FAILED(hr))
 		{
 			const Error error{ hr };
@@ -65,7 +65,7 @@ namespace PGUI::UI::D2D
 	auto D2DPathGeometry::Open() noexcept -> Result<GeometrySink>
 	{
 		ComPtr<ID2D1GeometrySink> sink;
-		if (const auto hr = Get()->Open(sink.GetAddressOf());
+		if (const auto hr = Get()->Open(sink.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -78,7 +78,7 @@ namespace PGUI::UI::D2D
 	auto D2DPathGeometry::Stream(const GeometrySink& sink) noexcept -> Error
 	{
 		Error error{
-			Get()->Stream(sink.Get())
+			Get()->Stream(sink.GetRaw())
 		};
 		LogIfFailed(error, L"Streaming failed");
 		return error;

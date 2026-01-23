@@ -19,7 +19,7 @@ namespace PGUI::UI::Font
 	{
 		ComPtr<IDWriteLocalizedStrings> strings;
 
-		if (const auto hr = Get()->GetFamilyNames(strings.GetAddressOf());
+		if (const auto hr = Get()->GetFamilyNames(strings.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -35,9 +35,8 @@ namespace PGUI::UI::Font
 		auto& ptr = Get();
 
 		ComPtr<IDWriteFontSet1> fontSet1;
-		ComPtr<IDWriteFontSet4> fontSet;
 
-		if (const auto hr = ptr->GetFontSet(fontSet1.GetAddressOf());
+		if (const auto hr = ptr->GetFontSet(fontSet1.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -45,10 +44,10 @@ namespace PGUI::UI::Font
 			return Unexpected{ error };
 		}
 
-		if (const auto& hr = fontSet1.As(&fontSet);
-			FAILED(hr))
+		auto fontSet = fontSet1.try_query<IDWriteFontSet4>();
+		if (fontSet.get() == nullptr)
 		{
-			Error error{ hr };
+			Error error{ E_NOINTERFACE };
 			Logger::Error(error, L"Cannot get IDWriteFontSet4 interface");
 			return Unexpected{ error };
 		}

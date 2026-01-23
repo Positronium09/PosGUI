@@ -52,7 +52,7 @@ export namespace PGUI::UI
 		}
 
 		protected:
-		virtual auto Render(Graphics) -> void
+		virtual auto Render(const Graphics&) -> void
 		{
 			/*  */
 		}

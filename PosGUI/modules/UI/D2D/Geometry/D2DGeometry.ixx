@@ -58,7 +58,7 @@ export namespace PGUI::UI::D2D
 			D2D1_RECT_F bounds{ };
 
 			if (auto hr = this->Get()->GetWidenedBounds(
-				strokeWidth, strokeStyle.Get(),
+				strokeWidth, strokeStyle.get(),
 				worldTransform, flatteningTolerance, &bounds);
 				FAILED(hr))
 			{
@@ -116,7 +116,7 @@ export namespace PGUI::UI::D2D
 		{
 			auto contains = FALSE;
 			if (auto hr = this->Get()->StrokeContainsPoint(
-				point, strokeWidth, strokeStyle.Get(),
+				point, strokeWidth, strokeStyle.get(),
 				worldTransform, flatteningTolerance, &contains);
 				FAILED(hr))
 			{

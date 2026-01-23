@@ -39,7 +39,7 @@ export namespace PGUI::Factories
 				if (const auto hr = CreateDXGIFactory2(
 					flags,
 					__uuidof(IDXGIFactory7),
-					std::bit_cast<void**>((dxgiFactory.GetAddressOf())));
+					dxgiFactory.put_void());
 					FAILED(hr))
 				{
 					const Error error{ hr };

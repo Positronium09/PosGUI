@@ -105,6 +105,11 @@ export namespace PGUI::DataBinding
 			valueChangedEvent.RemoveCallback(id);
 		}
 
+		auto ClearObservers() noexcept -> void
+		{
+			valueChangedEvent.ClearCallbacks();
+		}
+
 		virtual auto operator=(const T& val) noexcept -> Property&
 		{
 			Set(val);

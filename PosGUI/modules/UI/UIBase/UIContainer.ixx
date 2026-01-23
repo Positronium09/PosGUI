@@ -89,7 +89,7 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto HitTest(PointF point) noexcept -> bool override;
 
-		auto Render(Graphics graphics) -> void override;
+		auto Render(const Graphics& graphics) -> void override;
 
 		auto Move(const PointF position) -> void override
 		{

@@ -39,17 +39,17 @@ export namespace PGUI::UI::D2D
 
 		~RenderTarget() noexcept = default;
 
-		auto BeginDraw() noexcept -> void
+		auto BeginDraw() const noexcept -> void
 		{
 			this->Get()->BeginDraw();
 		}
 
-		auto EndDraw() noexcept
+		auto EndDraw() const noexcept
 		{
 			return this->Get()->EndDraw();
 		}
 
-		auto Clear(const Brush& brush) noexcept -> void
+		auto Clear(const Brush& brush) const noexcept -> void
 		{
 			const auto size = GetSize();
 			const auto rect = RectF{ { }, size };
@@ -57,22 +57,21 @@ export namespace PGUI::UI::D2D
 			FillRectangle(rect, brush);
 		}
 
-		auto Clear(RGBA color) noexcept -> void
+		auto Clear(RGBA color) const noexcept -> void
 		{
 			this->Get()->Clear(color);
 		}
 
-		[[nodiscard]] auto CreateBrush(const BrushParameters& parameters)
+		[[nodiscard]] auto CreateBrush(const BrushParameters& parameters) const noexcept
 		{
 			return Brush{ this->template GetAs<ID2D1RenderTarget>(), parameters };
 		}
 
-		[[nodiscard]] auto CreateBitmap(SizeU size, BitmapProperties properties) noexcept -> Result<D2DBitmap>
+		[[nodiscard]] auto CreateBitmap(SizeU size, BitmapProperties properties) const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
-			ComPtr<ID2D1Bitmap1> bitmap1;
-			auto hr = this->Get()->CreateBitmap(size, properties, &bitmap);
-			if (FAILED(hr))
+			if (auto hr = this->Get()->CreateBitmap(size, properties, &bitmap);
+				FAILED(hr))
 			{
 				Error error{ hr };
 				error
@@ -81,10 +80,10 @@ export namespace PGUI::UI::D2D
 				return Unexpected{ error };
 			}
 
-			hr = bitmap.As(&bitmap1);
-			if (FAILED(hr))
+			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
+			if (bitmap1.get() == nullptr)
 			{
-				Error error{ hr };
+				Error error{ E_NOINTERFACE };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
@@ -97,12 +96,11 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto CreateBitmap(
 			SizeU size,
 			std::span<std::byte> sourceData,
-			UINT32 pitch, BitmapProperties properties) noexcept -> Result<D2DBitmap>
+			UINT32 pitch, BitmapProperties properties) const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
-			ComPtr<ID2D1Bitmap1> bitmap1;
-			auto hr = this->Get()->CreateBitmap(size, sourceData.data(), pitch, properties, &bitmap);
-			if (FAILED(hr))
+			if (auto hr = this->Get()->CreateBitmap(size, sourceData.data(), pitch, properties, &bitmap); 
+				FAILED(hr))
 			{
 				Error error{ hr };
 				error
@@ -112,10 +110,10 @@ export namespace PGUI::UI::D2D
 				return Unexpected{ error };
 			}
 
-			hr = bitmap.As(&bitmap1);
-			if (FAILED(hr))
+			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
+			if (bitmap1.get() == nullptr)
 			{
-				Error error{ hr };
+				Error error{ E_NOINTERFACE };
 				error
 					.AddDetail(L"Size", std::format(L"{}", size))
 ;
@@ -127,53 +125,54 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] auto CreateBitmapFromSource(
 			const Imaging::BitmapSource<>& source,
-			std::optional<BitmapProperties> properties) noexcept -> Result<D2DBitmap>
+			std::optional<BitmapProperties> properties) const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
-			ComPtr<ID2D1Bitmap1> bitmap1;
-			auto hr = this->Get()->CreateBitmapFromWicBitmap(
+			
+			if (auto hr = this->Get()->CreateBitmapFromWicBitmap(
 				source.GetRawAs<IWICBitmapSource>(),
-				properties.has_value() ? &properties : nullptr, &bitmap);
-			if (FAILED(hr))
+				properties.has_value() ? &properties : nullptr, &bitmap); 
+				FAILED(hr))
 			{
 				Error error{ hr };
 				Logger::Error(error, L"Cannot create bitmap from source {}");
 				return Unexpected{ error };
 			}
 
-			hr = bitmap.As(&bitmap1);
-			if (FAILED(hr))
+			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
+			if (bitmap1.get() == nullptr)
 			{
-				Error error{ hr };
+				Error error{ E_NOINTERFACE };
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface {}");
 				return Unexpected{ error };
 			}
+
 			return D2DBitmap{ bitmap1 };
 		}
 
-		[[nodiscard]] auto CreateBitmapFromSource(const Imaging::BitmapSource<>& source) noexcept -> Result<D2DBitmap>
+		[[nodiscard]] auto CreateBitmapFromSource(const Imaging::BitmapSource<>& source) const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
-			ComPtr<ID2D1Bitmap1> bitmap1;
-			auto hr = this->Get()->CreateBitmapFromWicBitmap(source.GetRawAs<IWICBitmapSource>(), &bitmap);
-			if (FAILED(hr))
+
+			if (auto hr = this->Get()->CreateBitmapFromWicBitmap(source.GetRawAs<IWICBitmapSource>(), &bitmap); 
+				FAILED(hr))
 			{
 				Error error{ hr };
 				Logger::Error(error, L"Cannot create bitmap from source {}");
 				return Unexpected{ error };
 			}
 
-			hr = bitmap.As(&bitmap1);
-			if (FAILED(hr))
+			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
+			if (bitmap1.get() == nullptr)
 			{
-				Error error{ hr };
+				Error error{ E_NOINTERFACE };
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface {}");
 				return Unexpected{ error };
 			}
 			return D2DBitmap{ bitmap1 };
 		}
 
-		[[nodiscard]] auto CreateLayer(SizeF size) noexcept -> Result<D2DLayer>
+		[[nodiscard]] auto CreateLayer(SizeF size) const noexcept -> Result<D2DLayer>
 		{
 			ComPtr<ID2D1Layer> layer;
 
@@ -189,7 +188,7 @@ export namespace PGUI::UI::D2D
 			return D2DLayer{ layer };
 		}
 
-		[[nodiscard]] auto CreateLayer() noexcept -> Result<D2DLayer>
+		[[nodiscard]] auto CreateLayer() const noexcept -> Result<D2DLayer>
 		{
 			ComPtr<ID2D1Layer> layer;
 			if (auto hr = this->Get()->CreateLayer(&layer); 
@@ -202,64 +201,64 @@ export namespace PGUI::UI::D2D
 			return D2DLayer{ layer };
 		}
 
-		auto DrawLine(PointF p1, PointF p2, Brush brush, float strokeWidth = 1.0F) noexcept -> void
+		auto DrawLine(PointF p1, PointF p2, Brush brush, float strokeWidth = 1.0F) const noexcept -> void
 		{
 			this->Get()->DrawLine(p1, p2, brush, strokeWidth);
 		}
 
-		auto DrawLine(LineSegmentF lineSegment, Brush brush, float strokeWidth = 1.0F) noexcept -> void
+		auto DrawLine(LineSegmentF lineSegment, Brush brush, float strokeWidth = 1.0F) const noexcept -> void
 		{
 			this->Get()->DrawLine(lineSegment.start, lineSegment.end, brush, strokeWidth);
 		}
 
-		auto DrawRectangle(RectF rect, Brush brush, float strokeWidth = 1.0F) noexcept -> void
+		auto DrawRectangle(RectF rect, Brush brush, float strokeWidth = 1.0F) const noexcept -> void
 		{
 			this->Get()->DrawRectangle(rect, brush, strokeWidth);
 		}
 
-		auto FillRectangle(RectF rect, Brush brush) noexcept -> void
+		auto FillRectangle(RectF rect, Brush brush) const noexcept -> void
 		{
 			this->Get()->FillRectangle(rect, brush);
 		}
 
-		auto DrawRoundedRectangle(RoundedRect rect, Brush brush, float strokeWidth = 1.0F) noexcept -> void
+		auto DrawRoundedRectangle(RoundedRect rect, Brush brush, float strokeWidth = 1.0F) const noexcept -> void
 		{
 			this->Get()->DrawRoundedRectangle(rect, brush, strokeWidth);
 		}
 
-		auto FillRoundedRectangle(RoundedRect rect, Brush brush) noexcept -> void
+		auto FillRoundedRectangle(RoundedRect rect, Brush brush) const noexcept -> void
 		{
 			this->Get()->FillRoundedRectangle(rect, brush);
 		}
 
-		auto DrawEllipse(Ellipse ellipse, Brush brush, float strokeWidth = 1.0F) noexcept -> void
+		auto DrawEllipse(Ellipse ellipse, Brush brush, float strokeWidth = 1.0F) const noexcept -> void
 		{
 			this->Get()->DrawEllipse(ellipse, brush, strokeWidth);
 		}
 
-		auto FillEllipse(Ellipse ellipse, Brush brush) noexcept -> void
+		auto FillEllipse(Ellipse ellipse, Brush brush) const noexcept -> void
 		{
 			this->Get()->FillEllipse(ellipse, brush);
 		}
 
-		auto DrawGeometry(D2DGeometry<> geometry, Brush brush, float strokeWidth = 1.0F) noexcept -> void
+		auto DrawGeometry(D2DGeometry<> geometry, Brush brush, float strokeWidth = 1.0F) const noexcept -> void
 		{
 			this->Get()->DrawGeometry(geometry.GetRaw(), brush, strokeWidth);
 		}
 
-		auto FillGeometry(D2DGeometry<> geometry, Brush brush /* Write BitmapBrush */) -> void
+		auto FillGeometry(D2DGeometry<> geometry, Brush brush /* Write BitmapBrush */) const noexcept -> void
 		{
 			this->Get()->FillGeometry(geometry.GetRaw(), brush, nullptr);
 		}
 
-		auto DrawText(std::wstring_view text, const TextFormat& format, RectF textRect, Brush brush) noexcept -> void
+		auto DrawText(std::wstring_view text, const TextFormat& format, RectF textRect, Brush brush) const noexcept -> void
 		{
 			this->Get()->DrawText(text.data(), static_cast<UINT32>(text.size()),
 			                      format.GetRawAs<IDWriteTextFormat>(), textRect, brush);
 		}
 
 		auto DrawText(const TextLayout& layout, PointF origin, Brush brush,
-		              DrawTextOptions drawTextOptions = DrawTextOptions::EnableColorFont) noexcept -> void
+		              DrawTextOptions drawTextOptions = DrawTextOptions::EnableColorFont) const noexcept -> void
 		{
 			this->Get()->DrawTextLayout(origin, layout.GetRawAs<IDWriteTextLayout>(), brush,
 			                            static_cast<D2D1_DRAW_TEXT_OPTIONS>(drawTextOptions));
@@ -269,7 +268,7 @@ export namespace PGUI::UI::D2D
 		                std::optional<RectF> destinationRect = std::nullopt,
 		                std::optional<RectF> sourceRect = std::nullopt,
 		                BitmapInterpolationMode interpolationMode = BitmapInterpolationMode::Linear,
-		                float opacity = 1.0F) noexcept -> void
+		                float opacity = 1.0F) const noexcept -> void
 		{
 			D2D1_RECT_F* destRect = nullptr;
 			if (destinationRect.has_value())
@@ -288,7 +287,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		auto FillOpacityMask(D2DBitmap bitmap, Brush brush,
-		                     RectF destinationRect, RectF sourceRect) noexcept -> void
+		                     RectF destinationRect, RectF sourceRect) const noexcept -> void
 		{
 			this->Get()->FillOpacityMask(bitmap.GetRaw(), brush,
 			                             D2D1_OPACITY_MASK_CONTENT_GRAPHICS |
@@ -297,7 +296,7 @@ export namespace PGUI::UI::D2D
 			                             destinationRect, sourceRect);
 		}
 
-		auto SetTransform(Matrix3x2 transform) noexcept -> void
+		auto SetTransform(Matrix3x2 transform) const noexcept -> void
 		{
 			this->Get()->SetTransform(transform);
 		}
@@ -310,7 +309,7 @@ export namespace PGUI::UI::D2D
 			return D2D1MatrixToMatrix3x2(transform);
 		}
 
-		auto ResetTransform() noexcept
+		auto ResetTransform() const noexcept
 		{
 			auto transform = GetTransform();
 			SetTransform(Matrix3x2::Identity());
@@ -318,7 +317,7 @@ export namespace PGUI::UI::D2D
 			return transform;
 		}
 
-		auto SetAntialiasingMode(AntiAliasingMode mode) noexcept -> void
+		auto SetAntialiasingMode(AntiAliasingMode mode) const noexcept -> void
 		{
 			this->Get()->SetAntialiasMode(static_cast<D2D1_ANTIALIAS_MODE>(mode));
 		}
@@ -328,7 +327,7 @@ export namespace PGUI::UI::D2D
 			return static_cast<AntiAliasingMode>(this->Get()->GetAntialiasMode());
 		}
 
-		auto SetTextAntialiasingMode(TextAntialiasingMode mode) noexcept -> void
+		auto SetTextAntialiasingMode(TextAntialiasingMode mode) const noexcept -> void
 		{
 			this->Get()->SetTextAntialiasMode(static_cast<D2D1_TEXT_ANTIALIAS_MODE>(mode));
 		}
@@ -338,9 +337,9 @@ export namespace PGUI::UI::D2D
 			return static_cast<TextAntialiasingMode>(this->Get()->GetTextAntialiasMode());
 		}
 
-		auto SetTextRenderingParams(const ComPtr<IDWriteRenderingParams>& params) noexcept -> void
+		auto SetTextRenderingParams(const ComPtr<IDWriteRenderingParams>& params) const noexcept -> void
 		{
-			this->Get()->SetTextRenderingParams(params.Get());
+			this->Get()->SetTextRenderingParams(params.get());
 		}
 
 		[[nodiscard]] auto GetTextRenderingParams() const noexcept
@@ -351,7 +350,7 @@ export namespace PGUI::UI::D2D
 			return params;
 		}
 
-		auto SetTags(D2D1_TAG tag1, D2D1_TAG tag2) noexcept -> void
+		auto SetTags(D2D1_TAG tag1, D2D1_TAG tag2) const noexcept -> void
 		{
 			this->Get()->SetTags(tag1, tag2);
 		}
@@ -365,22 +364,22 @@ export namespace PGUI::UI::D2D
 			return std::pair{ tag1, tag2 };
 		}
 
-		auto PushLayer(D2DLayer layer, const LayerParameters& layerParameters) -> void
+		auto PushLayer(D2DLayer layer, const LayerParameters& layerParameters) const noexcept -> void
 		{
 			this->Get()->PushLayer(layerParameters, layer.GetRaw());
 		}
 
-		auto PushLayer(const LayerParameters& layerParameters) -> void
+		auto PushLayer(const LayerParameters& layerParameters) const noexcept -> void
 		{
 			this->Get()->PushLayer(layerParameters, nullptr);
 		}
 
-		auto PopLayer() noexcept -> void
+		auto PopLayer() const noexcept -> void
 		{
 			this->Get()->PopLayer();
 		}
 
-		auto Flush(std::optional<std::pair<D2D1_TAG, D2D1_TAG>> tags) noexcept -> void
+		auto Flush(std::optional<std::pair<D2D1_TAG, D2D1_TAG>> tags) const noexcept -> void
 		{
 			if (tags.has_value())
 			{
@@ -392,27 +391,27 @@ export namespace PGUI::UI::D2D
 			}
 		}
 
-		auto PushAxisAlignedClip(const RectF clipRect, const AntiAliasingMode antialiasMode) noexcept -> void
+		auto PushAxisAlignedClip(const RectF clipRect, const AntiAliasingMode antialiasMode) const noexcept -> void
 		{
 			this->Get()->PushAxisAlignedClip(clipRect, static_cast<D2D1_ANTIALIAS_MODE>(antialiasMode));
 		}
 
-		auto PopAxisAlignedClip() noexcept -> void
+		auto PopAxisAlignedClip() const noexcept -> void
 		{
 			this->Get()->PopAxisAlignedClip();
 		}
 
-		auto SetDpi(const float dpiX, const float dpiY) noexcept -> void
+		auto SetDpi(const float dpiX, const float dpiY) const noexcept -> void
 		{
 			this->Get()->SetDpi(dpiX, dpiY);
 		}
 
-		auto SetDpi(const float dpi) noexcept -> void
+		auto SetDpi(const float dpi) const noexcept -> void
 		{
 			SetDpi(dpi, dpi);
 		}
 
-		auto SetDpi(const std::pair<float, float> dpi) noexcept -> void
+		auto SetDpi(const std::pair<float, float> dpi) const noexcept -> void
 		{
 			SetDpi(dpi.first, dpi.second);
 		}

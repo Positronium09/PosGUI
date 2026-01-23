@@ -26,7 +26,7 @@ export namespace PGUI::UI
 
 		~SolidBrush() noexcept = default;
 
-		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Brush*() const noexcept { return Get().get(); }
 	};
 
 	class LinearGradientBrush : public ComPtrHolder<ID2D1LinearGradientBrush>
@@ -42,7 +42,7 @@ export namespace PGUI::UI
 
 		~LinearGradientBrush() noexcept = default;
 
-		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Brush*() const noexcept { return Get().get(); }
 	};
 
 	class RadialGradientBrush : public ComPtrHolder<ID2D1RadialGradientBrush>
@@ -58,7 +58,7 @@ export namespace PGUI::UI
 
 		~RadialGradientBrush() noexcept = default;
 
-		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Brush*() const noexcept { return Get().get(); }
 	};
 
 	class BitmapBrush : public ComPtrHolder<ID2D1BitmapBrush>
@@ -73,7 +73,7 @@ export namespace PGUI::UI
 
 		~BitmapBrush() noexcept = default;
 
-		explicit(false) operator ID2D1Brush*() const noexcept { return Get().Get(); }
+		explicit(false) operator ID2D1Brush*() const noexcept { return Get().get(); }
 	};;
 
 	struct LinearGradientBrushParameters

@@ -25,7 +25,7 @@ namespace PGUI::UI::Imaging
 
 		if (const auto hr = factory->CreateDecoder(
 			containerFormat,
-			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, GetAddress());
+			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -44,7 +44,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreateDecoderFromFileHandle(
 			fileHandle,
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
+			static_cast<WICDecodeOptions>(decoderOptions), Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -63,7 +63,7 @@ namespace PGUI::UI::Imaging
 			fileName.c_str(),
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
 			static_cast<DWORD>(desiredAccess),
-			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
+			static_cast<WICDecodeOptions>(decoderOptions), Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -78,9 +78,9 @@ namespace PGUI::UI::Imaging
 		const auto& factory = Factories::WICFactory::GetFactory();
 
 		if (const auto hr = factory->CreateDecoderFromStream(
-			stream.Get(),
+				stream.get(),
 			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<WICDecodeOptions>(decoderOptions), GetAddress());
+			static_cast<WICDecodeOptions>(decoderOptions), Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -94,7 +94,7 @@ namespace PGUI::UI::Imaging
 	{
 		return Error{
 			Get()->Initialize(
-			stream.Get(),
+				stream.get(),
 			static_cast<WICDecodeOptions>(decoderOptions))
 		};
 	}
@@ -118,7 +118,7 @@ namespace PGUI::UI::Imaging
 	{
 		ComPtr<IWICMetadataQueryReader> reader;
 
-		if (const auto hr = Get()->GetMetadataQueryReader(reader.GetAddressOf());
+		if (const auto hr = Get()->GetMetadataQueryReader(reader.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -132,7 +132,7 @@ namespace PGUI::UI::Imaging
 	auto BitmapDecoder::GetPreview() const noexcept -> Result<BitmapSource<>>
 	{
 		ComPtr<IWICBitmapSource> preview;
-		if (const auto hr = Get()->GetPreview(preview.GetAddressOf());
+		if (const auto hr = Get()->GetPreview(preview.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -146,7 +146,7 @@ namespace PGUI::UI::Imaging
 	auto BitmapDecoder::GetThumbnail() const noexcept -> Result<BitmapSource<>>
 	{
 		ComPtr<IWICBitmapSource> thumbnail;
-		if (const auto hr = Get()->GetThumbnail(thumbnail.GetAddressOf());
+		if (const auto hr = Get()->GetThumbnail(thumbnail.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -221,7 +221,7 @@ namespace PGUI::UI::Imaging
 			}
 			ComPtr<IWICBitmapFrameDecode> frameDecode;
 
-			if (const auto hr = Get()->GetFrame(index, frameDecode.GetAddressOf());
+			if (const auto hr = Get()->GetFrame(index, frameDecode.put());
 				FAILED(hr))
 			{
 				Error error{ hr };
@@ -265,7 +265,7 @@ namespace PGUI::UI::Imaging
 	{
 		DWORD capabilities{ };
 
-		if (const auto hr = Get()->QueryCapability(stream.Get(), &capabilities);
+		if (const auto hr = Get()->QueryCapability(stream.get(), &capabilities);
 			FAILED(hr))
 		{
 			Error error{ hr };

@@ -17,7 +17,7 @@ namespace PGUI::UI::Imaging
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreatePalette(GetAddress());
+		if (const auto hr = factory->CreatePalette(Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -33,7 +33,7 @@ namespace PGUI::UI::Imaging
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreatePalette(GetAddress());
+		if (const auto hr = factory->CreatePalette(Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -55,7 +55,7 @@ namespace PGUI::UI::Imaging
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreatePalette(GetAddress());
+		if (const auto hr = factory->CreatePalette(Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },

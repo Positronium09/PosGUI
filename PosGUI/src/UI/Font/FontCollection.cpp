@@ -19,7 +19,7 @@ namespace PGUI::UI::Font
 		ComPtr<IDWriteFontCollection3> fontCollection;
 		if (const auto hr = factory->GetSystemFontCollection(
 			false, DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC,
-			fontCollection.GetAddressOf());
+			fontCollection.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -66,7 +66,7 @@ namespace PGUI::UI::Font
 			return Unexpected{ error };
 		}
 
-		hr = fontSetBuilder->AddFontFile(fontFile.Get());
+		hr = fontSetBuilder->AddFontFile(fontFile.get());
 		if (FAILED(hr))
 		{
 			Error error{ hr };
@@ -88,7 +88,7 @@ namespace PGUI::UI::Font
 		}
 
 		ComPtr<IDWriteFontCollection1> fontCollection;
-		hr = factory->CreateFontCollectionFromFontSet(fontSet.Get(), &fontCollection);
+		hr = factory->CreateFontCollectionFromFontSet(fontSet.get(), &fontCollection);
 		if (FAILED(hr))
 		{
 			Error error{ hr };
@@ -98,11 +98,10 @@ namespace PGUI::UI::Font
 			return Unexpected{ error };
 		}
 
-		ComPtr<IDWriteFontCollection3> fontCollection3;
-		hr = fontCollection.As(&fontCollection3);
-		if (FAILED(hr))
+		auto fontCollection3 = fontCollection.try_query<IDWriteFontCollection3>();
+		if (fontCollection3.get() == nullptr)
 		{
-			Error error{ hr };
+			Error error{ E_NOINTERFACE };
 			error
 				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3.");
@@ -157,7 +156,7 @@ namespace PGUI::UI::Font
 		auto& ptr = Get();
 
 		ComPtr<IDWriteFontFamily2> family;
-		if (const auto hr = ptr->GetFontFamily(index, family.GetAddressOf());
+		if (const auto hr = ptr->GetFontFamily(index, family.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -175,8 +174,7 @@ namespace PGUI::UI::Font
 		auto& ptr = Get();
 
 		ComPtr<IDWriteFontSet1> fontSet1;
-		ComPtr<IDWriteFontSet4> fontSet;
-		if (const auto hr = ptr->GetFontSet(fontSet1.GetAddressOf());
+		if (const auto hr = ptr->GetFontSet(fontSet1.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -184,11 +182,10 @@ namespace PGUI::UI::Font
 			return Unexpected{ error };
 		}
 
-
-		if (const auto hr = fontSet1.As(&fontSet);
-			FAILED(hr))
+		auto fontSet = fontSet1.try_query<IDWriteFontSet4>();
+		if (fontSet.get() == nullptr)
 		{
-			Error error{ hr };
+			Error error{ E_NOINTERFACE };
 			Logger::Error(error, L"Failed to cast font set to IDWriteFontSet4.");
 			return Unexpected{ error };
 		}

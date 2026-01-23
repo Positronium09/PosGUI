@@ -26,7 +26,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreateBitmap(
 			size.cx, size.cy, pixelFormat,
 			static_cast<WICBitmapCreateCacheOption>(cacheOption),
-			GetAddress());
+			Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr }
@@ -44,7 +44,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreateBitmapFromHBITMAP(
 			hBitmap, hPalette,
 			static_cast<WICBitmapAlphaChannelOption>(alphaOption),
-			GetAddress());
+			Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -56,7 +56,7 @@ namespace PGUI::UI::Imaging
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreateBitmapFromHICON(hIcon, GetAddress());
+		if (const auto hr = factory->CreateBitmapFromHICON(hIcon, Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -70,7 +70,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreateBitmapFromSource(
 			source.GetRaw(),
 			static_cast<WICBitmapCreateCacheOption>(cacheOption),
-			GetAddress());
+			Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },
@@ -86,7 +86,7 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreateBitmapFromSourceRect(
 			source.GetRaw(),
 			rect.left, rect.right, size.cx, size.cy,
-			GetAddress());
+			Put());
 			FAILED(hr))
 		{
 			Logger::Error(Error{ hr },

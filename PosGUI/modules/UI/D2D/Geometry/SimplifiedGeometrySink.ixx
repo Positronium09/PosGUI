@@ -16,7 +16,7 @@ import PGUI.UI.D2D.D2DStructs;
 export namespace PGUI::UI::D2D
 {
 	template <typename Interface = ID2D1SimplifiedGeometrySink>
-	class SimplifiedGeometrySink : public ComPtr<Interface>
+	class SimplifiedGeometrySink : public ComPtrHolder<Interface>
 	{
 		static_assert(
 			std::is_same_v<Interface, ID2D1SimplifiedGeometrySink> || std::is_same_v<Interface, ID2D1GeometrySink>,
@@ -26,7 +26,7 @@ export namespace PGUI::UI::D2D
 		SimplifiedGeometrySink() noexcept = default;
 
 		explicit(false) SimplifiedGeometrySink(ComPtr<Interface> ptr) noexcept :
-			ComPtr<Interface>(ptr)
+			ComPtrHolder<Interface>{ ptr }
 		{ }
 
 		auto BeginFigure(PointF startPoint, FigureBegin figureBegin) noexcept -> void

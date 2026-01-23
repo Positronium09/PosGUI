@@ -56,7 +56,7 @@ namespace PGUI::UI
 			fontFamilyName.data(),
 			collection.GetRawAs<IDWriteFontCollection>(),
 			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
-			fontSize, localeName.data(), GetAddress());
+			fontSize, localeName.data(), Put());
 		LogIfFailed(
 			Error{ hr }
 			.AddDetail(L"FontFamilyName", fontFamilyName)
@@ -94,7 +94,7 @@ namespace PGUI::UI
 			fontFamilyName.data(),
 			collection.GetRawAs<IDWriteFontCollection>(),
 			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
-			fontSize, localeName.data(), GetAddress());
+			fontSize, localeName.data(), Put());
 
 		LogIfFailed(
 			Error{ hr }
@@ -185,9 +185,8 @@ namespace PGUI::UI
 	auto TextFormat::GetFontCollection() const noexcept -> Result<FontCollection>
 	{
 		ComPtr<IDWriteFontCollection> fontCollection;
-		ComPtr<IDWriteFontCollection3> fontCollection3;
 
-		if (const auto hr = Get()->GetFontCollection(fontCollection.GetAddressOf());
+		if (const auto hr = Get()->GetFontCollection(fontCollection.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -195,10 +194,10 @@ namespace PGUI::UI
 			return Unexpected{ error };
 		}
 
-		if (const auto hr = fontCollection.As(&fontCollection3);
-			FAILED(hr))
+		auto fontCollection3 = fontCollection.try_query<IDWriteFontCollection3>();
+		if (fontCollection3.get() == nullptr)
 		{
-			Error error{ hr };
+			Error error{ E_NOINTERFACE };
 			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3");
 			return Unexpected{ error };
 		}
@@ -290,7 +289,7 @@ namespace PGUI::UI
 	auto TextFormat::GetTrimming() const noexcept -> Result<Trimming>
 	{
 		Trimming trimming{ };
-		if (const auto hr = Get()->GetTrimming(&trimming.trimmingOptions, trimming.GetAddress());
+		if (const auto hr = Get()->GetTrimming(&trimming.trimmingOptions, trimming.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };

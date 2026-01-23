@@ -343,8 +343,6 @@ namespace PGUI::UI::Layout
 
 	auto GridLayout::SetItemProperty(std::size_t id, const GridItemProperties& properties) noexcept -> void
 	{
-		needsSorting = true;
-
 		const auto boundChangeHandler = std::bind_front(&GridLayout::PropertyChangeHandler, this);
 		const auto boundColumnSpanValidator = std::bind_front(&GridLayout::ColumnSpanValidator, this,
 		                                                      *properties.column);
@@ -361,10 +359,28 @@ namespace PGUI::UI::Layout
 			prop.columnSpan.AddObserver(boundChangeHandler);
 			prop.columnSpan.AddValidator(boundColumnSpanValidator);
 
+			needsSorting = true;
+			RearrangeItems();
+
 			return;
 		}
 
 		auto& prop = itemProperties.at(*result).second;
+
+		if (prop.column.Get() == properties.column.Get() &&
+		    prop.row.Get() == properties.row.Get() &&
+		    prop.rowSpan.Get() == properties.rowSpan.Get() &&
+		    prop.columnSpan.Get() == properties.columnSpan.Get())
+		{
+			return;
+		}
+
+		prop.column.ClearObservers();
+		prop.row.ClearObservers();
+		prop.rowSpan.ClearObservers();
+		prop.columnSpan.ClearObservers();
+		prop.columnSpan.ClearValidators();
+
 		prop = properties;
 
 		prop.column.AddObserver(boundChangeHandler);
@@ -373,6 +389,7 @@ namespace PGUI::UI::Layout
 		prop.columnSpan.AddObserver(boundChangeHandler);
 		prop.columnSpan.AddValidator(boundColumnSpanValidator);
 
+		needsSorting = true;
 		RearrangeItems();
 	}
 

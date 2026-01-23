@@ -306,7 +306,7 @@ export namespace PGUI
 
 	using MessageHookers = std::vector<std::reference_wrapper<MessageHooker>>;
 
-	class Window
+	class Window : public std::enable_shared_from_this<Window>
 	{
 		// ReSharper disable once CppInconsistentNaming
 		friend auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;

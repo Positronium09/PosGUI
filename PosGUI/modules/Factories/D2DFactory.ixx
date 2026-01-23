@@ -37,7 +37,7 @@ export namespace PGUI::Factories
 
 				if (const auto hr = D2D1CreateFactory(
 					D2D1_FACTORY_TYPE_SINGLE_THREADED,
-					options, factory.GetAddressOf());
+					options, factory.put());
 					FAILED(hr))
 				{
 					const Error error{ hr };

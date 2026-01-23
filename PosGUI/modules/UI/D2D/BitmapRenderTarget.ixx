@@ -102,19 +102,19 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto GetBitmap() const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
-			auto hr = Get()->GetBitmap(&bitmap);
-			if (FAILED(hr))
+			
+			if (auto hr = Get()->GetBitmap(&bitmap); 
+				FAILED(hr))
 			{
 				Error error{ hr };
 				Logger::Error(error, L"Failed to get bitmap");
 				return Unexpected{ error };
 			}
 
-			ComPtr<ID2D1Bitmap1> bitmap1;
-			hr = bitmap.As(&bitmap1);
-			if (FAILED(hr))
+			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
+			if (bitmap1.get() == nullptr)
 			{
-				Error error{ hr };
+				Error error{ E_NOINTERFACE };
 				Logger::Error(error, L"Failed to cast bitmap to ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}

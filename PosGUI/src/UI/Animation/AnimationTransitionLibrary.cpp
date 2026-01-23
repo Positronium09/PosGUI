@@ -21,7 +21,7 @@ namespace PGUI::UI::Animation
 			nullptr,
 			CLSCTX_INPROC_SERVER,
 			__uuidof(IUIAnimationTransitionLibrary2),
-			GetVoidAddress());
+			PutVoid());
 			FAILED(hr))
 		{
 			throw Exception{
@@ -49,7 +49,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = instance->Get()->CreateAccelerateDecelerateTransition(
 			duration, finalValue,
 			accelerationRatio, decelerationRatio,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -71,7 +71,7 @@ namespace PGUI::UI::Animation
 
 		if (const auto hr = instance->Get()->CreateConstantTransition(
 			duration,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -93,7 +93,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = instance->Get()->CreateCubicBezierLinearTransition(
 			duration, finalValue,
 			p1.x, p1.y, p2.x, p2.y,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -120,7 +120,7 @@ namespace PGUI::UI::Animation
 			duration, finalValues.data(),
 			static_cast<UINT>(finalValues.size()),
 			p1.x, p1.y, p2.x, p2.y,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -146,7 +146,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = instance->Get()->CreateCubicTransition(
 			duration,
 			finalValue, finalVelocity,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -181,7 +181,7 @@ namespace PGUI::UI::Animation
 			duration,
 			finalValues.data(), finalVelocities.data(),
 			static_cast<UINT>(finalValues.size()),
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -205,7 +205,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = instance->Get()->CreateDiscreteTransition(
 			duration,
 			finalValue, hold,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -231,7 +231,7 @@ namespace PGUI::UI::Animation
 			finalValues.data(),
 			static_cast<UINT>(finalValues.size()),
 			hold,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -253,7 +253,7 @@ namespace PGUI::UI::Animation
 
 		if (const auto hr = instance->Get()->CreateInstantaneousTransition(
 			finalValue,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -273,7 +273,7 @@ namespace PGUI::UI::Animation
 
 		if (const auto hr = instance->Get()->CreateInstantaneousVectorTransition(
 			finalValues.data(), static_cast<UINT>(finalValues.size()),
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -294,7 +294,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = instance->Get()->CreateLinearTransition(
 			duration,
 			finalValue,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -318,7 +318,7 @@ namespace PGUI::UI::Animation
 			duration,
 			finalValues.data(),
 			static_cast<UINT>(finalValues.size()),
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -341,7 +341,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = instance->Get()->CreateLinearTransitionFromSpeed(
 			speed,
 			finalValue,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -365,7 +365,7 @@ namespace PGUI::UI::Animation
 			speed,
 			finalValues.data(),
 			static_cast<UINT>(finalValues.size()),
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -389,7 +389,7 @@ namespace PGUI::UI::Animation
 			finalValue,
 			finalVelocity,
 			acceleration,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -410,7 +410,7 @@ namespace PGUI::UI::Animation
 
 		if (const auto hr = instance->Get()->CreateReversalTransition(
 			duration,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -432,7 +432,7 @@ namespace PGUI::UI::Animation
 		if (const auto hr = instance->Get()->CreateSinusoidalTransitionFromRange(
 			duration, minimumValue, maximumValue,
 			period, static_cast<UI_ANIMATION_SLOPE>(slope),
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -455,7 +455,7 @@ namespace PGUI::UI::Animation
 
 		if (const auto hr = instance->Get()->CreateSinusoidalTransitionFromVelocity(
 			duration, period,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -476,7 +476,7 @@ namespace PGUI::UI::Animation
 
 		if (const auto hr = instance->Get()->CreateSmoothStopTransition(
 			maximumDuration, finalValue,
-			transition.GetAddress());
+			transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };

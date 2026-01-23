@@ -28,7 +28,7 @@ export namespace PGUI::UI::D2D
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			if (const auto hr = factory->CreateRectangleGeometry(rect, GetAddress());
+			if (const auto hr = factory->CreateRectangleGeometry(rect, Put());
 				FAILED(hr))
 			{
 				Logger::Error(Error{ hr }

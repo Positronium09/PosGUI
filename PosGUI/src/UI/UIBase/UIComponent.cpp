@@ -8,8 +8,13 @@ import PGUI.ErrorHandling;
 
 namespace PGUI::UI
 {
-	auto UIComponent::Render(Graphics graphics) -> void
+	auto UIComponent::Render(const Graphics& graphics) -> void
 	{
+		if (!*IsEnabled())
+		{
+			return;
+		}
+
 		auto axisAligned = false;
 		auto pushed = false;
 

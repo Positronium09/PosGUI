@@ -1,6 +1,5 @@
 module;
 #include <wincodec.h>
-#include <wrl.h>
 
 export module PGUI.Factories:WICFactory;
 
@@ -35,7 +34,7 @@ export namespace PGUI::Factories
 					nullptr,
 					CLSCTX_INPROC_SERVER,
 					__uuidof(IWICImagingFactory2),
-					std::bit_cast<void**>(factory.GetAddressOf()));
+					factory.put_void());
 					FAILED(hr))
 				{
 					const Error error{ hr };

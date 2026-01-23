@@ -50,7 +50,7 @@ namespace PGUI::UI::D2D
 	auto D2DBitmap::GetSurface() const noexcept -> Result<ComPtr<IDXGISurface>>
 	{
 		ComPtr<IDXGISurface> surface;
-		if (const auto hr = Get()->GetSurface(surface.GetAddressOf());
+		if (const auto hr = Get()->GetSurface(surface.put());
 			FAILED(hr))
 		{
 			Error error{ hr };

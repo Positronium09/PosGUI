@@ -14,21 +14,8 @@ export namespace PGUI::Mutex
 		}
 		SRWMutex(const SRWMutex&) = delete;
 		auto operator=(const SRWMutex&) -> SRWMutex& = delete;
-		SRWMutex(SRWMutex&& other) noexcept : 
-			srwLock{ other.srwLock }
-		{
-			other.srwLock = SRWLOCK_INIT;
-		}
-		auto operator=(SRWMutex&& other) noexcept -> SRWMutex&
-		{
-			if (this != &other)
-			{
-				srwLock = other.srwLock;
-				other.srwLock = SRWLOCK_INIT;
-			}
-			return *this;
-		}
-
+		SRWMutex(SRWMutex&& other) noexcept = delete;
+		auto operator=(SRWMutex&& other) noexcept -> SRWMutex& = delete;
 
 		auto lock() noexcept -> void
 		{

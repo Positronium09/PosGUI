@@ -52,14 +52,14 @@ namespace PGUI
 			beforeHookers,
 			[](auto& hook)
 			{
-				hook.get().UnhookFromWindow();
+				UnHookBefore(hook);
 			});
 
 		std::ranges::for_each(
 			afterHookers,
 			[](auto& hook)
 			{
-				hook.get().UnhookFromWindow();
+				UnHookAfter(hook);
 			});
 
 		beforeHookers.clear();
@@ -767,34 +767,38 @@ namespace PGUI
 		MessageHandlerResult result{ 0 };
 		auto hookerHandled = false;
 
-		for (const auto& hooker : window->beforeHookers)
+		if (!window->beforeHookers.empty())
 		{
-			const auto& handlers = hooker.get().GetHandlers();
-			if (!handlers.contains(msg))
+			for (auto beforeHookers = window->beforeHookers;
+			     const auto& hooker : beforeHookers)
 			{
-				continue;
-			}
-
-			for (const auto& messageHandlers : handlers.at(msg))
-			{
-				std::visit([&]<typename Func>(const Func& handler)
+				const auto& handlers = hooker.get().GetHandlers();
+				if (!handlers.contains(msg))
 				{
-					using T = std::decay_t<Func>;
-					if constexpr (std::is_same_v<T, HandlerHWND>)
-					{
-						result = handler(hWnd, msg, wParam, lParam);
-					}
-					else if constexpr (std::is_same_v<T, Handler>)
-					{
-						result = handler(msg, wParam, lParam);
-					}
-				}, messageHandlers);
+					continue;
+				}
 
-				hookerHandled = true;
-
-				if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
+				for (const auto& messageHandlers : handlers.at(msg))
 				{
-					return result.result;
+					std::visit([&]<typename Func>(const Func& handler)
+					{
+						using T = std::decay_t<Func>;
+						if constexpr (std::is_same_v<T, HandlerHWND>)
+						{
+							result = handler(hWnd, msg, wParam, lParam);
+						}
+						else if constexpr (std::is_same_v<T, Handler>)
+						{
+							result = handler(msg, wParam, lParam);
+						}
+					}, messageHandlers);
+
+					hookerHandled = true;
+
+					if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
+					{
+						return result.result;
+					}
 				}
 			}
 		}
@@ -835,32 +839,36 @@ namespace PGUI
 			}
 		}
 
-		for (const auto& hooker : window->afterHookers)
+		if (!window->afterHookers.empty())
 		{
-			const auto& handlers = hooker.get().GetHandlers();
-			if (!handlers.contains(msg))
+			for (auto afterHookers = window->afterHookers;
+			     const auto& hooker : afterHookers)
 			{
-				continue;
-			}
-
-			for (const auto& messageHandlers : handlers.at(msg))
-			{
-				std::visit([&]<typename Func>(const Func& handler)
+				const auto& handlers = hooker.get().GetHandlers();
+				if (!handlers.contains(msg))
 				{
-					using T = std::decay_t<Func>;
-					if constexpr (std::is_same_v<T, HandlerHWND>)
-					{
-						result = handler(hWnd, msg, wParam, lParam);
-					}
-					else if constexpr (std::is_same_v<T, Handler>)
-					{
-						result = handler(msg, wParam, lParam);
-					}
-				}, messageHandlers);
+					continue;
+				}
 
-				if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
+				for (const auto& messageHandlers : handlers.at(msg))
 				{
-					return result.result;
+					std::visit([&]<typename Func>(const Func& handler)
+					{
+						using T = std::decay_t<Func>;
+						if constexpr (std::is_same_v<T, HandlerHWND>)
+						{
+							result = handler(hWnd, msg, wParam, lParam);
+						}
+						else if constexpr (std::is_same_v<T, Handler>)
+						{
+							result = handler(msg, wParam, lParam);
+						}
+					}, messageHandlers);
+
+					if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
+					{
+						return result.result;
+					}
 				}
 			}
 		}

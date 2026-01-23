@@ -1,7 +1,5 @@
 module;
 #include <d2d1_3.h>
-// ReSharper disable once CppUnusedIncludeDirective
-#include <wrl.h>
 
 module PGUI.UI.Graphics;
 

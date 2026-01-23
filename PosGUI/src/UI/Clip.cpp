@@ -1,7 +1,6 @@
 module;
 #include <d2d1_1.h>
 #include <d2d1_3.h>
-#include <wrl.h>
 
 module PGUI.UI.Clip;
 

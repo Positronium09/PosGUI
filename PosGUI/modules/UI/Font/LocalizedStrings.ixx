@@ -1,6 +1,5 @@
 module;
 #include <dwrite_1.h>
-#include <wrl.h>
 
 export module PGUI.UI.Font.LocalizedStrings;
 

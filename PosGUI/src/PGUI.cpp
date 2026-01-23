@@ -1,7 +1,6 @@
 module;
 #include <dwmapi.h>
 #include <Windows.h>
-#include <wrl.h>
 #define WIL_SUPPRESS_EXCEPTIONS 0
 #include <wil/result_macros.h>
 #include <winrt/base.h>

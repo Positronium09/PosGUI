@@ -8,7 +8,6 @@ module;
 #include <dxgi1_2.h>
 #include <dxgi1_6.h>
 #include <Windows.h>
-#include <wrl.h>
 
 module PGUI.UI.DirectXCompositionWindow;
 

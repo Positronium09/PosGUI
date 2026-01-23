@@ -1,7 +1,6 @@
 module;
 #include <d2d1.h>
 #include <d2d1_3.h>
-#include <wrl.h>
 
 export module PGUI.Factories:D2DFactory;
 
@@ -29,11 +28,12 @@ export namespace PGUI::Factories
 		{
 			if (!factory)
 			{
-				D2D1_FACTORY_OPTIONS options{ };
+				constexpr D2D1_FACTORY_OPTIONS options{ 
+					#ifdef _DEBUG
+					.debugLevel = D2D1_DEBUG_LEVEL_ERROR
+					#endif
+				};
 
-				#ifdef _DEBUG
-				options.debugLevel = D2D1_DEBUG_LEVEL_ERROR;
-				#endif
 
 				if (const auto hr = D2D1CreateFactory(
 					D2D1_FACTORY_TYPE_SINGLE_THREADED,

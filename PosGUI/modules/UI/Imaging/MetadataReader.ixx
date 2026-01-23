@@ -1,6 +1,5 @@
 module;
 #include <wincodec.h>
-#include <wrl.h>
 
 export module PGUI.UI.Imaging.MetadataReader;
 

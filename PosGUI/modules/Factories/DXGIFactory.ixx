@@ -1,8 +1,6 @@
 module;
-#include <bit>
 #include <dxgi1_6.h>
 #include <Windows.h>
-#include <wrl.h>
 
 export module PGUI.Factories:DXGIFactory;
 

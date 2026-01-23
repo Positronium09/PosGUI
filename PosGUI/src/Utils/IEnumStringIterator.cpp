@@ -1,5 +1,5 @@
 module;
-#include <wrl.h>
+#include <objidl.h>
 
 module PGUI.IEnumStringIterator;
 

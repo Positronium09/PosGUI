@@ -1,6 +1,5 @@
 module;
 #include <UIAnimation.h>
-#include <wrl.h>
 
 module PGUI.UI.Animation:AnimationTimer;
 import :AnimationTimer;

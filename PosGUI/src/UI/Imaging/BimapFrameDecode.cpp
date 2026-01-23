@@ -1,7 +1,6 @@
 module;
 #include <ranges>
 #include <wincodec.h>
-#include <wrl.h>
 
 module PGUI.UI.Imaging.BitmapFrameDecode;
 

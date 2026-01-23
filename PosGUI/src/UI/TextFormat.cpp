@@ -1,6 +1,5 @@
 module;
 #include <dwrite_3.h>
-#include <wrl.h>
 
 module PGUI.UI.TextFormat;
 

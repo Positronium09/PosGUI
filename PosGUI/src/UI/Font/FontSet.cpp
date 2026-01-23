@@ -1,7 +1,6 @@
 module;
 #include <dwrite_3.h>
 #include <ranges>
-#include <wrl.h>
 
 module PGUI.UI.Font.FontSet;
 

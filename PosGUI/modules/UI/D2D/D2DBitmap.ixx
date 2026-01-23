@@ -1,6 +1,5 @@
 module;
 #include <d2d1_3.h>
-#include <wrl.h>
 
 export module PGUI.UI.D2D.D2DBitmap;
 

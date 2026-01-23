@@ -5,7 +5,6 @@ module;
 #include <dcomp.h>
 #include <dxgi1_2.h>
 #include <Windows.h>
-#include <wrl.h>
 
 export module PGUI.UI.DirectXCompositionWindow;
 

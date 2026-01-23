@@ -1,6 +1,6 @@
 // ReSharper disable CppInconsistentNaming
 module;
-#include <wrl.h>
+#include <objidl.h>
 
 export module PGUI.IEnumStringIterator;
 

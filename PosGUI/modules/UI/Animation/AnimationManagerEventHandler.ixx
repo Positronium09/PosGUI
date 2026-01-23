@@ -28,7 +28,7 @@ namespace PGUI::UI::Animation
 
 		auto __stdcall OnManagerStatusChanged(
 			UI_ANIMATION_MANAGER_STATUS newStatus,
-			UI_ANIMATION_MANAGER_STATUS previousStatus)->HRESULT override;
+			UI_ANIMATION_MANAGER_STATUS previousStatus) -> HRESULT override;
 
 		auto SetHandler(const ManagerStatusChangedHandler& newHandler) noexcept -> void;
 

@@ -1,5 +1,6 @@
 module;
 #include <Windows.h>
+#include <wil/resource.h>
 
 module PGUI.MessageLoop;
 
@@ -50,6 +51,14 @@ namespace PGUI
 		{
 			EnableWindow(parent, FALSE);
 		}
+		auto enableParent = wil::scope_exit([parent]
+		{
+			if (parent != nullptr)
+			{
+				EnableWindow(parent, TRUE);
+				SetForegroundWindow(parent);
+			}
+		});
 
 		MSG msg{ };
 		auto ret = 1;
@@ -75,12 +84,6 @@ namespace PGUI
 				TranslateMessage(&msg);
 				DispatchMessageW(&msg);
 			}
-		}
-
-		if (parent != nullptr)
-		{
-			EnableWindow(parent, TRUE);
-			SetForegroundWindow(parent);
 		}
 
 		return static_cast<int>(msg.wParam);

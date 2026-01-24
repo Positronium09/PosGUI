@@ -74,7 +74,7 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationVariableChangeEventHandler() noexcept;
 
-		virtual ~AnimationVariableChangeEventHandler() = default;
+		virtual ~AnimationVariableChangeEventHandler() noexcept;
 
 		[[nodiscard]] auto& GetRouter() noexcept { return router; }
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }

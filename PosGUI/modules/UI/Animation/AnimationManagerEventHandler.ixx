@@ -42,7 +42,7 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationManagerEventHandler() noexcept;
 
-		virtual ~AnimationManagerEventHandler() = default;
+		virtual ~AnimationManagerEventHandler() noexcept;
 
 		virtual auto OnManagerStatusChanged(
 			AnimationManagerStatus newStatus,

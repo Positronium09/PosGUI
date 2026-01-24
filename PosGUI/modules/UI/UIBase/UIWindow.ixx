@@ -51,6 +51,15 @@ export namespace PGUI::UI
 			return hoveredElement;
 		}
 
+		[[nodiscard]] auto LockFocusedElement() const noexcept
+		{
+			return focusedElement.lock();
+		}
+		[[nodiscard]] auto LockHoveredElement() const noexcept
+		{
+			return hoveredElement.lock();
+		}
+
 		protected:
 		virtual auto Render(const Graphics&) -> void
 		{
@@ -63,8 +72,8 @@ export namespace PGUI::UI
 		//If focused or hovered elements are destroyed crash due to dangling pointer
 		//TODO Fix it when it happens prolly use weak_ptr but too lazy rn
 
-		RawUIElementPtr focusedElement = nullptr;
-		RawUIElementPtr hoveredElement = nullptr;
+		WeakUIElementPtr focusedElement;
+		WeakUIElementPtr hoveredElement;
 
 		[[nodiscard]] static auto GetMousePosFromLparam(const LPARAM lParam) noexcept -> PointF
 		{
@@ -157,10 +166,11 @@ export namespace PGUI::UI
 		{
 			if (!newFocused)
 			{
-				if (focusedElement)
+				if (const auto focused = LockFocusedElement();
+					focused != nullptr)
 				{
-					focusedElement->RemoveFocus();
-					focusedElement = nullptr;
+					focused->RemoveFocus();
+					focusedElement.reset();
 				}
 				return;
 			}
@@ -170,19 +180,21 @@ export namespace PGUI::UI
 				return;
 			}
 
-			if (focusedElement == newFocused)
+			const auto focused = LockFocusedElement();
+			if (focused.get() == newFocused)
 			{
 				return;
 			}
-			if (focusedElement)
+			if (!focusedElement.expired())
 			{
-				focusedElement->RemoveFocus();
+				focused->RemoveFocus();
 			}
 			if (newFocused)
 			{
 				newFocused->SetFocus();
 			}
-			focusedElement = newFocused;
+
+			focusedElement = newFocused->weak_from_this();
 		}
 
 		auto Draw(Graphics graphics) -> void override;

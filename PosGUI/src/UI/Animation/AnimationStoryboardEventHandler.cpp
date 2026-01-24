@@ -87,6 +87,15 @@ namespace PGUI::UI::Animation
 		}
 	{ }
 
+	AnimationStoryboardEventHandler::~AnimationStoryboardEventHandler() noexcept
+	{
+		if (router)
+		{
+			router->ClearStatusChangedHandler();
+			router->ClearUpdatedHandler();
+		}
+	}
+
 	auto AnimationStoryboardEventHandler::CallStoryBoardStatusChangedHandler(
 		const Storyboard& storyboard,
 		const StoryboardStatus newStatus,

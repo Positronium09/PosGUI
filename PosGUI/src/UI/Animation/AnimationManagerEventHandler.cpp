@@ -73,6 +73,14 @@ namespace PGUI::UI::Animation
 		}
 	{ }
 
+	AnimationManagerEventHandler::~AnimationManagerEventHandler() noexcept
+	{
+		if (router)
+		{
+			router->ClearHandler();
+		}
+	}
+
 	auto AnimationManagerEvent::OnManagerStatusChanged(
 		const AnimationManagerStatus newStatus,
 		const AnimationManagerStatus previousStatus) -> void

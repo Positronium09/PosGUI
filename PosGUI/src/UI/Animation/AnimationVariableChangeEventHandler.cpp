@@ -97,6 +97,14 @@ namespace PGUI::UI::Animation
 		}
 	{ }
 
+	AnimationVariableChangeEventHandler::~AnimationVariableChangeEventHandler() noexcept
+	{
+		if (router)
+		{
+			router->ClearHandler();
+		}
+	}
+
 	auto AnimationVariableChangeEventHandler::CallVariableChanged(
 		const Storyboard& storyboard, const AnimationVariable& variable,
 		const std::span<double> newValues, const std::span<double> previousValues) noexcept -> HRESULT

@@ -17,7 +17,7 @@ export namespace PGUI
 		}
 
 		explicit ScopedTimer(
-			const std::wstring_view name,
+			const std::wstring_view name = L"None",
 			const bool overrideThreshold = false,
 			const std::source_location& location = std::source_location::current()) noexcept :
 			timerName{ name },

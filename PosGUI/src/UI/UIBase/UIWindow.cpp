@@ -96,7 +96,7 @@ namespace PGUI::UI
 
 	auto UIWindow::OnFocusChanged(const UINT msg, WPARAM, LPARAM) const noexcept -> MessageHandlerResult
 	{
-		if (!focusedElement || (msg != WM_SETFOCUS && msg != WM_KILLFOCUS))
+		if (focusedElement.expired() || (msg != WM_SETFOCUS && msg != WM_KILLFOCUS))
 		{
 			return 0;
 		}
@@ -112,7 +112,7 @@ namespace PGUI::UI
 			focusEvent.type = EventType::LostFocus;
 		}
 
-		focusedElement->HandleEvent(focusEvent);
+		LockFocusedElement()->HandleEvent(focusEvent);
 
 		return 0;
 	}
@@ -125,7 +125,7 @@ namespace PGUI::UI
 			return wParam == UNICODE_NOCHAR;
 		}
 
-		if (!focusedElement)
+		if (focusedElement.expired())
 		{
 			return 0;
 		}
@@ -146,7 +146,7 @@ namespace PGUI::UI
 		{
 			keyEvent.type = EventType::KeyUp;
 		}
-		focusedElement->HandleEvent(keyEvent);
+		LockFocusedElement()->HandleEvent(keyEvent);
 
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
@@ -158,9 +158,10 @@ namespace PGUI::UI
 		{
 			std::size_t focusIndex = 0;
 
-			if (focusedElement != nullptr)
+			if (!focusedElement.expired())
 			{
-				if (const auto result = childrenContainer.GetElementLinearIndex(focusedElement);
+				const auto focused = LockFocusedElement();
+				if (const auto result = childrenContainer.GetElementLinearIndex(focused.get());
 					result.has_value())
 				{
 					focusIndex = result.value() + 1;
@@ -188,7 +189,7 @@ namespace PGUI::UI
 			return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 		}
 
-		if (!focusedElement || (msg != WM_KEYDOWN && msg != WM_KEYUP))
+		if (focusedElement.expired() || (msg != WM_KEYDOWN && msg != WM_KEYUP))
 		{
 			return 0;
 		}
@@ -206,7 +207,7 @@ namespace PGUI::UI
 		{
 			keyEvent.type = EventType::KeyUp;
 		}
-		focusedElement->HandleEvent(keyEvent);
+		LockFocusedElement()->HandleEvent(keyEvent);
 
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
@@ -231,33 +232,36 @@ namespace PGUI::UI
 		const auto mouseButton = GetMouseButtonsFromWparam(wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		if (!hoveredElement)
+		if (hoveredElement.expired())
 		{
 			if (const auto result = GetChildren().GetElementAtPosition(mousePos);
 				result.has_value())
 			{
 				MouseEvent mouseEnterEvent;
-				hoveredElement = result.value();
+				const auto hovered = result.value();
+				hoveredElement = hovered->weak_from_this();
 				mouseEnterEvent.type = EventType::MouseEnter;
 				mouseEnterEvent.position = mousePos;
 				mouseEnterEvent.modifierKeys = modifierKeys;
 				mouseEnterEvent.mouseButton = mouseButton;
-				hoveredElement->HandleEvent(mouseEnterEvent);
+				hovered->HandleEvent(mouseEnterEvent);
 
 				return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 			}
 			return 0;
 		}
 
-		if (!hoveredElement->HitTest(mousePos))
+		const auto hovered = LockHoveredElement();
+
+		if (!hovered->HitTest(mousePos))
 		{
 			MouseEvent mouseLeaveEvent;
 			mouseLeaveEvent.type = EventType::MouseLeave;
 			mouseLeaveEvent.position = mousePos;
 			mouseLeaveEvent.modifierKeys = modifierKeys;
 			mouseLeaveEvent.mouseButton = mouseButton;
-			hoveredElement->HandleEvent(mouseLeaveEvent);
-			hoveredElement = nullptr;
+			hovered->HandleEvent(mouseLeaveEvent);
+			hoveredElement.reset();
 			return 0;
 		}
 
@@ -266,30 +270,32 @@ namespace PGUI::UI
 		mouseMoveEvent.position = mousePos;
 		mouseMoveEvent.modifierKeys = modifierKeys;
 		mouseMoveEvent.mouseButton = mouseButton;
-		hoveredElement->HandleEvent(mouseMoveEvent);
+		hovered->HandleEvent(mouseMoveEvent);
 
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseLeave(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
 	{
-		if (!hoveredElement)
+		if (hoveredElement.expired())
 		{
 			return 0;
 		}
 
+		const auto hovered = LockHoveredElement();
+
 		MouseEvent mouseLeaveEvent;
 		mouseLeaveEvent.type = EventType::MouseLeave;
-		hoveredElement->HandleEvent(mouseLeaveEvent);
+		hovered->HandleEvent(mouseLeaveEvent);
 
-		hoveredElement = nullptr;
+		hoveredElement.reset();
 
 		return 0;
 	}
 
 	auto UIWindow::OnMouseHover(UINT, const WPARAM wParam, const LPARAM lParam) const noexcept -> MessageHandlerResult
 	{
-		if (!hoveredElement)
+		if (hoveredElement.expired())
 		{
 			return 0;
 		}
@@ -303,14 +309,14 @@ namespace PGUI::UI
 		mouseHoverEvent.position = mousePos;
 		mouseHoverEvent.modifierKeys = modifierKeys;
 		mouseHoverEvent.mouseButton = mouseButton;
-		hoveredElement->HandleEvent(mouseHoverEvent);
+		LockHoveredElement()->HandleEvent(mouseHoverEvent);
 
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
 
 	auto UIWindow::OnMouseWheel(UINT, const WPARAM wParam, const LPARAM lParam) const noexcept -> MessageHandlerResult
 	{
-		if (!hoveredElement)
+		if (hoveredElement.expired())
 		{
 			return 0;
 		}
@@ -326,7 +332,7 @@ namespace PGUI::UI
 		mouseWheelEvent.modifierKeys = modifierKeys;
 		mouseWheelEvent.mouseButton = mouseButton;
 		mouseWheelEvent.wheelDelta = wheelDelta;
-		hoveredElement->HandleEvent(mouseWheelEvent);
+		LockHoveredElement()->HandleEvent(mouseWheelEvent);
 
 		return { 0, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
@@ -340,16 +346,19 @@ namespace PGUI::UI
 		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		if (focusedElement && !focusedElement->HitTest(mousePos))
+		const auto focused = LockFocusedElement();
+		const auto hovered = LockHoveredElement();
+
+		if (focused != nullptr && !focused->HitTest(mousePos))
 		{
 			ChangeFocusedElement(nullptr);
 		}
 
-		if (hoveredElement != nullptr)
+		if (hovered != nullptr)
 		{
-			ChangeFocusedElement(hoveredElement);
+			ChangeFocusedElement(hovered.get());
 		}
-		if (!focusedElement)
+		if (focused == nullptr)
 		{
 			return retVal;
 		}
@@ -359,7 +368,7 @@ namespace PGUI::UI
 		mouseEvent.position = mousePos;
 		mouseEvent.modifierKeys = modifierKeys;
 		mouseEvent.mouseButton = mouseButton;
-		focusedElement->HandleEvent(mouseEvent);
+		focused->HandleEvent(mouseEvent);
 
 		return { retVal, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
@@ -373,11 +382,14 @@ namespace PGUI::UI
 		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		if (hoveredElement != nullptr)
+		const auto focused = LockFocusedElement();
+		const auto hovered = LockHoveredElement();
+
+		if (hovered != nullptr)
 		{
-			ChangeFocusedElement(hoveredElement);
+			ChangeFocusedElement(hovered.get());
 		}
-		if (!focusedElement)
+		if (focused == nullptr)
 		{
 			return retVal;
 		}
@@ -387,7 +399,7 @@ namespace PGUI::UI
 		mouseEvent.position = mousePos;
 		mouseEvent.modifierKeys = modifierKeys;
 		mouseEvent.mouseButton = mouseButton;
-		focusedElement->HandleEvent(mouseEvent);
+		focused->HandleEvent(mouseEvent);
 
 		return { retVal, MessageHandlerReturnFlags::NoFurtherHandling };
 	}
@@ -401,16 +413,19 @@ namespace PGUI::UI
 		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		if (focusedElement && !focusedElement->HitTest(mousePos))
+		const auto focused = LockFocusedElement();
+		const auto hovered = LockHoveredElement();
+
+		if (focused != nullptr && !focused->HitTest(mousePos))
 		{
 			ChangeFocusedElement(nullptr);
 		}
 
-		if (hoveredElement != nullptr)
+		if (hovered != nullptr)
 		{
-			ChangeFocusedElement(hoveredElement);
+			ChangeFocusedElement(hovered.get());
 		}
-		if (!focusedElement)
+		if (focused == nullptr)
 		{
 			return retVal;
 		}
@@ -420,7 +435,7 @@ namespace PGUI::UI
 		mouseEvent.position = mousePos;
 		mouseEvent.modifierKeys = modifierKeys;
 		mouseEvent.mouseButton = mouseButton;
-		focusedElement->HandleEvent(mouseEvent);
+		focused->HandleEvent(mouseEvent);
 
 		return { retVal, MessageHandlerReturnFlags::NoFurtherHandling };
 	}

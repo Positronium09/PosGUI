@@ -55,7 +55,7 @@ export namespace PGUI::UI::Animation
 		public:
 		AnimationStoryboardEventHandler() noexcept;
 
-		virtual ~AnimationStoryboardEventHandler() = default;
+		virtual ~AnimationStoryboardEventHandler() noexcept;
 
 		[[nodiscard]] auto& GetRouter() noexcept { return router; }
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }

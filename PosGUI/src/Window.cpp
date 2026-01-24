@@ -754,7 +754,9 @@ namespace PGUI
 	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 	{
 		DebugTimer timer{
+			#ifdef _DEBUG
 			std::format(L"MSG {}", WindowMsgToText(msg))
+			#endif
 		};
 
 		if (msg == WM_NCCREATE) [[unlikely]]

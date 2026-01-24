@@ -11,7 +11,8 @@ import :AnimationEnums;
 
 namespace PGUI::UI::Animation
 {
-	class AnimationManagerEventHandlerRouter final : public IUIAnimationManagerEventHandler2
+	class AnimationManagerEventHandlerRouter final	: 
+		public Implements<AnimationManagerEventHandlerRouter, IUIAnimationManagerEventHandler2>
 	{
 		using ManagerStatusChangedHandler = std::function<HRESULT(AnimationManagerStatus, AnimationManagerStatus)>;
 
@@ -19,12 +20,6 @@ namespace PGUI::UI::Animation
 		AnimationManagerEventHandlerRouter() noexcept = default;
 
 		explicit AnimationManagerEventHandlerRouter(const ManagerStatusChangedHandler& handler) noexcept;
-
-		auto __stdcall QueryInterface(const IID& iid, void** obj) -> HRESULT override;
-
-		auto __stdcall AddRef() -> ULONG override;
-
-		auto __stdcall Release() -> ULONG override;
 
 		auto __stdcall OnManagerStatusChanged(
 			UI_ANIMATION_MANAGER_STATUS newStatus,
@@ -37,7 +32,6 @@ namespace PGUI::UI::Animation
 		private:
 		std::mutex handlerMutex;
 		ManagerStatusChangedHandler handler{ };
-		LONG referenceCount = 1;
 	};
 }
 
@@ -58,7 +52,7 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
 
 		private:
-		AnimationManagerEventHandlerRouter router;
+		ComPtr<AnimationManagerEventHandlerRouter> router;
 
 		auto CallHandler(AnimationManagerStatus newStatus,
 		                 AnimationManagerStatus previousStatus) noexcept -> HRESULT;

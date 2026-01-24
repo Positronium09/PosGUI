@@ -317,7 +317,7 @@ namespace PGUI::UI::Animation
 		const auto& ptr = Get();
 
 		if (const auto hr = ptr->SetVariableChangeHandler(
-			&handler.GetRouter(),
+				handler.GetRouter().get(),
 			registerForNext);
 			FAILED(hr))
 		{
@@ -327,7 +327,7 @@ namespace PGUI::UI::Animation
 		}
 
 		if (const auto hr = ptr->SetVariableIntegerChangeHandler(
-			&handler.GetIntegerRouter(),
+				handler.GetIntegerRouter().get(),
 			registerForNext);
 			FAILED(hr))
 		{

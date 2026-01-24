@@ -15,7 +15,13 @@ export namespace PGUI
 	using ConstRawPtr = const T*;
 
 	template <typename T, typename... Types>
-	concept IsAnyOf = (std::same_as<T, Types> || ...);
+	concept IsInTypeList = (std::same_as<T, Types> || ...);
+
+	template <size_t N, typename... Types>
+	using NthTypeOf = std::tuple_element_t<N, std::tuple<Types...>>;
+
+	template <typename... Types>
+	using FirstTypeOf = NthTypeOf<0, Types...>;
 
 	enum class PositioningMode
 	{

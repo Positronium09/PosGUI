@@ -19,40 +19,6 @@ namespace PGUI::UI::Animation
 		handler{ handler }
 	{ }
 
-	auto __stdcall AnimationManagerEventHandlerRouter::QueryInterface(const IID& iid, void** obj) -> HRESULT
-	{
-		if (obj == nullptr)
-		{
-			return E_INVALIDARG;
-		}
-		*obj = nullptr;
-
-		if (iid == IID_IUnknown || iid == IID_IUIAnimationManagerEventHandler2)
-		{
-			*obj = static_cast<void*>(this);
-			AddRef();
-
-			return NOERROR;
-		}
-
-		return E_NOINTERFACE;
-	}
-
-	auto __stdcall AnimationManagerEventHandlerRouter::AddRef() -> ULONG
-	{
-		return InterlockedIncrement(&referenceCount);
-	}
-
-	auto __stdcall AnimationManagerEventHandlerRouter::Release() -> ULONG
-	{
-		const auto refCount = InterlockedDecrement(&referenceCount);
-		if (0 == refCount)
-		{
-			delete this;
-		}
-		return refCount;
-	}
-
 	auto __stdcall AnimationManagerEventHandlerRouter::OnManagerStatusChanged(
 		UI_ANIMATION_MANAGER_STATUS newStatus,
 		UI_ANIMATION_MANAGER_STATUS previousStatus) -> HRESULT
@@ -101,7 +67,10 @@ namespace PGUI::UI::Animation
 	}
 
 	AnimationManagerEventHandler::AnimationManagerEventHandler() noexcept :
-		router{ std::bind_front(&AnimationManagerEventHandler::CallHandler, this) }
+		router{
+			MakeComPtr<AnimationManagerEventHandlerRouter>(
+				std::bind_front(&AnimationManagerEventHandler::CallHandler, this))
+		}
 	{ }
 
 	auto AnimationManagerEvent::OnManagerStatusChanged(

@@ -20,40 +20,6 @@ namespace PGUI::UI::Animation
 		handler{ handler }
 	{ }
 
-	auto __stdcall AnimationVariableChangeEventHandlerRouter::QueryInterface(const IID& iid, void** obj) -> HRESULT
-	{
-		if (obj == nullptr)
-		{
-			return E_INVALIDARG;
-		}
-		*obj = nullptr;
-
-		if (iid == IID_IUnknown || iid == IID_IUIAnimationVariableChangeHandler2)
-		{
-			*obj = static_cast<void*>(this);
-			AddRef();
-
-			return NOERROR;
-		}
-
-		return E_NOINTERFACE;
-	}
-
-	auto __stdcall AnimationVariableChangeEventHandlerRouter::AddRef() -> ULONG
-	{
-		return InterlockedIncrement(&referenceCount);
-	}
-
-	auto __stdcall AnimationVariableChangeEventHandlerRouter::Release() -> ULONG
-	{
-		const auto refCount = InterlockedDecrement(&referenceCount);
-		if (0 == refCount)
-		{
-			delete this;
-		}
-		return refCount;
-	}
-
 	auto __stdcall AnimationVariableChangeEventHandlerRouter::OnValueChanged(
 		IUIAnimationStoryboard2* storyboard, IUIAnimationVariable2* variable,
 		DOUBLE* newValues, DOUBLE* previousValues, const UINT dimension) -> HRESULT
@@ -90,41 +56,6 @@ namespace PGUI::UI::Animation
 		handler{ handler }
 	{ }
 
-	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::QueryInterface(
-		const IID& iid, void** obj) -> HRESULT
-	{
-		if (obj == nullptr)
-		{
-			return E_INVALIDARG;
-		}
-		*obj = nullptr;
-
-		if (iid == IID_IUnknown || iid == IID_IUIAnimationVariableIntegerChangeHandler2)
-		{
-			*obj = static_cast<void*>(this);
-			AddRef();
-
-			return NOERROR;
-		}
-
-		return E_NOINTERFACE;
-	}
-
-	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::AddRef() -> ULONG
-	{
-		return InterlockedIncrement(&referenceCount);
-	}
-
-	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::Release() -> ULONG
-	{
-		const auto refCount = InterlockedDecrement(&referenceCount);
-		if (0 == refCount)
-		{
-			delete this;
-		}
-		return refCount;
-	}
-
 	auto __stdcall AnimationVariableIntegerChangeEventHandlerRouter::OnIntegerValueChanged(
 		IUIAnimationStoryboard2* storyboard, IUIAnimationVariable2* variable,
 		INT32* newValues, INT32* previousValues, const UINT dimension) -> HRESULT
@@ -156,8 +87,14 @@ namespace PGUI::UI::Animation
 
 
 	AnimationVariableChangeEventHandler::AnimationVariableChangeEventHandler() noexcept :
-		router{ std::bind_front(&AnimationVariableChangeEventHandler::CallVariableChanged, this) },
-		integerRouter{ std::bind_front(&AnimationVariableChangeEventHandler::CallVariableIntegerChanged, this) }
+		router{
+			MakeComPtr<AnimationVariableChangeEventHandlerRouter>(
+				std::bind_front(&AnimationVariableChangeEventHandler::CallVariableChanged, this))
+		},
+		integerRouter{
+			MakeComPtr<AnimationVariableIntegerChangeEventHandlerRouter>(
+				std::bind_front(&AnimationVariableChangeEventHandler::CallVariableIntegerChanged, this))
+		}
 	{ }
 
 	auto AnimationVariableChangeEventHandler::CallVariableChanged(

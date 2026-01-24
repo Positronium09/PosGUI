@@ -235,7 +235,7 @@ namespace PGUI::UI::Animation
 		AnimationStoryboardEventHandler& eventHandler) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetStoryboardEventHandler(&eventHandler.GetRouter())
+			Get()->SetStoryboardEventHandler(eventHandler.GetRouter().get())
 		};
 		LogIfFailed(error, L"SetStoryboardEventHandler failed");
 		return error;

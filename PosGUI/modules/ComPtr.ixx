@@ -2,6 +2,7 @@ module;
 #define WIL_SUPPRESS_EXCEPTIONS 0
 #include <bit>
 #include <wil/com.h>
+#include <winrt/base.h>
 
 export module PGUI.ComPtr;
 
@@ -15,6 +16,9 @@ export namespace PGUI
 	template <typename T>
 	using ComPtr = wil::com_ptr_nothrow<T>;
 
+	template <typename T>
+	concept HasUUID = requires { __uuidof(T); };
+
 	template <typename T, typename... Policies>
 	[[nodiscard]] consteval auto GetIID(const wil::com_ptr_t<T, Policies...>&) noexcept
 	{
@@ -27,12 +31,49 @@ export namespace PGUI
 		return __uuidof(T);
 	}
 
-	template <typename... Interfaces>
+	template <typename T>
+	[[nodiscard]] consteval auto GetIID(const T&) noexcept
+	{
+		return __uuidof(T);
+	}
+
+	template <typename T>
+	[[nodiscard]] consteval auto GetIID(const T* const) noexcept
+	{
+		return __uuidof(T);
+	}
+
+	// ReSharper disable once CppInconsistentNaming
+	template <typename T, typename... Args>
+	[[nodiscard]] auto make_self_wil(Args&&... args) noexcept -> ComPtr<T>
+	{
+		auto rtPtr = winrt::make_self<T>(std::forward<Args>(args)...);
+
+		ComPtr<T> wilPtr;
+		wilPtr.attach(rtPtr.detach());
+
+		return wilPtr;
+	}
+
+	template <typename T, typename... Args>
+	[[nodiscard]] auto MakeComPtr(Args&&... args) noexcept
+	{
+		auto* raw = new (std::nothrow) T(std::forward<Args>(args)...);
+		
+		if (raw == nullptr)
+		{
+			return ComPtr<T>{};
+		}
+
+		return ComPtr<T>{ raw };
+	}
+
+	template <HasUUID... Interfaces>
 	class ComPtrHolder
 	{
 		static_assert(sizeof...(Interfaces) > 0, "At least one interface must be provided.");
 
-		using FirstType = std::tuple_element_t<0, std::tuple<Interfaces...>>;
+		using FirstType = FirstTypeOf<Interfaces...>;
 
 		public:
 		constexpr ComPtrHolder() noexcept = default;
@@ -48,58 +89,58 @@ export namespace PGUI
 		explicit(false) ComPtrHolder(std::nullptr_t) noexcept
 		{ }
 
-		template <IsAnyOf<Interfaces...> T>
+		template <IsInTypeList<Interfaces...> T>
 		constexpr auto operator=(const ComPtr<T>& ptr) -> ComPtrHolder&
 		{
 			Set(ptr);
 			return *this;
 		}
 
-		template <IsAnyOf<Interfaces...> T>
+		template <IsInTypeList<Interfaces...> T>
 		constexpr auto operator=(ComPtr<T>&& ptr) -> ComPtrHolder&
 		{
 			Set(ptr);
 			return *this;
 		}
 
-		template <IsAnyOf<Interfaces...> T>
+		template <IsInTypeList<Interfaces...> T>
 		constexpr auto operator=(T* ptr) -> ComPtrHolder&
 		{
 			Set(ptr);
 			return *this;
 		}
 
-		template <IsAnyOf<Interfaces...> T>
+		template <IsInTypeList<Interfaces...> T>
 		constexpr auto Set(const ComPtr<T>& ptr) noexcept -> void
 		{
 			std::get<ComPtr<T>>(interfaces) = ptr;
 		}
 
-		template <IsAnyOf<Interfaces...> T>
+		template <IsInTypeList<Interfaces...> T>
 		constexpr auto Set(ComPtr<T>&& ptr) noexcept -> void
 		{
 			std::get<ComPtr<T>>(interfaces) = std::move(ptr);
 		}
 
-		template <IsAnyOf<Interfaces...> T>
+		template <IsInTypeList<Interfaces...> T>
 		constexpr auto Set(T* ptr) noexcept -> void
 		{
 			std::get<ComPtr<T>>(interfaces) = ptr;
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] constexpr auto& Get() noexcept
 		{
 			return std::get<ComPtr<T>>(interfaces);
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] constexpr const auto& Get() const noexcept
 		{
 			return std::get<ComPtr<T>>(interfaces);
 		}
 
-		template <IsAnyOf<Interfaces...> T, typename U>
+		template <IsInTypeList<Interfaces...> T, typename U>
 		[[nodiscard]] auto GetAs() const noexcept
 		{
 			return Get<T>().template try_query<U>();
@@ -111,49 +152,49 @@ export namespace PGUI
 			return Get<FirstType>().template try_query<U>();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto PutVoid() noexcept
 		{
 			return Get<T>().put_void();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto Put() noexcept
 		{
 			return Get<T>().put();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto PutUnknown() noexcept
 		{
 			return Get<T>().put_unknown();
 		}
 
-		template <IsAnyOf<Interfaces...> T, typename U>
+		template <IsInTypeList<Interfaces...> T, typename U>
 		[[nodiscard]] auto PutAs() noexcept
 		{
 			return GetAs<T, U>().put();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto AddressOf() noexcept
 		{
 			return Get<T>().addressof();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto GetRaw() const noexcept
 		{
 			return Get<T>().get();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto GetRaw() noexcept
 		{
 			return Get<T>().get();
 		}
 
-		template <IsAnyOf<Interfaces...> T, typename U>
+		template <IsInTypeList<Interfaces...> T, typename U>
 		[[nodiscard]] auto GetRawAs() const noexcept
 		{
 			return GetAs<T, U>().get();
@@ -165,19 +206,19 @@ export namespace PGUI
 			return GetAs<U>().get();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto Detach() noexcept
 		{
 			return Get<T>().detach();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		auto Attach(T* ptr) noexcept -> void
 		{
 			Get<T>().attach(ptr);
 		}
 
-		template <IsAnyOf<Interfaces...> T, IsAnyOf<Interfaces...> U>
+		template <IsInTypeList<Interfaces...> T, IsInTypeList<Interfaces...> U>
 		auto AsAssign() noexcept -> Error
 		{
 			auto ptr = GetAs<T, U>();
@@ -196,19 +237,19 @@ export namespace PGUI
 			return error;
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] constexpr auto IsInitialized() const noexcept -> bool
 		{
 			return Get<T>().get() != nullptr;
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		explicit(false) constexpr operator ComPtr<T>() const noexcept
 		{
 			return Get<T>();
 		}
 
-		template <IsAnyOf<Interfaces...> T = FirstType>
+		template <IsInTypeList<Interfaces...> T = FirstType>
 		explicit(false) constexpr operator T*() const noexcept
 		{
 			return GetRaw<T>();
@@ -216,6 +257,66 @@ export namespace PGUI
 
 		private:
 		std::tuple<ComPtr<Interfaces>...> interfaces{ };
+	};
+
+	template <typename Derived, HasUUID... Interfaces>
+	struct Implements : Interfaces...
+	{
+		virtual ~Implements() noexcept = default;
+
+		auto __stdcall QueryInterface(
+			const IID& iid,
+			_COM_Outptr_ void** obj) -> HRESULT final
+		{
+			if (obj == nullptr)
+			{
+				return E_POINTER;
+			}
+			if (iid == IID_IUnknown)
+			{
+				*obj = static_cast<IUnknown*>(static_cast<FirstTypeOf<Interfaces...>*>(this));
+				AddRef();
+				return S_OK;
+			}
+			if ((CheckAssign<Interfaces>(iid, obj) || ...))
+			{
+				AddRef();
+				return S_OK;
+			}
+
+			*obj = nullptr;
+			return E_NOINTERFACE;
+		}
+
+		auto __stdcall AddRef() -> ULONG final
+		{
+			return refCount.fetch_add(1, std::memory_order_relaxed) + 1;
+		}
+
+		auto __stdcall Release() -> ULONG final
+		{
+			const auto count = refCount.fetch_sub(1, std::memory_order_acq_rel) - 1;
+			if (count == 0)
+			{
+				delete static_cast<Derived*>(this);
+			}
+			return count;
+		}
+
+		private:
+
+		template <typename T>
+		auto CheckAssign(const IID& iid, void** obj) -> bool
+		{
+			if (iid == __uuidof(T))
+			{
+				*obj = static_cast<T*>(this);
+				return true;
+			}
+			return false;
+		}
+
+		std::atomic_long refCount{ 1 };
 	};
 }
 

@@ -158,8 +158,19 @@ export namespace PGUI::UI
 			layoutPanel.reset();
 		}
 
+		auto SetCropRendering(const bool val) noexcept -> void
+		{
+			cropRendering = val;
+		}
+
+		[[nodiscard]] auto IsCropRenderingEnabled() const noexcept
+		{
+			return cropRendering;
+		}
+
 		private:
 		bool zOrderDirty = false;
+		bool cropRendering = true;
 		RectF rect;
 		std::vector<UIElementPtr> elements;
 		std::unique_ptr<Layout::LayoutPanel> layoutPanel;

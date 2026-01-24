@@ -21,40 +21,6 @@ namespace PGUI::UI::Animation
 		statusChangedHandler{ statusChangedHandler }
 	{ }
 
-	auto __stdcall AnimationStoryboardEventHandlerRouter::QueryInterface(const IID& iid, void** obj) -> HRESULT
-	{
-		if (obj == nullptr)
-		{
-			return E_INVALIDARG;
-		}
-		*obj = nullptr;
-
-		if (iid == IID_IUnknown || iid == IID_IUIAnimationStoryboardEventHandler2)
-		{
-			*obj = static_cast<void*>(this);
-			AddRef();
-
-			return NOERROR;
-		}
-
-		return E_NOINTERFACE;
-	}
-
-	auto __stdcall AnimationStoryboardEventHandlerRouter::AddRef() -> ULONG
-	{
-		return InterlockedIncrement(&referenceCount);
-	}
-
-	auto __stdcall AnimationStoryboardEventHandlerRouter::Release() -> ULONG
-	{
-		const auto refCount = InterlockedDecrement(&referenceCount);
-		if (0 == refCount)
-		{
-			delete this;
-		}
-		return refCount;
-	}
-
 	auto __stdcall AnimationStoryboardEventHandlerRouter::OnStoryboardStatusChanged(
 		IUIAnimationStoryboard2* storyboard,
 		UI_ANIMATION_STORYBOARD_STATUS newStatus,
@@ -115,8 +81,9 @@ namespace PGUI::UI::Animation
 
 	AnimationStoryboardEventHandler::AnimationStoryboardEventHandler() noexcept :
 		router{
+			MakeComPtr<AnimationStoryboardEventHandlerRouter>(
 			std::bind_front(&AnimationStoryboardEventHandler::CallStoryBoardStatusChangedHandler, this),
-			std::bind_front(&AnimationStoryboardEventHandler::CallStoryBoardUpdatedHandler, this)
+			std::bind_front(&AnimationStoryboardEventHandler::CallStoryBoardUpdatedHandler, this))
 		}
 	{ }
 

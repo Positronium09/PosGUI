@@ -236,7 +236,7 @@ namespace PGUI::UI::Animation
 	{
 		Error error{
 			Get()->SetManagerEventHandler(
-			&eventHandler.GetRouter(),
+				eventHandler.GetRouter().get(),
 			registerForNext)
 		};
 		LogIfFailed(error, L"SetManagerEventHandler failed");

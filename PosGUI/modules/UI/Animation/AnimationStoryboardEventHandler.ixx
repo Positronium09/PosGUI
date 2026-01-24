@@ -6,12 +6,14 @@ export module PGUI.UI.Animation:AnimationStoryboardEventHandler;
 import std;
 
 import PGUI.Event;
+import PGUI.ComPtr;
 import :AnimationInterface;
 import :AnimationEnums;
 
 namespace PGUI::UI::Animation
 {
-	class AnimationStoryboardEventHandlerRouter final : public IUIAnimationStoryboardEventHandler2
+	class AnimationStoryboardEventHandlerRouter final : 
+		public Implements<AnimationStoryboardEventHandlerRouter, IUIAnimationStoryboardEventHandler2>
 	{
 		using StoryboardStatusChangedHandler = std::function<HRESULT(Storyboard, StoryboardStatus, StoryboardStatus)>;
 		using StoryboardUpdatedHandler = std::function<HRESULT(Storyboard)>;
@@ -22,12 +24,6 @@ namespace PGUI::UI::Animation
 		AnimationStoryboardEventHandlerRouter(
 			const StoryboardStatusChangedHandler& statusChangedHandler,
 			const StoryboardUpdatedHandler& updatedHandler) noexcept;
-
-		auto __stdcall QueryInterface(const IID& iid, void** obj) -> HRESULT override;
-
-		auto __stdcall AddRef() -> ULONG override;
-
-		auto __stdcall Release() -> ULONG override;
 
 		auto __stdcall OnStoryboardStatusChanged(
 			IUIAnimationStoryboard2* storyboard,
@@ -49,7 +45,6 @@ namespace PGUI::UI::Animation
 		std::mutex statusChangedHandlerMutex;
 		StoryboardUpdatedHandler updatedHandler{ };
 		StoryboardStatusChangedHandler statusChangedHandler{ };
-		LONG referenceCount = 1;
 	};
 }
 
@@ -72,7 +67,7 @@ export namespace PGUI::UI::Animation
 		virtual auto OnStoryBoardUpdated(Storyboard storyboard) -> void = 0;
 
 		private:
-		AnimationStoryboardEventHandlerRouter router;
+		ComPtr<AnimationStoryboardEventHandlerRouter> router;
 
 		auto CallStoryBoardStatusChangedHandler(
 			const Storyboard& storyboard,

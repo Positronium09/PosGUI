@@ -4,6 +4,7 @@ import std;
 
 import :UIContainer;
 import :UIElement;
+import PGUI.UI.D2D.D2DEnums;
 import PGUI.ErrorHandling;
 import PGUI.UI.Graphics;
 
@@ -296,6 +297,11 @@ namespace PGUI::UI
 		EnsureZOrder();
 		(void)layoutPanel;
 
+		if (cropRendering)
+		{
+			graphics.PushAxisAlignedClip(GetRect(), D2D::AntiAliasingMode::PerPrimitive);
+		}
+
 		for (const auto& element : elements | std::views::reverse)
 		{
 			if (!*element->IsEnabled())
@@ -309,6 +315,11 @@ namespace PGUI::UI
 			}
 
 			element->Render(graphics);
+		}
+
+		if (cropRendering)
+		{
+			graphics.PopAxisAlignedClip();
 		}
 	}
 }

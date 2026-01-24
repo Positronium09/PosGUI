@@ -6,12 +6,14 @@ export module PGUI.UI.Animation:AnimationVariableChangeEventHandler;
 import std;
 
 import PGUI.Event;
+import PGUI.ComPtr;
 import :AnimationInterface;
 import :AnimationEnums;
 
 namespace PGUI::UI::Animation
 {
-	class AnimationVariableChangeEventHandlerRouter final : public IUIAnimationVariableChangeHandler2
+	class AnimationVariableChangeEventHandlerRouter final : 
+		public Implements<AnimationVariableChangeEventHandlerRouter, IUIAnimationVariableChangeHandler2>
 	{
 		using AnimationVariableChangeHandler = std::function<HRESULT(
 			Storyboard, AnimationVariable,
@@ -21,12 +23,6 @@ namespace PGUI::UI::Animation
 		AnimationVariableChangeEventHandlerRouter() noexcept = default;
 
 		explicit AnimationVariableChangeEventHandlerRouter(const AnimationVariableChangeHandler& handler) noexcept;
-
-		auto __stdcall QueryInterface(const IID& iid, void** obj)->HRESULT override;
-
-		auto __stdcall AddRef()->ULONG override;
-
-		auto __stdcall Release()->ULONG override;
 
 		auto __stdcall OnValueChanged(
 			IUIAnimationStoryboard2* storyboard,
@@ -41,10 +37,10 @@ namespace PGUI::UI::Animation
 		private:
 		std::mutex handlerMutex;
 		AnimationVariableChangeHandler handler;
-		LONG referenceCount = 1;
 	};
 
-	class AnimationVariableIntegerChangeEventHandlerRouter final : public IUIAnimationVariableIntegerChangeHandler2
+	class AnimationVariableIntegerChangeEventHandlerRouter final : 
+		public Implements<AnimationVariableIntegerChangeEventHandlerRouter, IUIAnimationVariableIntegerChangeHandler2>
 	{
 		using AnimationIntegerVariableChangeHandler = std::function<HRESULT(
 			Storyboard, AnimationVariable,
@@ -54,12 +50,6 @@ namespace PGUI::UI::Animation
 		AnimationVariableIntegerChangeEventHandlerRouter() noexcept = default;
 
 		explicit AnimationVariableIntegerChangeEventHandlerRouter(const AnimationIntegerVariableChangeHandler& handler) noexcept;
-
-		auto __stdcall QueryInterface(const IID& iid, void** obj)->HRESULT override;
-
-		auto __stdcall AddRef()->ULONG override;
-
-		auto __stdcall Release()->ULONG override;
 
 		auto __stdcall OnIntegerValueChanged(
 			IUIAnimationStoryboard2* storyboard,
@@ -74,7 +64,6 @@ namespace PGUI::UI::Animation
 		private:
 		std::mutex handlerMutex;
 		AnimationIntegerVariableChangeHandler handler;
-		LONG referenceCount = 1;
 	};
 }
 
@@ -101,8 +90,8 @@ export namespace PGUI::UI::Animation
 			std::span<INT32> newValues, std::span<INT32> previousValues) -> void = 0;
 
 		private:
-		AnimationVariableChangeEventHandlerRouter router;
-		AnimationVariableIntegerChangeEventHandlerRouter integerRouter;
+		ComPtr<AnimationVariableChangeEventHandlerRouter> router;
+		ComPtr<AnimationVariableIntegerChangeEventHandlerRouter> integerRouter;
 
 		auto CallVariableChanged(
 			const Storyboard& storyboard, const AnimationVariable& variable,

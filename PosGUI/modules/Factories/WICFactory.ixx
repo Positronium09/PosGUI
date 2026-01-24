@@ -33,7 +33,7 @@ export namespace PGUI::Factories
 					CLSID_WICImagingFactory,
 					nullptr,
 					CLSCTX_INPROC_SERVER,
-					__uuidof(IWICImagingFactory2),
+					GetIID(factory),
 					factory.put_void());
 					FAILED(hr))
 				{

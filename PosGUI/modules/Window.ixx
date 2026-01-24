@@ -312,7 +312,7 @@ export namespace PGUI
 		friend auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
 
 		public:
-		virtual ~Window();
+		virtual ~Window() noexcept;
 		Window(const Window&) = delete;
 		auto operator=(const Window&) -> Window& = delete;
 		Window(Window&&) noexcept = default;

@@ -36,7 +36,7 @@ export namespace PGUI::Factories
 
 				if (const auto hr = CreateDXGIFactory2(
 					flags,
-					__uuidof(IDXGIFactory7),
+					GetIID(dxgiFactory),
 					dxgiFactory.put_void());
 					FAILED(hr))
 				{

@@ -30,7 +30,7 @@ namespace PGUI
 		RegisterHandler(WM_MOVE, &Window::_OnMove);
 	}
 
-	Window::~Window()
+	Window::~Window() noexcept
 	{
 		std::ranges::for_each(timerMap | std::views::keys,
 			[this](const auto& id)
@@ -47,17 +47,16 @@ namespace PGUI
 		});
 		childWindows.clear();
 
-
 		std::ranges::for_each(
 			beforeHookers,
-			[](auto& hook)
+			[this](auto& hook)
 			{
 				UnHookBefore(hook);
 			});
 
 		std::ranges::for_each(
 			afterHookers,
-			[](auto& hook)
+			[this](auto& hook)
 			{
 				UnHookAfter(hook);
 			});
@@ -202,12 +201,12 @@ namespace PGUI
 			return;
 		}
 		const auto& childWindow = *found;
-		childWindows.erase(found);
 
 		SetParent(childHwnd, nullptr);
 		childWindow->parentHwnd = nullptr;
 		childWindow->ModifyStyle(WS_POPUP, WS_CHILD);
 
+		childWindows.erase(found);
 		OnChildRemoved(childHwnd);
 	}
 
@@ -226,9 +225,34 @@ namespace PGUI
 		{
 			hooker.HookedWindow()->UnHook(hooker);
 		}
+		
 		hooker.HookToWindow(this);
-		beforeHookers.push_back(hooker);
-		afterHookers.push_back(hooker);
+		try
+		{
+			beforeHookers.push_back(hooker);
+		}
+		catch (const std::exception& exception)
+		{
+			hooker.UnhookFromWindow();
+			Logger::Error(
+				Error{ E_FAIL }
+				.AddDetail(L"Exception", StringToWString(exception.what()))
+			);
+			return;
+		}
+		try
+		{
+			afterHookers.push_back(hooker);
+		}
+		catch (const std::exception& exception)
+		{
+			hooker.UnhookFromWindow();
+			beforeHookers.pop_back();
+			Logger::Error(
+				Error{ E_FAIL }
+				.AddDetail(L"Exception", StringToWString(exception.what()))
+			);
+		}
 	}
 
 	auto Window::HookBefore(MessageHooker& hooker) noexcept -> void
@@ -312,7 +336,20 @@ namespace PGUI
 
 		if (callback.has_value())
 		{
-			timerMap[id] = *callback;
+			try
+			{
+				timerMap[id] = *callback;
+			}
+			catch (const std::exception& e)
+			{
+				Logger::Error(
+					Error{ E_FAIL }
+					.AddDetail(L"Exception", StringToWString(e.what()))
+				);
+
+				KillTimer(hWnd, id);
+				return 0;
+			}
 		}
 
 		return id;

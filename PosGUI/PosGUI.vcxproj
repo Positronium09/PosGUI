@@ -298,7 +298,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -326,7 +326,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -354,7 +354,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -382,7 +382,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>$(ProjectDir)modules;$(ProjectDir)..\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>

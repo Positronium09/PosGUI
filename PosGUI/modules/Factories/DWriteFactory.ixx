@@ -31,7 +31,7 @@ export namespace PGUI::Factories
 			{
 				if (const auto hr = DWriteCreateFactory(
 					DWRITE_FACTORY_TYPE_SHARED,
-					__uuidof(IDWriteFactory8),
+					GetIID(directWriteFactory),
 					directWriteFactory.put_unknown());
 					FAILED(hr))
 				{

@@ -15,6 +15,18 @@ export namespace PGUI
 	template <typename T>
 	using ComPtr = wil::com_ptr_nothrow<T>;
 
+	template <typename T, typename... Policies>
+	[[nodiscard]] consteval auto GetIID(const wil::com_ptr_t<T, Policies...>&) noexcept
+	{
+		return __uuidof(T);
+	}
+
+	template <typename T>
+	[[nodiscard]] consteval auto GetIID() noexcept
+	{
+		return __uuidof(T);
+	}
+
 	template <typename... Interfaces>
 	class ComPtrHolder
 	{

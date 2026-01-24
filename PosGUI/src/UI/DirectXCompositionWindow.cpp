@@ -143,7 +143,7 @@ namespace PGUI::UI
 		}
 
 		ComPtr<IDXGISurface2> surface;
-		hr = swapChain->GetBuffer(0, __uuidof(IDXGISurface2), surface.put_void());
+		hr = swapChain->GetBuffer(0, GetIID(surface), surface.put_void());
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -260,7 +260,7 @@ namespace PGUI::UI
 		ComPtr<IDXGIAdapter1> adapter;
 		auto hr = dxgiFactory->EnumAdapterByGpuPreference(
 			0, gpuPreference,
-			__uuidof(IDXGIAdapter1),
+			GetIID(adapter),
 			adapter.put_void());
 		if (FAILED(hr))
 		{
@@ -337,8 +337,8 @@ namespace PGUI::UI
 
 		if (const auto hr = DCompositionCreateDevice(
 				dxgiDevice.get(),
-			__uuidof(dcompDevice),
-			std::bit_cast<void**>(&dcompDevice));
+				GetIID(dcompDevice),
+				dcompDevice.put_void());
 			FAILED(hr))
 		{
 			throw Exception{

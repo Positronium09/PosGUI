@@ -93,4 +93,13 @@ namespace PGUI::UI::Animation
 		LogIfFailed(error, L"Set frame rate threshold failed");
 		return error;
 	}
+
+	auto AnimationTimer::SetTimerEventHandler(AnimationTimerEventHandler& handler) const noexcept -> Error
+	{
+		Error error{
+			Get()->SetTimerEventHandler(handler.GetRouter().get())
+		};
+		LogIfFailed(error, L"SetTimerEventHandler failed");
+		return error;
+	}
 }

@@ -189,6 +189,7 @@ export namespace PGUI
 			{
 				return logicalValue.ScaleByDpiFactorFactor(GetScaleFactor());
 			}
+			std::unreachable();
 		}
 
 		constexpr auto GetScaleFactor() const noexcept -> float

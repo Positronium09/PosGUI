@@ -322,4 +322,20 @@ namespace PGUI::UI
 			graphics.PopAxisAlignedClip();
 		}
 	}
+
+	auto UIContainer::CreateDeviceResources() -> void
+	{
+		for (const auto& element : elements)
+		{
+			element->CreateDeviceResources();
+		}
+	}
+
+	auto UIContainer::DiscardDeviceResources() -> void
+	{
+		for (const auto& element : elements)
+		{
+			element->DiscardDeviceResources();
+		}
+	}
 }

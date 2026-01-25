@@ -49,6 +49,15 @@ export namespace PGUI::UI
 
 		[[nodiscard]] virtual auto HitTest(PointF point) noexcept -> bool = 0;
 
+		virtual auto CreateDeviceResources() -> void
+		{
+			/* */
+		}
+		virtual auto DiscardDeviceResources() -> void
+		{
+			/* */
+		}
+
 		[[nodiscard]] auto ConvertToRelative(const RectF rect) const noexcept
 		{
 			const auto pos = GetPosition();

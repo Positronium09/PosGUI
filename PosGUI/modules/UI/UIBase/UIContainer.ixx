@@ -91,6 +91,9 @@ export namespace PGUI::UI
 
 		auto Render(const Graphics& graphics) -> void override;
 
+		auto CreateDeviceResources() -> void override;
+		auto DiscardDeviceResources() -> void override;
+
 		auto Move(const PointF position) -> void override
 		{
 			PositionChangedEvent positionChangedEvent;

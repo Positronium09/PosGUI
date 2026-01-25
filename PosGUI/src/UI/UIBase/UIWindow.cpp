@@ -9,6 +9,7 @@ import :UIElement;
 import :UIContainer;
 import PGUI.Window;
 import PGUI.WindowClass;
+import PGUI.ScopedTimer;
 import PGUI.ErrorHandling;
 import PGUI.UI.DirectXCompositionWindow;
 
@@ -53,8 +54,23 @@ namespace PGUI::UI
 		RegisterHandler(WM_XBUTTONDBLCLK, &UIWindow::OnMouseDoubleClick);
 	}
 
+	auto UIWindow::CreateDeviceResources() -> void
+	{
+		childrenContainer.CreateDeviceResources();
+	}
+
+	auto UIWindow::DiscardDeviceResources() -> void
+	{
+		childrenContainer.DiscardDeviceResources();
+	}
+
 	auto UIWindow::Draw(const Graphics graphics) -> void
 	{
+		DebugTimer timer{
+			L"Rendering",
+			true
+		};
+
 		BeginDraw();
 
 		Render(graphics);

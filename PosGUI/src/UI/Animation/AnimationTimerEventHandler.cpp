@@ -58,7 +58,7 @@ namespace PGUI::UI::Animation
 
 	auto AnimationTimerEventHandlerRouter::SetPostUpdateHandler(const UpdateHandler& handler) noexcept -> void
 	{
-		std::lock_guard lock{ postUpdateHandler };
+		std::lock_guard lock{ postUpdateHandlerMutex };
 		postUpdateHandler = handler;
 	}
 
@@ -77,7 +77,7 @@ namespace PGUI::UI::Animation
 
 	auto AnimationTimerEventHandlerRouter::ClearPostUpdateHandler() noexcept -> void
 	{
-		std::lock_guard lock{ postUpdateHandler };
+		std::lock_guard lock{ postUpdateHandlerMutex };
 		postUpdateHandler = nullptr;
 	}
 

@@ -66,6 +66,9 @@ export namespace PGUI::UI
 			/*  */
 		}
 
+		auto CreateDeviceResources() -> void override;
+		auto DiscardDeviceResources() -> void override;
+
 		private:
 		bool tabStopEnabled = false;
 		UIContainer childrenContainer;

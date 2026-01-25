@@ -15,6 +15,7 @@ import PGUI.WindowClass;
 import PGUI.ComPtr;
 import PGUI.UI.Clip;
 import PGUI.UI.Graphics;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::UI
 {
@@ -76,6 +77,8 @@ export namespace PGUI::UI
 		explicit DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept;
 
 		auto OnSizeChanged(SizeL newSize) -> void override;
+
+		[[nodiscard]] auto GetDirtyRect() const noexcept -> Result<RectF>;
 
 		private:
 		inline static ComPtr<ID3D11Device2> d3d11Device;

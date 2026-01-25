@@ -4,6 +4,7 @@ module;
 export module PGUI.UI.Animation:AnimationTimer;
 
 import :AnimationTimeTypes;
+import :AnimationTimerEventHandler;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
@@ -28,8 +29,8 @@ export namespace PGUI::UI::Animation
 
 		auto SetFrameRateThreshold(UINT32 threshold) const noexcept -> Error;
 
-		//TODO SetTimerEventHandler
-		//TODO SetTimerUpdateHandler
+		auto SetTimerEventHandler(AnimationTimerEventHandler& handler) const noexcept -> Error;
+		//TODO SetTimerUpdateHandle
 
 		private:
 		static inline AnimationTimer* instance = nullptr;

@@ -15,6 +15,7 @@ import std;
 
 import PGUI.ErrorHandling;
 import PGUI.Utils;
+import PGUI.DpiScaled;
 import PGUI.UI.D2D.RenderTarget;
 import PGUI.Factories;
 
@@ -59,6 +60,33 @@ namespace PGUI::UI
 		InitD2D1DeviceContext();
 	}
 
+	auto DirectXCompositionWindow::GetDirtyRect() const noexcept -> Result<RectF>
+	{
+		if (paintStruct.hdc == nullptr)
+		{
+			return Unexpected{
+				Error{ E_FAIL }
+				.SetCustomMessage(L"Not inside of an BeginDraw-EndDraw block")
+				.SuggestFix(L"This function can only be called between BeginDraw and EndDraw calls")
+			};
+		}
+
+		DpiScaled<RectF> rect;
+		const auto dpi = GetDpi();
+		if (auto result = rect.SetDpi(dpi);
+			result.IsFailure())
+		{
+			return Unexpected{
+				result
+				.SetCustomMessage(L"Cannot set the new dpi")
+				.AddDetail(L"DPI", std::format(L"{:.5F}", dpi))
+			};
+		}
+
+		rect.SetPhysicalValue(paintStruct.rcPaint);
+		return rect.GetLogicalValue();
+	}
+
 	auto DirectXCompositionWindow::BeginDraw() -> void
 	{
 		CreateDeviceResources();
@@ -96,6 +124,8 @@ namespace PGUI::UI
 		}
 
 		EndPaint(Hwnd(), &paintStruct);
+
+		SecureZeroMemory(&paintStruct, sizeof(PAINTSTRUCT));
 
 		return std::make_pair(tag1, tag2);
 	}

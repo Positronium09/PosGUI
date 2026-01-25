@@ -4,6 +4,7 @@ module;
 module PGUI.UI.Animation:AnimationTimer;
 import :AnimationTimer;
 
+import :AnimationTimeTypes;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
@@ -70,7 +71,7 @@ namespace PGUI::UI::Animation
 		return hr == S_OK;
 	}
 
-	auto AnimationTimer::GetTime() const noexcept -> Result<double>
+	auto AnimationTimer::GetTime() const noexcept -> Result<Seconds>
 	{
 		double time{ };
 		if (const auto hr = Get()->GetTime(&time);
@@ -81,7 +82,7 @@ namespace PGUI::UI::Animation
 			return Unexpected{ error };
 		}
 
-		return time;
+		return FromWAM(time);
 	}
 
 	auto AnimationTimer::SetFrameRateThreshold(const UINT32 threshold) const noexcept -> Error

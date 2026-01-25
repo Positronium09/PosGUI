@@ -6,6 +6,7 @@ import :AnimationTransition;
 
 import std;
 
+import :AnimationTimeTypes;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
@@ -30,7 +31,7 @@ namespace PGUI::UI::Animation
 		return dimension;
 	}
 
-	auto AnimationTransition::GetDuration() const noexcept -> Result<double>
+	auto AnimationTransition::GetDuration() const noexcept -> Result<Seconds>
 	{
 		double duration;
 		if (const auto hr = Get()->GetDuration(&duration);
@@ -41,7 +42,7 @@ namespace PGUI::UI::Animation
 			return Unexpected{ error };
 		}
 
-		return duration;
+		return FromWAM(duration);
 	}
 
 	auto AnimationTransition::IsDurationKnown() const noexcept -> bool

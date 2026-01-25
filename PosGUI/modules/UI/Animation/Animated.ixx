@@ -1,6 +1,7 @@
 ﻿export module PGUI.UI.Animation:Animated;
 
 import :AnimationEnums;
+import :AnimationTimeTypes;
 import :Storyboard;
 import :AnimationTransition;
 import :AnimationTransitionLibrary;
@@ -37,7 +38,7 @@ export namespace PGUI::UI::Animation
 			var = varResult.value();
 		}
 
-		auto AnimateTo(const T& newValue, const double duration = 1.0) const noexcept -> Error
+		auto AnimateTo(const T& newValue, const Seconds duration = Seconds{ 1.0 }) const noexcept -> Error
 		{
 			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
@@ -166,7 +167,7 @@ export namespace PGUI::UI::Animation
 			var = varResult.value();
 		}
 
-		auto AnimateTo(const std::span<const T, Count> newValue, const double duration = 1.0) const noexcept -> Error
+		auto AnimateTo(const std::span<const T, Count> newValue, const Seconds duration = Seconds{ 1.0 }) const noexcept -> Error
 		{
 			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
@@ -314,7 +315,7 @@ export namespace PGUI::UI::Animation
 			var = varResult.value();
 		}
 
-		auto AnimateTo(const RGBA& newValue, const double duration = 1.0) const noexcept -> Error
+		auto AnimateTo(const RGBA& newValue, const Seconds duration = Seconds{ 1.0 }) const noexcept -> Error
 		{
 			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
@@ -442,7 +443,7 @@ export namespace PGUI::UI::Animation
 			var = varResult.value();
 		}
 
-		auto AnimateTo(const PointF& newValue, const double duration = 1.0) const noexcept -> Error
+		auto AnimateTo(const PointF& newValue, const Seconds duration = Seconds{ 1.0 }) const noexcept -> Error
 		{
 			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
@@ -564,7 +565,7 @@ export namespace PGUI::UI::Animation
 			var = varResult.value();
 		}
 
-		auto AnimateTo(const RectF& newValue, const double duration = 1.0) const noexcept -> Error
+		auto AnimateTo(const RectF& newValue, const Seconds duration = Seconds{ 1.0 }) const noexcept -> Error
 		{
 			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())
@@ -690,7 +691,7 @@ export namespace PGUI::UI::Animation
 			var = varResult.value();
 		}
 
-		auto AnimateTo(const SizeF& newValue, const double duration = 1.0) const noexcept -> Error
+		auto AnimateTo(const SizeF& newValue, const Seconds duration = Seconds{ 1.0 }) const noexcept -> Error
 		{
 			const auto storyboardResult = GetAnimationManager().CreateStoryboard();
 			if (!storyboardResult.has_value())

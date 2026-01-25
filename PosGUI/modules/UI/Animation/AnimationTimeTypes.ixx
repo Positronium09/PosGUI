@@ -1,7 +1,6 @@
 export module PGUI.UI.Animation:AnimationTimeTypes;
 
 import std;
-import TypeErasure;
 
 namespace PGUI::UI::Animation
 {
@@ -21,13 +20,13 @@ export namespace PGUI::UI::Animation
 	concept DurationType = DurationTypeHelper<T>::value;
 
 	using Nanoseconds = Duration<std::nano>;
-	using Milliseconds = Duration<std::milli>;
 	using Microseconds = Duration<std::micro>;
+	using Milliseconds = Duration<std::milli>;
 	using Seconds = Duration<std::ratio<1>>;
 	using Minutes = Duration<std::ratio<60>>;
 	using Hours = Duration<std::ratio<3600>>;
 
-	using Clock = std::chrono::high_resolution_clock;
+	using Clock = std::chrono::steady_clock;
 	using TimePoint = Clock::time_point;
 
 	template <typename Repr, typename Period>
@@ -50,5 +49,20 @@ export namespace PGUI::UI::Animation
 	[[nodiscard]] constexpr auto FromMilliseconds(const double milliseconds) noexcept
 	{
 		return Milliseconds{ milliseconds };
+	}
+
+	[[nodiscard]] auto Now() noexcept -> TimePoint
+	{
+		return Clock::now();
+	}
+
+	[[nodiscard]] constexpr auto FromWAM(const double wamTime) noexcept
+	{
+		return FromSeconds(wamTime);
+	}
+
+	[[nodiscard]] constexpr auto ToWAM(const auto& duration) noexcept
+	{
+		return ToSeconds(duration);
 	}
 }

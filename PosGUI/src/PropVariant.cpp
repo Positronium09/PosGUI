@@ -130,24 +130,24 @@ namespace PGUI
 		case FileTime:
 				return var.filetime;
 
-			case Clsid:
-				return var.puuid;
+		case Clsid:
+			return var.puuid;
 
-			case Cf:
-				return var.pclipdata;
+		case Cf:
+			return var.pclipdata;
 
-			case Bstr:
-				return var.bstrVal;
+		case Bstr:
+			return var.bstrVal;
 
-			case Blob:
-			case BlobObject:
-				return var.blob;
+		case Blob:
+		case BlobObject:
+			return var.blob;
 
 		case LPSTR:
-				return var.pszVal;
+			return std::string{ var.pszVal };
 
 		case LPWSTR:
-				return var.pwszVal;
+			return std::wstring{ var.pwszVal };
 
 			case Unknown:
 				return var.punkVal;

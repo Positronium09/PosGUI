@@ -28,7 +28,7 @@ export namespace PGUI::UI::Animation
 
 		auto Shutdown() const noexcept -> Error;
 
-		[[nodiscard]] auto Update(double timeNow) const noexcept -> Result<AnimationUpdateResult>;
+		[[nodiscard]] auto Update(Seconds timeNow) const noexcept -> Result<AnimationUpdateResult>;
 
 		[[nodiscard]] auto CreateAnimationVariable(double initialValue) const noexcept -> Result<AnimationVariable>;
 
@@ -62,8 +62,5 @@ export namespace PGUI::UI::Animation
 		//TODO SetCompressPriorityComparison 
 		//TODO SetConcludePriorityComparison
 		//TODO SetTrimPriorityComparison
-
-		private:
-		inline static AnimationManager* instance;
 	};
 }

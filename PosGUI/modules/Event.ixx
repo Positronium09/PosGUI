@@ -1,3 +1,6 @@
+module;
+#include <winrt/base.h>
+
 export module PGUI.Event;
 
 import std;
@@ -104,19 +107,21 @@ export namespace PGUI
 
 			for ([[maybe_unused]] const auto& [id, priority, callback] : callbacks)
 			{
-				auto future = std::async(std::launch::async, [callback, args...]
+				[callbackCopy = callback, ...argsCopy = args] -> winrt::fire_and_forget
 				{
-					if (std::holds_alternative<CancellingCallback>(callback))
+					co_await winrt::resume_background();
+
+					if (std::holds_alternative<CancellingCallback>(callbackCopy))
 					{
-						auto& cancellingCallback = std::get<CancellingCallback>(callback);
-						cancellingCallback(std::forward<Args>(args)...);
+						auto& cancellingCallback = std::get<CancellingCallback>(callbackCopy);
+						cancellingCallback(std::forward<Args>(argsCopy)...);
 					}
 					else
 					{
-						auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
-						nonCancellingCallback(std::forward<Args>(args)...);
+						auto& nonCancellingCallback = std::get<NonCancellingCallback>(callbackCopy);
+						nonCancellingCallback(std::forward<Args>(argsCopy)...);
 					}
-				});
+				}();
 			}
 		}
 

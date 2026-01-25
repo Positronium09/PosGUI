@@ -3,6 +3,7 @@ module;
 
 export module PGUI.UI.Animation:AnimationTimer;
 
+import :AnimationTimeTypes;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
@@ -23,7 +24,7 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto IsEnabled() const noexcept -> Result<bool>;
 
-		[[nodiscard]] auto GetTime() const noexcept -> Result<double>;
+		[[nodiscard]] auto GetTime() const noexcept -> Result<Seconds>;
 
 		auto SetFrameRateThreshold(UINT32 threshold) const noexcept -> Error;
 

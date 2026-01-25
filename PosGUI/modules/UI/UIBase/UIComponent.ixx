@@ -51,12 +51,23 @@ export namespace PGUI::UI
 		}
 
 		protected:
+		auto SetFastHittest(const bool val) noexcept -> void
+		{
+			doFastHittest = val;
+		}
+
+		[[nodiscard]] auto IsFastHittestEnabled() const noexcept -> bool
+		{
+			return doFastHittest;
+		}
+
 		virtual auto ClippedRender(Graphics) -> void
 		{
 			/*  */
 		}
 
 		private:
+		bool doFastHittest = false;
 		RectF rect;
 		Clip clip;
 	};

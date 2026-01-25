@@ -33,11 +33,8 @@ namespace PGUI::UI::Animation
 
 	auto AnimationManager::GetGlobalInstance() -> const AnimationManager&
 	{
-		if (instance == nullptr)
-		{
-			instance = new AnimationManager{ };
-		}
-		return *instance;
+		static AnimationManager instance{ };
+		return instance;
 	}
 
 	auto AnimationManager::AbandonAllStoryboards() noexcept -> Error
@@ -76,10 +73,10 @@ namespace PGUI::UI::Animation
 		return error;
 	}
 
-	auto AnimationManager::Update(const double timeNow) const noexcept -> Result<AnimationUpdateResult>
+	auto AnimationManager::Update(const Seconds timeNow) const noexcept -> Result<AnimationUpdateResult>
 	{
 		UI_ANIMATION_UPDATE_RESULT result;
-		if (const auto hr = Get()->Update(timeNow, &result);
+		if (const auto hr = Get()->Update(ToWAM(timeNow), &result);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -180,7 +177,7 @@ namespace PGUI::UI::Animation
 	auto AnimationManager::SetDefaultLongestAcceptableDelay(const Seconds delay) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetDefaultLongestAcceptableDelay(delay.count())
+			Get()->SetDefaultLongestAcceptableDelay(ToWAM(delay))
 		};
 		LogIfFailed(error, L"SetDefaultLongestAcceptableDelay failed");
 		return error;

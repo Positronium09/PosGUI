@@ -5,6 +5,7 @@ export import :AnimationManager;
 export import :AnimationTimer;
 export import :AnimationTransitionLibrary;
 export import :Storyboard;
+export import :AnimationTimeTypes;
 export import :AnimationTransition;
 export import :AnimationVariable;
 export import :AnimationManagerEventHandler;

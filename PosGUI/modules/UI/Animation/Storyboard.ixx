@@ -7,6 +7,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
+import :AnimationTimeTypes;
 import :AnimationInterface;
 import :AnimationEnums;
 
@@ -24,17 +25,17 @@ export namespace PGUI::UI::Animation
 
 		explicit(false) Storyboard(const ComPtr<IUIAnimationStoryboard2>& ptr) noexcept;
 
-		auto Schedule(double timeNow) const noexcept -> Result<AnimationSchedulingResult>;
+		auto Schedule(Seconds timeNow) const noexcept -> Result<AnimationSchedulingResult>;
 
 		auto Abandon() const noexcept -> Error;
 
 		auto Conclude() const noexcept -> Error;
 
-		auto Finish(double completionDeadline) const noexcept -> Error;
+		auto Finish(Seconds completionDeadline) const noexcept -> Error;
 
-		auto SetSkipDuration(double duration) const noexcept -> Error;
+		auto SetSkipDuration(Seconds duration) const noexcept -> Error;
 
-		auto SetLongestAcceptableDelay(double delay) const noexcept -> Error;
+		auto SetLongestAcceptableDelay(Seconds delay) const noexcept -> Error;
 
 		auto HoldVariable(const AnimationVariable& variable) const noexcept -> Error;
 
@@ -43,7 +44,7 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto AddKeyframeAtOffset(
 			KeyFrame keyFrame, 
-			double durationOffset) noexcept -> Result<KeyFrame>;
+			Seconds durationOffset) noexcept -> Result<KeyFrame>;
 
 		auto AddTransition(
 			const AnimationVariable& variable, 

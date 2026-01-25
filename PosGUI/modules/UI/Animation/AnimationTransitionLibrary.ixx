@@ -8,6 +8,7 @@ import std;
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.ErrorHandling;
+import :AnimationTimeTypes;
 import :AnimationInterface;
 import :AnimationEnums;
 
@@ -19,33 +20,33 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] static auto GetInstance() -> const AnimationTransitionLibrary&;
 
 		[[nodiscard]] static auto AccelerateDecelerateTransition(
-			double duration, double finalValue,
+			Seconds duration, double finalValue,
 			double accelerationRatio, double decelerationRatio) noexcept -> Result<AnimationTransition>;
 
-		[[nodiscard]] static auto ConstantTransition(double duration) noexcept -> Result<AnimationTransition>;
+		[[nodiscard]] static auto ConstantTransition(Seconds duration) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto CubicBezierLinearTransition(
-			double duration, double finalValue,
+			Seconds duration, double finalValue,
 			Point<double> p1, Point<double> p2) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto CubicBezierLinearTransition(
-			double duration, std::span<const double> finalValues,
+			Seconds duration, std::span<const double> finalValues,
 			Point<double> p1, Point<double> p2) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto CubicTransition(
-			double duration, double finalValue,
+			Seconds duration, double finalValue,
 			double finalVelocity) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto CubicTransition(
-			double duration, std::span<const double> finalValues,
+			Seconds duration, std::span<const double> finalValues,
 			std::span<const double> finalVelocities) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto DiscreteTransition(
-			double duration, double finalValue,
+			Seconds duration, double finalValue,
 			double hold) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto DiscreteTransition(
-			double duration, std::span<const double> finalValues,
+			Seconds duration, std::span<const double> finalValues,
 			double hold) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto InstantaneousTransition(double finalValue) noexcept -> Result<AnimationTransition>;
@@ -53,11 +54,11 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] static auto InstantaneousTransition(std::span<const double> finalValues) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto LinearTransition(
-			double duration,
+			Seconds duration,
 			double finalValue) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto LinearTransition(
-			double duration,
+			Seconds duration,
 			std::span<const double> finalValues) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto LinearTransitionFromSpeed(
@@ -72,19 +73,19 @@ export namespace PGUI::UI::Animation
 			double finalValue, double finalVelocity, double acceleration
 		) noexcept -> Result<AnimationTransition>;
 
-		[[nodiscard]] static auto ReversalTransition(double duration) noexcept -> Result<AnimationTransition>;
+		[[nodiscard]] static auto ReversalTransition(Seconds duration) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto SinusoidalTransitionFromRange(
-			double duration,
+			Seconds duration,
 			double minimumValue, double maximumValue,
 			double period, AnimationSlope slope) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto SinusoidalTransitionFromVelocity(
-			double duration, double period
+			Seconds duration, double period
 		) noexcept -> Result<AnimationTransition>;
 
 		[[nodiscard]] static auto SmoothStopTransition(
-			double maximumDuration,
+			Seconds maximumDuration,
 			double finalValue) noexcept -> Result<AnimationTransition>;
 
 		private:

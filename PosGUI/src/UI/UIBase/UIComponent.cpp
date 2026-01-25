@@ -195,6 +195,17 @@ namespace PGUI::UI
 			return true;
 		}
 
+		if (doFastHittest)
+		{
+			const auto bounds = clip.GetGeometry().GetBounds();
+			if (!bounds.has_value())
+			{
+				return false;
+			}
+
+			return bounds.value().Contains(point);
+		}
+
 		if (const auto result = clip.GetGeometry().FillContainsPoint(point - GetPosition());
 			result.has_value())
 		{

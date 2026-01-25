@@ -7,6 +7,7 @@ import :Storyboard;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import :AnimationVariable;
+import :AnimationTimeTypes;
 import :AnimationTransition;
 import :AnimationStoryboardEventHandler;
 
@@ -17,11 +18,11 @@ namespace PGUI::UI::Animation
 	{
 	}
 
-	auto Storyboard::Schedule(const double timeNow) const noexcept -> Result<AnimationSchedulingResult>
+	auto Storyboard::Schedule(const Seconds timeNow) const noexcept -> Result<AnimationSchedulingResult>
 	{
 		UI_ANIMATION_SCHEDULING_RESULT result;
 
-		if (const auto hr = Get()->Schedule(timeNow, &result);
+		if (const auto hr = Get()->Schedule(ToWAM(timeNow), &result);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -50,35 +51,35 @@ namespace PGUI::UI::Animation
 		return error;
 	}
 
-	auto Storyboard::Finish(const double completionDeadline) const noexcept -> Error
+	auto Storyboard::Finish(const Seconds completionDeadline) const noexcept -> Error
 	{
 		Error error{
-			Get()->Finish(completionDeadline)
+			Get()->Finish(ToWAM(completionDeadline))
 		};
 		error
-			.AddDetail(L"Completion Deadline", std::format(L"{:.10F}", completionDeadline));
+				.AddDetail(L"Completion Deadline", std::format(L"{:.10F}", completionDeadline.count()));
 		LogIfFailed(error, L"Finish failed");
 		return error;
 	}
 
-	auto Storyboard::SetSkipDuration(const double duration) const noexcept -> Error
+	auto Storyboard::SetSkipDuration(const Seconds duration) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetSkipDuration(duration)
+			Get()->SetSkipDuration(ToWAM(duration))
 		};
 		error
-			.AddDetail(L"Duration", std::format(L"{:.10F}", duration));
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()));
 		LogIfFailed(error, L"Setting skip duration failed");
 		return error;
 	}
 
-	auto Storyboard::SetLongestAcceptableDelay(const double delay) const noexcept -> Error
+	auto Storyboard::SetLongestAcceptableDelay(const Seconds delay) const noexcept -> Error
 	{
 		Error error{
-			Get()->SetLongestAcceptableDelay(delay)
+			Get()->SetLongestAcceptableDelay(ToWAM(delay))
 		};
 		error
-			.AddDetail(L"Delay", std::format(L"{:.10F}", delay));
+				.AddDetail(L"Delay", std::format(L"{:.10F}", delay.count()));
 		LogIfFailed(error, L"Setting longest acceptable delay failed");
 		return error;
 	}
@@ -108,10 +109,10 @@ namespace PGUI::UI::Animation
 	}
 
 	auto Storyboard::AddKeyframeAtOffset(
-		const KeyFrame keyFrame, const double durationOffset) noexcept -> Result<KeyFrame>
+		const KeyFrame keyFrame, const Seconds durationOffset) noexcept -> Result<KeyFrame>
 	{
 		KeyFrame newKeyFrame;
-		if (const auto hr = Get()->AddKeyframeAtOffset(keyFrame, durationOffset, &newKeyFrame);
+		if (const auto hr = Get()->AddKeyframeAtOffset(keyFrame, ToWAM(durationOffset), &newKeyFrame);
 			FAILED(hr))
 		{
 			Error error{ hr };

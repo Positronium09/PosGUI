@@ -63,7 +63,7 @@ export namespace PGUI
 		bool, SCODE,
 		CY, FILETIME,
 		CLSID*, CLIPDATA*,
-		BLOB, LPSTR, LPWSTR, // BSTR is LPWSTR
+		BLOB, std::string, std::wstring, // BSTR is LPWSTR
 		IUnknown*, IDispatch*,
 		IStream*, IStorage*,
 		LPVERSIONEDSTREAM,

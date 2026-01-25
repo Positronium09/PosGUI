@@ -5,6 +5,7 @@ export module PGUI.UI.Animation:AnimationTransition;
 
 import std;
 
+import :AnimationTimeTypes;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
@@ -19,7 +20,7 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto GetDimension() const noexcept -> Result<UINT>;
 
-		[[nodiscard]] auto GetDuration() const noexcept -> Result<double>;
+		[[nodiscard]] auto GetDuration() const noexcept -> Result<Seconds>;
 
 		[[nodiscard]] auto IsDurationKnown() const noexcept -> bool;
 

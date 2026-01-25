@@ -154,6 +154,7 @@
     <ClCompile Include="src\UI\Animation\AnimationManagerEventHandler.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationStoryboardEventHandler.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationTimer.cpp" />
+    <ClCompile Include="src\UI\Animation\AnimationTimerEventHandler.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationTransition.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationTransitionLibrary.cpp" />
     <ClCompile Include="src\UI\Animation\AnimationVariable.cpp" />

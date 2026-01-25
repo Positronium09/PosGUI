@@ -65,6 +65,7 @@ namespace PGUI::UI::Animation
 		{
 			return E_NOTIMPL;
 		}
+
 		const std::span newValueSpan{ newValues, dimension };
 		const std::span previousValueSpan{ previousValues, dimension };
 
@@ -84,7 +85,6 @@ namespace PGUI::UI::Animation
 		std::scoped_lock lock{ handlerMutex };
 		handler = nullptr;
 	}
-
 
 	AnimationVariableChangeEventHandler::AnimationVariableChangeEventHandler() noexcept :
 		router{

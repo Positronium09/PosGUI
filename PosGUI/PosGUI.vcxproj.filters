@@ -549,6 +549,9 @@
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\UI\Animation\AnimationTimerEventHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

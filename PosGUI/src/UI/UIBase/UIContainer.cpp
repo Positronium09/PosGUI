@@ -302,7 +302,7 @@ namespace PGUI::UI
 			graphics.PushAxisAlignedClip(GetRect(), D2D::AntiAliasingMode::PerPrimitive);
 		}
 
-		for (const auto& element : elements | std::views::reverse)
+		for (const auto& element : elements)
 		{
 			if (!*element->IsEnabled())
 			{

@@ -240,9 +240,16 @@ namespace PGUI::UI::Layout
 		float currentRowSize = 0;
 		float maxHeight = 0;
 
+		std::vector<SizeF> itemSizes;
+		itemSizes.reserve(GetItemCount());
+		for (const auto& item : GetItems())
+		{
+			itemSizes.push_back(MeasureItem(item));
+		}
+
 		for (const auto& [index, item] : GetItems() | std::views::enumerate)
 		{
-			const auto itemSize = MeasureItem(item);
+			const auto& itemSize = itemSizes.at(index);
 			if (currentRowSize + itemSize.cx > availableWidth)
 			{
 				rowSizes.push_back(maxHeight);
@@ -255,9 +262,12 @@ namespace PGUI::UI::Layout
 		}
 		while (rowSizes.size() < startIndices.size())
 		{
-			for (const auto& item : GetItems() | std::views::drop(startIndices.back()))
+			for ([[maybe_unused]] const auto& [index, item] :
+			     GetItems() |
+			     std::views::drop(startIndices.back()) |
+			     std::views::enumerate)
 			{
-				maxHeight = std::max(maxHeight, MeasureItem(item).cy);
+				maxHeight = std::max(maxHeight, itemSizes.at(index).cy);
 			}
 			rowSizes.push_back(maxHeight);
 		}
@@ -334,12 +344,19 @@ namespace PGUI::UI::Layout
 		startIndices.reserve(GetItemCount());
 		startIndices.push_back(0);
 
+		std::vector<SizeF> itemSizes;
+		itemSizes.reserve(GetItemCount());
+		for (const auto& item : GetItems())
+		{
+			itemSizes.push_back(MeasureItem(item));
+		}
+
 		float currentColumnSize = 0;
 		float maxWidth = 0;
 
 		for (const auto& [index, item] : GetItems() | std::views::enumerate)
 		{
-			const auto itemSize = MeasureItem(item);
+			const auto& itemSize = itemSizes.at(index);
 			if (currentColumnSize + itemSize.cy > availableHeight)
 			{
 				columnSizes.push_back(maxWidth);
@@ -353,9 +370,12 @@ namespace PGUI::UI::Layout
 
 		while (columnSizes.size() < startIndices.size())
 		{
-			for (const auto& item : GetItems() | std::views::drop(startIndices.back()))
+			for ([[maybe_unused]] const auto& [index, item] :
+			     GetItems() |
+			     std::views::drop(startIndices.back()) |
+			     std::views::enumerate)
 			{
-				maxWidth = std::max<float>(maxWidth, MeasureItem(item).cx);
+				maxWidth = std::max<float>(maxWidth, itemSizes.at(index).cx);
 			}
 			columnSizes.push_back(maxWidth);
 		}
@@ -469,11 +489,12 @@ namespace PGUI::UI::Layout
 		                  std::views::take(endChildIndex - startChildIndex + 1))
 		{
 			MoveItem(item, { currentX, yPosition });
+			const auto itemSize = MeasureItem(item);
 			if (GetCrossAxisAlignment() == CrossAxisAlignment::Stretch)
 			{
-				ResizeItem(item, { MeasureItem(item).cx, height });
+				ResizeItem(item, { itemSize.cx, height });
 			}
-			currentX += MeasureItem(item).cx + mainAxisGap;
+			currentX += itemSize.cx + mainAxisGap;
 		}
 	}
 
@@ -530,12 +551,13 @@ namespace PGUI::UI::Layout
 		                  std::views::take(endChildIndex - startChildIndex + 1))
 		{
 			MoveItem(item, { xPosition, currentY });
+			const auto itemSize = MeasureItem(item);
 
 			if (GetCrossAxisAlignment() == CrossAxisAlignment::Stretch)
 			{
-				ResizeItem(item, { width, MeasureItem(item).cy });
+				ResizeItem(item, { width, itemSize.cy });
 			}
-			currentY += MeasureItem(item).cy + mainAxisGap;
+			currentY += itemSize.cy + mainAxisGap;
 		}
 	}
 }

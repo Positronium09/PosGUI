@@ -5,6 +5,7 @@ export module PGUI.ErrorHandling:Logger;
 
 import std;
 
+import PGUI.Mutex;
 import :Error;
 import :ErrorCodes;
 import :Exception;
@@ -289,7 +290,7 @@ export namespace PGUI
 		}
 
 		private:
-		static inline std::mutex loggingMutex;
+		static inline Mutex::CSMutex loggingMutex;
 		static inline LogSink* logger = nullptr;
 		static inline auto defaultLogLevel =
 			#ifdef _DEBUG

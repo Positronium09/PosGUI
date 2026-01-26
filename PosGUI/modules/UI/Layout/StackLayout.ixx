@@ -57,6 +57,19 @@ export namespace PGUI::UI::Layout
 		auto SetWrapMode(WrapMode wrapMode) noexcept -> void;
 		[[nodiscard]] auto GetWrapMode() const noexcept { return wrapMode; }
 
+		auto SetAlignment(MainAxisAlignment mainAxis, CrossAxisAlignment crossAxis) noexcept -> void;
+		auto SetGaps(float mainAxis, float crossAxis) noexcept -> void;
+
+		auto SetAll(
+			LayoutOrientation orientation,
+			MainAxisAlignment mainAxisAlignment,
+			CrossAxisAlignment crossAxisAlignment,
+			WrapMode wrapMode,
+			StackLayoutPadding padding,
+			float mainAxisGap,
+			float crossAxisGap
+		) noexcept -> void;
+
 		protected:
 		auto RearrangeHorizontalNoWrap() noexcept -> void;
 		auto RearrangeVerticalNoWrap() noexcept -> void;
@@ -71,6 +84,8 @@ export namespace PGUI::UI::Layout
 		WrapMode wrapMode;
 		float mainAxisGap;
 		float crossAxisGap;
+
+		bool batchChanges = false;
 
 		auto RearrangeHorizontalRow(
 			std::size_t startChildIndex, std::size_t endChildIndex,

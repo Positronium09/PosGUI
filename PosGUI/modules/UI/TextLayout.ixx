@@ -159,14 +159,18 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto DetermineMinWidth() const noexcept -> Result<float>;
 
+		[[nodiscard]] auto GetMetrics() const noexcept -> Result<TextMetrics>;
+
+		[[nodiscard]] auto GetLineMetrics() const noexcept -> Result<std::vector<LineMetrics>>;
+
+		[[nodiscard]] auto GetTextLength() const noexcept -> Result<UINT32>;
+
 		//! Wont probably implement
 		//! HRESULT Draw(void* clientDrawingContext, IDWriteTextRenderer* renderer, FLOAT originX, FLOAT originY);
 
 		//TODO Write wrappers for all
 		//TODO dawg i mustve been so done w ts shi to leave em out
 		/*
-			HRESULT GetLineMetrics(DWRITE_LINE_METRICS* lineMetrics, UINT32 maxLineCount, UINT32* actualLineCount);
-			HRESULT GetMetrics(DWRITE_TEXT_METRICS* textMetrics);
 			HRESULT GetOverhangMetrics(DWRITE_OVERHANG_METRICS* overhangs);
 			HRESULT GetClusterMetrics(DWRITE_CLUSTER_METRICS* clusterMetrics, UINT32 maxClusterCount, UINT32* actualClusterCount);
 			HRESULT HitTestPoint(FLOAT pointX, FLOAT pointY, BOOL* isTrailingHit, BOOL* isInside, DWRITE_HIT_TEST_METRICS* hitTestMetrics);

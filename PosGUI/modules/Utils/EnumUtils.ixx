@@ -34,6 +34,12 @@ export namespace PGUI
 		return static_cast<UnderlyingType<T>>(val);
 	}
 
+	template <Enumeration T>
+	auto FromUnderlying(UnderlyingType<T> val) noexcept
+	{
+		return static_cast<T>(val);
+	}
+
 	template <EnumFlag T>
 	[[nodiscard]] constexpr auto ZeroFlag() noexcept
 	{

@@ -10,7 +10,7 @@ namespace PGUI::UI
 {
 	auto UIComponent::Render(const Graphics& graphics) -> void
 	{
-		if (!*IsEnabled())
+		if (!*IsEnabled() || !IsVisible())
 		{
 			return;
 		}

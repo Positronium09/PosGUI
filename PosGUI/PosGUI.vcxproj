@@ -47,6 +47,8 @@
     <ClCompile Include="modules\UI\Animation\Animated.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTimerEventHandler.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx" />
+    <ClCompile Include="modules\UI\DragDrop.ixx" />
+    <ClCompile Include="modules\UI\Input.ixx" />
     <ClCompile Include="modules\UI\Layout\DockLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\LayoutEnums.ixx" />
@@ -170,6 +172,7 @@
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
     <ClCompile Include="src\UI\Dialog.cpp" />
     <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
+    <ClCompile Include="src\UI\DragDrop.cpp" />
     <ClCompile Include="src\UI\Font\FontCollection.cpp" />
     <ClCompile Include="src\UI\Font\FontFamily.cpp" />
     <ClCompile Include="src\UI\Font\FontSet.cpp" />

@@ -156,6 +156,8 @@ export namespace PGUI
 				logicalValue = value.ScaleByDpiFactorFactor(GetInverseScaleFactor());
 			}
 		}
+		// ReSharper disable once CppNotAllPathsReturnValue
+
 		auto GetPhysicalValue() const noexcept -> T
 		{
 			if constexpr (std::is_arithmetic_v<T> || DpiMulScale<T>)
@@ -189,7 +191,6 @@ export namespace PGUI
 			{
 				return logicalValue.ScaleByDpiFactorFactor(GetScaleFactor());
 			}
-			std::unreachable();
 		}
 
 		constexpr auto GetScaleFactor() const noexcept -> float

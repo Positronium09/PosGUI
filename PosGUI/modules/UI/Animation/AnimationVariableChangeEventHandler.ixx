@@ -6,6 +6,7 @@ export module PGUI.UI.Animation:AnimationVariableChangeEventHandler;
 import std;
 
 import PGUI.Event;
+import PGUI.Mutex;
 import PGUI.ComPtr;
 import :AnimationInterface;
 import :AnimationEnums;
@@ -35,7 +36,7 @@ namespace PGUI::UI::Animation
 		auto ClearHandler() noexcept -> void;
 
 		private:
-		std::mutex handlerMutex;
+		Mutex::CSMutex handlerMutex;
 		AnimationVariableChangeHandler handler;
 	};
 
@@ -62,7 +63,7 @@ namespace PGUI::UI::Animation
 		auto ClearHandler() noexcept -> void;
 
 		private:
-		std::mutex handlerMutex;
+		Mutex::CSMutex handlerMutex;
 		AnimationIntegerVariableChangeHandler handler;
 	};
 }

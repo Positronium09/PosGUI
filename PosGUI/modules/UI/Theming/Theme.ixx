@@ -9,6 +9,7 @@ import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ColorContext;
 import PGUI.UI.Theming.SystemTheme;
 import PGUI.Event;
+import PGUI.Mutex;
 
 export namespace PGUI::UI::Theming
 {
@@ -93,6 +94,6 @@ export namespace PGUI::UI::Theming
 		inline static std::atomic_bool respondToSystemThemeChange = true;
 		inline static Theme currentTheme{ };
 		inline static Event<const Theme&> themeChangedEvent;
-		inline static std::mutex themeMutex{ };
+		inline static Mutex::CSMutex themeMutex{ };
 	};
 }

@@ -3,6 +3,7 @@ module PGUI.UI.Layout.StackLayout;
 import std;
 
 import PGUI.WindowClass;
+import PGUI.Utils;
 import PGUI.ErrorHandling;
 
 namespace PGUI::UI::Layout
@@ -22,7 +23,7 @@ namespace PGUI::UI::Layout
 
 	auto StackLayout::RearrangeItems() noexcept -> void
 	{
-		if (GetItemCount() == 0)
+		if (GetItemCount() == 0 || batchChanges)
 		{
 			return;
 		}
@@ -86,6 +87,41 @@ namespace PGUI::UI::Layout
 			wrapMode = mode;
 			RearrangeItems();
 		}
+	}
+
+	auto StackLayout::SetAlignment(
+		const MainAxisAlignment mainAxis,
+		const CrossAxisAlignment crossAxis) noexcept -> void
+	{
+		ScopedValue scoped{ batchChanges, true };
+		
+		SetMainAxisAlignment(mainAxis);
+		SetCrossAxisAlignment(crossAxis);
+	}
+
+	auto StackLayout::SetGaps(const float mainAxis, const float crossAxis) noexcept -> void
+	{
+		ScopedValue scoped{ batchChanges, true };
+
+		SetMainAxisGap(mainAxis);
+		SetCrossAxisGap(crossAxis);
+	}
+
+	auto StackLayout::SetAll(const LayoutOrientation orient, const MainAxisAlignment mainAxisAlign,
+	                         const CrossAxisAlignment crossAxisAlign,
+	                         const WrapMode wrap, const StackLayoutPadding pad,
+	                         const float mainAxis,
+	                         const float crossAxis) noexcept -> void
+	{
+		ScopedValue scoped{ batchChanges, true };
+
+		SetOrientation(orient);
+		SetMainAxisAlignment(mainAxisAlign);
+		SetCrossAxisAlignment(crossAxisAlign);
+		SetWrapMode(wrap);
+		SetPadding(pad);
+		SetMainAxisGap(mainAxis);
+		SetCrossAxisGap(crossAxis);
 	}
 
 	auto StackLayout::SetOrientation(const LayoutOrientation _orientation) noexcept -> void

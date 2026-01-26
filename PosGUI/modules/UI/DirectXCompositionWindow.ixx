@@ -43,7 +43,7 @@ export namespace PGUI::UI
 
 		[[nodiscard]] static auto& D3D11Device() noexcept { return d3d11Device; }
 		[[nodiscard]] static auto& DXGIDevice() noexcept { return dxgiDevice; }
-		[[nodiscard]] static auto& DCompositionDevice() noexcept { return dcompDevice; }
+		[[nodiscard]] static auto& DCompositionDevice() noexcept { return dCompositionDevice; }
 		[[nodiscard]] static auto& D2D1Device() noexcept { return d2d1Device; }
 
 		[[nodiscard]] auto GetGraphics() const noexcept
@@ -78,12 +78,10 @@ export namespace PGUI::UI
 
 		auto OnSizeChanged(SizeL newSize) -> void override;
 
-		[[nodiscard]] auto GetDirtyRect() const noexcept -> Result<RectF>;
-
 		private:
 		inline static ComPtr<ID3D11Device2> d3d11Device;
 		inline static ComPtr<IDXGIDevice4> dxgiDevice;
-		inline static ComPtr<IDCompositionDevice> dcompDevice;
+		inline static ComPtr<IDCompositionDevice> dCompositionDevice;
 		inline static ComPtr<ID2D1Device7> d2d1Device;
 
 		HMONITOR currentMonitor;

@@ -57,6 +57,11 @@ export namespace PGUI::UI::Font
 		[[nodiscard]] auto GetEndPosition() const noexcept -> UINT32 { return startPosition + length; }
 		[[nodiscard]] auto GetLength() const noexcept -> UINT32 { return length; }
 		[[nodiscard]] auto GetStartPosition() const noexcept -> UINT32 { return startPosition; }
+
+		[[nodiscard]] auto Contains(const UINT32 position) const noexcept -> bool
+		{
+			return position >= startPosition && position < startPosition + length;
+		}
 	};
 
 	struct LineSpacing : DWRITE_LINE_SPACING
@@ -84,7 +89,6 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) Trimming(const DWRITE_TRIMMING trimmingOptions) noexcept :
-			ComPtrHolder{ },
 			trimmingOptions{ trimmingOptions }
 		{ }
 
@@ -94,6 +98,126 @@ export namespace PGUI::UI::Font
 		{ }
 
 		DWRITE_TRIMMING trimmingOptions;
+	};
+
+	struct TextMetrics : DWRITE_TEXT_METRICS
+	{
+		constexpr TextMetrics() noexcept = default;
+		
+		explicit(false) constexpr TextMetrics(const DWRITE_TEXT_METRICS& metrics) noexcept :
+			DWRITE_TEXT_METRICS{ metrics }
+		{ }
+
+		constexpr TextMetrics(
+			const FLOAT left, const FLOAT top, 
+			const FLOAT width,
+			const FLOAT widthIncludingTrailingWhitespace,
+			const FLOAT height,
+			const FLOAT layoutWidth,
+			const FLOAT layoutHeight,
+			const UINT32 maxBidiReorderingDepth,
+			const UINT32 lineCount
+		) noexcept : 
+			DWRITE_TEXT_METRICS{
+				.left = left,
+				.top = top,
+				.width = width,
+				.widthIncludingTrailingWhitespace = widthIncludingTrailingWhitespace,
+				.height = height,
+				.layoutWidth = layoutWidth,
+				.layoutHeight = layoutHeight,
+				.maxBidiReorderingDepth = maxBidiReorderingDepth,
+				.lineCount = lineCount
+		}
+		{ }
+
+		explicit(false) constexpr operator DWRITE_TEXT_METRICS() const noexcept { return *this; }
+	};
+
+	struct alignas(alignof(DWRITE_LINE_METRICS1)) LineMetrics
+	{
+		UINT32 length;
+		UINT32 trailingWhitespaceLength;
+		UINT32 newLineLength;
+		FLOAT height;
+		FLOAT baseline;
+		BOOL isTrimmed;
+		FLOAT leadingBefore;
+		FLOAT leadingAfter;
+
+		constexpr LineMetrics() noexcept = default;
+		
+		constexpr LineMetrics(
+			const UINT32 length,
+			const UINT32 trailingWhitespaceLength,
+			const UINT32 newLineLength,
+			const FLOAT height,
+			const FLOAT baseline,
+			const BOOL isTrimmed,
+			const FLOAT leadingBefore,
+			const FLOAT leadingAfter
+		) noexcept : 
+			length{ length },
+			trailingWhitespaceLength{ trailingWhitespaceLength },
+			newLineLength{ newLineLength },
+			height{ height },
+			baseline{ baseline },
+			isTrimmed{ isTrimmed },
+			leadingBefore{ leadingBefore },
+			leadingAfter{ leadingAfter }
+		{ }
+
+		explicit(false) constexpr LineMetrics(const DWRITE_LINE_METRICS& metrics) noexcept :
+			length{ metrics.length },
+			trailingWhitespaceLength{ metrics.trailingWhitespaceLength },
+			newLineLength{ metrics.newlineLength },
+			height{ metrics.height },
+			baseline{ metrics.baseline },
+			isTrimmed{ metrics.isTrimmed },
+			leadingBefore{ 0.0F },
+			leadingAfter{ 0.0F }
+		{
+		}
+
+		explicit(false) constexpr LineMetrics(const DWRITE_LINE_METRICS1& metrics) noexcept :
+			length{ metrics.length },
+			trailingWhitespaceLength{ metrics.trailingWhitespaceLength },
+			newLineLength{ metrics.newlineLength },
+			height{ metrics.height },
+			baseline{ metrics.baseline },
+			isTrimmed{ metrics.isTrimmed },
+			leadingBefore{ metrics.leadingBefore },
+			leadingAfter{ metrics.leadingAfter }
+		{
+		}
+
+		explicit(false) constexpr operator DWRITE_LINE_METRICS() const noexcept
+		{
+			return DWRITE_LINE_METRICS{
+				.length = length,
+				.trailingWhitespaceLength = trailingWhitespaceLength,
+				.newlineLength = newLineLength,
+				.height = height,
+				.baseline = baseline,
+				.isTrimmed = isTrimmed
+			};
+		}
+
+		explicit(false) constexpr operator DWRITE_LINE_METRICS1() const noexcept
+		{
+			DWRITE_LINE_METRICS1 metrics{
+				.leadingBefore = leadingBefore,
+				.leadingAfter = leadingAfter
+			};
+			metrics.length = length;
+			metrics.trailingWhitespaceLength = trailingWhitespaceLength;
+			metrics.newlineLength = newLineLength;
+			metrics.height = height;
+			metrics.baseline = baseline;
+			metrics.isTrimmed = isTrimmed;
+
+			return metrics;
+		}
 	};
 }
 

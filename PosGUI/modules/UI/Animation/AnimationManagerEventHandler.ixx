@@ -7,6 +7,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Event;
+import PGUI.Mutex;
 import :AnimationEnums;
 
 namespace PGUI::UI::Animation
@@ -30,7 +31,7 @@ namespace PGUI::UI::Animation
 		auto ClearHandler() noexcept -> void;
 
 		private:
-		std::mutex handlerMutex;
+		Mutex::CSMutex handlerMutex;
 		ManagerStatusChangedHandler handler{ };
 	};
 }

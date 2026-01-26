@@ -22,29 +22,34 @@ export namespace PGUI::UI::D2D
 			SimplifiedGeometrySink{ ptr }
 		{ }
 
-		auto AddLine(const PointF point) const -> void
+		auto& AddLine(const PointF point) const
 		{
 			Get()->AddLine(point);
+			return *this;
 		}
 
-		auto AddArc(const ArcSegment& arcSegment) const -> void
+		auto& AddArc(const ArcSegment& arcSegment) const
 		{
 			Get()->AddArc(arcSegment);
+			return *this;
 		}
 
-		auto AddBezier(const BezierSegment& bezierSegment) const -> void
+		auto& AddBezier(const BezierSegment& bezierSegment) const
 		{
 			Get()->AddBezier(bezierSegment);
+			return *this;
 		}
 
-		auto AddQuadraticBezier(const QuadraticBezierSegment quadraticBezierSegment) const -> void
+		auto& AddQuadraticBezier(const QuadraticBezierSegment quadraticBezierSegment) const
 		{
 			Get()->AddQuadraticBezier(quadraticBezierSegment);
+			return *this;
 		}
 
-		auto AddQuadraticBeziers(const std::span<const QuadraticBezierSegment> segments) const -> void
+		auto& AddQuadraticBeziers(const std::span<const QuadraticBezierSegment> segments) const
 		{
 			Get()->AddQuadraticBeziers(segments.data(), static_cast<UINT32>(segments.size()));
+			return *this;
 		}
 	};
 }

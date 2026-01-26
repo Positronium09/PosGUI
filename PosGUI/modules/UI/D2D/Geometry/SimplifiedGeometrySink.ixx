@@ -18,7 +18,7 @@ export namespace PGUI::UI::D2D
 	class SimplifiedGeometrySink : public ComPtrHolder<Interface>
 	{
 		static_assert(
-			std::is_same_v<Interface, ID2D1SimplifiedGeometrySink> || std::is_same_v<Interface, ID2D1GeometrySink>,
+			std::is_same_v<Interface, ID2D1SimplifiedGeometrySink> || std::derived_from<Interface, ID2D1SimplifiedGeometrySink>,
 			"Interface must be ID2D1SimplifiedGeometrySink or ID2D1GeometrySink");
 
 		public:
@@ -28,14 +28,21 @@ export namespace PGUI::UI::D2D
 			ComPtrHolder<Interface>{ ptr }
 		{ }
 
-		auto BeginFigure(PointF startPoint, FigureBegin figureBegin) noexcept -> void
+		virtual ~SimplifiedGeometrySink() noexcept
 		{
-			this->Get()->BeginFigure(startPoint, static_cast<D2D1_FIGURE_BEGIN>(figureBegin));
+			auto error = Close();
 		}
 
-		auto EndFigure(FigureEnd figureEnd) noexcept -> void
+		auto& BeginFigure(PointF startPoint, FigureBegin figureBegin) noexcept
+		{
+			this->Get()->BeginFigure(startPoint, static_cast<D2D1_FIGURE_BEGIN>(figureBegin));
+			return *this;
+		}
+
+		auto& EndFigure(FigureEnd figureEnd) noexcept
 		{
 			this->Get()->EndFigure(static_cast<D2D1_FIGURE_END>(figureEnd));
+			return *this;
 		}
 
 		auto Close() noexcept -> Error
@@ -45,26 +52,30 @@ export namespace PGUI::UI::D2D
 			return error;
 		}
 
-		auto SetFillMode(FillMode fillMode) noexcept -> void
+		auto& SetFillMode(FillMode fillMode) noexcept
 		{
 			this->Get()->SetFillMode(static_cast<D2D1_FILL_MODE>(fillMode));
+			return *this;
 		}
 
-		auto SetSegmentFlags(SegmentFlags segmentFlags) noexcept -> void
+		auto& SetSegmentFlags(SegmentFlags segmentFlags) noexcept
 		{
 			this->Get()->SetSegmentFlags(static_cast<D2D1_PATH_SEGMENT>(segmentFlags));
+			return *this;
 		}
 
-		auto AddLines(const std::span<const PointF> points) noexcept -> void
+		auto& AddLines(const std::span<const PointF> points) noexcept
 		{
 			this->Get()->AddLines(std::bit_cast<const D2D1_POINT_2F*>(points.data()),
 			                      static_cast<UINT32>(points.size()));
+			return *this;
 		}
 
-		auto AddBeziers(const std::span<const BezierSegment> beziers) noexcept -> void
+		auto& AddBeziers(const std::span<const BezierSegment> beziers) noexcept
 		{
 			this->Get()->AddBeziers(static_cast<const D2D1_BEZIER_SEGMENT*>(beziers.data()),
 			                        static_cast<UINT32>(beziers.size()));
+			return *this;
 		}
 
 		explicit(false) constexpr operator SimplifiedGeometrySink<>() const noexcept

@@ -5,6 +5,7 @@ export module PGUI.UI.Animation:AnimationTimerEventHandler;
 
 import std;
 import PGUI.ComPtr;
+import PGUI.Mutex;
 import PGUI.Event;
 
 namespace PGUI::UI::Animation
@@ -35,9 +36,9 @@ namespace PGUI::UI::Animation
 		auto ClearRenderingTooSlowHandler() noexcept -> void;
 		
 		private:
-		std::mutex postUpdateHandlerMutex;
-		std::mutex preUpdateHandlerMutex;
-		std::mutex renderingTooSlowHandlerMutex;
+		Mutex::CSMutex postUpdateHandlerMutex;
+		Mutex::CSMutex preUpdateHandlerMutex;
+		Mutex::CSMutex renderingTooSlowHandlerMutex;
 		UpdateHandler postUpdateHandler;
 		UpdateHandler preUpdateHandler;
 		SlowRenderingHandler renderingTooSlowHandler;

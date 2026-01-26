@@ -60,38 +60,18 @@ namespace PGUI::UI
 		InitD2D1DeviceContext();
 	}
 
-	auto DirectXCompositionWindow::GetDirtyRect() const noexcept -> Result<RectF>
-	{
-		if (paintStruct.hdc == nullptr)
-		{
-			return Unexpected{
-				Error{ E_FAIL }
-				.SetCustomMessage(L"Not inside of an BeginDraw-EndDraw block")
-				.SuggestFix(L"This function can only be called between BeginDraw and EndDraw calls")
-			};
-		}
-
-		DpiScaled<RectF> rect;
-		const auto dpi = GetDpi();
-		if (auto result = rect.SetDpi(dpi);
-			result.IsFailure())
-		{
-			return Unexpected{
-				result
-				.SetCustomMessage(L"Cannot set the new dpi")
-				.AddDetail(L"DPI", std::format(L"{:.5F}", dpi))
-			};
-		}
-
-		rect.SetPhysicalValue(paintStruct.rcPaint);
-		return rect.GetLogicalValue();
-	}
-
 	auto DirectXCompositionWindow::BeginDraw() -> void
 	{
 		CreateDeviceResources();
 
-		BeginPaint(Hwnd(), &paintStruct);
+		if (const auto hdc = BeginPaint(Hwnd(), &paintStruct);
+			hdc == nullptr)
+		{
+			throw Exception{
+				Error{ GetLastError() },
+				L"BeginPaint failed"
+			};
+		}
 
 		GetD2D1DeviceContext()->BeginDraw();
 	}
@@ -124,8 +104,6 @@ namespace PGUI::UI
 		}
 
 		EndPaint(Hwnd(), &paintStruct);
-
-		SecureZeroMemory(&paintStruct, sizeof(PAINTSTRUCT));
 
 		return std::make_pair(tag1, tag2);
 	}
@@ -209,7 +187,7 @@ namespace PGUI::UI
 		auto& dcompTarget = GetDCompositionTarget();
 		auto& visual = GetDCompositionVisual();
 
-		auto hr = dcompDevice->CreateTargetForHwnd(
+		auto hr = dCompositionDevice->CreateTargetForHwnd(
 			Hwnd(), false,
 			&dcompTarget);
 		if (FAILED(hr))
@@ -220,7 +198,7 @@ namespace PGUI::UI
 			};
 		}
 
-		hr = dcompDevice->CreateVisual(&visual);
+		hr = dCompositionDevice->CreateVisual(&visual);
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -247,7 +225,7 @@ namespace PGUI::UI
 			};
 		}
 
-		hr = dcompDevice->Commit();
+		hr = dCompositionDevice->Commit();
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -358,7 +336,7 @@ namespace PGUI::UI
 
 	auto DirectXCompositionWindow::InitDCompDevice() -> void
 	{
-		if (dcompDevice)
+		if (dCompositionDevice)
 		{
 			Logger::Info(
 				L"DirectXCompositionWindow::InitDCompDevice called, but DirectComposition device already initialized");
@@ -367,8 +345,8 @@ namespace PGUI::UI
 
 		if (const auto hr = DCompositionCreateDevice(
 				dxgiDevice.get(),
-				GetIID(dcompDevice),
-				dcompDevice.put_void());
+				GetIID(dCompositionDevice),
+				dCompositionDevice.put_void());
 			FAILED(hr))
 		{
 			throw Exception{

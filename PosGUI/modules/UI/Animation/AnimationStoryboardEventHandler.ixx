@@ -6,6 +6,7 @@ export module PGUI.UI.Animation:AnimationStoryboardEventHandler;
 import std;
 
 import PGUI.Event;
+import PGUI.Mutex;
 import PGUI.ComPtr;
 import :AnimationInterface;
 import :AnimationEnums;
@@ -41,8 +42,8 @@ namespace PGUI::UI::Animation
 		auto ClearUpdatedHandler() noexcept -> void;
 
 		private:
-		std::mutex updateHandlerMutex;
-		std::mutex statusChangedHandlerMutex;
+		Mutex::CSMutex updateHandlerMutex;
+		Mutex::CSMutex statusChangedHandlerMutex;
 		StoryboardUpdatedHandler updatedHandler{ };
 		StoryboardStatusChangedHandler statusChangedHandler{ };
 	};

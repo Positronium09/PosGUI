@@ -28,4 +28,22 @@ export namespace PGUI
 		Absolute,
 		Relative
 	};
+
+	template <typename T> requires std::is_trivially_copyable_v<T>
+	struct ScopedValue
+	{
+		ScopedValue(T& variableRef, T newValue) noexcept :
+			variable{ variableRef }, oldValue{ variableRef }
+		{
+			variable = newValue;
+		}
+		~ScopedValue() noexcept
+		{
+			variable = oldValue;
+		}
+
+		private:
+		std::reference_wrapper<T> variable;
+		T oldValue;
+	};
 }

@@ -860,4 +860,63 @@ namespace PGUI::UI
 
 		return minWidth;
 	}
+
+	auto TextLayout::GetMetrics() const noexcept -> Result<TextMetrics>
+	{
+		DWRITE_TEXT_METRICS metrics{ };
+
+		if (const auto hr = Get()->GetMetrics(&metrics);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			Logger::Error(error, L"Cannot get text metrics");
+			return Unexpected{ error };
+		}
+
+		return TextMetrics{ metrics };
+	}
+
+	auto TextLayout::GetLineMetrics() const noexcept -> Result<std::vector<LineMetrics>>
+	{
+		auto textMetricsResult = GetMetrics();
+
+		if (!textMetricsResult.has_value())
+		{
+			return Unexpected{ textMetricsResult.error() };
+		}
+
+		const auto& textMetrics = textMetricsResult.value();
+		const auto lineCount = textMetrics.lineCount;
+
+		std::vector<LineMetrics> lineMetricsBuffer(lineCount);
+		UINT32 actualLineCount{ };
+		if (const auto hr = Get()->GetLineMetrics(
+				std::bit_cast<DWRITE_LINE_METRICS1*>(lineMetricsBuffer.data()),
+				lineCount,
+				&actualLineCount);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			Logger::Error(error, L"Cannot get line metrics");
+			return Unexpected{ error };
+		}
+
+		lineMetricsBuffer.resize(actualLineCount);
+		return lineMetricsBuffer;
+	}
+
+	auto TextLayout::GetTextLength() const noexcept -> Result<UINT32>
+	{
+		auto lineMetricsResult = GetLineMetrics();
+		if (!lineMetricsResult.has_value())
+		{
+			return Unexpected{ lineMetricsResult.error() };
+		}
+
+		const auto& lineMetrics = lineMetricsResult.value();
+		return std::ranges::fold_left(lineMetrics, 0, [](const UINT32 total, const LineMetrics& metrics)
+		{
+			return total + metrics.length;
+		});
+	}
 }

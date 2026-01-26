@@ -295,7 +295,6 @@ namespace PGUI::UI
 	auto UIContainer::Render(const Graphics& graphics) -> void
 	{
 		EnsureZOrder();
-		(void)layoutPanel;
 
 		if (cropRendering)
 		{
@@ -308,6 +307,7 @@ namespace PGUI::UI
 			{
 				continue;
 			}
+
 			if (const auto rc = GetRect();
 				!rc.Intersects(element->GetRect()))
 			{

@@ -8,9 +8,11 @@ import std;
 import :UIElement;
 import :UIContainer;
 import PGUI.Window;
+import PGUI.UI.Input;
 import PGUI.WindowClass;
 import PGUI.ScopedTimer;
 import PGUI.ErrorHandling;
+import PGUI.UI.D2D.D2DEnums;
 import PGUI.UI.DirectXCompositionWindow;
 
 namespace PGUI::UI
@@ -74,6 +76,7 @@ namespace PGUI::UI
 		BeginDraw();
 
 		Render(graphics);
+
 		childrenContainer.Render(graphics);
 
 		EndDraw();
@@ -362,18 +365,21 @@ namespace PGUI::UI
 		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		const auto focused = LockFocusedElement();
+		auto focused = LockFocusedElement();
 		const auto hovered = LockHoveredElement();
 
 		if (focused != nullptr && !focused->HitTest(mousePos))
 		{
 			ChangeFocusedElement(nullptr);
+			focused = LockFocusedElement();
 		}
 
 		if (hovered != nullptr)
 		{
 			ChangeFocusedElement(hovered.get());
+			focused = LockFocusedElement();
 		}
+
 		if (focused == nullptr)
 		{
 			return retVal;
@@ -398,13 +404,15 @@ namespace PGUI::UI
 		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		const auto focused = LockFocusedElement();
+		auto focused = LockFocusedElement();
 		const auto hovered = LockHoveredElement();
 
 		if (hovered != nullptr)
 		{
 			ChangeFocusedElement(hovered.get());
+			focused = LockFocusedElement();
 		}
+
 		if (focused == nullptr)
 		{
 			return retVal;
@@ -429,18 +437,21 @@ namespace PGUI::UI
 		const auto mouseButton = GetMouseButtonsFromWparam(wParam) | GetMouseButtonForMessage(msg, wParam);
 		const auto mousePos = GetMousePosFromLparam(lParam);
 
-		const auto focused = LockFocusedElement();
+		auto focused = LockFocusedElement();
 		const auto hovered = LockHoveredElement();
 
 		if (focused != nullptr && !focused->HitTest(mousePos))
 		{
 			ChangeFocusedElement(nullptr);
+			focused = LockFocusedElement();
 		}
 
 		if (hovered != nullptr)
 		{
 			ChangeFocusedElement(hovered.get());
+			focused = LockFocusedElement();
 		}
+
 		if (focused == nullptr)
 		{
 			return retVal;

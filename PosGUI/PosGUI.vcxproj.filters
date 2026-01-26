@@ -243,10 +243,7 @@
     <ClCompile Include="src\UI\Imaging\MetadataReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\IEnumStringIterator.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\IEnumStringIterator.cpp">
+    <ClCompile Include="modules\ComIterator.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Imaging\FormatConverter.ixx">
@@ -552,13 +549,28 @@
     <ClCompile Include="src\UI\Animation\AnimationTimerEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\DragDrop.ixx">
+    <ClCompile Include="modules\UI\DragDrop\DropTarget.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Input.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\DragDrop.cpp">
+    <ClCompile Include="src\UI\DragDrop\DropTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\DragDrop.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\DragDropTypes.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\DropSource.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\DragDrop\DropSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\DataObject.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

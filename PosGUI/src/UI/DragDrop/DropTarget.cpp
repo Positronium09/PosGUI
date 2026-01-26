@@ -2,7 +2,7 @@ module;
 #include <ole2.h>
 #include <Windows.h>
 
-module PGUI.UI.DragDrop;
+module PGUI.UI.DragDrop.DropTarget;
 
 import PGUI.Event;
 import PGUI.ComPtr;
@@ -11,11 +11,11 @@ import PGUI.Shape2D;
 import PGUI.ErrorHandling;
 import PGUI.UI.Input;
 
-namespace PGUI::UI
+namespace PGUI::UI::DragDrop
 {
-	auto DragDrop::DragEnter(IDataObject* pDataObj, const DWORD grfKeyState,
-	                         const POINTL pt,
-	                         DWORD* pdwEffect) -> HRESULT
+	auto DropTarget::DragEnter(IDataObject* pDataObj, const DWORD grfKeyState,
+	                           const POINTL pt,
+	                           DWORD* pdwEffect) -> HRESULT
 	{
 		if (pdwEffect == nullptr)
 		{
@@ -39,11 +39,7 @@ namespace PGUI::UI
 		catch (Exception& exception)
 		{
 			Logger::Error(exception.GetError());
-			if (exception.HResult() == E_OUTOFMEMORY)
-			{
-				return E_OUTOFMEMORY;
-			}
-			return E_UNEXPECTED;
+			return exception.HResult();
 		}
 		catch (...)
 		{
@@ -53,7 +49,7 @@ namespace PGUI::UI
 		return S_OK;
 	}
 
-	auto DragDrop::DragOver(const DWORD grfKeyState, const POINTL pt, DWORD* pdwEffect) -> HRESULT
+	auto DropTarget::DragOver(const DWORD grfKeyState, const POINTL pt, DWORD* pdwEffect) -> HRESULT
 	{
 		if (pdwEffect == nullptr)
 		{
@@ -76,20 +72,17 @@ namespace PGUI::UI
 		catch (Exception& exception)
 		{
 			Logger::Error(exception.GetError());
-			if (exception.HResult() == E_OUTOFMEMORY)
-			{
-				return E_OUTOFMEMORY;
-			}
-			return E_UNEXPECTED;
+			return exception.HResult();
 		}
 		catch (...)
 		{
 			return E_UNEXPECTED;
 		}
+
 		return S_OK;
 	}
 
-	auto DragDrop::DragLeave() -> HRESULT
+	auto DropTarget::DragLeave() -> HRESULT
 	{
 		try
 		{
@@ -98,20 +91,17 @@ namespace PGUI::UI
 		catch (Exception& exception)
 		{
 			Logger::Error(exception.GetError());
-			if (exception.HResult() == E_OUTOFMEMORY)
-			{
-				return E_OUTOFMEMORY;
-			}
-			return E_UNEXPECTED;
+			return exception.HResult();
 		}
 		catch (...)
 		{
 			return E_UNEXPECTED;
 		}
+
 		return S_OK;
 	}
 
-	auto DragDrop::Drop(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) -> HRESULT
+	auto DropTarget::Drop(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) -> HRESULT
 	{
 		if (pdwEffect == nullptr)
 		{
@@ -135,16 +125,13 @@ namespace PGUI::UI
 		catch (Exception& exception)
 		{
 			Logger::Error(exception.GetError());
-			if (exception.HResult() == E_OUTOFMEMORY)
-			{
-				return E_OUTOFMEMORY;
-			}
-			return E_UNEXPECTED;
+			return exception.HResult();
 		}
 		catch (...)
 		{
 			return E_UNEXPECTED;
 		}
+
 		return S_OK;
 	}
 }

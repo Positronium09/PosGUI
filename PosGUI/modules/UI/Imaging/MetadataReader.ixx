@@ -7,11 +7,13 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.PropVariant;
-import PGUI.IEnumStringIterator;
+import PGUI.ComIterator;
 import PGUI.UI.Imaging.ContainerFormats;
 
 export namespace PGUI::UI::Imaging
 {
+	using IEnumStringIterator = ComIterator<IEnumString, LPOLESTR, std::wstring>;
+
 	class MetadataReader : public ComPtrHolder<IWICMetadataQueryReader>
 	{
 		public:

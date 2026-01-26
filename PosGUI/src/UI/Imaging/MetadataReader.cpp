@@ -8,7 +8,7 @@ import std;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import PGUI.PropVariant;
-import PGUI.IEnumStringIterator;
+import PGUI.ComIterator;
 import PGUI.UI.Imaging.ContainerFormats;
 
 namespace PGUI::UI::Imaging

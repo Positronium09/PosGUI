@@ -47,7 +47,11 @@
     <ClCompile Include="modules\UI\Animation\Animated.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTimerEventHandler.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx" />
-    <ClCompile Include="modules\UI\DragDrop.ixx" />
+    <ClCompile Include="modules\UI\DragDrop\DataObject.ixx" />
+    <ClCompile Include="modules\UI\DragDrop\DragDrop.ixx" />
+    <ClCompile Include="modules\UI\DragDrop\DragDropTypes.ixx" />
+    <ClCompile Include="modules\UI\DragDrop\DropSource.ixx" />
+    <ClCompile Include="modules\UI\DragDrop\DropTarget.ixx" />
     <ClCompile Include="modules\UI\Input.ixx" />
     <ClCompile Include="modules\UI\Layout\DockLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
@@ -144,7 +148,7 @@
     <ClCompile Include="modules\UI\UI.ixx" />
     <ClCompile Include="modules\UI\Theming\SystemTheme.ixx" />
     <ClCompile Include="modules\Utils\ArithmeticUtils.ixx" />
-    <ClCompile Include="modules\IEnumStringIterator.ixx" />
+    <ClCompile Include="modules\ComIterator.ixx" />
     <ClCompile Include="modules\Utils\StringUtils.ixx" />
     <ClCompile Include="modules\Utils\Utils.ixx" />
     <ClCompile Include="modules\Utils\WindowsUtils.ixx" />
@@ -172,7 +176,8 @@
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
     <ClCompile Include="src\UI\Dialog.cpp" />
     <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
-    <ClCompile Include="src\UI\DragDrop.cpp" />
+    <ClCompile Include="src\UI\DragDrop\DropSource.cpp" />
+    <ClCompile Include="src\UI\DragDrop\DropTarget.cpp" />
     <ClCompile Include="src\UI\Font\FontCollection.cpp" />
     <ClCompile Include="src\UI\Font\FontFamily.cpp" />
     <ClCompile Include="src\UI\Font\FontSet.cpp" />
@@ -197,7 +202,6 @@
     <ClCompile Include="src\UI\UIBase\UIContainer.cpp" />
     <ClCompile Include="src\UI\UIBase\UIWindow.cpp" />
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
-    <ClCompile Include="src\Utils\IEnumStringIterator.cpp" />
     <ClCompile Include="src\Utils\StringUtils.cpp" />
     <ClCompile Include="src\Utils\WindowsUtils.cpp" />
     <ClCompile Include="src\Window.cpp" />
@@ -314,7 +318,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -344,7 +348,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -370,7 +374,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -400,7 +404,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

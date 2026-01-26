@@ -18,3 +18,5 @@ export import PGUI.UI.UIBase;
 export import PGUI.UI.Theming;
 export import PGUI.UI.Animation;
 export import PGUI.UI.Layout;
+export import PGUI.UI.Input;
+export import PGUI.UI.DragDrop;

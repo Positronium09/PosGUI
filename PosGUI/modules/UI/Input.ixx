@@ -41,11 +41,11 @@ export namespace PGUI::UI
 		short repeatCount = 0;
 	};
 
-	[[nodiscard]] static auto GetMousePosFromLparam(const LPARAM lParam) noexcept -> PointF
+	[[nodiscard]] auto GetMousePosFromLparam(const LPARAM lParam) noexcept -> PointF
 	{
 		return MAKEPOINTS(lParam);
 	}
-	[[nodiscard]] static auto GetMouseButtonsFromWparam(const WPARAM wParam) noexcept
+	[[nodiscard]] auto GetMouseButtonsFromWparam(const WPARAM wParam) noexcept
 	{
 		auto mouseButton = MouseButton::None;
 		mouseButton |= (wParam & MK_LBUTTON) != 0 ? MouseButton::Left : MouseButton::None;
@@ -56,7 +56,7 @@ export namespace PGUI::UI
 
 		return mouseButton;
 	}
-	[[nodiscard]] static auto GetModifierKeysFromWparam(const WPARAM wParam) noexcept -> ModifierKeys
+	[[nodiscard]] auto GetModifierKeysFromWparam(const WPARAM wParam) noexcept -> ModifierKeys
 	{
 		ModifierKeys modifierKeys;
 		modifierKeys.shift = (wParam & MK_SHIFT) != 0;
@@ -65,11 +65,11 @@ export namespace PGUI::UI
 		modifierKeys.super = (GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0;
 		return modifierKeys;
 	}
-	[[nodiscard]] static auto GetMouseWheelDeltaFromWparam(const WPARAM wParam) noexcept
+	[[nodiscard]] auto GetMouseWheelDeltaFromWparam(const WPARAM wParam) noexcept
 	{
 		return static_cast<int>(HIWORD(wParam));
 	}
-	[[nodiscard]] static auto GetKeyInfoFromLparam(const LPARAM lParam) noexcept
+	[[nodiscard]] auto GetKeyInfoFromLparam(const LPARAM lParam) noexcept
 	{
 		const auto keyFlags = HIWORD(lParam);
 
@@ -82,7 +82,7 @@ export namespace PGUI::UI
 
 		return keyInfo;
 	}
-	[[nodiscard]] static auto GetMouseButtonForMessage(const UINT msg, const WPARAM wParam) noexcept
+	[[nodiscard]] auto GetMouseButtonForMessage(const UINT msg, const WPARAM wParam) noexcept
 	{
 		auto mouseButton = MouseButton::None;
 

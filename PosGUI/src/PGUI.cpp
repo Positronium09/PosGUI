@@ -160,7 +160,16 @@ namespace PGUI
 {
 	auto Init() -> void
 	{
-		winrt::init_apartment();
+		if (const Error error{ CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE) };
+			error.IsFailure())
+		{
+			throw Exception{ error, L"Failed to initialize the Windows Runtime" };
+		}
+		if (const Error error{ OleInitialize(nullptr) };
+			error.IsFailure())
+		{
+			throw Exception{ error, L"Failed to initialize OLE" };
+		}
 
 		wil::SetResultLoggingCallback(WILLoggingCallback);
 		wil::SetResultMessageCallback(WILResultMessageCallback);

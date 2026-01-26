@@ -1,36 +1,21 @@
 module;
 #include <ole2.h>
 
-export module PGUI.UI.DragDrop;
+export module PGUI.UI.DragDrop.DropTarget;
 
 import PGUI.Event;
 import PGUI.ComPtr;
+import PGUI.Shape2D;
 import PGUI.UI.Input;
+import PGUI.UI.DragDrop.DragDropTypes;
 
-export namespace PGUI::UI
+export namespace PGUI::UI::DragDrop
 {
-	struct DragDropModifierInfo
-	{
-		ModifierKeys modifierKeys;
-		MouseButton mouseButton;
-	};
-
-	enum class DragDropEffect : DWORD
-	{
-		None = DROPEFFECT_NONE,
-		Copy = DROPEFFECT_COPY,
-		Move = DROPEFFECT_MOVE,
-		Link = DROPEFFECT_LINK,
-		Scroll = DROPEFFECT_SCROLL,
-		All = DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK
-	};
-	DEFINE_ENUM_FLAG_OPERATORS(DragDropEffect);
-
-	class DragDrop : Implements<DragDrop, IDropTarget>
+	class DropTarget : public Implements<DropTarget, IDropTarget>
 	{
 		public:
-		DragDrop() = default;
-		~DragDrop() noexcept override = default;
+		DropTarget() = default;
+		~DropTarget() noexcept override = default;
 
 		virtual auto OnDragEnter(ComPtr<IDataObject> dataObj,
 			DragDropModifierInfo modifierInfo,
@@ -49,10 +34,10 @@ export namespace PGUI::UI
 		auto Drop(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) -> HRESULT override;
 	};
 
-	class DragDropEvent final : public DragDrop
+	class DropTargetEvent final : public DropTarget
 	{
 		public:
-		DragDropEvent() = default;
+		DropTargetEvent() = default;
 
 		[[nodiscard]] auto& DragEnterEvent() noexcept { return dragEnterEvent; }
 		[[nodiscard]] const auto& DragEnterEvent() const noexcept { return dragEnterEvent; }

@@ -28,11 +28,6 @@ export namespace PGUI::UI::D2D
 			ComPtrHolder<Interface>{ ptr }
 		{ }
 
-		virtual ~SimplifiedGeometrySink() noexcept
-		{
-			auto error = Close();
-		}
-
 		auto& BeginFigure(PointF startPoint, FigureBegin figureBegin) noexcept
 		{
 			this->Get()->BeginFigure(startPoint, static_cast<D2D1_FIGURE_BEGIN>(figureBegin));

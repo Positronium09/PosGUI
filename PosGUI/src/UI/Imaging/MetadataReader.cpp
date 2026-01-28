@@ -94,45 +94,45 @@ namespace PGUI::UI::Imaging
 		}.SuggestFix(L"operator[] throws an exception; use GetMetadata if you want noexcept");
 	}
 
-	auto MetadataReader::cbegin() const -> IEnumStringIterator
+	auto MetadataReader::cbegin() const -> EnumStringIterator
 	{
 		const auto enumeratorResult = GetEnumerator();
 		if (enumeratorResult.has_value())
 		{
-			return IEnumStringIterator{ enumeratorResult.value() };
+			return EnumStringIterator{ enumeratorResult.value() };
 		}
 
 		throw Exception{ enumeratorResult.error() };
 	}
 
-	auto MetadataReader::cend() const -> IEnumStringIterator
+	auto MetadataReader::cend() const -> EnumStringIterator
 	{
 		const auto enumeratorResult = GetEnumerator();
 		if (enumeratorResult.has_value())
 		{
-			return IEnumStringIterator{ enumeratorResult.value(), true };
+			return EnumStringIterator{ enumeratorResult.value(), true };
 		}
 
 		throw Exception{ enumeratorResult.error() };
 	}
 
-	auto MetadataReader::begin() const -> IEnumStringIterator
+	auto MetadataReader::begin() const -> EnumStringIterator
 	{
 		const auto enumeratorResult = GetEnumerator();
 		if (enumeratorResult.has_value())
 		{
-			return IEnumStringIterator{ enumeratorResult.value() };
+			return EnumStringIterator{ enumeratorResult.value() };
 		}
 
 		throw Exception{ enumeratorResult.error() };
 	}
 
-	auto MetadataReader::end() const -> IEnumStringIterator
+	auto MetadataReader::end() const -> EnumStringIterator
 	{
 		const auto enumeratorResult = GetEnumerator();
 		if (enumeratorResult.has_value())
 		{
-			return IEnumStringIterator{ enumeratorResult.value(), true };
+			return EnumStringIterator{ enumeratorResult.value(), true };
 		}
 
 		throw Exception{ enumeratorResult.error() };

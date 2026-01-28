@@ -58,22 +58,22 @@ export namespace PGUI::UI
 			/* */
 		}
 
-		[[nodiscard]] auto ConvertToRelative(const RectF rect) const noexcept
+		[[nodiscard]] auto ConvertToAbsolute(const RectF rect) const noexcept
 		{
 			const auto pos = GetPosition();
 			return rect.Shifted(pos);
 		}
-		[[nodiscard]] auto ConvertToAbsolute(const RectF rect) const noexcept
+		[[nodiscard]] auto ConvertToRelative(const RectF rect) const noexcept
 		{
 			const auto pos = GetPosition();
 			return rect.Shifted(-pos);
 		}
-		[[nodiscard]] auto ConvertToRelative(const PointF point) const noexcept
+		[[nodiscard]] auto ConvertToAbsolute(const PointF point) const noexcept
 		{
 			const auto pos = GetPosition();
 			return point.Shifted(pos);
 		}
-		[[nodiscard]] auto ConvertToAbsolute(const PointF point) const noexcept
+		[[nodiscard]] auto ConvertToRelative(const PointF point) const noexcept
 		{
 			const auto pos = GetPosition();
 			return point.Shifted(-pos);

@@ -11,6 +11,7 @@ import std;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
 
+
 export namespace PGUI
 {
 	template <typename T>
@@ -18,6 +19,9 @@ export namespace PGUI
 
 	template <typename T>
 	concept HasUUID = requires { __uuidof(T); };
+
+	template <typename T>
+	concept ComInterface = std::is_base_of_v<IUnknown, T>;
 
 	template <typename T, typename... Policies>
 	[[nodiscard]] consteval auto GetIID(const wil::com_ptr_t<T, Policies...>&) noexcept
@@ -68,7 +72,7 @@ export namespace PGUI
 		return ComPtr<T>{ raw };
 	}
 
-	template <HasUUID... Interfaces>
+	template <ComInterface... Interfaces>
 	class ComPtrHolder
 	{
 		static_assert(sizeof...(Interfaces) > 0, "At least one interface must be provided.");

@@ -6,14 +6,12 @@ export module PGUI.UI.Imaging.MetadataReader;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.PropVariant;
 import PGUI.ComIterator;
+import PGUI.PropVariant;
 import PGUI.UI.Imaging.ContainerFormats;
 
 export namespace PGUI::UI::Imaging
 {
-	using IEnumStringIterator = ComIterator<IEnumString, LPOLESTR, std::wstring>;
-
 	class MetadataReader : public ComPtrHolder<IWICMetadataQueryReader>
 	{
 		public:
@@ -31,12 +29,12 @@ export namespace PGUI::UI::Imaging
 
 		[[nodiscard]] auto operator[](std::wstring_view name) const -> PropVariant;
 
-		[[nodiscard]] auto cbegin() const -> IEnumStringIterator;
+		[[nodiscard]] auto cbegin() const -> EnumStringIterator;
 
-		[[nodiscard]] auto cend() const -> IEnumStringIterator;
+		[[nodiscard]] auto cend() const -> EnumStringIterator;
 
-		[[nodiscard]] auto begin() const -> IEnumStringIterator;
+		[[nodiscard]] auto begin() const -> EnumStringIterator;
 
-		[[nodiscard]] auto end() const -> IEnumStringIterator;
+		[[nodiscard]] auto end() const -> EnumStringIterator;
 	};
 }

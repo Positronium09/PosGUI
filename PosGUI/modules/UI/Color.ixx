@@ -13,13 +13,15 @@ import std;
 
 export namespace PGUI::UI
 {
-	class HSL;
-	class HSV;
-	class CMYK;
+	struct HSL;
+	struct HSV;
+	struct CMYK;
+	// ReSharper disable once CppInconsistentNaming
 
-	class RGBA
+	struct sRGB;
+
+	struct RGBA
 	{
-		public:
 		constexpr RGBA() noexcept = default;
 
 		constexpr RGBA(const float r, const float g, const float b, const float a = 1.0F) noexcept :
@@ -65,6 +67,12 @@ export namespace PGUI::UI
 		explicit(false) RGBA(HSL hsl) noexcept;
 
 		explicit(false) RGBA(HSV hsv) noexcept;
+
+		// ReSharper disable once IdentifierTypo
+		
+		explicit(false) RGBA(sRGB srgb) noexcept;
+
+		explicit(false) RGBA(CMYK cmyk) noexcept;
 
 		explicit(false) constexpr RGBA(const D2D1_COLOR_F& color) noexcept :
 			r{ color.r }, g{ color.g }, b{ color.b }, a{ color.a }
@@ -171,10 +179,34 @@ export namespace PGUI::UI
 		float b = 0.0F;
 		float a = 0.0F;
 	};
+	// ReSharper disable once CppInconsistentNaming
 
-	class HSL
+	struct sRGB
 	{
-		public:
+		constexpr sRGB() noexcept = default;
+
+		constexpr sRGB(const float r, const float g, const float b) noexcept :
+			r{ r }, g{ g }, b{ b }
+		{ }
+
+		explicit(false) sRGB(const RGBA& rgb) noexcept;
+
+		explicit(false) operator RGBA() const noexcept;
+
+		[[nodiscard]] constexpr auto operator==(const sRGB& other) const noexcept -> bool = default;
+
+		[[nodiscard]] constexpr auto RelativeLuminance() const noexcept
+		{
+			return 0.2126F * r + 0.7152F * g + 0.0722F * b;
+		}
+
+		float r = 0.0F;
+		float g = 0.0F;
+		float b = 0.0F;
+	};
+
+	struct HSL
+	{
 		constexpr HSL() noexcept = default;
 
 		constexpr HSL(const float h, const float s, const float l) noexcept :
@@ -192,9 +224,8 @@ export namespace PGUI::UI
 		float l = 0.0F;
 	};
 
-	class HSV
+	struct HSV
 	{
-		public:
 		constexpr HSV() noexcept = default;
 
 		constexpr HSV(const float h, const float s, const float v) noexcept :
@@ -212,9 +243,8 @@ export namespace PGUI::UI
 		float v = 0.0F;
 	};
 
-	class CMYK
+	struct CMYK
 	{
-		public:
 		constexpr CMYK() noexcept = default;
 
 		constexpr CMYK(const float c, const float m, const float y, const float k) noexcept :
@@ -246,6 +276,134 @@ export namespace PGUI::UI
 	[[nodiscard]] constexpr auto WICColorToRGBA(const WICColor color) noexcept
 	{
 		return RGBA{ color, ((color & 0xFF000000) >> 24) / 255.0F };
+	}
+
+	template <typename T>
+	concept ColorType = std::convertible_to<T, RGBA> && std::convertible_to<RGBA, T>;
+
+	[[nodiscard]] constexpr auto MixColors(const RGBA& color1, const RGBA& color2, const float ratio) noexcept
+	{
+		const auto clampedRatio = std::clamp(ratio, 0.0F, 1.0F);
+	
+		return RGBA{
+			color1.r * (1.0F - clampedRatio) + color2.r * clampedRatio,
+			color1.g * (1.0F - clampedRatio) + color2.g * clampedRatio,
+			color1.b * (1.0F - clampedRatio) + color2.b * clampedRatio,
+			color1.a * (1.0F - clampedRatio) + color2.a * clampedRatio
+		};
+	}
+
+	[[nodiscard]] constexpr auto MixColors(
+		const ColorType auto& color1, 
+		const ColorType auto& color2, const float ratio) noexcept
+	{
+		return MixColors(static_cast<RGBA>(color1), static_cast<RGBA>(color2), ratio);
+	}
+
+	[[nodiscard]] constexpr auto RelativeLuminance(const ColorType auto& color) noexcept
+	{
+		return sRGB{ static_cast<RGBA>(color) }.RelativeLuminance();
+	}
+
+	[[nodiscard]] constexpr auto ContrastRatio(
+		const ColorType auto& color1, 
+		const ColorType auto& color2) noexcept
+	{
+		const auto L1 = RelativeLuminance(color1);
+		const auto L2 = RelativeLuminance(color2);
+	
+		const auto lighter = std::max(L1, L2);
+		const auto darker = std::min(L1, L2);
+		
+		return (lighter + 0.05F) / (darker + 0.05F);
+	}
+
+	std::unordered_map<std::wstring, struct
+	{
+		const float normalText;
+		const float largeText;
+		const float uiComponents;
+	}> contrastLevels = {
+		{ L"AA", { 4.5F, 3.0F, 3.0F } },
+		{ L"AAA", { 7.0F, 4.5F, 4.5F } }
+	};
+
+	[[nodiscard]] constexpr auto IsContrastSufficient(
+		const ColorType auto& color1, 
+		const ColorType auto& color2,
+		const float requiredRatio) noexcept
+	{
+		return ContrastRatio(color1, color2) >= requiredRatio;
+	}
+
+	[[nodiscard]] constexpr auto IsContrastSufficientForNormalText(
+		const ColorType auto& color1, 
+		const ColorType auto& color2,
+		const std::wstring_view level) noexcept
+	{
+		if (contrastLevels.contains(level.data()))
+		{
+			return IsContrastSufficient(
+				color1, color2, contrastLevels.at(level.data()).normalText);
+		}
+		
+		return false;
+	}
+
+	[[nodiscard]] constexpr auto IsContrastSufficientForLargeText(
+		const ColorType auto& color1, 
+		const ColorType auto& color2,
+		const std::wstring_view level) noexcept
+	{
+		if (contrastLevels.contains(level.data()))
+		{
+			return IsContrastSufficient(
+				color1, color2, contrastLevels.at(level.data()).largeText);
+		}
+		
+		return false;
+	}
+
+	[[nodiscard]] constexpr auto IsContrastSufficientForUIComponents(
+		const ColorType auto& color1,
+		const ColorType auto& color2,
+		const std::wstring_view level) noexcept
+	{
+		if (contrastLevels.contains(level.data()))
+		{
+			return IsContrastSufficient(
+				color1, color2, contrastLevels.at(level.data()).uiComponents);
+		}
+	
+		return false;
+	}
+
+	[[nodiscard]] constexpr auto CheckContrast(
+		const ColorType auto& color1,
+		const ColorType auto& color2) noexcept
+	{
+		struct ContrastCheckResult
+		{
+			// ReSharper disable CppInconsistentNaming
+			
+			bool normalTextAA : 1 = false;
+			bool normalTextAAA : 1 = false;
+			bool largeTextAA : 1 = false;
+			bool largeTextAAA : 1 = false;
+			bool uiComponentsAA : 1 = false;
+			bool uiComponentsAAA : 1 = true;
+			
+			// ReSharper restore CppInconsistentNaming
+		};
+
+		return ContrastCheckResult{
+			.normalTextAA = IsContrastSufficientForNormalText(color1, color2, L"AA"),
+			.normalTextAAA = IsContrastSufficientForNormalText(color1, color2, L"AAA"),
+			.largeTextAA = IsContrastSufficientForLargeText(color1, color2, L"AA"),
+			.largeTextAAA = IsContrastSufficientForLargeText(color1, color2, L"AAA"),
+			.uiComponentsAA = IsContrastSufficientForUIComponents(color1, color2, L"AA"),
+			.uiComponentsAAA = IsContrastSufficientForUIComponents(color1, color2, L"AAA")
+		};
 	}
 }
 

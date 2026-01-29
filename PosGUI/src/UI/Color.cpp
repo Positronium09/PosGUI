@@ -13,7 +13,7 @@ namespace PGUI::UI
 	#pragma region RGBA
 
 	RGBA::RGBA(const HSL hsl) noexcept :
-		a(1.0F)
+		a{ 1.0F }
 	{
 		const auto C = (1 - std::abs(2 * hsl.l - 1)) * hsl.s;
 		const auto hPrime = hsl.h / 60.0F;
@@ -63,7 +63,7 @@ namespace PGUI::UI
 	}
 
 	RGBA::RGBA(const HSV hsv) noexcept :
-		a(1.0F)
+		a{ 1.0F }
 	{
 		const auto C = hsv.v * hsv.s;
 
@@ -111,6 +111,54 @@ namespace PGUI::UI
 		r = rPrime + m;
 		g = gPrime + m;
 		b = bPrime + m;
+	}
+
+	RGBA::RGBA(sRGB srgb) noexcept
+	{
+		auto convertChannel = [](const float channel) noexcept -> float
+		{
+			if (channel <= 0.04045F)
+			{
+				return channel / 12.92F;
+			}
+			return std::powf((channel + 0.055F) / 1.055F, 2.4F);
+		};
+
+		r = convertChannel(srgb.r);
+		g = convertChannel(srgb.g);
+		b = convertChannel(srgb.b);
+	}
+
+	RGBA::RGBA(const CMYK cmyk) noexcept
+	{
+		r = (1 - cmyk.c) * (1 - cmyk.k);
+		g = (1 - cmyk.m) * (1 - cmyk.k);
+		b = (1 - cmyk.y) * (1 - cmyk.k);
+	}
+
+	#pragma endregion
+
+	#pragma region sRGB
+
+	sRGB::sRGB(const RGBA& rgb) noexcept
+	{
+		auto convertChannel = [](const float channel) noexcept -> float
+		{
+			if (channel <= 0.0031308F)
+			{
+				return channel * 12.92F;
+			}
+			return 1.055F * std::powf(channel, 1 / 2.4F) - 0.055F;
+		};
+
+		r = convertChannel(rgb.r);
+		g = convertChannel(rgb.g);
+		b = convertChannel(rgb.b);
+	}
+
+	sRGB::operator RGBA() const noexcept
+	{
+		return RGBA{ *this };
 	}
 
 	#pragma endregion

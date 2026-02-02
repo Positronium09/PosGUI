@@ -1,14 +1,21 @@
 
 ## High priority
-- [ ] Visual State Manager
-- [ ] Visual Debugging Tools
-- [ ] Windows Shell Integration
-- [ ] Page or View System
+- [X] Visual State Manager (seems finished)
 - [ ] Resource Manager
+- [ ] Visual Debugging Tools
+- [ ] Dispatcher
+- [ ] Complete PeekMessageLoop
+- [ ] Bubble Events (i forgot)
+- [ ] Page or View System
 - [ ] Scoped Theme System
 - [ ] Better Input Library
-- [ ] Complete PeekMessageLoop
-- [ ] Dispatcher
+- [ ] Windows Shell Integration
+
+## Medium priority
+- [ ] IME & TSF
+
+## Low priority
+- [ ] UI Automation
 
 ## UI Controls
  - [ ] Label

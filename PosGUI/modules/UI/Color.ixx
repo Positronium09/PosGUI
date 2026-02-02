@@ -260,7 +260,7 @@ export namespace PGUI::UI
 			y = (1 - rgb.b - k) / (1 - k);
 		}
 
-		explicit(false) constexpr operator RGBA() const noexcept
+		explicit(false) operator RGBA() const noexcept
 		{
 			return RGBA{ *this };
 		}
@@ -318,12 +318,14 @@ export namespace PGUI::UI
 		return (lighter + 0.05F) / (darker + 0.05F);
 	}
 
-	std::unordered_map<std::wstring, struct
+	struct ContrastValues
 	{
-		const float normalText;
-		const float largeText;
-		const float uiComponents;
-	}> contrastLevels = {
+		float normalText;
+		float largeText;
+		float uiComponents;
+	};
+
+	std::unordered_map<std::wstring, const ContrastValues> contrastLevels = {
 		{ L"AA", { 4.5F, 3.0F, 3.0F } },
 		{ L"AAA", { 7.0F, 4.5F, 4.5F } }
 	};
@@ -396,7 +398,7 @@ export namespace PGUI::UI
 			// ReSharper restore CppInconsistentNaming
 		};
 
-		return ContrastCheckResult{
+		return ContrastCheckResult {
 			.normalTextAA = IsContrastSufficientForNormalText(color1, color2, L"AA"),
 			.normalTextAAA = IsContrastSufficientForNormalText(color1, color2, L"AAA"),
 			.largeTextAA = IsContrastSufficientForLargeText(color1, color2, L"AA"),

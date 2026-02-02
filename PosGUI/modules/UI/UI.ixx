@@ -20,3 +20,4 @@ export import PGUI.UI.Animation;
 export import PGUI.UI.Layout;
 export import PGUI.UI.Input;
 export import PGUI.UI.DragDrop;
+export import PGUI.UI.VisualState;

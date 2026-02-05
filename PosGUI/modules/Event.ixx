@@ -39,7 +39,13 @@ export namespace PGUI
 
 			auto operator<=>(const CallbackData& other) const noexcept -> std::partial_ordering
 			{
-				return std::to_underlying(priority) <=> std::to_underlying(other.priority);
+				if (const auto cmp = std::to_underlying(priority) <=> std::to_underlying(other.priority);
+					cmp != 0)
+				{
+					return cmp;
+				}
+				
+				return id <=> other.id;
 			}
 		};
 
@@ -54,8 +60,9 @@ export namespace PGUI
 
 			std::scoped_lock lock{ callbackMutex };
 
-			CallbackData data{ nextCallbackId, priority, CallbackType{ callback } };
-			callbacks.insert(data);
+			callbacks.emplace_back(nextCallbackId, priority, CallbackType{ callback });
+
+			std::ranges::stable_sort(callbacks, std::ranges::greater{ }, &CallbackData::priority);
 
 			return nextCallbackId++;
 		}
@@ -146,7 +153,7 @@ export namespace PGUI
 		private:
 		CallbackId nextCallbackId = 0;
 		mutable MutexType callbackMutex;
-		std::set<CallbackData> callbacks;
+		std::vector<CallbackData> callbacks;
 	};
 
 	// ReSharper disable IdentifierTypo

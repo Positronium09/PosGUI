@@ -220,8 +220,6 @@ namespace PGUI
 			SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 		}
 
-		UI::DirectXCompositionWindow::InitD3D11Device();
-		UI::DirectXCompositionWindow::InitDCompDevice();
-		UI::DirectXCompositionWindow::InitD2D1Device();
+		UI::DirectXCompositionWindow::InitDevices();
 	}
 }

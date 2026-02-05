@@ -23,6 +23,25 @@ export namespace PGUI
 	template <typename... Types>
 	using FirstTypeOf = NthTypeOf<0, Types...>;
 
+	template <typename... Types>
+	constexpr auto TypeCount = sizeof...(Types);
+
+	template <typename... Types>
+	struct TypeList
+	{
+		static constexpr auto Count = sizeof...(Types);
+
+		template <std::size_t N>
+		using GetType = NthTypeOf<N, Types...>;
+
+		using FirstType = FirstTypeOf<Types...>;
+
+		using LastType = NthTypeOf<Count - 1, Types...>;
+
+		template <template <typename...> typename T>
+		using Rebind = T<Types...>;
+	};
+
 	enum class PositioningMode
 	{
 		Absolute,
@@ -32,18 +51,46 @@ export namespace PGUI
 	template <typename T> requires std::is_trivially_copyable_v<T>
 	struct ScopedValue
 	{
-		ScopedValue(T& variableRef, T newValue) noexcept :
+		constexpr ScopedValue(T& variableRef, T newValue) noexcept :
 			variable{ variableRef }, oldValue{ variableRef }
 		{
-			variable = newValue;
+			variable.get() = newValue;
 		}
-		~ScopedValue() noexcept
+		constexpr ~ScopedValue() noexcept
 		{
-			variable = oldValue;
+			variable.get() = oldValue;
 		}
 
 		private:
 		std::reference_wrapper<T> variable;
 		T oldValue;
 	};
+
+	namespace Hash
+	{
+		constexpr auto GoldenRatioSeed = std::size_t{ 0x9E3779B9 };
+
+		template <typename T>
+		auto CombineHash(std::size_t& seed, const T& value) noexcept -> void
+		{
+			std::hash<T> hasher;
+
+			seed ^= hasher(value) + GoldenRatioSeed + (seed << 6) + (seed >> 2);
+		}
+
+		template <typename... ToHash>
+		[[nodiscard]] auto ComputeHash(const ToHash&... values) noexcept
+		{
+			if constexpr (TypeCount<ToHash...> == 1)
+			{
+				return std::hash<FirstTypeOf<ToHash...>>{ }(std::get<0>(std::forward_as_tuple(values...)));
+			}
+
+			std::size_t seed = 0;
+
+			(CombineHash(seed, values), ...);
+			
+			return seed;
+		}
+	}
 }

@@ -12,8 +12,8 @@ export namespace PGUI
 	{
 		{ ~a } -> std::same_as<T>;
 		{ a | b } -> std::same_as<T>;
-		{ a& b } -> std::same_as<T>;
-		{ a^ b } -> std::same_as<T>;
+		{ a & b } -> std::same_as<T>;
+		{ a ^ b } -> std::same_as<T>;
 		{ a |= b } -> std::same_as<T&>;
 		{ a &= b } -> std::same_as<T&>;
 		{ a ^= b } -> std::same_as<T&>;
@@ -23,19 +23,19 @@ export namespace PGUI
 	using UnderlyingType = std::underlying_type_t<T>;
 
 	template <EnumFlag T>
-	[[nodiscard]] auto IsFlagSet(T var, T flag)
+	[[nodiscard]] constexpr auto IsFlagSet(T var, T flag)
 	{
 		return (var & flag) != static_cast<T>(0);
 	}
 
 	template <Enumeration T>
-	auto ToUnderlying(T val) noexcept
+	constexpr auto ToUnderlying(T val) noexcept
 	{
-		return static_cast<UnderlyingType<T>>(val);
+		return std::to_underlying(val);
 	}
 
 	template <Enumeration T>
-	auto FromUnderlying(UnderlyingType<T> val) noexcept
+	constexpr auto FromUnderlying(UnderlyingType<T> val) noexcept
 	{
 		return static_cast<T>(val);
 	}
@@ -46,7 +46,7 @@ export namespace PGUI
 		return static_cast<T>(0);
 	}
 
-	auto SetFlag(EnumFlag auto& var, EnumFlag auto flag) -> void
+	constexpr auto SetFlag(EnumFlag auto& var, EnumFlag auto flag) -> void
 	{
 		var |= flag;
 	}

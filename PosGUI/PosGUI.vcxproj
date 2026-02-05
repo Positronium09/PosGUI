@@ -60,6 +60,7 @@
     <ClCompile Include="modules\UI\Layout\LayoutStructs.ixx" />
     <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
     <ClCompile Include="modules\ScopedTimer.ixx" />
+    <ClCompile Include="modules\UI\ResourceManager.ixx" />
     <ClCompile Include="modules\UI\UIBase\Interface.ixx" />
     <ClCompile Include="modules\UI\UIBase\UIBase.ixx" />
     <ClCompile Include="modules\UI\UIBase\UIComponent.ixx" />
@@ -196,6 +197,7 @@
     <ClCompile Include="src\UI\Layout\DockLayout.cpp" />
     <ClCompile Include="src\UI\Layout\GridLayout.cpp" />
     <ClCompile Include="src\UI\Layout\StackLayout.cpp" />
+    <ClCompile Include="src\UI\ResourceManager.cpp" />
     <ClCompile Include="src\UI\Theming\SystemTheme.cpp" />
     <ClCompile Include="src\UI\TextFormat.cpp" />
     <ClCompile Include="src\UI\Gradient.cpp" />
@@ -314,6 +316,9 @@
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -342,6 +347,9 @@
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -370,6 +378,9 @@
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -398,6 +409,9 @@
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>

@@ -32,6 +32,14 @@ export namespace PGUI::UI
 
 		static auto InitD2D1Device() -> void;
 
+		static auto InitDevices() -> void
+		{
+			InitD3D11Device();
+			InitDCompDevice();
+			InitD2D1Device();
+			deviceCreationID.fetch_add(1, std::memory_order_relaxed);
+		}
+
 		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
 		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return Get<IDCompositionTarget>(); }
 		[[nodiscard]] const auto& GetSwapChain() const noexcept { return Get<IDXGISwapChain1>(); }
@@ -52,6 +60,11 @@ export namespace PGUI::UI
 			const auto dpi = GetDpi();
 			graphics.SetDpi(dpi);
 			return graphics;
+		}
+
+		[[nodiscard]] static auto GetDeviceCreationID() noexcept
+		{
+			return deviceCreationID.load(std::memory_order_relaxed);
 		}
 
 		virtual auto BeginDraw() -> void;
@@ -86,12 +99,29 @@ export namespace PGUI::UI
 
 		HMONITOR currentMonitor;
 		PAINTSTRUCT paintStruct{ };
+		static inline std::atomic_uint64_t deviceCreationID{ 0 };
 
 		auto InitSwapChain() -> void;
 
 		auto InitD2D1DeviceContext() -> void;
 
 		auto InitDirectComposition() -> void;
+
+		auto InitDeviceDependent()
+		{
+			InitSwapChain();
+			InitD2D1DeviceContext();
+			InitDirectComposition();
+		}
+
+		static auto HandleDeviceLoss()
+		{
+			d3d11Device.reset();
+			dxgiDevice.reset();
+			dCompositionDevice.reset();
+			d2d1Device.reset();
+			InitDevices();
+		}
 
 		auto OnNCCreate(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
 

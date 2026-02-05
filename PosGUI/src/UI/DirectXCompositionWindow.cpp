@@ -85,6 +85,12 @@ namespace PGUI::UI
 		if (hr == D2DERR_RECREATE_TARGET)
 		{
 			DiscardDeviceResources();
+			HandleDeviceLoss();
+			InitDeviceDependent();
+
+			EndPaint(Hwnd(), &paintStruct);
+
+			return std::make_pair(tag1, tag2);
 		}
 		else if (FAILED(hr))
 		{
@@ -94,8 +100,14 @@ namespace PGUI::UI
 			};
 		}
 
-		if (hr = GetSwapChain()->Present(1, NULL);
-			FAILED(hr))
+		hr = GetSwapChain()->Present(1, NULL);
+		if (hr == DXGI_ERROR_DEVICE_RESET || hr == DXGI_ERROR_DEVICE_REMOVED)
+		{
+			DiscardDeviceResources();
+			HandleDeviceLoss();
+			InitDeviceDependent();
+		}
+		else if (FAILED(hr))
 		{
 			throw Exception{
 				Error{ hr },
@@ -381,9 +393,7 @@ namespace PGUI::UI
 	auto DirectXCompositionWindow::OnNCCreate(
 		UINT, WPARAM, LPARAM) -> MessageHandlerResult
 	{
-		InitSwapChain();
-		InitD2D1DeviceContext();
-		InitDirectComposition();
+		InitDeviceDependent();
 
 		currentMonitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL);
 

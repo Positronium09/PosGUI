@@ -10,14 +10,17 @@ export namespace PGUI::DataBinding
 	template <typename T, typename Mutex = Mutex::SRWMutex>
 	class Property
 	{
-		//TODO write accessor proxy
-
 		public:
 		using ValueType = T;
 		using MutexType = Mutex;
 		
 		struct AccessorProxy
 		{
+			using LockType = std::conditional_t<
+				PGUI::Mutex::SharedMutexType<T>, 
+				std::shared_lock<Mutex>, 
+				std::scoped_lock<Mutex>>;
+
 			AccessorProxy(const T& value, MutexType& mutex) : 
 				value{ value }, lock{ mutex }
 			{
@@ -49,7 +52,7 @@ export namespace PGUI::DataBinding
 
 			private:
 			const T& value;
-			std::shared_lock<MutexType> lock;
+			LockType lock;
 		};
 
 		using EventType = EventT<Mutex, const AccessorProxy&>;
@@ -156,14 +159,12 @@ export namespace PGUI::DataBinding
 
 		virtual auto operator==(const T& val) const noexcept -> bool
 		{
-			std::shared_lock lock{ mutex };
-			return value == val;
+			return *Get() == val;
 		}
 
 		virtual auto operator<=>(const T& val) const noexcept -> decltype(std::declval<const T&>() <=> std::declval<const T&>())
 		{
-			std::shared_lock lock{ mutex };
-			return value <=> val;
+			return *Get() <=> val;
 		}
 
 		virtual auto operator*() const noexcept -> AccessorProxy

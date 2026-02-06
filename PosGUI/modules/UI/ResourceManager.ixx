@@ -9,7 +9,11 @@ export namespace PGUI::UI
 	class ResourceManager final
 	{
 		public:
-		static auto GetInstance() -> ResourceManager&;
+		static auto GetInstance() -> ResourceManager&
+		{
+			static ResourceManager instance;
+			return instance;
+		}
 
 		private:
 		ResourceManager() noexcept = default;

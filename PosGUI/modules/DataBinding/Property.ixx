@@ -10,10 +10,49 @@ export namespace PGUI::DataBinding
 	template <typename T, typename Mutex = Mutex::SRWMutex>
 	class Property
 	{
+		//TODO write accessor proxy
+
 		public:
 		using ValueType = T;
 		using MutexType = Mutex;
-		using EventType = EventT<Mutex, std::add_lvalue_reference_t<T>>;
+		
+		struct AccessorProxy
+		{
+			AccessorProxy(const T& value, MutexType& mutex) : 
+				value{ value }, lock{ mutex }
+			{
+			}
+
+			AccessorProxy(const AccessorProxy&) = delete;
+			auto operator=(const AccessorProxy&) -> AccessorProxy& = delete;
+			AccessorProxy(AccessorProxy&&) = default;
+			auto operator=(AccessorProxy&&) -> AccessorProxy& = default;
+
+			[[nodiscard]] auto operator->() const noexcept -> const T*
+			{
+				return std::addressof(value);
+			}
+			[[nodiscard]] auto operator*() const noexcept -> const T&
+			{
+				return value;
+			}
+			
+			[[nodiscard]] explicit(false) operator const T&() const noexcept
+			{
+				return value;
+			}
+
+			[[nodiscard]] auto Get() const noexcept -> const T&
+			{
+				return value;
+			}
+
+			private:
+			const T& value;
+			std::shared_lock<MutexType> lock;
+		};
+
+		using EventType = EventT<Mutex, const AccessorProxy&>;
 
 		Property() noexcept(std::is_nothrow_default_constructible_v<T>) = default;
 
@@ -36,7 +75,7 @@ export namespace PGUI::DataBinding
 			if (this != &other)
 			{
 				Set(other.Get());
-				valueChangedEvent.Invoke(value);
+				valueChangedEvent.Invoke(Get());
 			}
 			return *this;
 		}
@@ -46,21 +85,14 @@ export namespace PGUI::DataBinding
 			if (this != &other)
 			{
 				Set(std::move(other.Get()));
-				valueChangedEvent.Invoke(value);
+				valueChangedEvent.Invoke(Get());
 			}
 			return *this;
 		}
 
-		[[nodiscard]] const auto& Get() const noexcept
+		[[nodiscard]] auto Get() const noexcept
 		{
-			std::scoped_lock lock{ mutex };
-			return value;
-		}
-
-		[[nodiscard]] auto& Get() noexcept
-		{
-			std::scoped_lock lock{ mutex };
-			return value;
+			return AccessorProxy{ value, mutex };
 		}
 
 		virtual auto Set(const T& newValue) -> void
@@ -95,7 +127,7 @@ export namespace PGUI::DataBinding
 			valueChangedEvent.Invoke(Get());
 		}
 
-		auto AddObserver(CallbackType<T&> auto callback) noexcept
+		auto AddObserver(CallbackType<const AccessorProxy&> auto callback) noexcept
 		{
 			return valueChangedEvent.AddCallback(callback);
 		}
@@ -124,25 +156,19 @@ export namespace PGUI::DataBinding
 
 		virtual auto operator==(const T& val) const noexcept -> bool
 		{
-			std::scoped_lock lock{ mutex };
+			std::shared_lock lock{ mutex };
 			return value == val;
 		}
 
-		virtual auto operator<=>(const T& val) const noexcept -> decltype(std::declval<T&>() <=> std::declval<const T&>())
+		virtual auto operator<=>(const T& val) const noexcept -> decltype(std::declval<const T&>() <=> std::declval<const T&>())
 		{
-			std::scoped_lock lock{ mutex };
+			std::shared_lock lock{ mutex };
 			return value <=> val;
 		}
 
-		virtual auto operator*() noexcept -> T&
+		virtual auto operator*() const noexcept -> AccessorProxy
 		{
-			std::scoped_lock lock{ mutex };
-			return value;
-		}
-		virtual auto operator*() const noexcept -> const T&
-		{
-			std::scoped_lock lock{ mutex };
-			return value;
+			return AccessorProxy{ value, mutex };
 		}
 
 		private:

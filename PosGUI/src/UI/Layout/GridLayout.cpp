@@ -173,7 +173,7 @@ namespace PGUI::UI::Layout
 		});
 			maxColumn != itemProperties.end())
 		{
-			maxDefinedColumn = std::max(maxDefinedColumn, *maxColumn->second.column);
+			maxDefinedColumn = std::max(maxDefinedColumn, *maxColumn->second.column.Get());
 		}
 		if (const auto maxSpan = std::ranges::max_element(
 				itemProperties,
@@ -208,8 +208,8 @@ namespace PGUI::UI::Layout
 			const auto column = *properties.column;
 			const auto rowSpan = *properties.rowSpan;
 			const auto columnSpan = *properties.columnSpan;
-			const auto actualRowSpan = rowSpan;
-			const auto actualColumnSpan = columnSpan;
+			const auto actualRowSpan = *rowSpan;
+			const auto actualColumnSpan = *columnSpan;
 
 			if (row != AUTO_PLACE && column != AUTO_PLACE)
 			{
@@ -345,7 +345,7 @@ namespace PGUI::UI::Layout
 	{
 		const auto boundChangeHandler = std::bind_front(&GridLayout::PropertyChangeHandler, this);
 		const auto boundColumnSpanValidator = std::bind_front(&GridLayout::ColumnSpanValidator, this,
-		                                                      *properties.column);
+		                                                      *properties.column.Get());
 
 		const auto result = HasEntry(id);
 		if (!result.has_value())

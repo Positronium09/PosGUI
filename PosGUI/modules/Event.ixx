@@ -94,7 +94,7 @@ export namespace PGUI
 				if (std::holds_alternative<CancellingCallback>(callback))
 				{
 					auto& cancellingCallback = std::get<CancellingCallback>(callback);
-					if (!cancellingCallback(std::forward<Args>(args)...))
+					if (!cancellingCallback(args...))
 					{
 						return;
 					}
@@ -102,7 +102,7 @@ export namespace PGUI
 				else
 				{
 					auto& nonCancellingCallback = std::get<NonCancellingCallback>(callback);
-					nonCancellingCallback(std::forward<Args>(args)...);
+					nonCancellingCallback(args...);
 				}
 			}
 

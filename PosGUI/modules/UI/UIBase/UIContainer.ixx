@@ -15,18 +15,19 @@ export namespace PGUI::UI
 		template <UIElementType T, typename... Args>
 		auto CreateAndAdd(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
 		{
-			elements.emplace_back(std::make_shared<T>(std::forward<Args>(args)...));
-			const auto& element = elements.back();
-			element->SetParent(this);
+			auto newElement = std::make_shared<T>(std::forward<Args>(args)...);
+
+			elements.emplace_back(newElement);
+			newElement->SetParent(this);
 
 			zOrderDirty = true;
 
 			if (layoutPanel)
 			{
-				layoutPanel->AddItem(*element);
+				layoutPanel->AddItem(*newElement);
 			}
 
-			return std::dynamic_pointer_cast<T>(element);
+			return newElement;
 		}
 		auto AddElement(const UIElementPtr& ptr) noexcept -> void;
 
@@ -64,14 +65,12 @@ export namespace PGUI::UI
 
 		auto ChildRemoved(RawCUIElementPtr ptr) noexcept -> void override
 		{
-			const auto [begin, end] = std::ranges::remove_if(
+			std::erase_if(
 				elements, 
 				[&ptr](const auto& elem)
 				{
 					return elem.get() == ptr;
 				});
-
-			elements.erase(begin, end);
 		}
 
 		[[nodiscard]] auto GetPosition() const noexcept -> PointF override

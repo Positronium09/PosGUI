@@ -24,6 +24,14 @@ export namespace PGUI
 			return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 		}
 
+		[[nodiscard]] static constexpr auto Lerp(Point a, Point b, T t) noexcept
+		{
+			return Point{
+				static_cast<T>(std::lerp(a.x, b.x, t)),
+				static_cast<T>(std::lerp(a.y, b.y, t))
+			};
+		}
+
 		constexpr Point() noexcept = default;
 
 		constexpr Point(const T& x, const T& y) noexcept :

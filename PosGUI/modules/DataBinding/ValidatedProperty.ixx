@@ -118,11 +118,7 @@ export namespace PGUI::DataBinding
 			}
 			return *this;
 		}
-		auto operator*() noexcept -> T& override
-		{
-			return Property<T, Mutex>::operator*();
-		}
-		auto operator*() const noexcept -> const T& override
+		auto operator*() const noexcept -> Property<T, Mutex>::AccessorProxy override
 		{
 			return Property<T, Mutex>::operator*();
 		}

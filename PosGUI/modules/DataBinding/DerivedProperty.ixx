@@ -38,7 +38,6 @@ export namespace PGUI::DataBinding
 		~DerivedProperty() override = default;
 
 		explicit(false) operator const T&() const { return Property<T, Mutex>::Get(); }
-		explicit(false) operator T&() { return Property<T, Mutex>::Get(); }
 
 		template <typename OtherMutex>
 		auto operator==(const Property<T, OtherMutex>& other) const noexcept -> bool

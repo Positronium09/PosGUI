@@ -52,9 +52,8 @@ export namespace PGUI
 	struct ScopedValue
 	{
 		constexpr ScopedValue(T& variableRef, T newValue) noexcept :
-			variable{ variableRef }, oldValue{ variableRef }
+			variable{ variableRef }, oldValue{ std::exchange(variableRef, newValue) }
 		{
-			variable.get() = newValue;
 		}
 		constexpr ~ScopedValue() noexcept
 		{
@@ -93,4 +92,14 @@ export namespace PGUI
 			return seed;
 		}
 	}
+
+	struct StringHash
+	{
+		// ReSharper disable once CppInconsistentNaming
+		using is_transparent = void; // Activates "Heterogeneous Lookup"
+
+		[[nodiscard]] auto operator()(const char* txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
+		[[nodiscard]] auto operator()(const std::string_view txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
+		[[nodiscard]] auto operator()(const std::string& txt) const -> size_t { return std::hash<std::string>{ }(txt); }
+	};
 }

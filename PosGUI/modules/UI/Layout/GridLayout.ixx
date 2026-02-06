@@ -22,22 +22,22 @@ export namespace PGUI::UI::Layout
 	namespace GridLiterals
 	{
 		// ReSharper disable CppUserDefinedLiteralSuffixDoesNotStartWithUnderscore
-		constexpr auto operator""_fixed(const unsigned long long size) noexcept -> FixedSize
+		consteval auto operator""_fixed(const unsigned long long size) noexcept -> FixedSize
 		{
 			return static_cast<FixedSize>(size);
 		}
 
-		constexpr auto operator""_fixed(const long double size) noexcept -> FixedSize
+		consteval auto operator""_fixed(const long double size) noexcept -> FixedSize
 		{
 			return static_cast<FixedSize>(size);
 		}
 
-		constexpr auto operator""_fractional(const unsigned long long  size) noexcept -> FractionalSize
+		consteval auto operator""_fractional(const unsigned long long  size) noexcept -> FractionalSize
 		{
 			return static_cast<FractionalSize>(size);
 		}
 
-		constexpr auto operator""_fractional(const long double size) noexcept -> FractionalSize
+		consteval auto operator""_fractional(const long double size) noexcept -> FractionalSize
 		{
 			return static_cast<FractionalSize>(size);
 		}
@@ -75,25 +75,25 @@ export namespace PGUI::UI::Layout
 		}
 
 		DataBinding::ValidatedPropertyNM<long> row{ AUTO_PLACE,
-			{ [](const auto& val)
+			{ [](const auto& val) static
 			{
 				return val >= AUTO_PLACE;
 			} }
 		};
 		DataBinding::ValidatedPropertyNM<long> column{ AUTO_PLACE,
-			{ [](const auto& val)
+			{ [](const auto& val) static
 			{
 				return val >= AUTO_PLACE;
 			} }
 		};
 		DataBinding::ValidatedPropertyNM<long> rowSpan{ 1,
-			{ [](const auto& val)
+			{ [](const auto& val) static
 			{
 				return val > 0;
 			} }
 		};
 		DataBinding::ValidatedPropertyNM<long> columnSpan{ 1,
-			{ [](const auto& val)
+			{ [](const auto& val) static
 			{
 				return val > 0;
 			} }

@@ -2,12 +2,14 @@ export module PGUI.DataBinding.Property;
 
 import std;
 
+import PGUI.ErrorHandling;
+import PGUI.Utils;
 import PGUI.Event;
 import PGUI.Mutex;
 
 export namespace PGUI::DataBinding
 {
-	template <typename T, typename Mutex = Mutex::SRWMutex>
+	template <typename T, Mutex::SharedMutexType Mutex = Mutex::SRWMutex>
 	class Property
 	{
 		public:
@@ -16,11 +18,6 @@ export namespace PGUI::DataBinding
 		
 		struct AccessorProxy
 		{
-			using LockType = std::conditional_t<
-				PGUI::Mutex::SharedMutexType<T>, 
-				std::shared_lock<Mutex>, 
-				std::scoped_lock<Mutex>>;
-
 			AccessorProxy(const T& value, MutexType& mutex) : 
 				value{ value }, lock{ mutex }
 			{
@@ -52,7 +49,7 @@ export namespace PGUI::DataBinding
 
 			private:
 			const T& value;
-			LockType lock;
+			std::shared_lock<MutexType> lock;
 		};
 
 		using EventType = EventT<Mutex, const AccessorProxy&>;

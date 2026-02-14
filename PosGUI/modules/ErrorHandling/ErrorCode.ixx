@@ -29,6 +29,40 @@ export namespace PGUI
 	concept PGUIErrorCodeEnum = std::is_enum_v<T> &&
 		(std::same_as<T, ErrorCode> ||
 		 std::same_as<T, SystemErrorCode>);
+
+	namespace HRConfig
+	{
+		constexpr std::uint32_t FACILITY = 0x515;
+	}
+
+	[[nodiscard]] constexpr auto ToHresult(PGUIErrorCodeEnum auto code) noexcept -> long
+	{
+
+		constexpr std::uint32_t severity = 1;
+		constexpr std::uint32_t customer = 1;
+		
+		if (code == ErrorCode::Success)
+		{
+			return customer << 29 | HRConfig::FACILITY << 16;
+		}
+
+		const std::uint32_t codeValue = std::to_underlying(code);
+
+		return static_cast<long>(severity << 31 | customer << 29 | HRConfig::FACILITY << 16 | codeValue);
+	}
+
+	[[nodiscard]] constexpr auto IsPosGUIHresult(const long hr) noexcept -> bool
+	{
+		const auto hrValue = static_cast<std::uint32_t>(hr);
+
+		if ((hr & 1 << 29) == 0)
+		{
+			return false;
+		}
+
+		const auto facility = hrValue >> 16 & 0x1FFF;
+		return facility == HRConfig::FACILITY;
+	}
 }
 
 // ReSharper disable CppInconsistentNaming

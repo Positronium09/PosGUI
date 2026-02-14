@@ -157,6 +157,7 @@
     <ClCompile Include="modules\Utils\Utils.ixx" />
     <ClCompile Include="modules\Utils\WindowsUtils.ixx" />
     <ClCompile Include="modules\WindowClass.ixx" />
+    <ClCompile Include="modules\WinResource.ixx" />
     <ClCompile Include="src\MessageLoop.cpp" />
     <ClCompile Include="src\PGUI.cpp" />
     <ClCompile Include="src\PropVariant.cpp" />
@@ -211,6 +212,7 @@
     <ClCompile Include="src\Utils\WindowsUtils.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\WindowClass.cpp" />
+    <ClCompile Include="src\WinResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TypeErasure\TypeErasure\TypeErasure.vcxproj">
@@ -326,7 +328,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -359,7 +361,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -388,7 +390,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -421,7 +423,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;dxgi.lib;d2d1.lib;dxguid.lib;Dwrite.lib;dcomp.lib;d3d11.lib;runtimeobject.lib;windowsapp.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

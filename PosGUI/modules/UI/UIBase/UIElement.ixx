@@ -23,12 +23,17 @@ export namespace PGUI::UI
 
 		virtual ~UIElement() = default;
 
+		[[nodiscard]] auto LockParent() const noexcept
+		{
+			return parent.lock();
+		}
+
 		virtual auto Render(const Graphics&) -> void = 0;
 		virtual auto Invalidate() const noexcept -> void
 		{
-			if (parent != nullptr)
+			if (!parent.expired())
 			{
-				parent->Invalidate();
+				LockParent()->Invalidate();
 			}
 			invalidateRequest.Invoke(this);
 		}
@@ -125,20 +130,30 @@ export namespace PGUI::UI
 		}
 		auto SetParent(const RawUIElementPtr newParent) noexcept
 		{
-			if (parent == newParent)
+			const auto lockedParent = LockParent();
+			if (lockedParent.get() == newParent)
 			{
 				return;
 			}
 
-			if (parent != nullptr)
+			if (lockedParent.get() != nullptr)
 			{
-				parent->ChildRemoved(this);
+				auto lifetime = shared_from_this();
+				lockedParent->ChildRemoved(this);
 			}
-			parent = newParent;
+
+			if (newParent != nullptr)
+			{
+				parent = newParent->shared_from_this();
+			}
+			else
+			{
+				parent.reset();
+			}
 		}
 		[[nodiscard]] auto HasParent() const noexcept
 		{
-			return parent != nullptr;
+			return !parent.expired();
 		}
 		[[nodiscard]] auto GetParent() const noexcept
 		{
@@ -146,10 +161,10 @@ export namespace PGUI::UI
 		}
 		[[nodiscard]] auto GetRoot() const noexcept
 		{
-			auto current = parent;
+			auto current = LockParent();
 			while (current && current->HasParent())
 			{
-				current = current->GetParent();
+				current = current->LockParent()->shared_from_this();
 			}
 			return current;
 		}
@@ -210,11 +225,11 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto IsVisible() const noexcept -> bool
 		{
-			if (parent == nullptr)
+			if (parent.expired())
 			{
 				return true;
 			}
-			return parent->GetRect().Intersects(GetRect());
+			return LockParent()->GetRect().Intersects(GetRect());
 		}
 
 		auto operator==(const UIElement& other) const noexcept -> bool
@@ -229,7 +244,7 @@ export namespace PGUI::UI
 		}
 
 		private:
-		RawUIElementPtr parent = nullptr;
+		WeakUIElementPtr parent;
 		bool focusable = false;
 		bool isTabStop = false;
 		EventSRWM<RawCUIElementPtr> invalidateRequest;

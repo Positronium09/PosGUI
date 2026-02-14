@@ -9,6 +9,7 @@ export import PGUI.ErrorHandling;
 export import PGUI.ComIterator;
 export import PGUI.ComPtr;
 export import PGUI.ScopedTimer;
+export import PGUI.WinResource;
 export import PGUI.DataBinding;
 export import PGUI.Factories;
 export import PGUI.Shape2D;

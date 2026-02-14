@@ -7,6 +7,17 @@ export import :StringUtils;
 export import :ArithmeticUtils;
 export import :EnumUtils;
 
+namespace PGUI::Detail
+{
+	struct DummyTemplateCheck { };
+
+	template <typename, template <typename...> typename>
+	struct IsSpecializationHelper : std::false_type { };
+
+	template <template <typename...> typename Template, typename... Args>
+	struct IsSpecializationHelper<Template<Args...>, Template> : std::true_type { };
+}
+
 export namespace PGUI
 {
 	template <typename T> requires !std::is_same_v<T, void>
@@ -47,6 +58,9 @@ export namespace PGUI
 		Absolute,
 		Relative
 	};
+
+	template <typename T, template <typename...> typename Template>
+	concept IsSpecialization = Detail::IsSpecializationHelper<T, Template>::value;
 
 	template <typename T> requires std::is_trivially_copyable_v<T>
 	struct ScopedValue
@@ -96,10 +110,20 @@ export namespace PGUI
 	struct StringHash
 	{
 		// ReSharper disable once CppInconsistentNaming
-		using is_transparent = void; // Activates "Heterogeneous Lookup"
+		using is_transparent = void;
 
 		[[nodiscard]] auto operator()(const char* txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
 		[[nodiscard]] auto operator()(const std::string_view txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
-		[[nodiscard]] auto operator()(const std::string& txt) const -> size_t { return std::hash<std::string>{ }(txt); }
+		[[nodiscard]] auto operator()(const std::string& txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
+	};
+
+	struct WStringHash
+	{
+		// ReSharper disable once CppInconsistentNaming
+		using is_transparent = void;
+
+		[[nodiscard]] auto operator()(const wchar_t* txt) const -> size_t { return std::hash<std::wstring_view>{ }(txt); }
+		[[nodiscard]] auto operator()(const std::wstring_view txt) const -> size_t { return std::hash<std::wstring_view>{ }(txt); }
+		[[nodiscard]] auto operator()(const std::wstring& txt) const -> size_t { return std::hash<std::wstring_view>{ }(txt); }
 	};
 }

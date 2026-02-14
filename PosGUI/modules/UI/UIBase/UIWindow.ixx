@@ -71,9 +71,7 @@ export namespace PGUI::UI
 
 		private:
 		bool tabStopEnabled = false;
-		UIContainer childrenContainer;
-		//If focused or hovered elements are destroyed crash due to dangling pointer
-		//TODO Fix it when it happens prolly use weak_ptr but too lazy rn
+		UIContainerPtr childrenContainer = UIElement::Create<UIContainer>();
 
 		WeakUIElementPtr focusedElement;
 		WeakUIElementPtr hoveredElement;
@@ -116,7 +114,7 @@ export namespace PGUI::UI
 		auto Draw(Graphics graphics) -> void override;
 		auto OnSizeChanged(SizeL) -> void override;
 
-		auto OnNCCreate(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult;
+		auto OnNCCreate(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
 
 		auto OnFocusChanged(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult;
 

@@ -58,12 +58,12 @@ namespace PGUI::UI
 
 	auto UIWindow::CreateDeviceResources() -> void
 	{
-		childrenContainer.CreateDeviceResources();
+		childrenContainer->CreateDeviceResources();
 	}
 
 	auto UIWindow::DiscardDeviceResources() -> void
 	{
-		childrenContainer.DiscardDeviceResources();
+		childrenContainer->DiscardDeviceResources();
 	}
 
 	auto UIWindow::Draw(const Graphics graphics) -> void
@@ -77,7 +77,7 @@ namespace PGUI::UI
 
 		Render(graphics);
 
-		childrenContainer.Render(graphics);
+		childrenContainer->Render(graphics);
 
 		EndDraw();
 	}
@@ -85,10 +85,10 @@ namespace PGUI::UI
 	auto UIWindow::OnSizeChanged(const SizeL size) -> void
 	{
 		DirectXCompositionWindow::OnSizeChanged(size);
-		childrenContainer.Resize(GetClientSize());
+		childrenContainer->Resize(GetClientSize());
 	}
 
-	auto UIWindow::OnNCCreate(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
+	auto UIWindow::OnNCCreate(UINT, WPARAM, LPARAM) const noexcept -> MessageHandlerResult
 	{
 		auto style = GetClassStyle();
 		style |= CS_DBLCLKS;
@@ -103,7 +103,7 @@ namespace PGUI::UI
 			}
 		}
 
-		childrenContainer.InvalidateRequest().AddCallback(
+		childrenContainer->InvalidateRequest().AddCallback(
 			[this](RawCUIElementPtr)
 			{
 				Invalidate();
@@ -180,19 +180,19 @@ namespace PGUI::UI
 			if (!focusedElement.expired())
 			{
 				const auto focused = LockFocusedElement();
-				if (const auto result = childrenContainer.GetElementLinearIndex(focused.get());
+				if (const auto result = childrenContainer->GetElementLinearIndex(focused.get());
 					result.has_value())
 				{
 					focusIndex = result.value() + 1;
 				}
 			}
 
-			focusIndex %= childrenContainer.GetLinearElementCount();
+			focusIndex %= childrenContainer->GetLinearElementCount();
 
-			const auto element = childrenContainer.GetElementAtLinearIndex(focusIndex);
+			const auto element = childrenContainer->GetElementAtLinearIndex(focusIndex);
 			if (!element.has_value())
 			{
-				const auto firstElement = childrenContainer.GetElementAtLinearIndex(0);
+				const auto firstElement = childrenContainer->GetElementAtLinearIndex(0);
 
 				if (!firstElement.has_value())
 				{
@@ -253,7 +253,7 @@ namespace PGUI::UI
 
 		if (hoveredElement.expired())
 		{
-			if (const auto result = GetChildren().GetElementAtPosition(mousePos);
+			if (const auto result = childrenContainer->GetElementAtPosition(mousePos);
 				result.has_value())
 			{
 				MouseEvent mouseEnterEvent;

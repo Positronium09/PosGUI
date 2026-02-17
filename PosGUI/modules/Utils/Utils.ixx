@@ -53,14 +53,14 @@ export namespace PGUI
 		using Rebind = T<Types...>;
 	};
 
+	template <typename T, template <typename...> typename Template>
+	concept IsSpecialization = Detail::IsSpecializationHelper<T, Template>::value;
+	
 	enum class PositioningMode
 	{
 		Absolute,
 		Relative
 	};
-
-	template <typename T, template <typename...> typename Template>
-	concept IsSpecialization = Detail::IsSpecializationHelper<T, Template>::value;
 
 	template <typename T> requires std::is_trivially_copyable_v<T>
 	struct ScopedValue

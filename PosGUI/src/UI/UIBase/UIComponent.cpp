@@ -18,10 +18,14 @@ namespace PGUI::UI
 		auto axisAligned = false;
 		auto pushed = false;
 
+		graphics.PushTranslation(GetPosition());
+
+		const auto renderRect = RectF{ { 0, 0 }, GetSize() };
+
 		if (!clip)
 		{
 			axisAligned = true;
-			graphics.PushAxisAlignedClip(GetRect(), D2D::AntiAliasingMode::PerPrimitive);
+			graphics.PushAxisAlignedClip(renderRect, D2D::AntiAliasingMode::PerPrimitive);
 		}
 		else
 		{
@@ -30,11 +34,10 @@ namespace PGUI::UI
 			{
 				const auto& layer = layerResult.value();
 				const D2D::LayerParameters layerParams{
-					GetRect(),
+					renderRect,
 					D2D::AntiAliasingMode::PerPrimitive,
 					D2D::LayerOptions::None,
-					GetClip().GetGeometry(),
-					D2D::Matrix3x2::Translation(GetRect().left, GetRect().top)
+					GetClip().GetGeometry()
 				};
 				graphics.PushLayer(layer, layerParams);
 				pushed = true;
@@ -43,11 +46,13 @@ namespace PGUI::UI
 			{
 				Logger::Error(layerResult.error(), L"Cannot create layer for clipping");
 				axisAligned = true;
-				graphics.PushAxisAlignedClip(GetRect(), D2D::AntiAliasingMode::PerPrimitive);
+				graphics.PushAxisAlignedClip(renderRect, D2D::AntiAliasingMode::PerPrimitive);
 			}
 		}
 
 		ClippedRender(graphics);
+
+		graphics.PopTransform();
 
 		if (axisAligned)
 		{

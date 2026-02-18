@@ -33,6 +33,18 @@ export namespace PGUI::UI
 			return rect.Size();
 		}
 
+		[[nodiscard]] auto GetClientRect() const noexcept -> RectF
+		{
+			return RectF{ PointF{ 0.0F, 0.0F }, rect.Size() };
+		}
+
+		// ReSharper disable once CppMemberFunctionMayBeStatic
+
+		[[nodiscard]] auto GetClientPosition() const noexcept -> PointF
+		{
+			return PointF{ 0.0F, 0.0F };
+		}
+
 		auto HandleEvent(UIEvent&) -> void override;
 		[[nodiscard]] auto HitTest(PointF point) noexcept -> bool override;
 

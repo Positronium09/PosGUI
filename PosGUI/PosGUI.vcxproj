@@ -72,6 +72,8 @@
     <ClCompile Include="modules\UI\VisualState\VisualStateGroup.ixx" />
     <ClCompile Include="modules\UI\VisualState\VisualStateManager.ixx" />
     <ClCompile Include="modules\Utils\EnumUtils.ixx" />
+    <ClCompile Include="modules\Utils\HashUtils.ixx" />
+    <ClCompile Include="modules\Utils\MetaUtils.ixx" />
     <ClCompile Include="modules\Window.ixx" />
     <ClCompile Include="modules\DpiScaled.ixx" />
     <ClCompile Include="modules\PropVariant.ixx" />

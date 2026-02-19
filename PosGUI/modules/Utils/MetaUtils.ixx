@@ -6,16 +6,15 @@ namespace PGUI::Detail
 {
 	struct DummyTemplateCheck { };
 
-	template <typename, template <typename...> typename>
+	template <typename, template <auto...> typename>
 	struct IsSpecializationHelper : std::false_type { };
 
-	template <template <typename...> typename Template, typename... Args>
+	template <template <auto...> typename Template, auto... Args>
 	struct IsSpecializationHelper<Template<Args...>, Template> : std::true_type { };
 }
 
 export namespace PGUI
 {
-
 	template <typename T, typename... Types>
 	concept IsInTypeList = (std::same_as<T, Types> || ...);
 
@@ -28,10 +27,19 @@ export namespace PGUI
 	template <typename... Types>
 	constexpr auto TypeCount = sizeof...(Types);
 
+	template <typename... Operands>
+	constexpr auto LogicalOR = std::disjunction_v<Operands...>;
+
+	template <typename... Operands>
+	constexpr auto LogicalAND = std::conjunction_v<Operands...>;
+
+	template <typename Operand>
+	constexpr auto LogicalNOT = std::negation_v<Operand>;
+
 	template <typename... Types>
 	struct TypeList
 	{
-		static constexpr auto Count = sizeof...(Types);
+		static constexpr auto Count = TypeCount<Types...>;
 
 		template <std::size_t N>
 		using GetType = NthTypeOf<N, Types...>;
@@ -44,6 +52,6 @@ export namespace PGUI
 		using Rebind = T<Types...>;
 	};
 
-	template <typename T, template <typename...> typename Template>
+	template <typename T, template <auto...> typename Template>
 	concept IsSpecialization = Detail::IsSpecializationHelper<T, Template>::value;
 }

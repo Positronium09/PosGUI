@@ -21,43 +21,157 @@ import PGUI.Factories;
 
 namespace PGUI::UI
 {
-	DirectXCompositionWindow::DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept :
-		Window{ wndClass }
+	auto DirectXCompositionWindow::InitD3D11Device() -> void
 	{
-		RegisterHandler(WM_NCCREATE, &DirectXCompositionWindow::OnNCCreate);
-		RegisterHandler(WM_WINDOWPOSCHANGED, &DirectXCompositionWindow::OnWindowPosChanged);
-		RegisterHandler(WM_PAINT, &DirectXCompositionWindow::OnPaint);
-	}
-
-	auto DirectXCompositionWindow::OnSizeChanged(SizeL) -> void
-	{
-		const auto& d2d1 = GetD2D1DeviceContext();
-		d2d1->SetTarget(nullptr);
-
-		SizeL size = LogicalToPhysical(GetClientSize());
-
-		if (size.cy == 0)
+		if (d3d11Device)
 		{
-			size.cy = 1;
-		}
-		if (size.cx == 0)
-		{
-			size.cx = 1;
+			Logger::Info(L"DirectXCompositionWindow::InitD3D11Device called, but D3D11 device already initialized");
+			return;
 		}
 
-		if (const auto hr = GetSwapChain()->ResizeBuffers(
-			0, size.cx, size.cy,
-			DXGI_FORMAT_UNKNOWN, NULL);
-			FAILED(hr))
+		const auto dxgiFactory = Factories::DXGIFactory::GetFactory();
+		SYSTEM_POWER_STATUS powerStatus{ };
+		if (const auto ret = GetSystemPowerStatus(&powerStatus);
+			ret == 0)
+		{
+			Logger::Error(
+				L"Cannot get system power status {}",
+				Error{ GetLastError() }
+			);
+		}
+
+		auto gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
+		const auto powerSaverOn = powerStatus.SystemStatusFlag == 1;
+		const bool lowBattery = powerStatus.BatteryFlag & (2 | 4);
+		const auto charging = powerStatus.ACLineStatus != 0 || powerStatus.BatteryFlag & 8;
+
+		if (const bool hasBattery = powerStatus.BatteryFlag & 128;
+			(powerSaverOn || lowBattery) && (!charging) && hasBattery)
+		{
+			gpuPreference = DXGI_GPU_PREFERENCE_MINIMUM_POWER;
+		}
+
+		ComPtr<IDXGIAdapter1> adapter;
+		auto hr = dxgiFactory->EnumAdapterByGpuPreference(
+			0, gpuPreference,
+			GetIID(adapter),
+			adapter.put_void());
+		if (FAILED(hr))
 		{
 			throw Exception{
-				Error{ hr }
-				.AddDetail(L"Window Size", std::format(L"{}", size))
+				Error{ hr },
+				L"Cannot enumerate DXGI adapters"
 			};
 		}
 
-		DiscardDeviceResources();
-		InitD2D1DeviceContext();
+		constexpr auto createDeviceFlags =
+				#ifdef _DEBUG
+				static_cast<D3D11_CREATE_DEVICE_FLAG>(D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG);
+		#else
+		D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+		#endif
+
+		constexpr std::array featureLevels =
+		{
+			D3D_FEATURE_LEVEL_11_1,
+			D3D_FEATURE_LEVEL_11_0,
+			D3D_FEATURE_LEVEL_10_1,
+			D3D_FEATURE_LEVEL_10_0,
+			D3D_FEATURE_LEVEL_9_3,
+			D3D_FEATURE_LEVEL_9_2,
+			D3D_FEATURE_LEVEL_9_1
+		};
+
+		ComPtr<ID3D11Device> device;
+
+		hr = D3D11CreateDevice(
+			adapter.get(),
+			D3D_DRIVER_TYPE_UNKNOWN, nullptr,
+			createDeviceFlags,
+			featureLevels.data(),
+			// ReSharper disable once CppRedundantCastExpression
+			static_cast<UINT>(featureLevels.size()),
+			D3D11_SDK_VERSION,
+			&device, nullptr, nullptr);
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr },
+				L"Cannot create D3D11 device"
+			};
+		}
+
+		d3d11Device = device.try_query<ID3D11Device2>();
+		if (d3d11Device.get() == nullptr)
+		{
+			throw Exception{
+				Error{ E_NOINTERFACE },
+				L"Cannot query D3D11Device2 interface"
+			};
+		}
+
+		dxgiDevice = d3d11Device.try_query<IDXGIDevice4>();
+		if (dxgiDevice.get() == nullptr)
+		{
+			throw Exception{
+				Error{ E_NOINTERFACE },
+				L"Cannot query IDXGIDevice4 interface"
+			};
+		}
+	}
+
+	auto DirectXCompositionWindow::InitDCompDevice() -> void
+	{
+		if (dCompositionDevice)
+		{
+			Logger::Info(
+				L"DirectXCompositionWindow::InitDCompDevice called, but DirectComposition device already initialized");
+			return;
+		}
+
+		ComPtr<IDCompositionDevice> dcompDevice;
+		if (const auto hr = DCompositionCreateDevice3(
+				dxgiDevice.get(),
+				GetIID(dcompDevice),
+				dcompDevice.put_void());
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr },
+				L"Cannot create DirectComposition device"
+			};
+		}
+
+		dCompositionDevice = dcompDevice.try_query<IDCompositionDevice5>();
+		if (dCompositionDevice.get() == nullptr)
+		{
+			throw Exception{
+				Error{ E_NOINTERFACE },
+				L"Cannot query IDCompositionDevice5 interface"
+			};
+		}
+	}
+
+	auto DirectXCompositionWindow::InitD2D1Device() -> void
+	{
+		if (d2d1Device)
+		{
+			Logger::Info(L"DirectXCompositionWindow::InitD2D1Device called, but D2D1 device already initialized");
+			return;
+		}
+
+		const auto d2Factory = Factories::D2DFactory::GetFactory();
+
+		if (const auto hr = d2Factory->CreateDevice(
+				dxgiDevice.get(),
+				&d2d1Device);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr },
+				L"Cannot create D2D1 device"
+			};
+		}
 	}
 
 	auto DirectXCompositionWindow::BeginDraw() -> void
@@ -120,6 +234,45 @@ namespace PGUI::UI
 		return std::make_pair(tag1, tag2);
 	}
 
+	DirectXCompositionWindow::DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept :
+		Window{ wndClass }
+	{
+		RegisterHandler(WM_NCCREATE, &DirectXCompositionWindow::OnNCCreate);
+		RegisterHandler(WM_WINDOWPOSCHANGED, &DirectXCompositionWindow::OnWindowPosChanged);
+		RegisterHandler(WM_PAINT, &DirectXCompositionWindow::OnPaint);
+	}
+
+	auto DirectXCompositionWindow::OnSizeChanged(SizeL) -> void
+	{
+		const auto& d2d1 = GetD2D1DeviceContext();
+		d2d1->SetTarget(nullptr);
+
+		SizeL size = LogicalToPhysical(GetClientSize());
+
+		if (size.cy == 0)
+		{
+			size.cy = 1;
+		}
+		if (size.cx == 0)
+		{
+			size.cx = 1;
+		}
+
+		if (const auto hr = GetSwapChain()->ResizeBuffers(
+				0, size.cx, size.cy,
+				DXGI_FORMAT_UNKNOWN, NULL);
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr }
+				.AddDetail(L"Window Size", std::format(L"{}", size))
+			};
+		}
+
+		DiscardDeviceResources();
+		InitD2D1DeviceContext();
+	}
+
 	auto DirectXCompositionWindow::InitSwapChain() -> void
 	{
 		const auto dxgiFactory = Factories::DXGIFactory::GetFactory();
@@ -135,8 +288,8 @@ namespace PGUI::UI
 
 		if (const auto hr = dxgiFactory->CreateSwapChainForComposition(
 				dxgiDevice.get(),
-			&swapChainDesc, nullptr,
-			Put<IDXGISwapChain1>());
+				&swapChainDesc, nullptr,
+				Put<IDXGISwapChain1>());
 			FAILED(hr))
 		{
 			throw Exception{
@@ -150,6 +303,11 @@ namespace PGUI::UI
 	{
 		auto& d2d1Dc = GetD2D1DeviceContext();
 		const auto& swapChain = GetSwapChain();
+
+		if (d2d1Device.get() == nullptr)
+		{
+			DebugBreak();
+		}
 
 		auto hr = d2d1Device->CreateDeviceContext(
 			D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
@@ -199,7 +357,16 @@ namespace PGUI::UI
 		auto& dcompTarget = GetDCompositionTarget();
 		auto& visual = GetDCompositionVisual();
 
-		auto hr = dCompositionDevice->CreateTargetForHwnd(
+		const auto desktopDevice = dCompositionDevice.try_query<IDCompositionDesktopDevice>();
+		if (desktopDevice.get() == nullptr)
+		{
+			throw Exception{
+				Error{ E_NOINTERFACE },
+				L"Cannot query IDCompositionDesktopDevice interface from DComposition device"
+			};
+		}
+
+		auto hr = desktopDevice->CreateTargetForHwnd(
 			Hwnd(), false,
 			&dcompTarget);
 		if (FAILED(hr))
@@ -210,12 +377,21 @@ namespace PGUI::UI
 			};
 		}
 
-		hr = dCompositionDevice->CreateVisual(&visual);
+		ComPtr<IDCompositionVisual2> visualBase;
+		hr = dCompositionDevice->CreateVisual(&visualBase);
 		if (FAILED(hr))
 		{
 			throw Exception{
 				Error{ hr },
 				L"Cannot create DComposition visual"
+			};
+		}
+		visual = visualBase.try_query<IDCompositionVisual3>();
+		if (visual.get() == nullptr)
+		{
+			throw Exception{
+				Error{ E_NOINTERFACE },
+				L"Cannot query IDCompositionVisual3 interface"
 			};
 		}
 
@@ -243,149 +419,6 @@ namespace PGUI::UI
 			throw Exception{
 				Error{ hr },
 				L"Cannot commit DComposition device"
-			};
-		}
-	}
-
-	auto DirectXCompositionWindow::InitD3D11Device() -> void
-	{
-		if (d3d11Device)
-		{
-			Logger::Info(L"DirectXCompositionWindow::InitD3D11Device called, but D3D11 device already initialized");
-			return;
-		}
-
-		const auto dxgiFactory = Factories::DXGIFactory::GetFactory();
-		SYSTEM_POWER_STATUS powerStatus{ };
-		if (const auto ret = GetSystemPowerStatus(&powerStatus);
-			ret == 0)
-		{
-			Logger::Error(
-				L"Cannot get system power status {}",
-				Error{ GetLastError() }
-			);
-		}
-
-		auto gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
-		const auto powerSaverOn = powerStatus.SystemStatusFlag == 1;
-		const bool lowBattery = powerStatus.BatteryFlag & (2 | 4);
-		const auto charging = powerStatus.ACLineStatus != 0 || powerStatus.BatteryFlag & 8;
-
-		if (const bool hasBattery = powerStatus.BatteryFlag & 128;
-			(powerSaverOn || lowBattery) && (!charging) && hasBattery)
-		{
-			gpuPreference = DXGI_GPU_PREFERENCE_MINIMUM_POWER;
-		}
-
-		ComPtr<IDXGIAdapter1> adapter;
-		auto hr = dxgiFactory->EnumAdapterByGpuPreference(
-			0, gpuPreference,
-			GetIID(adapter),
-			adapter.put_void());
-		if (FAILED(hr))
-		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot enumerate DXGI adapters"
-			};
-		}
-
-		constexpr auto createDeviceFlags =
-#ifdef _DEBUG
-			static_cast<D3D11_CREATE_DEVICE_FLAG>(D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG);
-#else
-			D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-#endif
-
-		constexpr std::array featureLevels =
-		{
-			D3D_FEATURE_LEVEL_11_1,
-			D3D_FEATURE_LEVEL_11_0,
-			D3D_FEATURE_LEVEL_10_1,
-			D3D_FEATURE_LEVEL_10_0,
-			D3D_FEATURE_LEVEL_9_3,
-			D3D_FEATURE_LEVEL_9_2,
-			D3D_FEATURE_LEVEL_9_1
-		};
-
-		ComPtr<ID3D11Device> device;
-
-		hr = D3D11CreateDevice(
-			adapter.get(),
-			D3D_DRIVER_TYPE_UNKNOWN, nullptr,
-			createDeviceFlags,
-			featureLevels.data(),
-			// ReSharper disable once CppRedundantCastExpression
-			static_cast<UINT>(featureLevels.size()),
-			D3D11_SDK_VERSION,
-			&device, nullptr, nullptr);
-		if (FAILED(hr))
-		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create D3D11 device"
-			};
-		}
-
-		d3d11Device = device.try_query<ID3D11Device2>();
-		if (d3d11Device.get() == nullptr)
-		{
-			throw Exception{
-				Error{ E_NOINTERFACE },
-				L"Cannot query D3D11Device2 interface"
-			};
-		}
-
-		dxgiDevice = d3d11Device.try_query<IDXGIDevice4>();
-		if (dxgiDevice.get() == nullptr)
-		{
-			throw Exception{
-				Error{ E_NOINTERFACE },
-				L"Cannot query IDXGIDevice4 interface"
-			};
-		}
-	}
-
-	auto DirectXCompositionWindow::InitDCompDevice() -> void
-	{
-		if (dCompositionDevice)
-		{
-			Logger::Info(
-				L"DirectXCompositionWindow::InitDCompDevice called, but DirectComposition device already initialized");
-			return;
-		}
-
-		if (const auto hr = DCompositionCreateDevice(
-				dxgiDevice.get(),
-				GetIID(dCompositionDevice),
-				dCompositionDevice.put_void());
-			FAILED(hr))
-		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create DirectComposition device"
-			};
-		}
-	}
-
-	auto DirectXCompositionWindow::InitD2D1Device() -> void
-	{
-		if (d2d1Device)
-		{
-			Logger::Info(L"DirectXCompositionWindow::InitD2D1Device called, but D2D1 device already initialized");
-			return;
-		}
-
-		const auto d2Factory = Factories::D2DFactory::GetFactory();
-
-		if (const auto hr = d2Factory->CreateDevice(
-				dxgiDevice.get(),
-			&d2d1Device);
-			FAILED(hr))
-		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create D2D1 device"
 			};
 		}
 	}

@@ -21,7 +21,7 @@ export namespace PGUI::UI
 {
 	class DirectXCompositionWindow :
 		public Window,
-		protected ComPtrHolder<IDXGISwapChain1, IDCompositionTarget, ID2D1DeviceContext7, IDCompositionVisual>
+		protected ComPtrHolder<IDXGISwapChain1, IDCompositionTarget, ID2D1DeviceContext7, IDCompositionVisual3>
 	{
 		public:
 		~DirectXCompositionWindow() override = default;
@@ -43,11 +43,11 @@ export namespace PGUI::UI
 		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
 		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return Get<IDCompositionTarget>(); }
 		[[nodiscard]] const auto& GetSwapChain() const noexcept { return Get<IDXGISwapChain1>(); }
-		[[nodiscard]] const auto& GetDCompositionVisual() const noexcept { return Get<IDCompositionVisual>(); }
+		[[nodiscard]] const auto& GetDCompositionVisual() const noexcept { return Get<IDCompositionVisual3>(); }
 		[[nodiscard]] auto& GetD2D1DeviceContext() noexcept { return Get<ID2D1DeviceContext7>(); }
 		[[nodiscard]] auto& GetDCompositionTarget() noexcept { return Get<IDCompositionTarget>(); }
 		[[nodiscard]] auto& GetSwapChain() noexcept { return Get<IDXGISwapChain1>(); }
-		[[nodiscard]] auto& GetDCompositionVisual() noexcept { return Get<IDCompositionVisual>(); }
+		[[nodiscard]] auto& GetDCompositionVisual() noexcept { return Get<IDCompositionVisual3>(); }
 
 		[[nodiscard]] static auto& D3D11Device() noexcept { return d3d11Device; }
 		[[nodiscard]] static auto& DXGIDevice() noexcept { return dxgiDevice; }
@@ -81,7 +81,7 @@ export namespace PGUI::UI
 			/* */
 		}
 
-		virtual auto Draw(Graphics) -> void
+		virtual auto Draw(const Graphics&) -> void
 		{
 			/* E_NOTIMPL */
 		}
@@ -94,7 +94,7 @@ export namespace PGUI::UI
 		private:
 		inline static ComPtr<ID3D11Device2> d3d11Device;
 		inline static ComPtr<IDXGIDevice4> dxgiDevice;
-		inline static ComPtr<IDCompositionDevice> dCompositionDevice;
+		inline static ComPtr<IDCompositionDevice5> dCompositionDevice;
 		inline static ComPtr<ID2D1Device7> d2d1Device;
 
 		HMONITOR currentMonitor;

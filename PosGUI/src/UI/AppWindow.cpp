@@ -18,7 +18,7 @@ namespace PGUI::UI
 	{ }
 
 	AppWindow::AppWindow(const WindowClassPtr& wndClass) noexcept :
-		UIWindow{ wndClass }
+		DirectXCompositionWindow{ wndClass }
 	{
 		RegisterHandler(WM_NCCREATE, &AppWindow::OnNCCreate);
 		RegisterHandler(WM_SETTEXT, &AppWindow::OnSetText);

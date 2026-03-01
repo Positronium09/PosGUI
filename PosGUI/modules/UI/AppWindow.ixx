@@ -7,17 +7,17 @@ import std;
 
 import PGUI.Shape2D;
 import PGUI.Window;
+import PGUI.UI.DirectXCompositionWindow;
 import PGUI.WindowClass;
 import PGUI.UI.Color;
 import PGUI.UI.Brush;
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.ThemeAware;
 import PGUI.UI.Animation;
-import PGUI.UI.UIBase;
 
 export namespace PGUI::UI
 {
-	class AppWindow : public UIWindow , public Theming::ThemeAware<Theming::AppWindowStyle>
+	class AppWindow : public DirectXCompositionWindow, public Theming::ThemeAware<Theming::AppWindowStyle>
 	{
 		public:
 		AppWindow() noexcept;

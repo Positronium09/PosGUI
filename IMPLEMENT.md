@@ -1,6 +1,7 @@
 
 ## High priority
 - [X] Visual State Manager (seems finished)
+- [ ] Optin Composition Mode
 - [ ] Resource Manager
 - [ ] Visual Debugging Tools
 - [ ] Dispatcher

@@ -11,6 +11,13 @@ export import :HashUtils;
 
 export namespace PGUI
 {
+	constexpr auto IsDebugBuild =
+		#if defined(_DEBUG) || !defined(NDEBUG)
+		true;
+		#else
+		false;
+		#endif
+
 	template <typename T> requires !std::is_same_v<T, void>
 	using RawPtr = T*;
 	template <typename T> requires !std::is_same_v<T, void>

@@ -27,10 +27,10 @@ namespace PGUI::UI
 			std::bind_front(&UIHost::RedrawRequested, this)
 		);
 
-		/*
 		RegisterHandler(WM_NCCREATE, &UIHost::OnNCCreate);
 		RegisterHandler(WM_SIZE, &UIHost::OnSize);
 
+		/*
 		RegisterHandler(WM_SETFOCUS, &UIHost::OnFocusChanged);
 		RegisterHandler(WM_KILLFOCUS, &UIHost::OnFocusChanged);
 

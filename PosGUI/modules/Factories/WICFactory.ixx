@@ -8,45 +8,32 @@ import std;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
-export namespace PGUI::Factories
+namespace PGUI::Factories::WICFactory::Details
 {
-	class WICFactory
+	ComPtr<IWICImagingFactory2> factory{ nullptr };
+	std::once_flag initFlag;
+}
+
+export namespace PGUI::Factories::WICFactory
+{
+	[[nodiscard]] auto GetFactory() -> const ComPtr<IWICImagingFactory2>&
 	{
-		public:
-		WICFactory() = delete;
-
-		WICFactory(const WICFactory&) = delete;
-
-		auto operator=(const WICFactory&) -> WICFactory & = delete;
-
-		WICFactory(WICFactory&&) = delete;
-
-		auto operator=(WICFactory&&) -> WICFactory & = delete;
-
-		~WICFactory() = default;
-
-		[[nodiscard]] static auto GetFactory()
+		std::call_once(Details::initFlag, []
 		{
-			if (!factory)
+			if (const auto hr = CoCreateInstance(
+				CLSID_WICImagingFactory,
+				nullptr,
+				CLSCTX_INPROC_SERVER,
+				GetIID<IWICImagingFactory2>(),
+				Details::factory.put_void());
+				FAILED(hr))
 			{
-				if (const auto hr = CoCreateInstance(
-					CLSID_WICImagingFactory,
-					nullptr,
-					CLSCTX_INPROC_SERVER,
-					GetIID(factory),
-					factory.put_void());
-					FAILED(hr))
-				{
-					const Error error{ hr };
-					Logger::Critical(error, L"Failed to create WIC factory");
-					throw Exception{ error };
-				}
+				const Error error{ hr };
+				Logger::Critical(error, L"Failed to create WIC factory");
+				throw Exception{ error };
 			}
+		});
 
-			return factory;
-		}
-
-		private:
-		static inline ComPtr<IWICImagingFactory2> factory = nullptr;
-	};
+		return Details::factory;
+	}
 }

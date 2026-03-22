@@ -66,7 +66,7 @@ export namespace PGUI
 			return *this;
 		}
 
-		[[nodiscard]] constexpr auto operator-() const noexcept
+		[[nodiscard]] constexpr auto operator-() const noexcept requires std::is_signed_v<T>
 		{
 			return Size{ -cx, -cy };
 		}
@@ -91,25 +91,23 @@ export namespace PGUI
 			return Size{ cx / factor, cy / factor };
 		}
 
-		
-
 		template <typename U> requires std::is_arithmetic_v<U>
-		explicit(false) operator Size<U>() const noexcept
+		explicit(false) constexpr operator Size<U>() const noexcept
 		{
 			return Size<U>{ static_cast<U>(cx), static_cast<U>(cy) };
 		}
 
-		explicit(false) operator SIZE() const noexcept
+		explicit(false) constexpr operator SIZE() const noexcept
 		{
 			return SIZE{ static_cast<LONG>(cx), static_cast<LONG>(cy) };
 		}
 
-		explicit(false) operator D2D1_SIZE_F() const noexcept
+		explicit(false) constexpr operator D2D1_SIZE_F() const noexcept
 		{
 			return D2D1_SIZE_F{ static_cast<FLOAT>(cx), static_cast<FLOAT>(cy) };
 		}
 
-		explicit(false) operator D2D1_SIZE_U() const noexcept
+		explicit(false) constexpr operator D2D1_SIZE_U() const noexcept
 		{
 			return D2D1_SIZE_U{ static_cast<UINT32>(cx), static_cast<UINT32>(cy) };
 		}
@@ -119,24 +117,6 @@ export namespace PGUI
 	[[nodiscard]] constexpr auto operator*(T factor, const Size<T>& v) noexcept
 	{
 		return Size<T>(v.cx * factor, v.cy * factor);
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator/(T factor, const Size<T>& v) noexcept
-	{
-		return Size<T>(v.cx / factor, v.cy / factor);
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator*(const Size<T>& v, T factor) noexcept
-	{
-		return Size<T>(v.cx * factor, v.cy * factor);
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator/(const Size<T>& v, T factor) noexcept
-	{
-		return Size<T>(v.cx / factor, v.cy / factor);
 	}
 
 	using SizeF = Size<float>;

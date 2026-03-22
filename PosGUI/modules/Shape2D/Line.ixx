@@ -7,7 +7,7 @@ import :LineSegment;
 
 export namespace PGUI
 {
-	template <typename T> requires std::floating_point<T>
+	template <std::floating_point T>
 	struct Line
 	{
 		T m = static_cast<T>(0);
@@ -19,9 +19,33 @@ export namespace PGUI
 			m{ m }, c{ c }
 		{ }
 
-		constexpr Line(Point<T> p1, Point<T> p2) noexcept :
-			m{ (p2.y - p1.y) / (p2.x - p1.x) }, c{ p1.y - m * p1.x }
-		{ }
+		Line(T a, T b, T c) noexcept
+		{
+			if (std::abs(b) < std::numeric_limits<T>::epsilon())
+			{
+				m = std::numeric_limits<T>::infinity();
+				c = -c / a;
+			}
+			else if (std::abs(a) < std::numeric_limits<T>::epsilon())
+			{
+				m = static_cast<T>(0);
+				c = -c / b;
+			}
+		}
+
+		Line(Point<T> p1, Point<T> p2) noexcept
+		{
+			if (std::abs(p2.x - p1.x) < std::numeric_limits<T>::epsilon())
+			{
+				m = std::numeric_limits<T>::infinity();
+				c = -p1.x;
+			}
+			else if (std::abs(p2.y - p1.y) < std::numeric_limits<T>::epsilon())
+			{
+				m = static_cast<T>(0);
+				c = p1.y;
+			}
+		}
 
 		explicit constexpr Line(LineSegment<T> segment) noexcept :
 			Line{ segment.start, segment.end }
@@ -39,22 +63,30 @@ export namespace PGUI
 
 		[[nodiscard]] constexpr auto XIntercept() const noexcept
 		{
+			if (IsHorizontal())
+			{
+				return std::numeric_limits<T>::infinity();
+			}
 			return -c / m;
 		}
 
-		[[nodiscard]] constexpr auto IsVertical() const noexcept
+		[[nodiscard]] auto IsVertical() const noexcept
 		{
 			return std::isinf(m);
 		}
 
-		[[nodiscard]] constexpr auto IsHorizontal() const noexcept
+		[[nodiscard]] auto IsHorizontal() const noexcept
 		{
-			return m < std::numeric_limits<T>::epsilon();
+			return std::abs(m) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] auto IsParallel(const Line& other) const noexcept
 		{
-			return std::abs(m == other.m) < std::numeric_limits<T>::epsilon();
+			if (IsVertical() && other.IsVertical())
+			{
+				return true;
+			}
+			return std::abs(m - other.m) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] auto IsPerpendicular(const Line& other) const noexcept
@@ -66,7 +98,7 @@ export namespace PGUI
 		{
 			if (IsParallel(other))
 			{
-				return std::unexpected(std::monostate{ });
+				return std::unexpected{ std::monostate{ } };
 			}
 			if (IsVertical())
 			{

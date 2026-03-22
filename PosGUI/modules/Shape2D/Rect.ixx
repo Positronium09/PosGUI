@@ -45,7 +45,7 @@ export namespace PGUI
 		{ }
 
 		explicit(false) constexpr Rect(const WICRect& rc) noexcept :
-			Rect{ Point{ rc.X, rc.Y }, PGUI::Size{ rc.Width, rc.Width } }
+			Rect{ Point{ rc.X, rc.Y }, PGUI::Size{ rc.Width, rc.Height } }
 		{ }
 
 		constexpr Rect(Point<T> topLeft, Point<T> bottomRight) noexcept :
@@ -177,16 +177,10 @@ export namespace PGUI
 				std::min(bottom, rect.bottom) });
 		}
 
-		[[nodiscard]] constexpr auto Subtract(const Rect rect) const noexcept
+		[[nodiscard]] auto Subtract(const Rect rect) const noexcept
 		{
 			std::vector<Rect> result;
 			result.reserve(4);
-			if (!Intersects(rect))
-			{
-				result.push_back(*this);
-				result.shrink_to_fit();
-				return result;
-			}
 
 			const auto intersection = IntersectionRect(rect);
 			if (!intersection.has_value())
@@ -278,7 +272,7 @@ export namespace PGUI
 
 		constexpr auto Inflate(const T dx, const T dy) noexcept -> void
 		{
-			left += -dx;
+			left -= dx;
 			right += dx;
 			top -= dy;
 			bottom += dy;

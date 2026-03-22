@@ -1,5 +1,6 @@
 module;
 #include <dwmapi.h>
+#include <strsafe.h>
 #include <Windows.h>
 #include <winrt/windows.globalization.h>
 
@@ -1051,14 +1052,16 @@ namespace PGUI
 	{
 		std::wstring localeName(LOCALE_NAME_MAX_LENGTH, '\0');
 
-		GetUserDefaultLocaleName(localeName.data(), LOCALE_NAME_MAX_LENGTH);
-
-		localeName.shrink_to_fit();
+		if (const auto count = GetUserDefaultLocaleName(localeName.data(), LOCALE_NAME_MAX_LENGTH);
+			count > 0)
+		{
+			localeName.resize(count - 1);
+		}
 
 		return localeName;
 	}
 
-	auto GetCurrentInputMethodLanguage() -> std::wstring
+	auto GetCurrentInputMethodLanguage() noexcept -> std::wstring
 	{
 		using winrt::Windows::Globalization::Language;
 
@@ -1066,9 +1069,9 @@ namespace PGUI
 		if (const auto ret = ResolveLocaleName(
 				Language::CurrentInputMethodLanguageTag().c_str(),
 				localeName.data(), LOCALE_NAME_MAX_LENGTH);
-			ret == 0)
+			ret > 0)
 		{
-			throw Exception{ GetLastError() };
+			localeName.resize(ret - 1);
 		}
 
 		return localeName;

@@ -36,7 +36,7 @@ export namespace PGUI::UI
 				};
 			}
 
-			children.push_back(UIElementPtr<>{ std::move(element) });
+			children.push_back(std::move(element));
 			ChildAddedEvent().Invoke(elementPtr);
 			return elementPtr;
 		}

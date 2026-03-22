@@ -149,7 +149,7 @@ export namespace PGUI
 
 	[[nodiscard]] auto GetUserLocaleName() noexcept -> std::wstring;
 
-	[[nodiscard]] auto GetCurrentInputMethodLanguage() -> std::wstring;
+	[[nodiscard]] auto GetCurrentInputMethodLanguage() noexcept -> std::wstring;
 
 	[[nodiscard]] auto HresultFromWin32() noexcept -> HRESULT;
 
@@ -170,16 +170,4 @@ export namespace PGUI
 	auto HResultToString(HRESULT hresult) noexcept -> std::wstring;
 
 	auto WinErrToString(DWORD errorCode) noexcept -> std::wstring;
-
-	template <typename T, std::floating_point U>
-	[[nodiscard]] auto AdjustForDpi(T value, U dpi) noexcept -> T
-	{
-		return static_cast<T>(value * dpi / DEFAULT_SCREEN_DPI_T<U>);
-	}
-
-	template <typename T, std::floating_point U>
-	[[nodiscard]] auto RemoveDpiAdjustment(T value, U dpi) noexcept -> T
-	{
-		return static_cast<T>(value * DEFAULT_SCREEN_DPI_T<U> / dpi);
-	}
 }

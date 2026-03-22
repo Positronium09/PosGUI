@@ -17,7 +17,7 @@ export namespace PGUI::DataBinding
 
 		ValidatedProperty(
 			const T& value, 
-			const std::initializer_list<Validator>& validators) noexcept(std::is_nothrow_copy_constructible_v<T>) :
+			const std::initializer_list<Validator> validators) noexcept(std::is_nothrow_copy_constructible_v<T>) :
 			Property<T, Mutex>{ value }, validators{ validators }
 		{ }
 
@@ -45,7 +45,7 @@ export namespace PGUI::DataBinding
 			validators.clear();
 		}
 
-		auto Set(const T& newValue) -> void override
+		auto Set(const T& newValue) noexcept(std::is_nothrow_copy_assignable_v<T>) -> void override
 		{
 			if (IsValueValid(newValue))
 			{
@@ -53,11 +53,11 @@ export namespace PGUI::DataBinding
 			}
 		}
 
-		auto Set(T&& newValue) -> void override
+		auto Set(T&& newValue) noexcept(std::is_nothrow_move_assignable_v<T>) -> void override
 		{
 			if (IsValueValid(newValue))
 			{
-				Property<T, Mutex>::Set(newValue);
+				Property<T, Mutex>::Set(std::move(newValue));
 			}
 		}
 
@@ -105,7 +105,7 @@ export namespace PGUI::DataBinding
 		{
 			if (this != &other)
 			{
-				Set(std::move(other.Get()));
+				Set(other.MoveValue());
 			}
 			return *this;
 		}
@@ -114,7 +114,7 @@ export namespace PGUI::DataBinding
 		{
 			if (this != &other)
 			{
-				Set(std::move(other.Get()));
+				Set(other.MoveValue());
 			}
 			return *this;
 		}
@@ -132,13 +132,6 @@ export namespace PGUI::DataBinding
 		std::vector<Validator> validators{ };
 
 		[[nodiscard]] auto IsValueValid(const T& value) const
-		{
-			return std::ranges::all_of(validators, [&value](const auto& validator)
-			{
-				return std::invoke(validator, value);
-			});
-		}
-		[[nodiscard]] auto IsValueValid(T&& value) const
 		{
 			return std::ranges::all_of(validators, [&value](const auto& validator)
 			{

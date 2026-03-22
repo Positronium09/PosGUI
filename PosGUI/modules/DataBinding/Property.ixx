@@ -64,9 +64,10 @@ export namespace PGUI::DataBinding
 			value{ other.Get() }
 		{ }
 
-		Property(Property&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
-			value{ std::move(other.Get()) }
-		{ }
+		Property(Property&& other) noexcept(std::is_nothrow_move_constructible_v<T>) : 
+			value{ other.MoveValue() }
+		{
+		}
 
 		virtual ~Property() = default;
 
@@ -75,7 +76,6 @@ export namespace PGUI::DataBinding
 			if (this != &other)
 			{
 				Set(other.Get());
-				valueChangedEvent.Invoke(Get());
 			}
 			return *this;
 		}
@@ -84,8 +84,7 @@ export namespace PGUI::DataBinding
 		{
 			if (this != &other)
 			{
-				Set(std::move(other.Get()));
-				valueChangedEvent.Invoke(Get());
+				Set(other.MoveValue());
 			}
 			return *this;
 		}
@@ -95,7 +94,7 @@ export namespace PGUI::DataBinding
 			return AccessorProxy{ value, mutex };
 		}
 
-		virtual auto Set(const T& newValue) -> void
+		virtual auto Set(const T& newValue) noexcept(std::is_nothrow_copy_assignable_v<T>) -> void
 		{
 			{
 				std::scoped_lock lock{ mutex };
@@ -111,7 +110,7 @@ export namespace PGUI::DataBinding
 			valueChangedEvent.Invoke(Get());
 		}
 
-		virtual auto Set(T&& newValue) -> void
+		virtual auto Set(T&& newValue) noexcept(std::is_nothrow_move_assignable_v<T>) -> void
 		{
 			{
 				std::scoped_lock lock{ mutex };
@@ -125,6 +124,12 @@ export namespace PGUI::DataBinding
 				value = std::move(newValue);
 			}
 			valueChangedEvent.Invoke(Get());
+		}
+
+		auto MoveValue() noexcept(std::is_nothrow_move_constructible_v<T>) -> T
+		{
+			std::scoped_lock lock{ mutex };
+			return std::move(value);
 		}
 
 		auto AddObserver(CallbackType<const AccessorProxy&> auto callback) noexcept
@@ -142,15 +147,15 @@ export namespace PGUI::DataBinding
 			valueChangedEvent.ClearCallbacks();
 		}
 
-		virtual auto operator=(const T& val) noexcept -> Property&
+		virtual auto operator=(const T& val) noexcept(std::is_nothrow_copy_assignable_v<T>) -> Property&
 		{
 			Set(val);
 			return *this;
 		}
 
-		virtual auto operator=(T&& val) noexcept -> Property&
+		virtual auto operator=(T&& val) noexcept(std::is_nothrow_move_assignable_v<T>) -> Property&
 		{
-			Set(val);
+			Set(std::move(val));
 			return *this;
 		}
 
@@ -159,7 +164,7 @@ export namespace PGUI::DataBinding
 			return *Get() == val;
 		}
 
-		virtual auto operator<=>(const T& val) const noexcept -> decltype(std::declval<const T&>() <=> std::declval<const T&>())
+		virtual auto operator<=>(const T& val) const noexcept -> std::compare_three_way_result_t<T>
 		{
 			return *Get() <=> val;
 		}

@@ -29,15 +29,15 @@ export namespace PGUI
 	}
 
 	template <EnumFlag T>
-	[[nodiscard]] constexpr auto IsFlagSet(const T var, const T flag)
+	[[nodiscard]] constexpr auto IsFlagSet(const T var, const T flag) noexcept
 	{
 		return (var & flag) != ZeroFlag<T>();
 	}
 	template <EnumFlag T>
-    [[nodiscard]] constexpr auto AreAllFlagsSet(const T var, const T flag)
-    {
-        return (var & flag) == flag;
-    }
+	[[nodiscard]] constexpr auto AreAllFlagsSet(const T var, const T flag) noexcept
+	{
+		return (var & flag) == flag;
+	}
 
 	template <Enumeration T>
 	constexpr auto ToUnderlying(const T val) noexcept
@@ -52,7 +52,7 @@ export namespace PGUI
 	}
 
 	template <EnumFlag T>
-	constexpr auto SetFlag(T& var, const T flag) -> void
+	constexpr auto SetFlag(T& var, const T flag) noexcept -> void
 	{
 		var |= flag;
 	}
@@ -67,7 +67,7 @@ export namespace PGUI
 		var &= ~flag;
 	}
 	template <EnumFlag T>
-	constexpr auto ClearEnum(T& var) -> void
+	constexpr auto ClearEnum(T& var) noexcept -> void
 	{
 		var = ZeroFlag<T>();
 	}

@@ -4,52 +4,40 @@ module;
 
 export module PGUI.Factories:D2DFactory;
 
+import std;
+
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
-export namespace PGUI::Factories
+namespace PGUI::Factories::D2DFactory::Details
 {
-	class D2DFactory
+	ComPtr<ID2D1Factory8> factory{ nullptr };
+	std::once_flag initFlag;
+}
+
+export namespace PGUI::Factories::D2DFactory
+{
+	[[nodiscard]] auto GetFactory() -> const ComPtr<ID2D1Factory8>&
 	{
-		public:
-		D2DFactory() = delete;
-
-		D2DFactory(const D2DFactory&) = delete;
-
-		auto operator=(const D2DFactory&) -> D2DFactory & = delete;
-
-		D2DFactory(D2DFactory&&) = delete;
-
-		auto operator=(D2DFactory&&) -> D2DFactory & = delete;
-
-		~D2DFactory() = default;
-
-		[[nodiscard]] static auto GetFactory()
+		std::call_once(Details::initFlag, []
 		{
-			if (!factory)
+			constexpr D2D1_FACTORY_OPTIONS options{
+				#ifdef _DEBUG
+				.debugLevel = D2D1_DEBUG_LEVEL_ERROR
+				#endif
+			};
+
+			if (const auto hr = D2D1CreateFactory(
+				D2D1_FACTORY_TYPE_SINGLE_THREADED,
+				options, Details::factory.put());
+				FAILED(hr))
 			{
-				constexpr D2D1_FACTORY_OPTIONS options{ 
-					#ifdef _DEBUG
-					.debugLevel = D2D1_DEBUG_LEVEL_ERROR
-					#endif
-				};
-
-
-				if (const auto hr = D2D1CreateFactory(
-					D2D1_FACTORY_TYPE_SINGLE_THREADED,
-					options, factory.put());
-					FAILED(hr))
-				{
-					const Error error{ hr };
-					Logger::Critical(error, L"Failed to create Direct2D factory");
-					throw Exception{ error };
-				}
+				const Error error{ hr };
+				Logger::Critical(error, L"Failed to create Direct2D factory");
+				throw Exception{ error };
 			}
+		});
 
-			return factory;
-		}
-
-		private:
-		static inline ComPtr<ID2D1Factory8> factory = nullptr;
-	};
+		return Details::factory;
+	}
 }

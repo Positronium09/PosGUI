@@ -54,7 +54,7 @@ export namespace PGUI
 			Rect<float>{ rrc.rect }, xRadius{ rrc.radiusX }, yRadius{ rrc.radiusY }
 		{ }
 
-		constexpr auto MoveAndResize(const RectF rect) noexcept -> void
+		constexpr auto SetRect(const RectF rect) noexcept -> void
 		{
 			left = rect.left;
 			top = rect.top;
@@ -64,9 +64,9 @@ export namespace PGUI
 
 		[[nodiscard]] constexpr auto operator==(const RoundedRect& other) const noexcept -> bool = default;
 
-		explicit(false) operator D2D1_ROUNDED_RECT() const noexcept
+		explicit(false) constexpr operator D2D1_ROUNDED_RECT() const noexcept
 		{
-			return D2D1_ROUNDED_RECT{ *this, xRadius, yRadius };
+			return D2D1_ROUNDED_RECT{ static_cast<D2D1_RECT_F>(*this), xRadius, yRadius };
 		}
 	};
 }

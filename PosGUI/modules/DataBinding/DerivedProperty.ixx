@@ -13,8 +13,8 @@ export namespace PGUI::DataBinding
 	{
 		public:
 		template <typename Deriver, typename... Dependencies>
-			requires std::invocable<Deriver, const typename Dependencies::ValueType&...> &&
-			         std::convertible_to<std::invoke_result_t<Deriver, const typename Dependencies::ValueType&...>, T>
+			requires std::invocable<Deriver, const Dependencies::ValueType&...> &&
+			         std::convertible_to<std::invoke_result_t<Deriver, const Dependencies::ValueType&...>, T>
 		explicit DerivedProperty(const Deriver& deriver,
 		                         Dependencies&... dependencies) noexcept
 		{
@@ -23,29 +23,35 @@ export namespace PGUI::DataBinding
 				Property<T, Mutex>::Set(deriver(dependencies.Get()...));
 			};
 
-			(dependencies.AddObserver([update](const auto&) { update(); }), ...);
+			(unsubscribers.push_back(
+				[&dep = dependencies, 
+				id = dependencies.AddObserver([update](const auto&) { update(); })]
+			{
+				dep.RemoveObserver(id);
+			}), ...);
 			update();
 		};
 
-		DerivedProperty(const DerivedProperty& other) noexcept(std::is_nothrow_copy_constructible_v<T>) :
-			Property<T, Mutex>{ other }
-		{ }
+		DerivedProperty(const DerivedProperty&) noexcept = delete;
+		DerivedProperty(DerivedProperty&&) noexcept = delete;
+		auto operator=(const DerivedProperty&) noexcept -> DerivedProperty&  = delete;
+		auto operator=(DerivedProperty&&) noexcept -> DerivedProperty& = delete;
 
-		DerivedProperty(DerivedProperty&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
-			Property<T, Mutex>{ std::move(other) }
-		{ }
-
-		~DerivedProperty() override = default;
-
-		explicit(false) operator const T&() const { return Property<T, Mutex>::Get(); }
+		~DerivedProperty() override
+		{
+			for (auto& unsubscriber : unsubscribers)
+			{
+				unsubscriber();
+			}
+		}
 
 		template <typename OtherMutex>
 		auto operator==(const Property<T, OtherMutex>& other) const noexcept -> bool
 		{
-			return Property<T, Mutex>::operator==(other);
+			return Property<T, Mutex>::operator==(other.Get());
 		}
 
-		auto operator==(const T& val) const noexcept -> bool
+		auto operator==(const T& val) const noexcept -> bool override
 		{
 			return Property<T, Mutex>::operator==(val);
 		}
@@ -53,15 +59,19 @@ export namespace PGUI::DataBinding
 		template <typename OtherMutex>
 		auto operator<=>(const Property<T, OtherMutex>& other) const noexcept
 		{
-			return Property<T, Mutex>::operator<=>(other);
+			return Property<T, Mutex>::operator<=>(other.Get());
 		}
 
-		auto operator<=>(const T& val) const noexcept
+		auto operator<=>(const T& val) const noexcept -> std::compare_three_way_result_t<T> override
 		{
 			return Property<T, Mutex>::operator<=>(val);
 		}
+
+		private:
+		std::vector<std::move_only_function<void()>> unsubscribers;
 	};
 
 	template <typename T>
 	using DerivedPropertyNM = DerivedProperty<T, Mutex::NullMutex>;
 }
+

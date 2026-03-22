@@ -6,7 +6,7 @@ import :Point;
 
 export namespace PGUI
 {
-	template <typename T> requires std::floating_point<T>
+	template <std::floating_point T>
 	struct LineSegment
 	{
 		Point<T> start{ };
@@ -35,8 +35,13 @@ export namespace PGUI
 			return (end.y - start.y) / (end.x - start.x);
 		}
 
-		[[nodiscard]] constexpr auto YIntercept() const noexcept
+		[[nodiscard]] auto YIntercept() const noexcept
 		{
+			if (IsVertical())
+			{
+				return std::numeric_limits<T>::infinity();
+			}
+
 			return start.y - Slope() * start.x;
 		}
 
@@ -45,14 +50,14 @@ export namespace PGUI
 			return -YIntercept() / Slope();
 		}
 
-		[[nodiscard]] constexpr auto IsVertical() const noexcept
+		[[nodiscard]] auto IsVertical() const noexcept
 		{
 			return std::isinf(Slope());
 		}
 
-		[[nodiscard]] constexpr auto IsHorizontal() const noexcept
+		[[nodiscard]] auto IsHorizontal() const noexcept
 		{
-			return Slope() < std::numeric_limits<T>::epsilon();
+			return std::abs(Slope()) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] constexpr auto Midpoint() const noexcept
@@ -65,13 +70,22 @@ export namespace PGUI
 			return std::atan2(end.y - start.y, end.x - start.x);
 		}
 
-		[[nodiscard]] auto IsParallel(const LineSegment lineSegment) const noexcept
+		[[nodiscard]] auto IsParallel(const LineSegment& lineSegment) const noexcept
 		{
+			if (IsVertical() && lineSegment.IsVertical())
+			{
+				return true;
+			}
 			return std::abs(Slope() - lineSegment.Slope()) < std::numeric_limits<T>::epsilon();
 		}
 
-		[[nodiscard]] auto IsPerpendicular(const LineSegment lineSegment) const noexcept
+		[[nodiscard]] auto IsPerpendicular(const LineSegment& lineSegment) const noexcept
 		{
+			if (IsVertical() && lineSegment.IsHorizontal() || 
+				IsHorizontal() && lineSegment.IsVertical())
+			{
+				return true;
+			}
 			return std::abs(Slope() * lineSegment.Slope() + 1) < std::numeric_limits<T>::epsilon();
 		}
 
@@ -85,11 +99,27 @@ export namespace PGUI
 		{
 			if (IsParallel(lineSegment))
 			{
-				return std::monostate{ };
+				return std::unexpected{ std::monostate{ } };
 			}
+			
+			T x;
+			T y;
 
-			auto x = (lineSegment.YIntercept() - YIntercept()) / (Slope() - lineSegment.Slope());
-			auto y = Slope() * x + YIntercept();
+			if (IsVertical())
+			{
+				x = start.x;
+				y = lineSegment.Slope() * x + lineSegment.YIntercept();
+			}
+			else if (lineSegment.IsVertical())
+			{
+				x = lineSegment.start.x;
+				y = Slope() * x + YIntercept();
+			}
+			else
+			{
+				x = (lineSegment.YIntercept() - YIntercept()) / (Slope() - lineSegment.Slope());
+				y = Slope() * x + YIntercept();
+			}
 
 			if (auto intersection = Point{ x, y };
 				IsOnLineSegment(intersection) && lineSegment.IsOnLineSegment(intersection))
@@ -97,7 +127,7 @@ export namespace PGUI
 				return intersection;
 			}
 
-			return std::unexpected(std::monostate{ });
+			return std::unexpected{ std::monostate{ } };
 		}
 
 		[[nodiscard]] constexpr auto operator+(const Point<T>& point) const noexcept

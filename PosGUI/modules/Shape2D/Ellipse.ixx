@@ -56,7 +56,7 @@ export namespace PGUI
 			return Ellipse{ center / scale, xRadius / scale, yRadius / scale };
 		}
 
-		explicit(false) operator D2D1_ELLIPSE() const noexcept
+		explicit(false) constexpr operator D2D1_ELLIPSE() const noexcept
 		{
 			return D2D1_ELLIPSE{ center, xRadius, yRadius };
 		}
@@ -65,10 +65,6 @@ export namespace PGUI
 	constexpr auto operator*(const float scale, const Ellipse& ellipse) noexcept -> Ellipse
 	{
 		return ellipse * scale;
-	}
-	constexpr auto operator/(const float scale, const Ellipse& ellipse) noexcept -> Ellipse
-	{
-		return ellipse / scale;
 	}
 }
 

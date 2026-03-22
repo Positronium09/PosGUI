@@ -41,6 +41,11 @@ export namespace PGUI
 			variable.get() = oldValue;
 		}
 
+		ScopedValue(const ScopedValue&) = delete;
+		auto operator=(const ScopedValue&) -> ScopedValue& = delete;
+		ScopedValue(ScopedValue&&) noexcept = delete;
+		auto operator=(ScopedValue&&) noexcept -> ScopedValue& = delete;
+
 		private:
 		std::reference_wrapper<T> variable;
 		T oldValue;

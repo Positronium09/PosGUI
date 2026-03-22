@@ -1,6 +1,5 @@
 module;
 #include <dwrite_3.h>
-#include <winrt/impl/Windows.System.1.h>
 
 module PGUI.UI.TextLayout;
 

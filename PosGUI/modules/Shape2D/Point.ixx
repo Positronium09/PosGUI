@@ -102,7 +102,7 @@ export namespace PGUI
 			return Point{ x / factor, y / factor };
 		}
 
-		[[nodiscard]] constexpr auto operator-() const noexcept
+		[[nodiscard]] constexpr auto operator-() const noexcept requires std::is_signed_v<T>
 		{
 			return Point{ -x, -y };
 		}
@@ -133,8 +133,10 @@ export namespace PGUI
 			const long double angleRadians = angleDegrees / 180.0 * std::numbers::pi;
 			const long double prevX = x;
 			const long double prevY = y;
-			x = static_cast<T>(prevX * std::cosl(angleRadians) - prevY * std::sinl(angleRadians));
-			y = static_cast<T>(prevX * std::sinl(angleRadians) + prevY * std::cosl(angleRadians));
+			const auto cos = std::cosl(angleRadians);
+			const auto sin = std::sinl(angleRadians);
+			x = static_cast<T>(prevX * cos - prevY * sin);
+			y = static_cast<T>(prevX * sin + prevY * cos);
 
 			x += point.x;
 			y += point.y;
@@ -208,24 +210,6 @@ export namespace PGUI
 	[[nodiscard]] constexpr auto operator*(T factor, const Point<T>& v) noexcept
 	{
 		return Point<T>(v.x * factor, v.y * factor);
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator/(T factor, const Point<T>& v) noexcept
-	{
-		return Point<T>(v.x / factor, v.y / factor);
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator*(const Point<T>& v, T factor) noexcept
-	{
-		return Point<T>(v.x * factor, v.y * factor);
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator/(const Point<T>& v, T factor) noexcept
-	{
-		return Point<T>(v.x / factor, v.y / factor);
 	}
 
 	using PointF = Point<float>;

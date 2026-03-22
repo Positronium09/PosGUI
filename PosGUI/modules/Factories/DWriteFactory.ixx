@@ -8,42 +8,30 @@ import std;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
-export namespace PGUI::Factories
+namespace PGUI::Factories::DWriteFactory::Details
 {
-	class DWriteFactory
+	ComPtr<IDWriteFactory8> factory{ nullptr };
+	std::once_flag initFlag;
+}
+
+export namespace PGUI::Factories::DWriteFactory
+{
+	[[nodiscard]] auto GetFactory() -> const ComPtr<IDWriteFactory8>&
 	{
-		public:
-		DWriteFactory() = delete;
-
-		DWriteFactory(const DWriteFactory&) = delete;
-
-		auto operator=(const DWriteFactory&) -> DWriteFactory & = delete;
-
-		DWriteFactory(DWriteFactory&&) = delete;
-
-		auto operator=(DWriteFactory&&) -> DWriteFactory & = delete;
-
-		~DWriteFactory() = default;
-
-		[[nodiscard]] static auto GetFactory()
+		std::call_once(Details::initFlag, []
 		{
-			if (!directWriteFactory)
+			if (const auto hr = DWriteCreateFactory(
+				DWRITE_FACTORY_TYPE_SHARED,
+				GetIID<IDWriteFactory8>(),
+				Details::factory.put_unknown());
+				FAILED(hr))
 			{
-				if (const auto hr = DWriteCreateFactory(
-					DWRITE_FACTORY_TYPE_SHARED,
-					GetIID(directWriteFactory),
-					directWriteFactory.put_unknown());
-					FAILED(hr))
-				{
-					const Error error{ hr };
-					Logger::Critical(error, L"Failed to create DirectWrite factory");
-					throw Exception{ error };
-				}
+				const Error error{ hr };
+				Logger::Critical(error, L"Failed to create DirectWrite factory");
+				throw Exception{ error };
 			}
-			return directWriteFactory;
-		}
+		});
 
-		private:
-		static inline ComPtr<IDWriteFactory8> directWriteFactory = nullptr;
-	};
+		return Details::factory;
+	}
 }

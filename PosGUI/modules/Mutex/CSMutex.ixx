@@ -13,7 +13,7 @@ export namespace PGUI::Mutex
 			InitializeCriticalSectionEx(&criticalSection, spinCount, 0);
 		}
 		CSMutex(const CSMutex&) = delete;
-		auto operator=(CSMutex&) -> CSMutex& = delete;
+		auto operator=(const CSMutex&) -> CSMutex& = delete;
 		CSMutex(CSMutex&& other) noexcept = delete;
 		auto operator=(CSMutex&& other) noexcept -> CSMutex& = delete;
 
@@ -32,7 +32,7 @@ export namespace PGUI::Mutex
 		// ReSharper disable once CppInconsistentNaming
 		auto try_lock() noexcept -> bool
 		{
-			return TryEnterCriticalSection(&criticalSection) != ERROR_SUCCESS;
+			return TryEnterCriticalSection(&criticalSection) != 0;
 		}
 		private:
 		CRITICAL_SECTION criticalSection;

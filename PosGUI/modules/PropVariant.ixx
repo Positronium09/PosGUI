@@ -57,11 +57,11 @@ export namespace PGUI
 		std::nullptr_t,
 		CHAR, UCHAR,
 		SHORT, USHORT,
-		INT, UINT,
+		INT, UINT, 
+		LONG, ULONG, // SCODE is LONG
 		LARGE_INTEGER, ULARGE_INTEGER,
 		FLOAT, DOUBLE, // DATE is DOUBLE
-		bool, SCODE,
-		CY, FILETIME,
+		bool, CY, FILETIME,
 		CLSID*, CLIPDATA*,
 		BLOB, std::string, std::wstring, // BSTR is LPWSTR
 		IUnknown*, IDispatch*,
@@ -72,7 +72,7 @@ export namespace PGUI
 		SHORT*, USHORT*, INT*, UINT*,
 		LARGE_INTEGER*, ULARGE_INTEGER*,
 		FLOAT*, DOUBLE*,
-		bool*, SCODE*,
+		bool*, LONG*,
 		CY*, FILETIME*, BSTR*,
 		IUnknown**, IDispatch**,
 		DECIMAL*, LPSAFEARRAY*,

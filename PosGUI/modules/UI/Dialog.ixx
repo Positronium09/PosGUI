@@ -95,8 +95,8 @@ export namespace PGUI::UI
 			}
 
 			SendMessageW(window->Hwnd(), WM_INITDIALOG,
-			             std::bit_cast<WPARAM>(window->Hwnd()),
-			             std::bit_cast<LPARAM>(window.get()));
+			             std::bit_cast<Argument1>(window->Hwnd()),
+			             std::bit_cast<Argument2>(window.get()));
 
 			//window->CenterAroundParent();
 
@@ -111,7 +111,7 @@ export namespace PGUI::UI
 		explicit Dialog(const WindowClassPtr& wndClass) noexcept;
 
 		private:
-		[[nodiscard]] static auto OnInitDialog(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+		[[nodiscard]] static auto OnInitDialog(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 	};
 
 	using ModelessDialog = Dialog;
@@ -129,6 +129,6 @@ export namespace PGUI::UI
 		bool shouldClose = false;
 		std::atomic_ref<bool> shouldCloseAtomic = std::atomic_ref(shouldClose);
 
-		auto OnClose(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+		auto OnClose(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 	};
 }

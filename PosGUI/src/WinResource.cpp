@@ -12,6 +12,16 @@ import PGUI.ErrorHandling;
 
 namespace PGUI::Resource
 {
+	[[nodiscard]] auto GetResourceIDString(const ResourceID& id) noexcept -> std::wstring
+	{
+		if (id.IsIntResource())
+		{
+			return std::to_wstring(reinterpret_cast<ULONG_PTR>(static_cast<const wchar_t*>(id)));
+		}
+
+		return std::wstring{ id };
+	}
+
 	auto LoadFromModule(const HMODULE moduleHandle, const ResourceID& id,
 	                    const ResourceType& type) noexcept -> Result<RawDataModulePair>
 	{
@@ -22,7 +32,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 		auto* hGlobal = LoadResource(moduleHandle, sourceHandle);
@@ -32,7 +42,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 		const auto size = static_cast<std::size_t>(SizeofResource(moduleHandle, sourceHandle));
@@ -42,7 +52,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 
@@ -53,7 +63,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 
@@ -74,7 +84,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 
@@ -93,7 +103,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 
@@ -113,7 +123,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 
@@ -133,7 +143,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 
@@ -151,7 +161,7 @@ namespace PGUI::Resource
 				Error{
 					GetLastError(),
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
-				 .AddDetail(L"Resource ID", static_cast<const wchar_t*>(id))
+				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};
 		}
 
@@ -174,7 +184,7 @@ namespace PGUI::Resource
 		}
 
 		std::wstring buffer(count + 1, L'\0');
-		if (const auto copied = LoadStringW(moduleHandle, id, buffer.data(), count);
+		if (const auto copied = LoadStringW(moduleHandle, id, buffer.data(), count + 1);
 			copied != count)
 		{
 			return Unexpected{

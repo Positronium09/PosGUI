@@ -37,7 +37,7 @@ export namespace PGUI
 			CallbackPriority priority;
 			Callback callback;
 
-			auto operator<=>(const CallbackData& other) const noexcept -> std::partial_ordering
+			auto operator<=>(const CallbackData& other) const noexcept -> auto
 			{
 				if (const auto cmp = std::to_underlying(priority) <=> std::to_underlying(other.priority);
 					cmp != 0)
@@ -121,12 +121,15 @@ export namespace PGUI
 					if (std::holds_alternative<CancellingCallback>(callbackCopy))
 					{
 						auto& cancellingCallback = std::get<CancellingCallback>(callbackCopy);
-						cancellingCallback(std::forward<Args>(argsCopy)...);
+						if (!cancellingCallback(argsCopy...))
+						{
+							// Asynchronous invocation cannot be cancelled
+						}
 					}
 					else
 					{
 						auto& nonCancellingCallback = std::get<NonCancellingCallback>(callbackCopy);
-						nonCancellingCallback(std::forward<Args>(argsCopy)...);
+						nonCancellingCallback(argsCopy...);
 					}
 				}();
 			}
@@ -176,29 +179,40 @@ export namespace PGUI
 	template <typename MutexType, typename... Args>
 	class ScopedCallback final
 	{
-		using EventType = Event<MutexType, Args...>;
+		using EventType = EventT<MutexType, Args...>;
 
 		public:
 		ScopedCallback(EventType& event, const CallbackId id) noexcept :
-			event{ event }, id{ id }
+			event{ std::ref(event) }, id{ id }
 		{
 		}
 
 		~ScopedCallback() noexcept
 		{
-			event.RemoveCallback(id);
+			if (event.has_value())
+			{
+				event->get().RemoveCallback(id);
+			}
 		}
 
-		ScopedCallback(ScopedCallback&&) = default;
+		ScopedCallback(ScopedCallback&& other) noexcept : 
+			event{ std::exchange(other.event, std::nullopt) }, id{ other.id }
+		{
+		}
+		auto operator=(ScopedCallback&& other) noexcept -> ScopedCallback&
+		{
+			std::swap(event, other.event);
+			std::swap(id, other.id);
 
-		auto operator=(ScopedCallback&&) -> ScopedCallback& = default;
+			return *this;
+		}
 
 		ScopedCallback(const ScopedCallback&) = delete;
 
 		auto operator=(const ScopedCallback&) -> ScopedCallback& = delete;
 
 		private:
-		EventType& event;
+		std::optional<std::reference_wrapper<EventType>> event = std::nullopt;
 		CallbackId id{ };
 	};
 }

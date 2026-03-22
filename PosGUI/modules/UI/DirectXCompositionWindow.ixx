@@ -52,6 +52,7 @@ export namespace PGUI::UI
 		[[nodiscard]] static auto& D3D11Device() noexcept { return d3d11Device; }
 		[[nodiscard]] static auto& DXGIDevice() noexcept { return dxgiDevice; }
 		[[nodiscard]] static auto& DCompositionDevice() noexcept { return dCompositionDevice; }
+		[[nodiscard]] static auto& DCompositionSurfaceFactory() noexcept { return dCompositionSurfaceFactory; }
 		[[nodiscard]] static auto& D2D1Device() noexcept { return d2d1Device; }
 
 		[[nodiscard]] auto GetGraphics() const noexcept
@@ -95,6 +96,7 @@ export namespace PGUI::UI
 		inline static ComPtr<ID3D11Device2> d3d11Device;
 		inline static ComPtr<IDXGIDevice4> dxgiDevice;
 		inline static ComPtr<IDCompositionDevice5> dCompositionDevice;
+		inline static ComPtr<IDCompositionSurfaceFactory> dCompositionSurfaceFactory;
 		inline static ComPtr<ID2D1Device7> d2d1Device;
 
 		HMONITOR currentMonitor;
@@ -123,10 +125,10 @@ export namespace PGUI::UI
 			InitDevices();
 		}
 
-		auto OnNCCreate(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		auto OnNCCreate(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
 
-		auto OnWindowPosChanged(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+		auto OnWindowPosChanged(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 
-		auto OnPaint(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		auto OnPaint(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
 	};
 }

@@ -7,7 +7,7 @@ import std;
 
 import PGUI.Shape2D;
 import PGUI.Window;
-import PGUI.UI.DirectXCompositionWindow;
+import PGUI.UI.UICore;
 import PGUI.WindowClass;
 import PGUI.UI.Color;
 import PGUI.UI.Brush;
@@ -17,7 +17,7 @@ import PGUI.UI.Animation;
 
 export namespace PGUI::UI
 {
-	class AppWindow : public DirectXCompositionWindow, public Theming::ThemeAware<Theming::AppWindowStyle>
+	class AppWindow : public UIHost, public Theming::ThemeAware<Theming::AppWindowStyle>
 	{
 		public:
 		AppWindow() noexcept;
@@ -73,18 +73,16 @@ export namespace PGUI::UI
 		bool isFullScreen = false;
 		SizeI minSize = SizeI{ 300, 300 };
 
-		auto OnNCCreate(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+		auto OnNCCreate(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 
-		auto OnSetText(UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> MessageHandlerResult;
+		auto OnSetText(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 
-		[[nodiscard]] auto OnGetText(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
+		[[nodiscard]] auto OnGetText(MessageID msg, Argument1 arg1, Argument2 arg2) const noexcept -> MessageHandlerResult;
 
-		[[nodiscard]] auto OnGetTextLength(UINT msg, WPARAM wParam,
-		                                   LPARAM lParam) const noexcept -> MessageHandlerResult;
+		[[nodiscard]] auto OnGetTextLength(MessageID msg, Argument1 arg1, Argument2 arg2) const noexcept -> MessageHandlerResult;
 
-		[[nodiscard]] auto OnGetMinMaxInfo(UINT msg, WPARAM wParam,
-		                                   LPARAM lParam) const noexcept -> MessageHandlerResult;
+		[[nodiscard]] auto OnGetMinMaxInfo(MessageID msg, Argument1 arg1, Argument2 arg2) const noexcept -> MessageHandlerResult;
 
-		[[nodiscard]] auto OnLButtonDown(UINT msg, WPARAM wParam, LPARAM lParam) const noexcept -> MessageHandlerResult;
+		[[nodiscard]] auto OnLButtonDown(MessageID msg, Argument1 arg1, Argument2 arg2) const noexcept -> MessageHandlerResult;
 	};
 }

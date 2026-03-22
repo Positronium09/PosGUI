@@ -5,8 +5,14 @@ export module PGUI.Utils:WindowsUtils;
 
 import std;
 
+import PGUI.Shape2D;
+
 export
 {
+	using MessageID = UINT;
+	using Argument1 = std::uintptr_t;
+	using Argument2 = std::intptr_t;
+
 	template <typename T = float> requires std::is_arithmetic_v<T>
 	constexpr auto DEFAULT_SCREEN_DPI_T = static_cast<T>(USER_DEFAULT_SCREEN_DPI);
 
@@ -25,22 +31,22 @@ export
 		constexpr auto WM_CALCSCROLL = 0x003F;
 		// Handled by DefWindowProc
 		constexpr auto WM_UAHDESTROYWINDOW = 0x0090;
-		// lParam is UAHMENU
+		// arg2 is UAHMENU
 		constexpr auto WM_UAHDRAWMENU = 0x0091;
-		// lParam is UAHDRAWMENUITEM
+		// arg2 is UAHDRAWMENUITEM
 		constexpr auto WM_UAHDRAWMENUITEM = 0x0092;
 		// Handled by DefWindowProc
 		constexpr auto WM_UAHINITMENU = 0x0093;
-		// lParam is UAHMEASUREMENUITEM
+		// arg2 is UAHMEASUREMENUITEM
 		constexpr auto WM_UAHMEASUREMENUITEM = 0x0094;
 		// Handled by DefWindowProc
 		constexpr auto WM_UAHNCPAINTMENUPOPUP = 0x0095;
 		constexpr auto WM_UAHUPDATE = 0x0096;
 		// Draw Caption mode.
-		// wParam are DC_* flags.
+		// arg1 are DC_* flags.
 		constexpr auto WM_NCUAHDRAWCAPTION = 0x00AE;
 		// Draw Frame mode.
-		// wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
+		// arg1 is HDC, arg2 are DC_ACTIVE and or DC_REDRAWHUNGWND.
 		constexpr auto WM_NCUAHDRAWFRAME = 0x00AF;
 		constexpr auto EM_MSGMAX = 0x00DA;
 		constexpr auto WM_SYSTIMER = 0x0118;
@@ -118,6 +124,27 @@ export
 
 export namespace PGUI
 {
+	enum class SizeFlags
+	{
+		MaxHide = SIZE_MAXHIDE,
+		Maximized = SIZE_MAXIMIZED,
+		MaxShow = SIZE_MAXSHOW,
+		Minimized = SIZE_MINIMIZED,
+		Restored = SIZE_RESTORED
+	};
+
+	enum class SizingFlags
+	{
+		Bottom = WMSZ_BOTTOM,
+		BottomLeft = WMSZ_BOTTOMLEFT,
+		BottomRight = WMSZ_BOTTOMRIGHT,
+		Left = WMSZ_LEFT,
+		Right = WMSZ_RIGHT,
+		Top = WMSZ_TOP,
+		TopLeft = WMSZ_TOPLEFT,
+		TopRight = WMSZ_TOPRIGHT
+	};
+
 	[[nodiscard]] auto GetHInstance() -> HINSTANCE;
 
 	[[nodiscard]] auto GetUserLocaleName() noexcept -> std::wstring;
@@ -128,7 +155,15 @@ export namespace PGUI
 
 	[[nodiscard]] auto HresultFromWin32(DWORD errCode) noexcept -> HRESULT;
 
-	auto WindowMsgToText(UINT msg) noexcept -> std::wstring_view;
+	[[nodiscard]] auto ParseSizeMessage(Argument1 arg1, Argument2 arg2) noexcept -> std::pair<SizeFlags, SizeF>;
+
+	[[nodiscard]] auto ParseSizingMessage(Argument1 arg1, Argument2 arg2) noexcept -> std::pair<SizingFlags, RectF>;
+
+	[[nodiscard]] auto ParseMoveMessage(Argument2 arg2) noexcept -> PointF;
+
+	[[nodiscard]] auto ParseMovingMessage(Argument2 arg2) noexcept -> RectF;
+
+	auto WindowMsgToText(MessageID msg) noexcept -> std::wstring_view;
 
 	auto EnableDarkTitleBar(HWND hWnd, bool enable = true) noexcept -> void;
 

@@ -53,7 +53,7 @@ export namespace PGUI
 
 		ScopedTimer(const ScopedTimer&) = delete;
 		ScopedTimer(ScopedTimer&&) = delete;
-		auto operator=(const ScopedTimer&) -> ScopedTimer  = delete;
+		auto operator=(const ScopedTimer&) -> ScopedTimer&  = delete;
 		auto operator=(ScopedTimer&&) -> ScopedTimer& = delete;
 
 		private:

@@ -1084,7 +1084,34 @@ namespace PGUI
 		return HRESULT_FROM_WIN32(errCode);
 	}
 
-	auto WindowMsgToText(const UINT msg) noexcept -> std::wstring_view
+	auto ParseSizeMessage(const Argument1 arg1, const Argument2 arg2) noexcept -> std::pair<SizeFlags, SizeF>
+	{
+		return std::make_pair(
+			static_cast<SizeFlags>(arg1),
+			SizeF{
+				static_cast<float>(LOWORD(arg2)),
+				static_cast<float>(HIWORD(arg2))
+			});
+	}
+
+	auto ParseSizingMessage(Argument1 arg1, const Argument2 arg2) noexcept -> std::pair<SizingFlags, RectF>
+	{
+		return std::make_pair(
+			static_cast<SizingFlags>(arg1),
+			RectF{ *std::bit_cast<LPRECT>(arg2) });
+	}
+
+	auto ParseMoveMessage(Argument2 arg2) noexcept -> PointF
+	{
+		return PointF{ MAKEPOINTS(arg2) };
+	}
+
+	auto ParseMovingMessage(const Argument2 arg2) noexcept -> RectF
+	{
+		return *std::bit_cast<LPRECT>(arg2);
+	}
+
+	auto WindowMsgToText(const MessageID msg) noexcept -> std::wstring_view
 	{
 		if (msg == WM_USER + 7)
 		{

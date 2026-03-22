@@ -3,22 +3,26 @@
 
 export module PGUI.Mutex:KMutex;
 
+import std;
+
 export namespace PGUI::Mutex
 {
 	class KMutex final
 	{
 		public:
-		KMutex() noexcept
+		KMutex() noexcept : 
+			mutexHandle{ CreateMutexW(nullptr, false, nullptr) }
 		{
-			static_assert(true, "WIP");
-			mutexHandle = CreateMutexW(nullptr, false, nullptr);
+			if (!mutexHandle)
+			{
+				std::terminate();
+			}
 		}
 		KMutex(const KMutex&) = delete;
 		auto operator=(const KMutex&) -> KMutex & = delete;
 		KMutex(KMutex&& other) noexcept :
-			mutexHandle{ other.mutexHandle }
+			mutexHandle{ std::exchange(other.mutexHandle, nullptr) }
 		{
-			other.mutexHandle = nullptr;
 		}
 		auto operator=(KMutex&& other) noexcept -> KMutex &
 		{
@@ -28,8 +32,7 @@ export namespace PGUI::Mutex
 				{
 					CloseHandle(mutexHandle);
 				}
-				mutexHandle = other.mutexHandle;
-				other.mutexHandle = nullptr;
+				mutexHandle = std::exchange(other.mutexHandle, nullptr);
 			}
 
 			return *this;

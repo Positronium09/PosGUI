@@ -19,33 +19,14 @@ namespace PGUI
 		SetWindowLongPtrW(hWnd, WindowPointerOffset, std::bit_cast<LONG_PTR>(ptr));
 	}
 
-	Window::Window(const WindowClassPtr& windowClass) noexcept :
-		windowClass{ windowClass }
-	{
-		RegisterHandler(WM_DPICHANGED, &Window::_OnDpiChanged);
-		RegisterHandler(WM_DPICHANGED_AFTERPARENT, &Window::_OnDpiChanged);
-		RegisterHandler(WM_DPICHANGED_BEFOREPARENT, &Window::_OnDpiChanged);
-		RegisterHandler(WM_WINDOWPOSCHANGED, &Window::_OnWindowPosChanged);
-		RegisterHandler(WM_SIZE, &Window::_OnSize);
-		RegisterHandler(WM_MOVE, &Window::_OnMove);
-	}
-
 	Window::~Window() noexcept
 	{
 		std::ranges::for_each(timerMap | std::views::keys,
-			[this](const auto& id)
-		{
-			KillTimer(hWnd, id);
-		});
+		                      [this](const auto& id)
+		                      {
+			                      KillTimer(hWnd, id);
+		                      });
 		timerMap.clear();
-
-		std::ranges::for_each(childWindows,
-			[](const auto& childWindow)
-		{
-			childWindow->parentHwnd = nullptr;
-			childWindow->hWnd = nullptr;
-		});
-		childWindows.clear();
 
 		std::ranges::for_each(
 			beforeHookers,
@@ -75,18 +56,29 @@ namespace PGUI
 		}
 	}
 
+	Window::Window(const WindowClassPtr& windowClass) noexcept :
+		windowClass{ windowClass }
+	{
+		RegisterHandler(WM_DPICHANGED, &Window::_OnDpiChanged);
+		RegisterHandler(WM_DPICHANGED_AFTERPARENT, &Window::_OnDpiChanged);
+		RegisterHandler(WM_DPICHANGED_BEFOREPARENT, &Window::_OnDpiChanged);
+		RegisterHandler(WM_WINDOWPOSCHANGED, &Window::_OnWindowPosChanged);
+		RegisterHandler(WM_SIZE, &Window::_OnSize);
+		RegisterHandler(WM_MOVE, &Window::_OnMove);
+	}
+
 	// ReSharper disable CppInconsistentNaming
-	auto Window::_RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void
+	auto Window::_RegisterHandler(const MessageID msg, const HandlerHWND& handler) -> void
 	{
 		messageHandlerMap[msg].push_back(handler);
 	}
 
-	auto Window::_RegisterHandler(const UINT msg, const Handler& handler) -> void
+	auto Window::_RegisterHandler(const MessageID msg, const Handler& handler) -> void
 	{
 		messageHandlerMap[msg].push_back(handler);
 	}
 
-	auto Window::_OnDpiChanged(const UINT msg, const WPARAM, const LPARAM lParam) -> MessageHandlerResult
+	auto Window::_OnDpiChanged(const MessageID msg, const Argument1, const Argument2 arg2) -> MessageHandlerResult
 	{
 		LRESULT result = 0;
 		if (const auto error = logicalRect.SetDpi(GetDpi());
@@ -97,7 +89,7 @@ namespace PGUI
 
 		if (msg == WM_DPICHANGED)
 		{
-			logicalRect.SetPhysicalValue(*std::bit_cast<LPRECT>(lParam));
+			logicalRect.SetPhysicalValue(*std::bit_cast<LPRECT>(arg2));
 			result = OnDpiChanged(GetDpi());
 		}
 		else if (msg == WM_DPICHANGED_AFTERPARENT)
@@ -114,9 +106,9 @@ namespace PGUI
 		return result;
 	}
 
-	auto Window::_OnWindowPosChanged(UINT, WPARAM, const LPARAM lParam) -> MessageHandlerResult
+	auto Window::_OnWindowPosChanged(UINT, Argument1, const Argument2 arg2) -> MessageHandlerResult
 	{
-		const auto windowPos = *std::bit_cast<LPWINDOWPOS>(lParam);
+		const auto windowPos = *std::bit_cast<LPWINDOWPOS>(arg2);
 		const RectF windowRect{
 			static_cast<float>(windowPos.x),
 			static_cast<float>(windowPos.y),
@@ -145,17 +137,17 @@ namespace PGUI
 		if (!IsFlagSet(flags, PositionFlags::NoClientMove))
 		{
 			[[maybe_unused]]
-				const PointL point{
-					static_cast<long>(windowRect.left),
-					static_cast<long>(windowRect.top)
-			};
+					const PointL point{
+						static_cast<long>(windowRect.left),
+						static_cast<long>(windowRect.top)
+					};
 			OnMoved(logicalRect->TopLeft());
 			//SendMsg(WM_MOVE, NULL, MAKELONG(point.x, point.y));
 		}
 		if (!IsFlagSet(flags, PositionFlags::NoClientSize) || IsFlagSet(flags, PositionFlags::StateChanged))
 		{
 			[[maybe_unused]]
-			auto wparam = SIZE_RESTORED;
+					auto wparam = SIZE_RESTORED;
 			if (IsMinimized())
 			{
 				wparam = SIZE_MINIMIZED;
@@ -171,14 +163,14 @@ namespace PGUI
 		return 0;
 	}
 
-	auto Window::_OnSize(UINT, WPARAM, const LPARAM) -> MessageHandlerResult
+	auto Window::_OnSize(UINT, Argument1, const Argument2) -> MessageHandlerResult
 	{
 		OnSizeChanged(logicalRect->Size());
 
 		return 0;
 	}
 
-	auto Window::_OnMove(UINT, WPARAM, const LPARAM) -> MessageHandlerResult
+	auto Window::_OnMove(UINT, Argument1, const Argument2) -> MessageHandlerResult
 	{
 		OnMoved(logicalRect->TopLeft());
 
@@ -187,7 +179,204 @@ namespace PGUI
 
 	// ReSharper restore CppInconsistentNaming
 
-	auto Window::RemoveChildWindow(const HWND childHwnd) -> void
+	// ReSharper disable once CppInconsistentNaming
+	auto _WindowProc(HWND hWnd, MessageID msg, Argument1 arg1, Argument2 arg2) -> LRESULT
+	{
+		DebugTimer timer{
+			#ifdef _DEBUG
+			std::format(L"MSG {}", WindowMsgToText(msg))
+			#endif
+		};
+
+		if (msg == WM_NCCREATE) [[unlikely]]
+		{
+			const auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(arg2);
+			auto* window = std::bit_cast<Window*>(createStruct->lpCreateParams);
+
+			window->hWnd = hWnd;
+			window->parentHwnd = createStruct->hwndParent;
+			if (const auto error = window->logicalRect.SetDpi(window->GetDpi());
+				error.IsFailure())
+			{
+				Logger::Error(error, L"SetDpi failed in WM_NCCREATE");
+			}
+
+			SetWindowPtrToHWND(hWnd, window);
+		}
+
+		if (LRESULT result = 0;
+			DwmDefWindowProc(hWnd, msg, arg1, arg2, &result)) [[unlikely]]
+		{
+			return result;
+		}
+
+		const RawWindowPtr<Window> window = GetWindowPtrFromHWND(hWnd);
+		if (window == nullptr) [[unlikely]]
+		{
+			return DefWindowProcW(hWnd, msg, arg1, arg2);
+		}
+
+		if (msg == WM_TIMER)
+		{
+			if (const auto timerId = arg1;
+				window->timerMap.contains(timerId))
+			{
+				const auto& callback = window->timerMap.at(timerId);
+				callback(timerId);
+				return 0;
+			}
+		}
+
+		if (!window) [[unlikely]]
+		{
+			return DefWindowProcW(hWnd, msg, arg1, arg2);
+		}
+
+		MessageHandlerResult result{ 0 };
+		auto hookerHandled = false;
+
+		if (!window->beforeHookers.empty())
+		{
+			for (auto beforeHookers = window->beforeHookers;
+			     const auto& hooker : beforeHookers)
+			{
+				const auto& handlers = hooker.get().GetHandlers();
+				if (!handlers.contains(msg))
+				{
+					continue;
+				}
+
+				for (const auto& messageHandlers : handlers.at(msg))
+				{
+					std::visit([&]<typename Func>(const Func& handler)
+					{
+						using T = std::decay_t<Func>;
+						if constexpr (std::is_same_v<T, HandlerHWND>)
+						{
+							result = handler(hWnd, msg, arg1, arg2);
+						}
+						else if constexpr (std::is_same_v<T, Handler>)
+						{
+							result = handler(msg, arg1, arg2);
+						}
+					}, messageHandlers);
+
+					hookerHandled = true;
+
+					if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
+					{
+						return result.result;
+					}
+				}
+			}
+		}
+
+		if (!window->messageHandlerMap.contains(msg))
+		{
+			if (hookerHandled)
+			{
+				return result;
+			}
+			result = DefWindowProcW(hWnd, msg, arg1, arg2);
+		}
+		else
+		{
+			for (const auto& handlerVariant : window->messageHandlerMap.at(msg))
+			{
+				std::visit([&]<typename Func>(const Func& handler)
+				{
+					using T = std::decay_t<Func>;
+					if constexpr (std::is_same_v<T, HandlerHWND>)
+					{
+						result = handler(hWnd, msg, arg1, arg2);
+					}
+					else if constexpr (std::is_same_v<T, Handler>)
+					{
+						result = handler(msg, arg1, arg2);
+					}
+				}, handlerVariant);
+
+				if (IsFlagSet(result.flags, MessageHandlerReturnFlags::NoFurtherHandling)) [[unlikely]]
+				{
+					break;
+				}
+			}
+			if (IsFlagSet(result.flags, MessageHandlerReturnFlags::PassToDefProc)) [[unlikely]]
+			{
+				DefWindowProcW(hWnd, msg, arg1, arg2);
+			}
+		}
+
+		if (!window->afterHookers.empty())
+		{
+			for (auto afterHookers = window->afterHookers;
+			     const auto& hooker : afterHookers)
+			{
+				const auto& handlers = hooker.get().GetHandlers();
+				if (!handlers.contains(msg))
+				{
+					continue;
+				}
+
+				for (const auto& messageHandlers : handlers.at(msg))
+				{
+					std::visit([&]<typename Func>(const Func& handler)
+					{
+						using T = std::decay_t<Func>;
+						if constexpr (std::is_same_v<T, HandlerHWND>)
+						{
+							result = handler(hWnd, msg, arg1, arg2);
+						}
+						else if constexpr (std::is_same_v<T, Handler>)
+						{
+							result = handler(msg, arg1, arg2);
+						}
+					}, messageHandlers);
+
+					if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
+					{
+						return result.result;
+					}
+				}
+			}
+		}
+
+		if (msg == WM_NCCREATE) [[unlikely]]
+		{
+			const auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(arg2);
+			RectL rc = RectF{
+				           0,
+				           0,
+				           static_cast<float>(createStruct->cx),
+				           static_cast<float>(createStruct->cy)
+			           } * window->GetDpiScaleFactor();
+
+			AdjustWindowRectExForDpi(
+				std::bit_cast<LPRECT>(&rc),
+				window->GetStyle(),
+				FALSE,
+				window->GetExStyle(),
+				static_cast<UINT>(window->GetDpi()));
+
+			const PointF p{ static_cast<float>(createStruct->x), static_cast<float>(createStruct->y) };
+			const RectF rect{ p * window->GetDpiScaleFactor(), rc.Size() };
+
+			window->logicalRect.SetPhysicalValue(rect);
+
+			window->MoveAndResize(*window->logicalRect);
+		}
+
+		if (msg == WM_NCDESTROY) [[unlikely]]
+		{
+			SetWindowPtrToHWND(hWnd, nullptr);
+			window->hWnd = nullptr;
+			window->parentHwnd = nullptr;
+		}
+
+		return result;
+	}
+
+	auto Window::RemoveChildWindow(const HWND childHwnd) -> WindowPtr<>
 	{
 		const auto found = std::ranges::find_if(
 			childWindows,
@@ -198,9 +387,9 @@ namespace PGUI
 
 		if (found == childWindows.end())
 		{
-			return;
+			return nullptr;
 		}
-		const auto& childWindow = *found;
+		auto childWindow = std::move(*found);
 
 		SetParent(childHwnd, nullptr);
 		childWindow->parentHwnd = nullptr;
@@ -208,6 +397,8 @@ namespace PGUI
 
 		childWindows.erase(found);
 		OnChildRemoved(childHwnd);
+
+		return childWindow;
 	}
 
 	auto Window::GetParentWindow() const noexcept -> Window*
@@ -322,7 +513,7 @@ namespace PGUI
 	                      const std::optional<TimerCallback>& callback) noexcept -> TimerId
 	{
 		if (const auto setTimerId =
-			SetTimer(hWnd, id, static_cast<UINT>(delay.count()), nullptr);
+					SetTimer(hWnd, id, static_cast<UINT>(delay.count()), nullptr);
 			setTimerId == 0)
 		{
 			const auto error = GetLastError();
@@ -382,7 +573,7 @@ namespace PGUI
 		}
 	}
 
-	auto Window::GetChildWindow(const HWND hwnd) const noexcept -> WindowPtr<Window>
+	auto Window::GetChildWindow(const HWND hwnd) const noexcept -> RawWindowPtr<Window>
 	{
 		const auto result = std::ranges::find_if(childWindows, [hwnd](const auto& wnd)
 		{
@@ -394,10 +585,10 @@ namespace PGUI
 			return nullptr;
 		}
 
-		return *result;
+		return result->get();
 	}
 
-	auto Window::ChildWindowFromPoint(const PointF point) const noexcept -> WindowPtr<Window>
+	auto Window::ChildWindowFromPoint(const PointF point) const noexcept -> RawWindowPtr<Window>
 	{
 		auto hwnd = ::ChildWindowFromPoint(Hwnd(), LogicalToPhysical(point));
 
@@ -409,7 +600,7 @@ namespace PGUI
 				});
 			result != childWindows.end())
 		{
-			return *result;
+			return result->get();
 		}
 
 		return nullptr;
@@ -482,7 +673,7 @@ namespace PGUI
 		return PhysicalToLogical<RectF>(physical);
 	}
 
-	auto Window::CenterAroundWindow(const WindowPtr<>& wnd) noexcept -> void
+	auto Window::CenterAroundWindow(const RawWindowPtr<> wnd) noexcept -> void
 	{
 		if (wnd == nullptr)
 		{
@@ -544,6 +735,7 @@ namespace PGUI
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
 
+
 	auto Window::CenterAroundRect(const RectF rect) noexcept -> void
 	{
 		const auto center = rect.Center();
@@ -559,7 +751,6 @@ namespace PGUI
 
 		SetPosition(centeredWindowRect, PositionFlags::NoZOrder);
 	}
-
 
 	auto Window::CenterAroundParent() noexcept -> void
 	{
@@ -748,202 +939,5 @@ namespace PGUI
 	auto Window::MapRectToParent(const RectF rect) const noexcept -> RectF
 	{
 		return MapRect(parentHwnd, rect);
-	}
-
-	// ReSharper disable once CppInconsistentNaming
-	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
-	{
-		DebugTimer timer{
-			#ifdef _DEBUG
-			std::format(L"MSG {}", WindowMsgToText(msg))
-			#endif
-		};
-
-		if (msg == WM_NCCREATE) [[unlikely]]
-		{
-			const auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
-			auto* window = std::bit_cast<Window*>(createStruct->lpCreateParams);
-
-			window->hWnd = hWnd;
-			window->parentHwnd = createStruct->hwndParent;
-			if (const auto error = window->logicalRect.SetDpi(window->GetDpi());
-				error.IsFailure())
-			{
-				Logger::Error(error, L"SetDpi failed in WM_NCCREATE");
-			}
-
-			SetWindowPtrToHWND(hWnd, window);
-		}
-
-		if (LRESULT result = 0;
-			DwmDefWindowProc(hWnd, msg, wParam, lParam, &result)) [[unlikely]]
-		{
-			return result;
-		}
-
-		const RawWindowPtr<Window> window = GetWindowPtrFromHWND(hWnd);
-		if (window == nullptr) [[unlikely]]
-		{
-			return DefWindowProcW(hWnd, msg, wParam, lParam);
-		}
-
-		if (msg == WM_TIMER)
-		{
-			if (const auto timerId = wParam;
-				window->timerMap.contains(timerId))
-			{
-				const auto& callback = window->timerMap.at(timerId);
-				callback(timerId);
-				return 0;
-			}
-		}
-
-		if (!window) [[unlikely]]
-		{
-			return DefWindowProcW(hWnd, msg, wParam, lParam);
-		}
-
-		MessageHandlerResult result{ 0 };
-		auto hookerHandled = false;
-
-		if (!window->beforeHookers.empty())
-		{
-			for (auto beforeHookers = window->beforeHookers;
-			     const auto& hooker : beforeHookers)
-			{
-				const auto& handlers = hooker.get().GetHandlers();
-				if (!handlers.contains(msg))
-				{
-					continue;
-				}
-
-				for (const auto& messageHandlers : handlers.at(msg))
-				{
-					std::visit([&]<typename Func>(const Func& handler)
-					{
-						using T = std::decay_t<Func>;
-						if constexpr (std::is_same_v<T, HandlerHWND>)
-						{
-							result = handler(hWnd, msg, wParam, lParam);
-						}
-						else if constexpr (std::is_same_v<T, Handler>)
-						{
-							result = handler(msg, wParam, lParam);
-						}
-					}, messageHandlers);
-
-					hookerHandled = true;
-
-					if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
-					{
-						return result.result;
-					}
-				}
-			}
-		}
-
-		if (!window->messageHandlerMap.contains(msg))
-		{
-			if (hookerHandled)
-			{
-				return result;
-			}
-			result = DefWindowProcW(hWnd, msg, wParam, lParam);
-		}
-		else
-		{
-			for (const auto& handlerVariant : window->messageHandlerMap.at(msg))
-			{
-				std::visit([&]<typename Func>(const Func& handler)
-				{
-					using T = std::decay_t<Func>;
-					if constexpr (std::is_same_v<T, HandlerHWND>)
-					{
-						result = handler(hWnd, msg, wParam, lParam);
-					}
-					else if constexpr (std::is_same_v<T, Handler>)
-					{
-						result = handler(msg, wParam, lParam);
-					}
-				}, handlerVariant);
-
-				if (IsFlagSet(result.flags, MessageHandlerReturnFlags::NoFurtherHandling)) [[unlikely]]
-				{
-					break;
-				}
-			}
-			if (IsFlagSet(result.flags, MessageHandlerReturnFlags::PassToDefProc)) [[unlikely]]
-			{
-				DefWindowProcW(hWnd, msg, wParam, lParam);
-			}
-		}
-
-		if (!window->afterHookers.empty())
-		{
-			for (auto afterHookers = window->afterHookers;
-			     const auto& hooker : afterHookers)
-			{
-				const auto& handlers = hooker.get().GetHandlers();
-				if (!handlers.contains(msg))
-				{
-					continue;
-				}
-
-				for (const auto& messageHandlers : handlers.at(msg))
-				{
-					std::visit([&]<typename Func>(const Func& handler)
-					{
-						using T = std::decay_t<Func>;
-						if constexpr (std::is_same_v<T, HandlerHWND>)
-						{
-							result = handler(hWnd, msg, wParam, lParam);
-						}
-						else if constexpr (std::is_same_v<T, Handler>)
-						{
-							result = handler(msg, wParam, lParam);
-						}
-					}, messageHandlers);
-
-					if (IsFlagSet(result.flags, MessageHandlerReturnFlags::ForceThisResult)) [[unlikely]]
-					{
-						return result.result;
-					}
-				}
-			}
-		}
-
-		if (msg == WM_NCCREATE) [[unlikely]]
-		{
-			const auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
-			RectL rc = RectF{
-				           0,
-				           0,
-				           static_cast<float>(createStruct->cx),
-				           static_cast<float>(createStruct->cy)
-			           } * window->GetDpiScaleFactor();
-
-			AdjustWindowRectExForDpi(
-				std::bit_cast<LPRECT>(&rc),
-				window->GetStyle(),
-				FALSE,
-				window->GetExStyle(),
-				static_cast<UINT>(window->GetDpi()));
-
-			const PointF p{ static_cast<float>(createStruct->x), static_cast<float>(createStruct->y) };
-			const RectF rect{ p * window->GetDpiScaleFactor(), rc.Size() };
-
-			window->logicalRect.SetPhysicalValue(rect);
-
-			window->MoveAndResize(*window->logicalRect);
-		}
-
-		if (msg == WM_NCDESTROY) [[unlikely]]
-		{
-			SetWindowPtrToHWND(hWnd, nullptr);
-			window->hWnd = nullptr;
-			window->parentHwnd = nullptr;
-		}
-
-		return result;
 	}
 }

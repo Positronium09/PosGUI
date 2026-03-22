@@ -19,7 +19,7 @@ namespace PGUI::UI
 		RegisterHandler(WM_INITDIALOG, &Dialog::OnInitDialog);
 	}
 
-	auto Dialog::OnInitDialog(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
+	auto Dialog::OnInitDialog(UINT, Argument1, Argument2) noexcept -> MessageHandlerResult
 	{
 		return { NULL, MessageHandlerReturnFlags::ForceThisResult };
 	}
@@ -39,7 +39,7 @@ namespace PGUI::UI
 		return RunModalMessageLoop(Hwnd(), ParentHwnd(), shouldCloseAtomic);
 	}
 
-	auto ModalDialog::OnClose(UINT, WPARAM, LPARAM) noexcept -> MessageHandlerResult
+	auto ModalDialog::OnClose(UINT, Argument1, Argument2) noexcept -> MessageHandlerResult
 	{
 		shouldCloseAtomic = true;
 		return 0;

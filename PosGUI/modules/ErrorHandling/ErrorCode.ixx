@@ -13,7 +13,8 @@ export namespace PGUI
 		NotImplemented,
 		NullPointer,
 		NotFound,
-		InvalidCast
+		InvalidCast,
+		AllocationFailure
 	};
 
 	enum class SystemErrorCode : int
@@ -104,6 +105,12 @@ export namespace PGUI
 					return "Not implemented";
 				case ErrorCode::NullPointer:
 					return "Null pointer";
+				case ErrorCode::NotFound:
+					return "Not found";
+				case ErrorCode::InvalidCast:
+					return "Invalid cast";
+				case ErrorCode::AllocationFailure:
+					return "Allocation failure";
 				default:
 					return "Unknown general error";
 			}

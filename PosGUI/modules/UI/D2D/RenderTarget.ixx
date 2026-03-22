@@ -128,9 +128,10 @@ export namespace PGUI::UI::D2D
 			std::optional<BitmapProperties> properties) const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
-			
+			const auto bitmapSourcePtr = source.GetAs<IWICBitmapSource>();
+
 			if (auto hr = this->Get()->CreateBitmapFromWicBitmap(
-				source.GetRawAs<IWICBitmapSource>(),
+				bitmapSourcePtr.get(),
 				properties.has_value() ? &properties : nullptr, &bitmap); 
 				FAILED(hr))
 			{
@@ -153,8 +154,9 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto CreateBitmapFromSource(const Imaging::BitmapSource<>& source) const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
+			const auto bitmapSourcePtr = source.GetAs<IWICBitmapSource>();
 
-			if (auto hr = this->Get()->CreateBitmapFromWicBitmap(source.GetRawAs<IWICBitmapSource>(), &bitmap); 
+			if (auto hr = this->Get()->CreateBitmapFromWicBitmap(bitmapSourcePtr.get(), &bitmap); 
 				FAILED(hr))
 			{
 				Error error{ hr };
@@ -253,14 +255,16 @@ export namespace PGUI::UI::D2D
 
 		auto DrawText(std::wstring_view text, const TextFormat& format, RectF textRect, Brush brush) const noexcept -> void
 		{
+			const auto textFormatPtr = format.GetAs<IDWriteTextFormat>();
 			this->Get()->DrawText(text.data(), static_cast<UINT32>(text.size()),
-			                      format.GetRawAs<IDWriteTextFormat>(), textRect, brush);
+			                      textFormatPtr.get(), textRect, brush);
 		}
 
 		auto DrawText(const TextLayout& layout, PointF origin, Brush brush,
 		              DrawTextOptions drawTextOptions = DrawTextOptions::EnableColorFont) const noexcept -> void
 		{
-			this->Get()->DrawTextLayout(origin, layout.GetRawAs<IDWriteTextLayout>(), brush,
+			const auto textLayoutPtr = layout.GetAs<IDWriteTextFormat>();
+			this->Get()->DrawTextLayout(origin, textLayoutPtr.get(), brush,
 			                            static_cast<D2D1_DRAW_TEXT_OPTIONS>(drawTextOptions));
 		}
 
@@ -455,7 +459,7 @@ export namespace PGUI::UI::D2D
 		//TODO CreateLayer
 		//TODO CreateMesh
 
-		operator RenderTarget<>() const noexcept
+		explicit(false) operator RenderTarget<>() const noexcept
 		{
 			return RenderTarget<>{ this->Get() };
 		}

@@ -51,9 +51,10 @@ namespace PGUI::UI
 		const auto fontAxisValues =
 			fontSet.ConvertWeightStretchStyleToFontAxisValues(fontWeight, fontStretch, fontStyle, fontSize);
 
+		const auto collectionPtr = collection.GetAs<IDWriteFontCollection>();
 		const auto hr = factory->CreateTextFormat(
 			fontFamilyName.data(),
-			collection.GetRawAs<IDWriteFontCollection>(),
+			collectionPtr.get(),
 			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
 			fontSize, localeName.data(), Put());
 		LogIfFailed(
@@ -89,9 +90,10 @@ namespace PGUI::UI
 			collection = fontCollectionResult.value();
 		}
 
+		const auto collectionPtr = collection.GetAs<IDWriteFontCollection>();
 		const auto hr = factory->CreateTextFormat(
 			fontFamilyName.data(),
-			collection.GetRawAs<IDWriteFontCollection>(),
+			collectionPtr.get(),
 			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
 			fontSize, localeName.data(), Put());
 

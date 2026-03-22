@@ -8,10 +8,7 @@ export namespace PGUI::Mutex
 	class SRWMutex
 	{
 		public:
-		SRWMutex() noexcept
-		{
-			InitializeSRWLock(&srwLock);
-		}
+		SRWMutex() noexcept = default;
 		SRWMutex(const SRWMutex&) = delete;
 		auto operator=(const SRWMutex&) -> SRWMutex& = delete;
 		SRWMutex(SRWMutex&& other) noexcept = delete;
@@ -29,7 +26,7 @@ export namespace PGUI::Mutex
 		
 		auto try_lock() noexcept -> bool
 		{
-			return TryAcquireSRWLockExclusive(&srwLock) != ERROR_SUCCESS;
+			return TryAcquireSRWLockExclusive(&srwLock) != 0;
 		}
 
 		auto lock_shared() noexcept -> void
@@ -42,7 +39,7 @@ export namespace PGUI::Mutex
 		}
 		auto try_lock_shared() noexcept -> bool
 		{
-			return TryAcquireSRWLockShared(&srwLock) != ERROR_SUCCESS;
+			return TryAcquireSRWLockShared(&srwLock) != 0;
 		}
 		// ReSharper restore CppInconsistentNaming
 

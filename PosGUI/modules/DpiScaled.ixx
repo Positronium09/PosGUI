@@ -11,36 +11,93 @@ import PGUI.Utils;
 export namespace PGUI
 {
 	template <typename T>
-	concept DpiMulScale = requires(std::remove_cvref_t<std::remove_pointer_t<T>> value)
+	concept DpiMulScale = requires(std::remove_cvref_t<T> value)
 	{
-		{ value * DEFAULT_SCREEN_DPI } -> std::convertible_to<std::remove_cvref_t<std::remove_pointer_t<T>>>;
+		{ value * DEFAULT_SCREEN_DPI } -> std::convertible_to<std::remove_cvref_t<T>>;
 	};
 	template <typename T>
-	concept DpiDivScale = requires(std::remove_cvref_t<std::remove_pointer_t<T>> value)
+	concept DpiDivScale = requires(std::remove_cvref_t<T> value)
 	{
-		{ value / DEFAULT_SCREEN_DPI } -> std::convertible_to<std::remove_cvref_t<std::remove_pointer_t<T>>>;
+		{ value / DEFAULT_SCREEN_DPI } -> std::convertible_to<std::remove_cvref_t<T>>;
 	};
 	template <typename T>
-	concept DpiFuncRetScalable = requires(std::remove_cvref_t<std::remove_pointer_t<T>> value)
+	concept DpiFuncMutScalable = requires(std::remove_cvref_t<T> value)
 	{
-		value.ScaleByDpiFactor(1.0F);
+		{ value.ScaleByDpiFactor(1.0F) } -> std::same_as<void>;
 	};
 	template <typename T>
-	concept DpiFuncModScalable = requires(std::remove_cvref_t<std::remove_pointer_t<T>> value)
+	concept DpiFuncRetScalable = requires(std::remove_cvref_t<T> value)
 	{
-		{ value.ScaleByDpiFactor(1.0F) } -> std::convertible_to<std::remove_cvref_t<std::remove_pointer_t<T>>>;
+		{ value.ScaleByDpiFactor(1.0F) } -> std::convertible_to<std::remove_cvref_t<T>>;
 	};
 
 	template <typename T>
 	concept DpiScalable = std::is_arithmetic_v<T> || 
 		DpiMulScale<T> || 
 		DpiDivScale<T> || 
-		DpiFuncRetScalable<T> ||
-		DpiFuncModScalable<T>;
+		DpiFuncMutScalable<T> ||
+		DpiFuncRetScalable<T>;
 
 #pragma warning(push)
 #pragma warning(disable: 4244, \
 	justification: "Narrowing conversion may occur and DpiScaled cannot fix such an warning")
+
+
+	namespace Scaling
+	{
+		template <DpiScalable T>
+		[[nodiscard]] auto LogicalToPhysical(const T& value, const float dpi = DEFAULT_SCREEN_DPI) noexcept
+		{
+			if constexpr (std::is_arithmetic_v<T> || DpiMulScale<T>)
+			{
+				return static_cast<T>(value * (dpi / DEFAULT_SCREEN_DPI));
+			}
+			else if constexpr (DpiDivScale<T>)
+			{
+				return static_cast<T>(value / (DEFAULT_SCREEN_DPI / dpi));
+			}
+			else if constexpr (DpiFuncMutScalable<T>)
+			{
+				auto copy = value;
+				copy.ScaleByDpiFactor(dpi / DEFAULT_SCREEN_DPI);
+				return copy;
+			}
+			else if constexpr (DpiFuncRetScalable<T>)
+			{
+				return value.ScaleByDpiFactor(dpi / DEFAULT_SCREEN_DPI);
+			}
+			else
+			{
+				return value;
+			}
+		}
+		template <DpiScalable T>
+		[[nodiscard]] auto PhysicalToLogical(const T& value, const float dpi = DEFAULT_SCREEN_DPI) noexcept
+		{
+			if constexpr (std::is_arithmetic_v<T> || DpiDivScale<T>)
+			{
+				return static_cast<T>(value / (dpi / DEFAULT_SCREEN_DPI));
+			}
+			else if constexpr (DpiMulScale<T>)
+			{
+				return static_cast<T>(value * (DEFAULT_SCREEN_DPI / dpi));
+			}
+			else if constexpr (DpiFuncMutScalable<T>)
+			{
+				auto copy = value;
+				copy.ScaleByDpiFactor(1.0F / (dpi / DEFAULT_SCREEN_DPI));
+				return copy;
+			}
+			else if constexpr (DpiFuncRetScalable<T>)
+			{
+				return value.ScaleByDpiFactor(1.0F / (dpi / DEFAULT_SCREEN_DPI));
+			}
+			else
+			{
+				return value;
+			}
+		}
+	}
 
 	template <DpiScalable T>
 	class DpiScaled final
@@ -62,9 +119,21 @@ export namespace PGUI
 			dpi{ other.dpi }, logicalValue{ other.logicalValue }
 		{
 		}
+		auto operator=(const DpiScaled& other) noexcept(std::is_nothrow_copy_assignable_v<T>) -> DpiScaled&
+		{
+			dpi = other.dpi;
+			logicalValue = other.logicalValue;
+			return *this;
+		}
 		DpiScaled(DpiScaled&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
 			dpi{ other.dpi }, logicalValue{ std::move(other.logicalValue) }
 		{
+		}
+		auto operator=(DpiScaled&& other) noexcept(std::is_nothrow_move_assignable_v<T>) -> DpiScaled&
+		{
+			dpi = other.dpi;
+			logicalValue = std::move(other.logicalValue);
+			return *this;
 		}
 
 		auto operator=(const T& other) noexcept(std::is_nothrow_copy_assignable_v<T>) -> DpiScaled&
@@ -118,79 +187,12 @@ export namespace PGUI
 		}
 		auto SetPhysicalValue(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) -> void
 		{
-			if constexpr (std::is_arithmetic_v<T> || DpiDivScale<T>)
-			{
-				logicalValue = static_cast<T>(value / GetScaleFactor());
-			}
-			else if constexpr (DpiMulScale<T>)
-			{
-				logicalValue = static_cast<T>(value * GetInverseScaleFactor());
-			}
-			else if constexpr (DpiFuncModScalable<T>)
-			{
-				logicalValue = value;
-				logicalValue.ScaleByDpiFactor(GetInverseScaleFactor());
-			}
-			else if constexpr (DpiFuncRetScalable<T>)
-			{
-				logicalValue = value.ScaleByDpiFactorFactor(GetInverseScaleFactor());
-			}
+			logicalValue = Scaling::PhysicalToLogical(value, dpi);
 		}
-		auto SetPhysicalValue(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) -> void
-		{
-			if constexpr (std::is_arithmetic_v<T> || DpiDivScale<T>)
-			{
-				logicalValue = static_cast<T>(value / GetScaleFactor());
-			}
-			else if constexpr (DpiMulScale<T>)
-			{
-				logicalValue = static_cast<T>(value * GetInverseScaleFactor());
-			}
-			else if constexpr (DpiFuncModScalable<T>)
-			{
-				logicalValue = std::move(value);
-				logicalValue.ScaleByDpiFactor(GetInverseScaleFactor());
-			}
-			else if constexpr (DpiFuncRetScalable<T>)
-			{
-				logicalValue = value.ScaleByDpiFactorFactor(GetInverseScaleFactor());
-			}
-		}
-		// ReSharper disable once CppNotAllPathsReturnValue
 
 		auto GetPhysicalValue() const noexcept -> T
 		{
-			if constexpr (std::is_arithmetic_v<T> || DpiMulScale<T>)
-			{
-				return static_cast<T>(logicalValue * GetScaleFactor());
-			}
-			else if constexpr (DpiDivScale<T>)
-			{
-				return static_cast<T>(logicalValue / GetInverseScaleFactor());
-			}
-			else if constexpr (DpiFuncModScalable<T>)
-			{
-				if constexpr (std::is_copy_assignable_v<T>)
-				{
-					auto copy = logicalValue;
-					copy.ScaleByDpiFactor(GetScaleFactor());
-					
-					return copy;
-				}
-				else if (std::is_copy_constructible_v<T>)
-				{
-					return T{ logicalValue }.ScaleByDpiFactor(GetScaleFactor());
-				}
-				else
-				{
-					// No copy constructor, return logical value directly
-					return logicalValue.ScaleByDpiFactor(GetScaleFactor());
-				}
-			}
-			else if constexpr (DpiFuncRetScalable<T>)
-			{
-				return logicalValue.ScaleByDpiFactorFactor(GetScaleFactor());
-			}
+			return Scaling::LogicalToPhysical(logicalValue, dpi);
 		}
 
 		constexpr auto GetScaleFactor() const noexcept -> float
@@ -216,21 +218,23 @@ export namespace PGUI
 		}
 
 		auto operator==(const DpiScaled& other) const noexcept -> bool
+		requires std::equality_comparable<T>
 		{
-			static_assert(std::equality_comparable<T>);
 			return logicalValue == other.logicalValue && dpi == other.dpi;
 		}
-		auto operator<=>(const DpiScaled& other) const noexcept -> std::strong_ordering
+		auto operator<=>(const DpiScaled& other) const noexcept -> auto
+		requires std::three_way_comparable<T>
 		{
-			static_assert(std::three_way_comparable<T>);
 			return logicalValue <=> other.logicalValue;
 		}
 		auto operator==(const T& other) const noexcept -> bool
+			requires std::equality_comparable<T>
 		{
 			static_assert(std::equality_comparable<T>);
 			return logicalValue == other;
 		}
-		auto operator<=>(const T& other) const noexcept -> std::strong_ordering
+		auto operator<=>(const T& other) const noexcept -> auto
+			requires std::three_way_comparable<T>
 		{
 			static_assert(std::three_way_comparable<T>);
 			return logicalValue <=> other;
@@ -240,62 +244,6 @@ export namespace PGUI
 		float dpi{ DEFAULT_SCREEN_DPI };
 		T logicalValue{ };
 	};
-
-	namespace Scaling
-	{
-		template <DpiScalable T>
-		[[nodiscard]] auto LogicalToPhysical(const T& value, const float dpi = DEFAULT_SCREEN_DPI) noexcept
-		{
-			if constexpr (std::is_arithmetic_v<T> || DpiMulScale<T>)
-			{
-				return static_cast<T>(value * (dpi / DEFAULT_SCREEN_DPI));
-			}
-			else if constexpr (DpiDivScale<T>)
-			{
-				return static_cast<T>(value / (dpi / DEFAULT_SCREEN_DPI));
-			}
-			else if constexpr (DpiFuncModScalable<T>)
-			{
-				auto copy = value;
-				copy.ScaleByDpiFactor(dpi / DEFAULT_SCREEN_DPI);
-				return copy;
-			}
-			else if constexpr (DpiFuncRetScalable<T>)
-			{
-				return value.ScaleByDpiFactorFactor(dpi / DEFAULT_SCREEN_DPI);
-			}
-			else
-			{
-				return value; // No scaling possible, return as is
-			}
-		}
-		template <DpiScalable T>
-		[[nodiscard]] auto PhysicalToLogical(const T& value, const float dpi = DEFAULT_SCREEN_DPI) noexcept
-		{
-			if constexpr (std::is_arithmetic_v<T> || DpiDivScale<T>)
-			{
-				return static_cast<T>(value / (dpi / DEFAULT_SCREEN_DPI));
-			}
-			else if constexpr (DpiMulScale<T>)
-			{
-				return static_cast<T>(value * (dpi / DEFAULT_SCREEN_DPI));
-			}
-			else if constexpr (DpiFuncModScalable<T>)
-			{
-				auto copy = value;
-				copy.ScaleByDpiFactor(1.0F / (dpi / DEFAULT_SCREEN_DPI));
-				return copy;
-			}
-			else if constexpr (DpiFuncRetScalable<T>)
-			{
-				return value.ScaleByDpiFactorFactor(1.0F / (dpi / DEFAULT_SCREEN_DPI));
-			}
-			else
-			{
-				return value; // No scaling possible, return as is
-			}
-		}
-	}
 
 	#pragma warning(pop)
 }

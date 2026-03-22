@@ -1,5 +1,6 @@
 module;
 #include <dwrite_3.h>
+#include <winrt/impl/Windows.System.1.h>
 
 module PGUI.UI.TextLayout;
 
@@ -21,9 +22,10 @@ namespace PGUI::UI
 	TextLayout::TextLayout(const std::wstring_view text, const TextFormat& textFormat, const SizeF maxSize) noexcept
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
+		const auto textFormatPtr = textFormat.GetAs<IDWriteTextFormat>();
 		const auto hr = factory->CreateTextLayout(
 			text.data(), static_cast<UINT32>(text.size()),
-			textFormat.GetRawAs<IDWriteTextFormat3, IDWriteTextFormat>(),
+			textFormatPtr.get(),
 			maxSize.cx, maxSize.cy,
 			std::bit_cast<IDWriteTextLayout**>(Put()));
 
@@ -138,9 +140,10 @@ namespace PGUI::UI
 	auto TextLayout::SetFontCollection(const FontCollection& fontCollection,
 	                                   const TextRange textRange) const noexcept -> Error
 	{
+		const auto fontCollectionPtr = fontCollection.GetAs<IDWriteFontCollection>();
 		Error error{
 			Get()->SetFontCollection(
-				fontCollection.GetRawAs<IDWriteFontCollection3, IDWriteFontCollection>(),
+				fontCollectionPtr.get(),
 				textRange)
 		};
 		error
@@ -360,24 +363,31 @@ namespace PGUI::UI
 
 	auto TextLayout::GetFontCollection() const noexcept -> Result<FontCollection>
 	{
-		FontCollection fontCollection{ nullptr };
-		if (const auto hr = Get()->GetFontCollection(
-				fontCollection.PutAs<IDWriteFontCollection3, IDWriteFontCollection>());
+		ComPtr<IDWriteFontCollection> fontCollectionPtr;
+		if (const auto hr = Get()->GetFontCollection(fontCollectionPtr.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			Logger::Error(error, L"Cannot get font collection");
 			return Unexpected{ error };
 		}
+		const auto ptr = fontCollectionPtr.try_query<IDWriteFontCollection3>();
+		if (ptr.get() == nullptr)
+		{
+			return Unexpected{
+				Error{ SystemErrorCode::InterfaceNotSupported }
+				.AddDetail(L"Interface", L"IDWriteFontCollection3")
+			};
+		}
 
-		return fontCollection;
+		return FontCollection{ ptr };
 	}
 
 	auto TextLayout::GetFontCollection(const UINT32 position) const noexcept -> Result<FontCollection>
 	{
-		FontCollection fontCollection{ nullptr };
+		ComPtr<IDWriteFontCollection> fontCollection;
 		if (const auto hr = Get()->GetFontCollection(
-				position, fontCollection.PutAs<IDWriteFontCollection3, IDWriteFontCollection>());
+				position, fontCollection.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -386,17 +396,25 @@ namespace PGUI::UI
 			Logger::Error(error, L"Cannot get font collection");
 			return Unexpected{ error };
 		}
+		const auto ptr = fontCollection.try_query<IDWriteFontCollection3>();
+		if (ptr.get() == nullptr)
+		{
+			return Unexpected{
+				Error{ SystemErrorCode::InterfaceNotSupported }
+				.AddDetail(L"Interface", L"IDWriteFontCollection3")
+			};
+		}
 
-		return fontCollection;
+		return FontCollection{ ptr };
 	}
 
 	auto TextLayout::GetFontCollection(const UINT32 position,
 	                                   TextRange& textRange) const noexcept -> Result<FontCollection>
 	{
-		FontCollection fontCollection{ nullptr };
+		ComPtr<IDWriteFontCollection> fontCollection;
 		if (const auto hr = Get()->GetFontCollection(
 			position,
-			fontCollection.PutAs<IDWriteFontCollection3, IDWriteFontCollection>(),
+			fontCollection.put(),
 			&textRange);
 			FAILED(hr))
 		{
@@ -407,8 +425,16 @@ namespace PGUI::UI
 			Logger::Error(error, L"Cannot get font collection");
 			return Unexpected{ error };
 		}
+		const auto ptr = fontCollection.try_query<IDWriteFontCollection3>();
+		if (ptr.get() == nullptr)
+		{
+			return Unexpected{
+				Error{ SystemErrorCode::InterfaceNotSupported }
+				.AddDetail(L"Interface", L"IDWriteFontCollection3")
+			};
+		}
 
-		return fontCollection;
+		return FontCollection{ ptr };
 	}
 
 	auto TextLayout::GetFontFamilyName() const noexcept -> Result<std::wstring>

@@ -21,7 +21,7 @@ export namespace PGUI::UI
 		}
 
 		explicit(false) GradientStop(const D2D1_GRADIENT_STOP& gradientStop) noexcept :
-			D2D1_GRADIENT_STOP()
+			D2D1_GRADIENT_STOP{ }
 		{
 			position = gradientStop.position;
 			color = gradientStop.color;

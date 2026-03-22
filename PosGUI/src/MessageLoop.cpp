@@ -25,8 +25,8 @@ namespace PGUI
 				Logger::Critical(
 					Error{ errCode }
 					.AddDetail(L"Message", WindowMsgToText(msg.message))
-					.AddDetail(L"wParam", std::to_wstring(msg.wParam))
-					.AddDetail(L"lParam", std::to_wstring(msg.lParam))
+					.AddDetail(L"arg1", std::to_wstring(msg.wParam))
+					.AddDetail(L"arg2", std::to_wstring(msg.lParam))
 				);
 
 				return static_cast<int>(errCode);
@@ -61,19 +61,23 @@ namespace PGUI
 		});
 
 		MSG msg{ };
-		auto ret = 1;
-		while (ret != 0 && !shouldClose.load())
+		while (!shouldClose.load())
 		{
-			ret = GetMessageW(&msg, nullptr, 0, 0);
-			if (ret == -1)
+			if (const auto ret = GetMessageW(&msg, nullptr, 0, 0);
+				ret == 0)
+			{
+				PostQuitMessage(static_cast<int>(msg.wParam));
+				break;
+			}
+			else if (ret == -1)
 			{
 				const auto errCode = GetLastError();
 
 				Logger::Critical(
 					Error{ errCode }
 					.AddDetail(L"Message", WindowMsgToText(msg.message))
-					.AddDetail(L"wParam", std::to_wstring(msg.wParam))
-					.AddDetail(L"lParam", std::to_wstring(msg.lParam))
+					.AddDetail(L"arg1", std::to_wstring(msg.wParam))
+					.AddDetail(L"arg2", std::to_wstring(msg.lParam))
 				);
 
 				return static_cast<int>(errCode);

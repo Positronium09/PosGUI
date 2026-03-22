@@ -19,12 +19,14 @@ export namespace PGUI
 	concept WindowType = std::derived_from<T, Window>;
 
 	template <WindowType T = Window>
-	using WindowPtr = std::shared_ptr<T>;
+	using WindowPtr = std::unique_ptr<T>;
 
 	template <WindowType T = Window>
 	using RawWindowPtr = T*;
 
 	constexpr auto WindowPointerOffset = 0uz;
+
+	//TODO Write enum class for window styles and extended styles
 
 	enum class MessageHandlerReturnFlags
 	{
@@ -40,7 +42,8 @@ export namespace PGUI
 		LRESULT result;
 		MessageHandlerReturnFlags flags;
 
-		explicit(false) MessageHandlerResult(const LRESULT result, const MessageHandlerReturnFlags flags = MessageHandlerReturnFlags::None) :
+		explicit(false) MessageHandlerResult(const LRESULT result, 
+			const MessageHandlerReturnFlags flags = MessageHandlerReturnFlags::None) :
 			result{ result }, flags{ flags }
 		{
 		}
@@ -48,16 +51,16 @@ export namespace PGUI
 		explicit(false) operator LRESULT() const noexcept { return result; }
 	};
 
-	using HandlerHWND = std::function<MessageHandlerResult(HWND, UINT, WPARAM, LPARAM)>;
-	using Handler = std::function<MessageHandlerResult(UINT, WPARAM, LPARAM)>;
+	using HandlerHWND = std::function<MessageHandlerResult(HWND, MessageID, Argument1, Argument2)>;
+	using Handler = std::function<MessageHandlerResult(MessageID, Argument1, Argument2)>;
 	template <typename T>
-	using HandlerHWNDMember = MessageHandlerResult(T::*)(HWND, UINT, WPARAM, LPARAM);
+	using HandlerHWNDMember = MessageHandlerResult(T::*)(HWND, MessageID, Argument1, Argument2);
 	template <typename T>
-	using HandlerMember = MessageHandlerResult(T::*)(UINT, WPARAM, LPARAM);
+	using HandlerMember = MessageHandlerResult(T::*)(MessageID, Argument1, Argument2);
 	template <typename T>
-	using HandlerHWNDCMember = MessageHandlerResult(T::*)(HWND, UINT, WPARAM, LPARAM) const;
+	using HandlerHWNDCMember = MessageHandlerResult(T::*)(HWND, MessageID, Argument1, Argument2) const;
 	template <typename T>
-	using HandlerCMember = MessageHandlerResult(T::*)(UINT, WPARAM, LPARAM) const;
+	using HandlerCMember = MessageHandlerResult(T::*)(MessageID, Argument1, Argument2) const;
 	using MessageHandler = std::variant<HandlerHWND, Handler>;
 
 	using MessageHandlerMap = std::unordered_map<UINT, std::vector<MessageHandler>>;
@@ -244,7 +247,7 @@ export namespace PGUI
 		{
 			if (hookedWindow != nullptr)
 			{
-				throw Exception{ E_FAIL }.SuggestFix(L"MessageHooker is already hooked to a window");
+				throw Exception{ ErrorCode::Failure }.SuggestFix(L"MessageHooker is already hooked to a window");
 			}
 			hookedWindow = window;
 		}
@@ -257,29 +260,29 @@ export namespace PGUI
 			return hookedWindow;
 		}
 		protected:
-		auto RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
-		auto RegisterHandler(const UINT msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const MessageID msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const MessageID msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerHWNDMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerHWNDMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerHWNDCMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerHWNDCMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerCMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerCMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
@@ -291,12 +294,12 @@ export namespace PGUI
 		MessageHandlerMap messageHandlerMap{ };
 
 		// ReSharper disable CppInconsistentNaming
-		auto _RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void
+		auto _RegisterHandler(const MessageID msg, const HandlerHWND& handler) -> void
 		{
 			messageHandlerMap[msg].push_back(handler);
 		}
 
-		auto _RegisterHandler(const UINT msg, const Handler& handler) -> void
+		auto _RegisterHandler(const MessageID msg, const Handler& handler) -> void
 		{
 			messageHandlerMap[msg].push_back(handler);
 		}
@@ -306,10 +309,10 @@ export namespace PGUI
 
 	using MessageHookers = std::vector<std::reference_wrapper<MessageHooker>>;
 
-	class Window : public std::enable_shared_from_this<Window>
+	class Window
 	{
 		// ReSharper disable once CppInconsistentNaming
-		friend auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+		friend auto _WindowProc(HWND hWnd, MessageID msg, Argument1 arg1, Argument2 arg2) -> LRESULT;
 
 		public:
 		virtual ~Window() noexcept;
@@ -319,9 +322,9 @@ export namespace PGUI
 		auto operator=(Window&&) noexcept -> Window& = default;
 
 		template <WindowType T, typename... Args>
-		[[nodiscard]] static auto Create(const WindowCreateInfo& info, Args&&... args)
+		[[nodiscard]] static auto Create(const WindowCreateInfo& info, Args&&... args) -> WindowPtr<T>
 		{
-			auto window = std::make_shared<T>(std::forward<Args>(args)...);
+			auto window = std::make_unique<T>(std::forward<Args>(args)...);
 			auto wnd = window.get();
 
 			CreateWindowExW(info.exStyle,
@@ -343,9 +346,9 @@ export namespace PGUI
 		}
 
 		template <WindowType T, typename... Args>
-		auto CreateChildWindow(const WindowCreateInfo& info, Args&&... args)
+		auto CreateChildWindow(const WindowCreateInfo& info, Args&&... args) -> RawWindowPtr<T>
 		{
-			auto window = std::make_shared<T>(std::forward<Args>(args)...);
+			auto window = std::make_unique<T>(std::forward<Args>(args)...);
 			auto wnd = window.get();
 
 			CreateWindowExW(info.exStyle,
@@ -363,15 +366,15 @@ export namespace PGUI
 				throw Exception{ error };
 			}
 
-			childWindows.push_back(window);
+			childWindows.push_back(std::move(window));
 
-			OnChildAdded(window);
+			OnChildAdded(childWindows.back().get());
 
-			return std::dynamic_pointer_cast<T>(childWindows.back());
+			return dynamic_cast<T*>(childWindows.back().get());
 		}
 
 		template <WindowType T>
-		auto AddChildWindow(const WindowPtr<T>& window)
+		auto AddChildWindow(WindowPtr<T>& window) -> RawWindowPtr<T>
 		{
 			auto wnd = window.get();
 
@@ -381,14 +384,18 @@ export namespace PGUI
 			SetParent(wnd->Hwnd(), Hwnd());
 			wnd->parentHwnd = Hwnd();
 
-			childWindows.push_back(window);
+			childWindows.push_back(std::move(window));
 
-			OnChildAdded(window);
+			OnChildAdded(childWindows.back().get());
 
 			return wnd;
 		}
 
-		auto RemoveChildWindow(HWND childHwnd) -> void;
+		auto RemoveChildWindow(HWND childHwnd) -> WindowPtr<>;
+		auto RemoveChildWindow(const RawWindowPtr<> childHwnd) -> WindowPtr<>
+		{
+			return RemoveChildWindow(childHwnd->hWnd);
+		}
 
 		[[nodiscard]] auto GetParentWindow() const noexcept -> RawWindowPtr<>;
 
@@ -399,32 +406,32 @@ export namespace PGUI
 			{
 				return nullptr;
 			}
-			return std::dynamic_pointer_cast<RawWindowPtr<T>>(GetWindowPtrFromHWND(parentHwnd));
+			return dynamic_cast<RawWindowPtr<T>>(GetWindowPtrFromHWND(parentHwnd));
 		}
 
-		auto RegisterHandler(const UINT msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
-		auto RegisterHandler(const UINT msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const MessageID msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
+		auto RegisterHandler(const MessageID msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerHWNDMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerHWNDMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerHWNDCMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerHWNDCMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
 
 		template <typename T>
-		auto RegisterHandler(UINT msg, HandlerCMember<T> func) -> void
+		auto RegisterHandler(MessageID msg, HandlerCMember<T> func) -> void
 		{
 			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
 		}
@@ -454,9 +461,9 @@ export namespace PGUI
 
 		[[nodiscard]] const auto& GetChildWindows() const noexcept { return childWindows; }
 
-		[[nodiscard]] auto GetChildWindow(HWND hWnd) const noexcept -> WindowPtr<Window>;
+		[[nodiscard]] auto GetChildWindow(HWND hWnd) const noexcept -> RawWindowPtr<Window>;
 
-		[[nodiscard]] auto ChildWindowFromPoint(PointF point) const noexcept -> WindowPtr<Window>;
+		[[nodiscard]] auto ChildWindowFromPoint(PointF point) const noexcept -> RawWindowPtr<Window>;
 
 		[[nodiscard]] auto GetWindowRect() const noexcept -> RectF;
 		[[nodiscard]] auto GetClientRect() const noexcept -> RectF;
@@ -492,9 +499,13 @@ export namespace PGUI
 			return static_cast<bool>(GetWindowLongPtrW(Hwnd(), GWL_STYLE) & WS_CHILD);
 		}
 
-		[[nodiscard]] auto IsChildOf(const WindowPtr<Window>& parent) const noexcept
+		[[nodiscard]] auto IsChildOf(const RawWindowPtr<Window> parent) const noexcept
 		{
 			return parentHwnd == parent->Hwnd();
+		}
+		[[nodiscard]] auto IsChildOf(const WindowPtr<Window>& parent) const noexcept
+		{
+			return IsChildOf(parent.get());
 		}
 
 		[[nodiscard]] auto IsChildOf(const HWND hwnd) const noexcept { return parentHwnd == hwnd; }
@@ -504,7 +515,11 @@ export namespace PGUI
 		[[nodiscard]] auto IsMinimized() const noexcept -> bool { return IsIconic(Hwnd()); }
 		[[nodiscard]] auto IsMaximized() const noexcept -> bool { return IsZoomed(Hwnd()); }
 
-		auto CenterAroundWindow(const WindowPtr<>& wnd) noexcept -> void;
+		auto CenterAroundWindow(RawWindowPtr<> wnd) noexcept -> void;
+		auto CenterAroundWindow(const WindowPtr<>& wnd) noexcept -> void
+		{
+			CenterAroundWindow(wnd.get());
+		}
 		auto CenterAroundWindow(HWND hwnd) noexcept -> void;
 
 		auto CenterAroundPoint(PointF point) noexcept -> void;
@@ -608,13 +623,13 @@ export namespace PGUI
 
 		[[nodiscard]] auto MapRectToParent(RectF rect) const noexcept -> RectF;
 
-		auto SendMsg(const UINT msg, const WPARAM wParam, const LPARAM lParam) const noexcept -> void
+		auto SendMsg(const MessageID msg, const Argument1 arg1, const Argument2 arg2) const noexcept -> void
 		{
-			SendMessageW(Hwnd(), msg, wParam, lParam);
+			SendMessageW(Hwnd(), msg, arg1, arg2);
 		}
-		auto PostMsg(const UINT msg, const WPARAM wParam, const LPARAM lParam) const noexcept -> void
+		auto PostMsg(const MessageID msg, const Argument1 arg1, const Argument2 arg2) const noexcept -> void
 		{
-			PostMessageW(Hwnd(), msg, wParam, lParam);
+			PostMessageW(Hwnd(), msg, arg1, arg2);
 		}
 
 		protected:
@@ -636,7 +651,7 @@ export namespace PGUI
 			return 0;
 		}
 
-		virtual auto OnChildAdded(const WindowPtr<Window>&) -> void
+		virtual auto OnChildAdded(const RawWindowPtr<Window>) -> void
 		{
 			/* E_NOTIMPL */
 		}
@@ -658,14 +673,14 @@ export namespace PGUI
 
 		private:
 		// ReSharper disable CppInconsistentNaming
-		auto _RegisterHandler(UINT msg, const HandlerHWND& handler) -> void;
+		auto _RegisterHandler(MessageID msg, const HandlerHWND& handler) -> void;
 
-		auto _RegisterHandler(UINT msg, const Handler& handler) -> void;
+		auto _RegisterHandler(MessageID msg, const Handler& handler) -> void;
 
-		auto _OnDpiChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
-		auto _OnWindowPosChanged(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
-		auto _OnSize(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
-		auto _OnMove(UINT msg, WPARAM wParam, LPARAM lParam) -> MessageHandlerResult;
+		auto _OnDpiChanged(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
+		auto _OnWindowPosChanged(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
+		auto _OnSize(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
+		auto _OnMove(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
 
 		// ReSharper restore CppInconsistentNaming
 
@@ -681,5 +696,5 @@ export namespace PGUI
 	};
 
 	// ReSharper disable once CppInconsistentNaming
-	auto _WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+	auto _WindowProc(HWND hWnd, MessageID msg, Argument1 arg1, Argument2 arg2) -> LRESULT;
 }

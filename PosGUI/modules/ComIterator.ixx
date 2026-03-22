@@ -44,7 +44,6 @@ export namespace PGUI
 	class ComIterator : ComPtrHolder<T>
 	{
 		public:
-		using iterator_category = std::input_iterator_tag;
 		using value_type = ValueType;
 		using difference_type = std::ptrdiff_t;
 		using pointer = std::add_pointer_t<ValueType>;
@@ -53,16 +52,30 @@ export namespace PGUI
 		explicit ComIterator(const ComPtr<T>& iter, const bool isEnd = false) noexcept : 
 			ComPtrHolder<T>{ iter }, end{ isEnd }
 		{
-			this->MoveNext();
+			static_assert(IteratorDerivedType<Derived, IteratorType>,
+				"Derived must implement:\n"
+				"void DeleteCurrent() noexcept\n"
+				"void ConvertItem(<const> IteratorType&) noexcept\n"
+				"void DeleteItem(<const> IteratorType&) noexcept");
+
+			static_assert(std::derived_from<Derived, ComIterator>, "Derived must be derived from ComIterator");
 		}
 
-		const auto& operator*() const
+		const auto& operator*()
 		{
+			if (!hasValue) [[unlikely]]
+			{
+				this->MoveNext();
+			}
 			return current;
 		}
 		auto operator->() -> pointer
 		{
-			return &current;
+			if (!hasValue) [[unlikely]]
+			{
+				this->MoveNext();
+			}
+			return std::addressof(current);
 		}
 		auto operator++() -> ComIterator&
 		{
@@ -95,16 +108,11 @@ export namespace PGUI
 
 		private:
 		bool end = false;
+		bool hasValue = false;
 		value_type current;
 
 		auto MoveNext()
 		{
-			static_assert(IteratorDerivedType<Derived, IteratorType>, 
-				"Derived must implement:\n"
-				"void DeleteCurrent() noexcept\n"
-				"void ConvertItem(<const> IteratorType&) noexcept\n"
-				"void DeleteItem(<const> IteratorType&) noexcept");
-
 			if (this->end)
 			{
 				return;
@@ -120,7 +128,11 @@ export namespace PGUI
 				return;
 			}
 
-			static_cast<Derived*>(this)->DeleteCurrent();
+			if (hasValue) [[likely]]
+			{
+				static_cast<Derived*>(this)->DeleteCurrent();
+			}
+			hasValue = true;
 
 			static_cast<Derived*>(this)->ConvertItem(item);
 

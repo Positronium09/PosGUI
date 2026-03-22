@@ -18,7 +18,7 @@ namespace PGUI::UI
 	{ }
 
 	AppWindow::AppWindow(const WindowClassPtr& wndClass) noexcept :
-		DirectXCompositionWindow{ wndClass }
+		UIHost{ wndClass }
 	{
 		RegisterHandler(WM_NCCREATE, &AppWindow::OnNCCreate);
 		RegisterHandler(WM_SETTEXT, &AppWindow::OnSetText);
@@ -75,7 +75,7 @@ namespace PGUI::UI
 
 	auto AppWindow::SetTitle(const std::wstring_view title) const noexcept -> void
 	{
-		SendMsg(WM_SETTEXT, 0, std::bit_cast<LPARAM>(title.data()));
+		SendMsg(WM_SETTEXT, 0, std::bit_cast<Argument2>(title.data()));
 	}
 
 	auto AppWindow::IsMaximizable() const noexcept -> bool
@@ -240,9 +240,10 @@ namespace PGUI::UI
 		EnableDarkTitleBar(Hwnd(), style.darkMode);
 	}
 
-	auto AppWindow::OnNCCreate(UINT /*unused*/, WPARAM /*unused*/, const LPARAM lParam) noexcept -> MessageHandlerResult
+	auto AppWindow::OnNCCreate(UINT /*unused*/, Argument1 /*unused*/,
+	                           const Argument2 arg2) noexcept -> MessageHandlerResult
 	{
-		auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(lParam);
+		auto* createStruct = std::bit_cast<LPCREATESTRUCTW>(arg2);
 
 		titleText = createStruct->lpszName;
 		createStruct->dwExStyle |= WS_EX_NOREDIRECTIONBITMAP;
@@ -252,18 +253,19 @@ namespace PGUI::UI
 		return { 1, MessageHandlerReturnFlags::PassToDefProc };
 	}
 
-	auto AppWindow::OnSetText(UINT /*unused*/, WPARAM /*unused*/, const LPARAM lParam) noexcept -> MessageHandlerResult
+	auto AppWindow::OnSetText(UINT /*unused*/, Argument1 /*unused*/,
+	                          const Argument2 arg2) noexcept -> MessageHandlerResult
 	{
-		titleText = std::bit_cast<wchar_t*>(lParam);
+		titleText = std::bit_cast<wchar_t*>(arg2);
 
 		return { 1, MessageHandlerReturnFlags::PassToDefProc };
 	}
 
-	auto AppWindow::OnGetText(UINT /*unused*/, const WPARAM wParam,
-	                          const LPARAM lParam) const noexcept -> MessageHandlerResult
+	auto AppWindow::OnGetText(UINT /*unused*/, const Argument1 arg1,
+	                          const Argument2 arg2) const noexcept -> MessageHandlerResult
 	{
-		const auto size = std::min(titleText.size() + 1, wParam);
-		const auto hr = StringCchCopyW(std::bit_cast<wchar_t*>(lParam), size, titleText.data());
+		const auto size = std::min(titleText.size() + 1, arg1);
+		const auto hr = StringCchCopyW(std::bit_cast<wchar_t*>(arg2), size, titleText.data());
 
 		LogIfFailed(
 			LogLevel::Warning,
@@ -271,7 +273,7 @@ namespace PGUI::UI
 				hr
 			}
 			.AddDetail(L"New Title Size", std::to_wstring(size))
-			.AddDetail(L"New Title", std::bit_cast<wchar_t*>(lParam)),
+			.AddDetail(L"New Title", std::bit_cast<wchar_t*>(arg2)),
 			L"Cannot copy title string"
 		);
 
@@ -279,17 +281,17 @@ namespace PGUI::UI
 	}
 
 	auto AppWindow::OnGetTextLength(
-		UINT /*unused*/, WPARAM /*unused*/,
-		LPARAM /*unused*/) const noexcept -> MessageHandlerResult
+		UINT /*unused*/, Argument1 /*unused*/,
+		Argument2 /*unused*/) const noexcept -> MessageHandlerResult
 	{
 		return static_cast<LRESULT>(titleText.length());
 	}
 
 	auto AppWindow::OnGetMinMaxInfo(
-		UINT /*unused*/, WPARAM /*unused*/,
-		const LPARAM lParam) const noexcept -> MessageHandlerResult
+		UINT /*unused*/, Argument1 /*unused*/,
+		const Argument2 arg2) const noexcept -> MessageHandlerResult
 	{
-		auto* minMaxInfo = std::bit_cast<LPMINMAXINFO>(lParam);
+		auto* minMaxInfo = std::bit_cast<LPMINMAXINFO>(arg2);
 
 		const auto frameX = GetSystemMetrics(SM_CXFRAME);
 		const auto frameY = GetSystemMetrics(SM_CYFRAME);
@@ -302,8 +304,8 @@ namespace PGUI::UI
 	}
 
 	auto AppWindow::OnLButtonDown(
-		UINT /*unused*/, WPARAM /*unused*/,
-		LPARAM /*unused*/) const noexcept -> MessageHandlerResult
+		UINT /*unused*/, Argument1 /*unused*/,
+		Argument2 /*unused*/) const noexcept -> MessageHandlerResult
 	{
 		SetFocus();
 

@@ -51,25 +51,46 @@ export namespace PGUI
 	template <typename T, typename... Args>
 	[[nodiscard]] auto make_self_wil(Args&&... args) noexcept -> ComPtr<T>
 	{
-		auto rtPtr = winrt::make_self<T>(std::forward<Args>(args)...);
+		try
+		{
+			auto rtPtr = winrt::make_self<T>(std::forward<Args>(args)...);
 
-		ComPtr<T> wilPtr;
-		wilPtr.attach(rtPtr.detach());
+			ComPtr<T> wilPtr;
+			wilPtr.attach(rtPtr.detach());
 
-		return wilPtr;
+			return wilPtr;
+		}
+		catch (const winrt::hresult_error& e)
+		{
+			Logger::Error(Error{ 
+					static_cast<HRESULT>(e.code().value)
+				}, 
+				std::format(L"Failed to create instance of {}", StringToWString(typeid(T).name())));
+
+			return nullptr;
+		}
+		catch (const std::bad_alloc& e)
+		{
+			Logger::Error(Error{ ErrorCode::AllocationFailure },
+				std::format(L"Failed to create instance of {}", StringToWString(typeid(T).name())));
+			
+			return nullptr;
+		}
 	}
 
 	template <typename T, typename... Args>
-	[[nodiscard]] auto MakeComPtr(Args&&... args) noexcept
+	[[nodiscard]] auto MakeComPtr(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>) -> ComPtr<T>
 	{
 		auto* raw = new (std::nothrow) T(std::forward<Args>(args)...);
-		
+
 		if (raw == nullptr)
 		{
-			return ComPtr<T>{};
+			return ComPtr<T>{ };
 		}
 
-		return ComPtr<T>{ raw };
+		ComPtr<T> ptr;
+		ptr.attach(raw);
+		return ptr;
 	}
 
 	template <ComInterface... Interfaces>
@@ -103,7 +124,7 @@ export namespace PGUI
 		template <IsInTypeList<Interfaces...> T>
 		constexpr auto operator=(ComPtr<T>&& ptr) -> ComPtrHolder&
 		{
-			Set(ptr);
+			Set(std::move(ptr));
 			return *this;
 		}
 
@@ -174,12 +195,6 @@ export namespace PGUI
 			return Get<T>().put_unknown();
 		}
 
-		template <IsInTypeList<Interfaces...> T, typename U>
-		[[nodiscard]] auto PutAs() noexcept
-		{
-			return GetAs<T, U>().put();
-		}
-
 		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto AddressOf() noexcept
 		{
@@ -198,18 +213,6 @@ export namespace PGUI
 			return Get<T>().get();
 		}
 
-		template <IsInTypeList<Interfaces...> T, typename U>
-		[[nodiscard]] auto GetRawAs() const noexcept
-		{
-			return GetAs<T, U>().get();
-		}
-
-		template <typename U>
-		[[nodiscard]] auto GetRawAs() const noexcept
-		{
-			return GetAs<U>().get();
-		}
-
 		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] auto Detach() noexcept
 		{
@@ -226,19 +229,19 @@ export namespace PGUI
 		auto AsAssign() noexcept -> Error
 		{
 			auto ptr = GetAs<T, U>();
-			auto error = Error{ ptr.get() == nullptr ? E_NOINTERFACE : S_OK };
-			error
-				.AddDetail(L"From", StringToWString(typeid(T).name()))
-				.AddDetail(L"To", StringToWString(typeid(U).name()));
 
-			if (error.IsFailure())
+			if (ptr.get() == nullptr)
 			{
+				Error error{ SystemErrorCode::InterfaceNotSupported };
+				error
+					.AddDetail(L"From", StringToWString(typeid(T).name()))
+					.AddDetail(L"To", StringToWString(typeid(U).name()));
 				Logger::Error(error, L"Cannot cast between interfaces");
 				return error;
 			}
 
 			Set(ptr);
-			return error;
+			return Error{ ErrorCode::Success };
 		}
 
 		template <IsInTypeList<Interfaces...> T = FirstType>
@@ -337,13 +340,13 @@ struct std::formatter<IID, Char>
 			return iter;
 		}
 
-		throw std::format_error{ "No format specifiers is supported" };
+		throw std::format_error{ "No format specifiers are supported" };
 	}
 
 	template <typename FormatContext>
 	auto format(const IID& iid, FormatContext& ctx) const
 	{
-		return std::format_to(ctx.out(), "{{{:08X}-{:04X}-{:04X}-{{{:02X}{:02X}}}-{{{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}}}}}",
+		return std::format_to(ctx.out(), "{{{:08X}-{:04X}-{:04X}-{:02X}{:02X}-{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}}}",
 			iid.Data1, iid.Data2, iid.Data3,
 			iid.Data4[0], iid.Data4[1],
 			iid.Data4[2], iid.Data4[3], iid.Data4[4], iid.Data4[5], iid.Data4[6], iid.Data4[7]);
@@ -363,7 +366,7 @@ struct std::formatter<wil::com_ptr_t<T, Policies...>, Char>
 		{
 			return iter;
 		}
-		throw std::format_error{ "No format specifiers is supported" };
+		throw std::format_error{ "No format specifiers are supported" };
 	}
 
 	template <typename FormatContext>

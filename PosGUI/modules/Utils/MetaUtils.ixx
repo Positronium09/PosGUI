@@ -50,6 +50,9 @@ export namespace PGUI
 
 		template <template <typename...> typename T>
 		using Rebind = T<Types...>;
+
+		template <typename T>
+		static constexpr auto Contains = IsInTypeList<T, Types...>;
 	};
 
 	template <typename T, template <auto...> typename Template>

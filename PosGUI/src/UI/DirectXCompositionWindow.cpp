@@ -130,11 +130,11 @@ namespace PGUI::UI
 		}
 
 		ComPtr<IDCompositionDevice> dcompDevice;
-		if (const auto hr = DCompositionCreateDevice3(
-				dxgiDevice.get(),
-				GetIID(dcompDevice),
-				dcompDevice.put_void());
-			FAILED(hr))
+		auto hr = DCompositionCreateDevice3(
+			dxgiDevice.get(),
+			GetIID(dcompDevice),
+			dcompDevice.put_void());
+		if (FAILED(hr))
 		{
 			throw Exception{
 				Error{ hr },
@@ -148,6 +148,15 @@ namespace PGUI::UI
 			throw Exception{
 				Error{ E_NOINTERFACE },
 				L"Cannot query IDCompositionDevice5 interface"
+			};
+		}
+
+		hr = dCompositionDevice->CreateSurfaceFactory(dxgiDevice.get(), dCompositionSurfaceFactory.put());
+		if (FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr },
+				L"Cannot create DirectComposition surface factory"
 			};
 		}
 	}
@@ -192,8 +201,8 @@ namespace PGUI::UI
 
 	auto DirectXCompositionWindow::EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG>
 	{
-		D2D1_TAG tag1;
-		D2D1_TAG tag2;
+		D2D1_TAG tag1 = 0;
+		D2D1_TAG tag2 = 0;
 		auto hr = GetD2D1DeviceContext()->EndDraw(&tag1, &tag2);
 
 		if (hr == D2DERR_RECREATE_TARGET)
@@ -304,24 +313,22 @@ namespace PGUI::UI
 		auto& d2d1Dc = GetD2D1DeviceContext();
 		const auto& swapChain = GetSwapChain();
 
-		if (d2d1Device.get() == nullptr)
+		if (d2d1Dc.get() == nullptr)
 		{
-			DebugBreak();
-		}
-
-		auto hr = d2d1Device->CreateDeviceContext(
-			D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
-			&d2d1Dc);
-		if (FAILED(hr))
-		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create D2D1DeviceContext"
-			};
+			if (const auto hr = d2d1Device->CreateDeviceContext(
+					D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
+					&d2d1Dc);
+				FAILED(hr))
+			{
+				throw Exception{
+					Error{ hr },
+					L"Cannot create D2D1DeviceContext"
+				};
+			}
 		}
 
 		ComPtr<IDXGISurface2> surface;
-		hr = swapChain->GetBuffer(0, GetIID(surface), surface.put_void());
+		auto hr = swapChain->GetBuffer(0, GetIID(surface), surface.put_void());
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -424,7 +431,7 @@ namespace PGUI::UI
 	}
 
 	auto DirectXCompositionWindow::OnNCCreate(
-		UINT, WPARAM, LPARAM) -> MessageHandlerResult
+		UINT, Argument1, Argument2) -> MessageHandlerResult
 	{
 		InitDeviceDependent();
 
@@ -434,7 +441,7 @@ namespace PGUI::UI
 	}
 
 	auto DirectXCompositionWindow::OnWindowPosChanged(
-		const UINT msg, WPARAM, LPARAM) noexcept -> MessageHandlerResult
+		const MessageID msg, Argument1, Argument2) noexcept -> MessageHandlerResult
 	{
 		if (const auto monitor = MonitorFromWindow(Hwnd(), MONITOR_DEFAULTTONULL);
 			monitor != currentMonitor)
@@ -465,7 +472,7 @@ namespace PGUI::UI
 	}
 
 	auto DirectXCompositionWindow::OnPaint(
-		UINT, WPARAM, LPARAM) -> MessageHandlerResult
+		UINT, Argument1, Argument2) -> MessageHandlerResult
 	{
 		Draw(GetGraphics());
 

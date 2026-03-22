@@ -12,14 +12,14 @@ export namespace PGUI::Mutex
 
 		auto try_lock() const noexcept -> bool { return true; }
 
-		auto lock_shared() noexcept -> void
+		auto lock_shared() const noexcept -> void
 		{
 			
 		}
-		auto unlock_shared() noexcept -> void
+		auto unlock_shared() const noexcept -> void
 		{
 		}
-		auto try_lock_shared() noexcept -> bool
+		auto try_lock_shared() const noexcept -> bool
 		{
 			return true;
 		}

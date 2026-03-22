@@ -47,6 +47,8 @@
     <ClCompile Include="modules\UI\Animation\Animated.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTimerEventHandler.ixx" />
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx" />
+    <ClCompile Include="modules\UI\DComp\DComp.ixx" />
+    <ClCompile Include="modules\UI\DComp\Surface.ixx" />
     <ClCompile Include="modules\UI\DragDrop\DataObject.ixx" />
     <ClCompile Include="modules\UI\DragDrop\DragDrop.ixx" />
     <ClCompile Include="modules\UI\DragDrop\DragDropTypes.ixx" />
@@ -61,6 +63,12 @@
     <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
     <ClCompile Include="modules\ScopedTimer.ixx" />
     <ClCompile Include="modules\UI\ResourceManager.ixx" />
+    <ClCompile Include="modules\UI\UICore\Interface.ixx" />
+    <ClCompile Include="modules\UI\UICore\UIContainer.ixx" />
+    <ClCompile Include="modules\UI\UICore\UICore.ixx" />
+    <ClCompile Include="modules\UI\UICore\UIElement.ixx" />
+    <ClCompile Include="modules\UI\UICore\UIEvent.ixx" />
+    <ClCompile Include="modules\UI\UICore\UIHost.ixx" />
     <ClCompile Include="modules\UI\VisualState\VisualState.ixx" />
     <ClCompile Include="modules\UI\VisualState\VisualStateGroup.ixx" />
     <ClCompile Include="modules\UI\VisualState\VisualStateManager.ixx" />
@@ -199,6 +207,9 @@
     <ClCompile Include="src\UI\Gradient.cpp" />
     <ClCompile Include="src\UI\TextLayout.cpp" />
     <ClCompile Include="src\UI\Theming\Theme.cpp" />
+    <ClCompile Include="src\UI\UICore\UIContainer.cpp" />
+    <ClCompile Include="src\UI\UICore\UIElement.cpp" />
+    <ClCompile Include="src\UI\UICore\UIHost.cpp" />
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
     <ClCompile Include="src\Utils\StringUtils.cpp" />
     <ClCompile Include="src\Utils\WindowsUtils.cpp" />

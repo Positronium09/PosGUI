@@ -16,8 +16,8 @@ namespace PGUI::UI::Animation
 	class AnimationStoryboardEventHandlerRouter final : 
 		public Implements<AnimationStoryboardEventHandlerRouter, IUIAnimationStoryboardEventHandler2>
 	{
-		using StoryboardStatusChangedHandler = std::function<HRESULT(Storyboard, StoryboardStatus, StoryboardStatus)>;
-		using StoryboardUpdatedHandler = std::function<HRESULT(Storyboard)>;
+		using StoryboardStatusChangedHandler = std::function<HRESULT(const Storyboard&, StoryboardStatus, StoryboardStatus)>;
+		using StoryboardUpdatedHandler = std::function<HRESULT(const Storyboard&)>;
 
 		public:
 		AnimationStoryboardEventHandlerRouter() noexcept = default;
@@ -62,10 +62,10 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
 
 		virtual auto OnStoryBoardStatusChanged(
-			Storyboard storyboard,
+			const Storyboard& storyboard,
 			StoryboardStatus newStatus, StoryboardStatus previousStatus) -> void = 0;
 
-		virtual auto OnStoryBoardUpdated(Storyboard storyboard) -> void = 0;
+		virtual auto OnStoryBoardUpdated(const Storyboard& storyboard) -> void = 0;
 
 		private:
 		ComPtr<AnimationStoryboardEventHandlerRouter> router;
@@ -87,14 +87,14 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] auto& StoryboardUpdated() noexcept { return storyboardUpdatedEvent; }
 
 		private:
-		Event<Storyboard,
+		Event<const Storyboard&,
 		      StoryboardStatus, StoryboardStatus> storyboardStatusChangedEvent;
-		Event<Storyboard> storyboardUpdatedEvent;
+		Event<const Storyboard&> storyboardUpdatedEvent;
 
 		auto OnStoryBoardStatusChanged(
-			Storyboard storyboard,
+			const Storyboard& storyboard,
 			StoryboardStatus newStatus, StoryboardStatus previousStatus) -> void override;
 
-		auto OnStoryBoardUpdated(Storyboard storyboard) -> void override;
+		auto OnStoryBoardUpdated(const Storyboard& storyboard) -> void override;
 	};
 }

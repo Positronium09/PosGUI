@@ -4,6 +4,7 @@ module;
 export module PGUI.WindowClass;
 
 import PGUI.Mutex;
+import PGUI.Utils;
 
 import std;
 
@@ -19,7 +20,7 @@ export namespace PGUI
 	{
 		public:
 		static auto Create(
-			const std::wstring& className,
+			wzstring_view className,
 			UINT style = CS_HREDRAW | CS_VREDRAW, HBRUSH backgroundBrush = nullptr,
 			HICON icon = nullptr, HCURSOR cursor = nullptr, HICON smIcon = nullptr) -> WindowClassPtr;
 
@@ -30,11 +31,11 @@ export namespace PGUI
 
 		~WindowClass() noexcept;
 
-		[[nodiscard]] auto ClassName() const noexcept -> std::wstring_view { return className; }
+		[[nodiscard]] auto ClassName() const noexcept -> wzstring_view { return className; }
 		[[nodiscard]] auto GetAtom() const noexcept { return classAtom; }
 
 		protected:
-		WindowClass(const std::wstring& className,
+		WindowClass(wzstring_view className,
 		            UINT style, HBRUSH backgroundBrush,
 		            HICON icon, HCURSOR cursor, HICON smIcon);
 

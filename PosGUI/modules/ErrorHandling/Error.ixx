@@ -15,7 +15,7 @@ export namespace PGUI
 	class Error;
 
 	template <typename T>
-	[[nodiscard]] using Result = std::expected<T, Error>;
+	using Result = std::expected<T, Error>;
 
 	using Unexpected = std::unexpected<Error>;
 
@@ -105,9 +105,16 @@ export namespace PGUI
 		{
 			return details.contains(key);
 		}
-		auto& AddDetail(std::wstring_view key, std::wstring_view value)
+		auto& AddDetail(std::wstring_view key, std::wstring_view value) noexcept
 		{
-			details.emplace(key, value);
+			try
+			{
+				details.emplace(key, value);
+			}
+			catch (const std::exception&)
+			{
+				/*  */
+			}
 			return *this;
 		}
 		auto& RemoveDetail(const std::wstring& key) noexcept
@@ -119,13 +126,11 @@ export namespace PGUI
 
 			return *this;
 		}
-		[[nodiscard]] auto GetDetail(const std::wstring& key) const noexcept -> Result<std::wstring_view>
+		[[nodiscard]] auto GetDetail(const std::wstring& key) const noexcept -> Result<wzstring_view>
 		{
 			if (!details.contains(key))
 			{
-				return Unexpected{ Error{
-					std::make_error_code(std::errc::invalid_argument)
-				} };
+				return Unexpected{ ErrorCode::InvalidArgument };
 			}
 
 			return details.at(key);
@@ -177,8 +182,8 @@ export namespace PGUI
 		[[nodiscard]] auto operator==(const Error& other) const noexcept
 		{
 			return code == other.code &&
-				sourceLocation.file_name() == other.sourceLocation.file_name() &&
-				sourceLocation.function_name() == other.sourceLocation.function_name() &&
+				std::string_view{ sourceLocation.file_name() } == std::string_view{ other.sourceLocation.file_name() } &&
+				std::string_view{ sourceLocation.function_name() } == std::string_view{ other.sourceLocation.function_name() } &&
 				sourceLocation.line() == other.sourceLocation.line() &&
 				sourceLocation.column() == other.sourceLocation.column() &&
 				details == other.details;
@@ -282,18 +287,18 @@ struct std::formatter<PGUI::Error, Char>
 				static_cast<unsigned int>(error.HResult()));
 			needSeparator = true;
 		}
+		if (outTime)
+		{
+			std::format_to(ctx.out(), 
+				"{}[{:%Y-%m-%d %H:%M:%S}]", needSeparator ? " | " : "",
+				error.TimeStamp());
+			needSeparator = true;
+		}
 		if (outMessage)
 		{
 			std::format_to(ctx.out(), "{}Error Message: {}",
 				needSeparator ? " | " : "",
 				error.Message());
-			needSeparator = true;
-		}
-		if (outTime)
-		{
-			std::format_to(ctx.out(), 
-				"{}Time Stamp: {}", needSeparator ? " | " : "",
-				error.TimeStamp());
 			needSeparator = true;
 		}
 		if (outSource)
@@ -319,14 +324,14 @@ struct std::formatter<PGUI::Error, Char>
 				std::vector<std::wstring> details;
 				details.resize(error.Details().size());
 
-				for (const auto& [index, detail] : error.Details() | views::enumerate)
+				for (const auto& [index, detail] : error.Details() | std::views::enumerate)
 				{
 					details[index] = std::format(L"{}", detail);
 				}
 
 				const auto detailString = details
-					| views::join_with(std::wstring{ L", " })
-					| ranges::to<std::wstring>();
+					| std::views::join_with(std::wstring{ L", " })
+					| std::ranges::to<std::wstring>();
 				std::format_to(ctx.out(), "{}",
 					PGUI::WStringToString(detailString));
 			}
@@ -343,8 +348,8 @@ struct std::formatter<PGUI::Error, Char>
 			{
 				const auto customMessageString = *error.CustomMessage();
 
-				std::format_to(ctx.out(), L"{}Custom Message: {}",
-					needSeparator ? L" | " : L"", customMessageString);
+				std::format_to(ctx.out(), "{}Custom Message: {}",
+					needSeparator ? " | " : "", PGUI::WStringToString(customMessageString));
 			}
 			needSeparator = true;
 		}

@@ -7,6 +7,7 @@ import std;
 
 import PGUI.UI.TextFormat;
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.Shape2D;
 import PGUI.UI.Font.FontCollection;
 import PGUI.UI.Font.FontEnums;
@@ -21,7 +22,7 @@ export namespace PGUI::UI
 		public:
 		explicit(false) TextLayout(const ComPtr<IDWriteTextLayout4>& textLayout) noexcept;
 
-		TextLayout(std::wstring_view text, const TextFormat& textFormat, SizeF maxSize) noexcept;
+		TextLayout(wzstring_view text, const TextFormat& textFormat, SizeF maxSize) noexcept;
 
 		auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Error;
 
@@ -45,7 +46,7 @@ export namespace PGUI::UI
 
 		auto SetFontCollection(const FontCollection& fontCollection, TextRange textRange) const noexcept -> Error;
 
-		auto SetFontFamilyName(std::wstring_view fontFamilyName, TextRange textRange) const noexcept -> Error;
+		auto SetFontFamilyName(wzstring_view fontFamilyName, TextRange textRange) const noexcept -> Error;
 
 		auto SetFontWeight(FontWeight fontWeight, TextRange textRange) const noexcept -> Error;
 
@@ -67,7 +68,7 @@ export namespace PGUI::UI
 		//? Maybe write a wrapper for IDWriteTypography
 		auto SetTypography(const ComPtr<IDWriteTypography>& typography, TextRange textRange) const noexcept -> Error;
 
-		auto SetLocaleName(std::wstring_view localeName, TextRange textRange) const noexcept -> Error;
+		auto SetLocaleName(wzstring_view localeName, TextRange textRange) const noexcept -> Error;
 
 		auto SetTrimming(const Trimming& trimming) const noexcept -> Error;
 

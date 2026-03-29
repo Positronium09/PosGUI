@@ -18,15 +18,17 @@ namespace PGUI::UI
 		ComPtrHolder{ textLayout }
 	{ }
 
-	TextLayout::TextLayout(const std::wstring_view text, const TextFormat& textFormat, const SizeF maxSize) noexcept
+	TextLayout::TextLayout(const wzstring_view text, const TextFormat& textFormat, const SizeF maxSize) noexcept
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 		const auto textFormatPtr = textFormat.GetAs<IDWriteTextFormat>();
+		auto textLayoutPtr = GetAs<IDWriteTextLayout>();
 		const auto hr = factory->CreateTextLayout(
 			text.data(), static_cast<UINT32>(text.size()),
 			textFormatPtr.get(),
 			maxSize.cx, maxSize.cy,
-			std::bit_cast<IDWriteTextLayout**>(Put()));
+			textLayoutPtr.put());
+		Set(textLayoutPtr.try_query<IDWriteTextLayout4>());
 
 		LogIfFailed(
 			Error{
@@ -121,7 +123,7 @@ namespace PGUI::UI
 			Get()->SetMaxHeight(maxHeight)
 		};
 		error
-			.AddDetail(L"Max Width", std::format(L"{:.5F}", maxHeight));
+			.AddDetail(L"Max Height", std::format(L"{:.5F}", maxHeight));
 		LogIfFailed(error, L"Cannot set max height");
 		return error;
 	}
@@ -151,7 +153,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextLayout::SetFontFamilyName(const std::wstring_view fontFamilyName,
+	auto TextLayout::SetFontFamilyName(const wzstring_view fontFamilyName,
 	                                   const TextRange textRange) const noexcept -> Error
 	{
 		Error error{
@@ -266,7 +268,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextLayout::SetLocaleName(const std::wstring_view localeName,
+	auto TextLayout::SetLocaleName(const wzstring_view localeName,
 	                               const TextRange textRange) const noexcept -> Error
 	{
 		Error error{
@@ -439,10 +441,10 @@ namespace PGUI::UI
 	auto TextLayout::GetFontFamilyName() const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetFontFamilyNameLength();
-		std::wstring fontFamilyName(length, L'\0');
+		std::wstring fontFamilyName(length + 1, L'\0');
 
 		if (const auto hr = Get()->GetFontFamilyName(
-				fontFamilyName.data(), length);
+				fontFamilyName.data(), length + 1);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -455,11 +457,20 @@ namespace PGUI::UI
 
 	auto TextLayout::GetFontFamilyName(const UINT32 position) const noexcept -> Result<std::wstring>
 	{
-		const auto length = Get()->GetFontFamilyNameLength();
-		std::wstring fontFamilyName(length, L'\0');
+		UINT32 length{ };
+		if (const auto hr = Get()->GetFontFamilyNameLength(position, &length);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get font family name");
+			return Unexpected{ error };
+		}
+		std::wstring fontFamilyName(length + 1, L'\0');
 
 		if (const auto hr = Get()->GetFontFamilyName(
-				position, fontFamilyName.data(), length);
+				position, fontFamilyName.data(), length + 1);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -475,11 +486,20 @@ namespace PGUI::UI
 	auto TextLayout::GetFontFamilyName(const UINT32 position,
 	                                   TextRange& textRange) const noexcept -> Result<std::wstring>
 	{
-		const auto length = Get()->GetFontFamilyNameLength();
-		std::wstring fontFamilyName(length, L'\0');
+		UINT32 length{ };
+		if (const auto hr = Get()->GetFontFamilyNameLength(position, &length, &textRange);
+			FAILED(hr))
+		{
+			Error error{ hr };
+			error
+				.AddDetail(L"Position", std::to_wstring(position));
+			Logger::Error(error, L"Cannot get font family name");
+			return Unexpected{ error };
+		}
+		std::wstring fontFamilyName(length + 1, L'\0');
 
 		if (const auto hr = Get()->GetFontFamilyName(
-				position, fontFamilyName.data(), length, &textRange);
+				position, fontFamilyName.data(), length + 1, &textRange);
 			FAILED(hr))
 		{
 			Error error{ hr };

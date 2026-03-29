@@ -113,7 +113,8 @@ namespace PGUI::UI
 		b = bPrime + m;
 	}
 
-	RGBA::RGBA(sRGB srgb) noexcept
+	RGBA::RGBA(sRGB srgb) noexcept :
+		a{ 1.0F }
 	{
 		auto convertChannel = [](const float channel) noexcept -> float
 		{
@@ -129,7 +130,8 @@ namespace PGUI::UI
 		b = convertChannel(srgb.b);
 	}
 
-	RGBA::RGBA(const CMYK cmyk) noexcept
+	RGBA::RGBA(const CMYK cmyk) noexcept :
+		a{ 1.0F }
 	{
 		r = (1 - cmyk.c) * (1 - cmyk.k);
 		g = (1 - cmyk.m) * (1 - cmyk.k);
@@ -173,7 +175,14 @@ namespace PGUI::UI
 		const auto delta = cMax - cMin;
 
 		l = (cMax + cMin) / 2.0F;
-		s = delta / (1 - std::abs(2 * l - 1));
+		if (delta == 0)
+		{
+			s = 0.0F;
+		}
+		else
+		{
+			s = delta / (1 - std::abs(2 * l - 1));
+		}
 
 		if (delta == 0)
 		{
@@ -181,7 +190,7 @@ namespace PGUI::UI
 		}
 		else if (cMax == rgb.r)
 		{
-			h = std::fmodf(rgb.g - rgb.b / delta, 6);
+			h = std::fmodf((rgb.g - rgb.b) / delta, 6);
 		}
 		else if (cMax == rgb.g)
 		{
@@ -218,7 +227,7 @@ namespace PGUI::UI
 		}
 		else if (cMax == rgb.r)
 		{
-			h = std::fmodf(rgb.g - rgb.b / delta, 6);
+			h = std::fmodf((rgb.g - rgb.b) / delta, 6);
 		}
 		else if (cMax == rgb.g)
 		{

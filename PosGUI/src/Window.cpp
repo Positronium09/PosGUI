@@ -21,26 +21,20 @@ namespace PGUI
 
 	Window::~Window() noexcept
 	{
-		std::ranges::for_each(timerMap | std::views::keys,
-		                      [this](const auto& id)
-		                      {
-			                      KillTimer(hWnd, id);
-		                      });
+		for (const auto& timerId : timerMap | std::views::keys)
+		{
+			KillTimer(hWnd, timerId);
+		}
 		timerMap.clear();
 
-		std::ranges::for_each(
-			beforeHookers,
-			[this](auto& hook)
-			{
-				UnHookBefore(hook);
-			});
-
-		std::ranges::for_each(
-			afterHookers,
-			[this](auto& hook)
-			{
-				UnHookAfter(hook);
-			});
+		for (const auto& beforeHooker : beforeHookers)
+		{
+			beforeHooker.get().UnhookFromWindow();
+		}
+		for (const auto& afterHooker : afterHookers)
+		{
+			afterHooker.get().UnhookFromWindow();
+		}
 
 		beforeHookers.clear();
 		afterHookers.clear();
@@ -63,8 +57,8 @@ namespace PGUI
 		RegisterHandler(WM_DPICHANGED_AFTERPARENT, &Window::_OnDpiChanged);
 		RegisterHandler(WM_DPICHANGED_BEFOREPARENT, &Window::_OnDpiChanged);
 		RegisterHandler(WM_WINDOWPOSCHANGED, &Window::_OnWindowPosChanged);
-		RegisterHandler(WM_SIZE, &Window::_OnSize);
-		RegisterHandler(WM_MOVE, &Window::_OnMove);
+		// RegisterHandler(WM_SIZE, &Window::_OnSize);
+		// RegisterHandler(WM_MOVE, &Window::_OnMove);
 	}
 
 	// ReSharper disable CppInconsistentNaming
@@ -218,18 +212,14 @@ namespace PGUI
 
 		if (msg == WM_TIMER)
 		{
-			if (const auto timerId = arg1;
-				window->timerMap.contains(timerId))
+			const auto timerId = arg1;
+			if (auto it = window->timerMap.find(timerId);
+				it != window->timerMap.end())
 			{
-				const auto& callback = window->timerMap.at(timerId);
+				const auto& callback = it->second;
 				callback(timerId);
 				return 0;
 			}
-		}
-
-		if (!window) [[unlikely]]
-		{
-			return DefWindowProcW(hWnd, msg, arg1, arg2);
 		}
 
 		MessageHandlerResult result{ 0 };
@@ -426,7 +416,7 @@ namespace PGUI
 		{
 			hooker.UnhookFromWindow();
 			Logger::Error(
-				Error{ E_FAIL }
+				Error{ SystemErrorCode::STLFailure }
 				.AddDetail(L"Exception", StringToWString(exception.what()))
 			);
 			return;
@@ -440,7 +430,7 @@ namespace PGUI
 			hooker.UnhookFromWindow();
 			beforeHookers.pop_back();
 			Logger::Error(
-				Error{ E_FAIL }
+				Error{ SystemErrorCode::STLFailure }
 				.AddDetail(L"Exception", StringToWString(exception.what()))
 			);
 		}
@@ -453,7 +443,18 @@ namespace PGUI
 			hooker.HookedWindow()->UnHookBefore(hooker);
 		}
 		hooker.HookToWindow(this);
-		beforeHookers.push_back(hooker);
+		try
+		{
+			beforeHookers.push_back(hooker);
+		}
+		catch (const std::exception& exception)
+		{
+			hooker.UnhookFromWindow();
+			Logger::Error(
+				Error{ SystemErrorCode::STLFailure }
+				.AddDetail(L"Exception", StringToWString(exception.what()))
+			);
+		}
 	}
 
 	auto Window::HookAfter(MessageHooker& hooker) noexcept -> void
@@ -463,7 +464,18 @@ namespace PGUI
 			hooker.HookedWindow()->UnHookAfter(hooker);
 		}
 		hooker.HookToWindow(this);
-		afterHookers.push_back(hooker);
+		try
+		{
+			afterHookers.push_back(hooker);
+		}
+		catch (const std::exception& exception)
+		{
+			hooker.UnhookFromWindow();
+			Logger::Error(
+				Error{ SystemErrorCode::STLFailure }
+				.AddDetail(L"Exception", StringToWString(exception.what()))
+			);
+		}
 	}
 
 	auto Window::UnHook(MessageHooker& hooker) noexcept -> void
@@ -534,7 +546,7 @@ namespace PGUI
 			catch (const std::exception& e)
 			{
 				Logger::Error(
-					Error{ E_FAIL }
+					Error{ SystemErrorCode::STLFailure }
 					.AddDetail(L"Exception", StringToWString(e.what()))
 				);
 
@@ -705,7 +717,7 @@ namespace PGUI
 		RECT rc;
 		::GetWindowRect(hwnd, &rc);
 
-		const RectL rect = PhysicalToLogical(RectF{ rc });
+		const RectF rect = PhysicalToLogical(RectF{ rc });
 		const auto center = rect.Center();
 		const auto centeredWindowRect = GetWindowRect().CenteredAround(center);
 

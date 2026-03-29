@@ -21,16 +21,16 @@ namespace PGUI::UI
 	{ }
 
 	TextFormat::TextFormat(
-		const std::wstring_view fontFamilyName, const float fontSize,
+		const wzstring_view fontFamilyName, const float fontSize,
 		const FontWeight fontWeight, const FontStyle fontStyle, const FontStretch fontStretch,
 		const FontCollection& fontCollection,
-		const std::wstring_view localeName) noexcept
+		const wzstring_view localeName) noexcept
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 
 		FontCollection collection = fontCollection;
 
-		if (fontCollection.IsInitialized())
+		if (!fontCollection.IsInitialized())
 		{
 			auto fontCollectionResult = FontCollection::GetSystemFontCollection();
 			if (!fontCollectionResult.has_value())
@@ -70,16 +70,16 @@ namespace PGUI::UI
 	}
 
 	TextFormat::TextFormat(
-		const std::wstring_view fontFamilyName, const float fontSize,
+		const wzstring_view fontFamilyName, const float fontSize,
 		const std::span<const FontAxisValue> fontAxisValues,
 		const FontCollection& fontCollection,
-		const std::wstring_view localeName) noexcept
+		const wzstring_view localeName) noexcept
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 
 		FontCollection collection = fontCollection;
 
-		if (fontCollection.IsInitialized())
+		if (!fontCollection.IsInitialized())
 		{
 			auto fontCollectionResult = FontCollection::GetSystemFontCollection();
 			if (!fontCollectionResult.has_value())

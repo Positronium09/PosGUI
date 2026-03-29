@@ -221,19 +221,21 @@ namespace PGUI::UI
 
 	Brush::Brush(const ComPtr<ID2D1Brush>& ptr) noexcept
 	{
-		ComPtrHolder<ID2D1Brush, ID2D1SolidColorBrush, ID2D1LinearGradientBrush,
-		             ID2D1RadialGradientBrush, ID2D1BitmapBrush> holder{ nullptr };
-		holder.Attach(ptr.get());
+		ComPtrHolder<
+				ID2D1Brush, ID2D1SolidColorBrush, ID2D1LinearGradientBrush,
+				ID2D1RadialGradientBrush, ID2D1BitmapBrush> holder
+			{
+			ptr.get(),
+			nullptr,
+			nullptr,
+			nullptr,
+			nullptr
+		};
+		
 		auto hrSolidColor = holder.AsAssign<ID2D1Brush, ID2D1SolidColorBrush>();
 		auto hrLinearGradient = holder.AsAssign<ID2D1Brush, ID2D1LinearGradientBrush>();
 		auto hrRadialGradient = holder.AsAssign<ID2D1Brush, ID2D1RadialGradientBrush>();
 		auto hrBitmapBrush = holder.AsAssign<ID2D1Brush, ID2D1BitmapBrush>();
-
-		LogIfFailed(
-			LogLevel::Info,
-			Error{ hrSolidColor },
-			L"Given pointer is not a SolidColorBrush"
-		);
 
 		if (holder.IsInitialized<ID2D1SolidColorBrush>())
 		{
@@ -243,12 +245,6 @@ namespace PGUI::UI
 			return;
 		}
 
-		LogIfFailed(
-			LogLevel::Info,
-			Error{ hrLinearGradient },
-			L"Given pointer is not a LinearGradientBrush"
-		);
-
 		if (holder.IsInitialized<ID2D1LinearGradientBrush>())
 		{
 			const auto& linearGradientBrush = holder.Get<ID2D1LinearGradientBrush>();
@@ -257,12 +253,6 @@ namespace PGUI::UI
 			return;
 		}
 
-		LogIfFailed(
-			LogLevel::Info,
-			Error{ hrRadialGradient },
-			L"Given pointer is not a RadialGradientBrush"
-		);
-
 		if (holder.IsInitialized<ID2D1RadialGradientBrush>())
 		{
 			const auto& radialGradientBrush = holder.Get<ID2D1RadialGradientBrush>();
@@ -270,12 +260,6 @@ namespace PGUI::UI
 			brush = RadialGradientBrush{ radialGradientBrush };
 			return;
 		}
-
-		LogIfFailed(
-			LogLevel::Info,
-			Error{ hrBitmapBrush },
-			L"Given pointer is not a BitmapBrush"
-		);
 
 		if (holder.IsInitialized<ID2D1BitmapBrush>())
 		{
@@ -294,6 +278,8 @@ namespace PGUI::UI
 		}
 
 		brush = EmptyBrush{ };
+
+		Logger::Warning(L"Unknown brush type. Brush is set to empty");
 	}
 
 	Brush::Brush(const BrushParameters& parameters) noexcept :
@@ -314,10 +300,10 @@ namespace PGUI::UI
 		CreateBrush(renderTarget);
 	}
 
-	auto Brush::CreateBrush(ComPtr<ID2D1RenderTarget> renderTarget) noexcept -> void
+	auto Brush::CreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget) noexcept -> void
 	{
 		ReleaseBrush();
-		std::visit([renderTarget, this]<typename T>(T& param)
+		std::visit([&renderTarget, this]<typename T>(T& param)
 		{
 			if constexpr (std::is_same_v<T, RGBA>)
 			{

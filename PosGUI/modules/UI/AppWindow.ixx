@@ -6,6 +6,7 @@ export module PGUI.UI.AppWindow;
 import std;
 
 import PGUI.Shape2D;
+import PGUI.Utils;
 import PGUI.Window;
 import PGUI.UI.UICore;
 import PGUI.WindowClass;
@@ -33,9 +34,9 @@ export namespace PGUI::UI
 		[[nodiscard]] auto GetMinimumSize() const noexcept -> SizeI { return minSize; }
 		auto SetMinimumSize(const SizeI size) noexcept -> void { minSize = size; }
 
-		auto SetTitle(std::wstring_view title) const noexcept -> void;
+		auto SetTitle(wzstring_view title) const noexcept -> void;
 
-		[[nodiscard]] auto GetTitle() const noexcept -> std::wstring_view { return titleText; }
+		[[nodiscard]] auto GetTitle() const noexcept -> wzstring_view { return titleText; }
 
 		[[nodiscard]] auto IsMaximizable() const noexcept -> bool;
 

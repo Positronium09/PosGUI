@@ -7,6 +7,7 @@ export module PGUI.UI.Font.FontCollection;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.ErrorHandling;
 import PGUI.UI.Font.FontFamily;
 import PGUI.UI.Font.FontSet;
@@ -26,10 +27,10 @@ export namespace PGUI::UI::Font
 		explicit(false) FontCollection(const ComPtr<IDWriteFontCollection3>& collection) noexcept;
 
 		[[nodiscard]] auto FindFontFamilyByName(
-			std::wstring_view fontFamilyName) const noexcept -> Result<UINT32>;
+			wzstring_view fontFamilyName) const noexcept -> Result<UINT32>;
 
 		[[nodiscard]] auto GetFontFamily(
-			std::wstring_view fontFamilyName) const noexcept -> Result<FontFamily>;
+			wzstring_view fontFamilyName) const noexcept -> Result<FontFamily>;
 
 		[[nodiscard]] auto GetFontFamily(UINT32 index) const noexcept -> Result<FontFamily>;
 

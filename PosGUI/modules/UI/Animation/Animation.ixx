@@ -12,3 +12,7 @@ export import :AnimationManagerEventHandler;
 export import :AnimationStoryboardEventHandler;
 export import :AnimationVariableChangeEventHandler;
 export import :Animated;
+
+/*
+  12. Animated — depends on most Animation modules
+ */

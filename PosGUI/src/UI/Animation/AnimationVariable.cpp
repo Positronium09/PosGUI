@@ -19,7 +19,7 @@ namespace PGUI::UI::Animation
 	{
 		ComPtr<IUIAnimationStoryboard2> storyboard;
 
-		if (const auto hr = Get()->GetCurrentStoryboard(&storyboard);
+		if (const auto hr = Get()->GetCurrentStoryboard(storyboard.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -245,7 +245,7 @@ namespace PGUI::UI::Animation
 		return error;
 	}
 
-	auto AnimationVariable::SetLowerBound(const std::span<double> bounds) const noexcept -> Error
+	auto AnimationVariable::SetLowerBound(const std::span<const double> bounds) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetLowerBoundVector(
@@ -265,7 +265,7 @@ namespace PGUI::UI::Animation
 		return error;
 	}
 
-	auto AnimationVariable::SetUpperBound(const std::span<double> bounds) const noexcept -> Error
+	auto AnimationVariable::SetUpperBound(const std::span<const double> bounds) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetUpperBoundVector(

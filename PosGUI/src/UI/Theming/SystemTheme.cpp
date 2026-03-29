@@ -38,7 +38,7 @@ namespace PGUI::UI::Theming
 					static_cast<winrt::Windows::UI::ViewManagement::UIColorType>(colorType))
 			};
 		}
-		catch (winrt::hresult_error& error)
+		catch (const winrt::hresult_error& error)
 		{
 			throw Exception{
 				Error{

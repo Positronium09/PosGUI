@@ -88,16 +88,17 @@ export namespace PGUI::UI::Theming
 
 		static auto RegisterSystemEventChanges() -> void
 		{
+			static std::once_flag onceFlag;
 			static winrt::event_token colorValuesChangedToken;
-			if (!colorValuesChangedToken)
+			std::call_once(onceFlag, []()
 			{
 				colorValuesChangedToken = uiSettings.ColorValuesChanged([](
 					const winrt::Windows::UI::ViewManagement::UISettings&,
 					const winrt::Windows::Foundation::IInspectable&)
-					{
-						colorValuesChangedEvent.InvokeAsync();
-					});
-			}
+				{
+					colorValuesChangedEvent.InvokeAsync();
+				});
+			});
 		}
 
 		private:

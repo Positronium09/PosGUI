@@ -3,6 +3,16 @@ export module PGUI.Utils:HashUtils;
 import std;
 
 import :MetaUtils;
+import :StringUtils;
+
+export template <typename CharT, typename Traits>
+struct std::hash<PGUI::basic_zstring_view<CharT, Traits>>
+{
+	[[nodiscard]] auto operator()(const PGUI::basic_zstring_view<CharT, Traits> sv) const noexcept -> size_t
+	{
+		return std::hash<std::basic_string_view<CharT, Traits>>{ }(sv);
+	}
+};
 
 export namespace PGUI
 {
@@ -41,6 +51,7 @@ export namespace PGUI
 
 		[[nodiscard]] auto operator()(const char* txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
 		[[nodiscard]] auto operator()(const std::string_view txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
+		[[nodiscard]] auto operator()(const zstring_view txt) const -> size_t { return std::hash<zstring_view>{ }(txt); }
 		[[nodiscard]] auto operator()(const std::string& txt) const -> size_t { return std::hash<std::string_view>{ }(txt); }
 	};
 
@@ -51,6 +62,7 @@ export namespace PGUI
 
 		[[nodiscard]] auto operator()(const wchar_t* txt) const -> size_t { return std::hash<std::wstring_view>{ }(txt); }
 		[[nodiscard]] auto operator()(const std::wstring_view txt) const -> size_t { return std::hash<std::wstring_view>{ }(txt); }
+		[[nodiscard]] auto operator()(const wzstring_view txt) const -> size_t { return std::hash<wzstring_view>{ }(txt); }
 		[[nodiscard]] auto operator()(const std::wstring& txt) const -> size_t { return std::hash<std::wstring_view>{ }(txt); }
 	};
 }

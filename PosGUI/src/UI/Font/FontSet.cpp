@@ -26,7 +26,7 @@ namespace PGUI::UI::Font
 
 		if (inputValues)
 		{
-			inputValuesArr = std::bit_cast<const DWRITE_FONT_AXIS_VALUE*>(inputValues->data());
+			inputValuesArr = static_cast<const DWRITE_FONT_AXIS_VALUE*>(inputValues->data());
 			inputValuesArrCount = static_cast<UINT32>(inputValues->size());
 		}
 		std::vector<FontAxisValue> values(DWRITE_STANDARD_FONT_AXIS_COUNT + inputValuesArrCount);

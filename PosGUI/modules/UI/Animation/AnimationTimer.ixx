@@ -31,8 +31,5 @@ export namespace PGUI::UI::Animation
 
 		auto SetTimerEventHandler(AnimationTimerEventHandler& handler) const noexcept -> Error;
 		//TODO SetTimerUpdateHandle
-
-		private:
-		static inline AnimationTimer* instance = nullptr;
 	};
 }

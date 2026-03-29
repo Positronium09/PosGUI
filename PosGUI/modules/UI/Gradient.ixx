@@ -35,8 +35,11 @@ export namespace PGUI::UI
 		public:
 		virtual ~Gradient() noexcept = default;
 
-		[[nodiscard]] const auto& GetStops() noexcept { return stops; }
-		[[nodiscard]] auto& GetStops() const noexcept { return stops; }
+		template <typename Self>
+		[[nodiscard]] auto&& GetStops(this Self&& self) noexcept
+		{
+			return std::forward_like<Self>(self.stops);
+		}
 
 		[[nodiscard]] auto GetPositioningMode() const noexcept { return mode; }
 		auto SetPositioningMode(const PositioningMode _mode) noexcept -> void { mode = _mode; }

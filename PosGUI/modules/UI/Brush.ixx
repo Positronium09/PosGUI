@@ -73,7 +73,7 @@ export namespace PGUI::UI
 		~BitmapBrush() noexcept = default;
 
 		explicit(false) operator ID2D1Brush*() const noexcept { return Get().get(); }
-	};;
+	};
 
 	struct LinearGradientBrushParameters
 	{
@@ -140,13 +140,13 @@ export namespace PGUI::UI
 		auto SetParametersAndCreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget,
 			const BrushParameters& params) noexcept -> void;
 
-		auto CreateBrush(ComPtr<ID2D1RenderTarget> renderTarget) noexcept -> void;
+		auto CreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget) noexcept -> void;
 
 		auto ReleaseBrush() noexcept -> void;
 
 		auto SetGradientBrushRect(RectF rect) -> void;
 
-		[[nodiscard]] auto GetParameters() const noexcept { return parameters; }
+		[[nodiscard]] const auto& GetParameters() const noexcept { return parameters; }
 
 		explicit(false) operator ID2D1Brush*() const noexcept;
 

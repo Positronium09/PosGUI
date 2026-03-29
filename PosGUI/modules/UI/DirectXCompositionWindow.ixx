@@ -19,6 +19,17 @@ import PGUI.ErrorHandling;
 
 export namespace PGUI::UI
 {
+	enum class BatteryFlag : BYTE
+	{
+		High = BATTERY_FLAG_HIGH,
+		Low = BATTERY_FLAG_LOW,
+		Critical = BATTERY_FLAG_CRITICAL,
+		Charging = BATTERY_FLAG_CHARGING,
+		NoBattery = BATTERY_FLAG_NO_BATTERY,
+		Unknown = BATTERY_FLAG_UNKNOWN
+	};
+	DEFINE_ENUM_FLAG_OPERATORS(BatteryFlag);
+
 	class DirectXCompositionWindow :
 		public Window,
 		protected ComPtrHolder<IDXGISwapChain1, IDCompositionTarget, ID2D1DeviceContext7, IDCompositionVisual3>
@@ -99,7 +110,7 @@ export namespace PGUI::UI
 		inline static ComPtr<IDCompositionSurfaceFactory> dCompositionSurfaceFactory;
 		inline static ComPtr<ID2D1Device7> d2d1Device;
 
-		HMONITOR currentMonitor;
+		HMONITOR currentMonitor = nullptr;
 		PAINTSTRUCT paintStruct{ };
 		static inline std::atomic_uint64_t deviceCreationID{ 0 };
 
@@ -122,6 +133,7 @@ export namespace PGUI::UI
 			dxgiDevice.reset();
 			dCompositionDevice.reset();
 			d2d1Device.reset();
+			dCompositionSurfaceFactory.reset();
 			InitDevices();
 		}
 

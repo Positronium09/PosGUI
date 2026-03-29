@@ -103,6 +103,10 @@ namespace PGUI::UI::Animation
 		{
 			router->ClearHandler();
 		}
+		if (integerRouter)
+		{
+			integerRouter->ClearHandler();
+		}
 	}
 
 	auto AnimationVariableChangeEventHandler::CallVariableChanged(
@@ -144,7 +148,7 @@ namespace PGUI::UI::Animation
 	}
 
 	auto AnimationVariableChangeEvent::OnVariableChanged(
-		const Storyboard storyboard, const AnimationVariable variable,
+		const Storyboard& storyboard, const AnimationVariable& variable,
 		const std::span<double> newValues, const std::span<double> previousValues) -> void
 	{
 		variableChangedEvent.Invoke(
@@ -153,7 +157,7 @@ namespace PGUI::UI::Animation
 	}
 
 	auto AnimationVariableChangeEvent::OnVariableIntegerChanged(
-		const Storyboard storyboard, const AnimationVariable variable,
+		const Storyboard& storyboard, const AnimationVariable& variable,
 		const std::span<INT32> newValues, const std::span<INT32> previousValues) -> void
 	{
 		variableIntegerChangedEvent.Invoke(

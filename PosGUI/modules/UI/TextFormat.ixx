@@ -22,17 +22,17 @@ export namespace PGUI::UI
 		explicit(false) TextFormat(const ComPtr<IDWriteTextFormat3>& textFormat) noexcept;
 
 		TextFormat(
-			std::wstring_view fontFamilyName, float fontSize,
+			wzstring_view fontFamilyName, float fontSize,
 			FontWeight fontWeight = FontWeights::Normal,
 			FontStyle fontStyle = FontStyles::Normal,
 			FontStretch fontStretch = FontStretches::Normal,
 			const FontCollection& fontCollection = FontCollection{ nullptr },
-			std::wstring_view localeName = GetUserLocaleName()) noexcept;
+			wzstring_view localeName = GetUserLocaleName()) noexcept;
 
-		TextFormat(std::wstring_view fontFamilyName, float fontSize,
+		TextFormat(wzstring_view fontFamilyName, float fontSize,
 		           std::span<const FontAxisValue> fontAxisValues,
 					const FontCollection& fontCollection = FontCollection{ nullptr },
-		           std::wstring_view localeName = GetUserLocaleName()) noexcept;
+		           wzstring_view localeName = GetUserLocaleName()) noexcept;
 
 		auto SetFlowDirection(FlowDirection flowDirection) noexcept -> Error;
 

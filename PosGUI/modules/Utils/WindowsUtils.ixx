@@ -5,6 +5,7 @@ export module PGUI.Utils:WindowsUtils;
 
 import std;
 
+import :StringUtils;
 import PGUI.Shape2D;
 
 export
@@ -163,7 +164,7 @@ export namespace PGUI
 
 	[[nodiscard]] auto ParseMovingMessage(Argument2 arg2) noexcept -> RectF;
 
-	auto WindowMsgToText(MessageID msg) noexcept -> std::wstring_view;
+	auto WindowMsgToText(MessageID msg) noexcept -> wzstring_view;
 
 	auto EnableDarkTitleBar(HWND hWnd, bool enable = true) noexcept -> void;
 

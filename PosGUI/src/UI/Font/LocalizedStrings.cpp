@@ -15,7 +15,7 @@ namespace PGUI::UI::Font
 	{ }
 
 	auto LocalizedStrings::FindLocaleName(
-		const std::wstring_view name) const noexcept -> Result<UINT32>
+		const wzstring_view name) const noexcept -> Result<UINT32>
 	{
 		UINT32 index = 0;
 		auto found = FALSE;
@@ -23,11 +23,11 @@ namespace PGUI::UI::Font
 		auto& ptr = Get();
 
 		if (const auto hr = ptr->FindLocaleName(
-			name.data(), &index,
-			&found);
-			FAILED(hr))
+				name.data(), &index,
+				&found);
+			found == FALSE || FAILED(hr))
 		{
-			Error error{ hr };
+			Error error{ FAILED(hr) ? hr : E_FAIL };
 			error
 				.AddDetail(L"Locale Name", name);
 			Logger::Error(error, L"Failed to find locale name in localized strings.");

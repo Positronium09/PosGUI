@@ -38,7 +38,7 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto GetStatus() const noexcept -> Result<AnimationManagerStatus>;
 
-		[[nodiscard]] auto EstimateNextEventTime() const noexcept -> Result<double>;
+		[[nodiscard]] auto EstimateNextEventTime() const noexcept -> Result<Seconds>;
 
 		auto SetAnimationMode(AnimationMode mode) const noexcept -> Error;
 
@@ -50,7 +50,7 @@ export namespace PGUI::UI::Animation
 
 		auto ScheduleTransition(
 			const AnimationVariable& variable,
-			AnimationTransition transition, double currentTime) const noexcept -> Error;
+			const AnimationTransition& transition, double currentTime) const noexcept -> Error;
 
 		auto SetManagerEventHandler(
 			AnimationManagerEventHandler& eventHandler,

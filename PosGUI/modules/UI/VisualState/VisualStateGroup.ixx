@@ -3,6 +3,7 @@ export module PGUI.UI.VisualStateGroup;
 import std;
 
 import PGUI.Utils;
+import PGUI.ErrorHandling;
 
 export namespace PGUI::UI
 {
@@ -16,20 +17,41 @@ export namespace PGUI::UI
 		}
 		~VisualStateGroup() noexcept = default;
 
-		auto AllowTransition(const StateT from, StateT to) noexcept -> void
+		auto AllowTransition(const StateT from, StateT to) noexcept -> Error
 		{
-			allowedTransitions[from].emplace_back(to);
+			try
+			{
+				allowedTransitions[from].emplace_back(to);
+				return Error{ ErrorCode::Success };
+			}
+			catch (const std::exception& e)
+			{
+				return Error{ SystemErrorCode::STLFailure }
+				.SetCustomMessage(
+					StringToWString(e.what()));
+			}
 		}
-		auto DisallowTransition(const StateT from, StateT to) noexcept -> void
+		auto DisallowTransition(const StateT from, StateT to) noexcept -> Error
 		{
-			disallowedTransitions[from].emplace_back(to);
+			try
+			{
+				disallowedTransitions[from].emplace_back(to);
+				return Error{ ErrorCode::Success };
+			}
+			catch (const std::exception& e)
+			{
+				return Error{ SystemErrorCode::STLFailure }
+				.SetCustomMessage(
+					StringToWString(e.what()));
+			}
 		}
 
 		[[nodiscard]] auto IsTransitionAllowed(const StateT from, const StateT to) const noexcept -> bool
 		{
-			if (disallowedTransitions.contains(from))
+			if (const auto disallowedIt = disallowedTransitions.find(from);
+				disallowedIt != disallowedTransitions.end())
 			{
-				const auto& disallowedVector = disallowedTransitions.at(from);
+				const auto& disallowedVector = disallowedIt->second;
 				if (const auto it = std::ranges::find(disallowedVector, to);
 					it != disallowedVector.cend())
 				{
@@ -37,9 +59,10 @@ export namespace PGUI::UI
 				}
 			}
 
-			if (allowedTransitions.contains(from))
+			if (const auto allowedIt = allowedTransitions.find(from);
+				allowedIt != allowedTransitions.end())
 			{
-				const auto& allowedVector = allowedTransitions.at(from);
+				const auto& allowedVector = allowedIt->second;
 				if (const auto it = std::ranges::find(allowedVector, to);
 					it != allowedVector.cend())
 				{

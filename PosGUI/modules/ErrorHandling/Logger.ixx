@@ -5,6 +5,7 @@ export module PGUI.ErrorHandling:Logger;
 
 import std;
 
+import PGUI.Utils;
 import PGUI.Mutex;
 import :Error;
 import :ErrorCodes;
@@ -22,7 +23,7 @@ export namespace PGUI
 		Critical = 5
 	};
 
-	constexpr auto LogLevelToString(const LogLevel logLevel) noexcept -> std::wstring_view
+	constexpr auto LogLevelToString(const LogLevel logLevel) noexcept -> wzstring_view
 	{
 		switch (logLevel)
 		{
@@ -88,10 +89,7 @@ export namespace PGUI
 
 		auto Log(const LogLevel logLevel, const std::wstring_view message) -> void override
 		{
-			auto now = std::chrono::system_clock::now();
-
-			file << std::format(L"[{:%Y-%m-%d %H:%M:%S}] [{}] {}\n",
-				now, LogLevelToString(logLevel), message);
+			file << std::format(L"[{}] {}\n", LogLevelToString(logLevel), message);
 		}
 
 		private:
@@ -130,21 +128,30 @@ export namespace PGUI
 
 		[[nodiscard]] static auto GetLogger() noexcept -> Result<std::reference_wrapper<LogSink>>
 		{
+			std::scoped_lock lock{ loggingMutex };
 			if (logger == nullptr)
 			{
-				return Unexpected{ E_NOT_SET };
+				return Unexpected{ ErrorCode::NotSet };
 			}
 			return *logger;
 		}
 
 		template <std::derived_from<LogSink> Sink>
-		[[nodiscard]] static auto& GetLogger() noexcept
+		[[nodiscard]] static auto GetLogger() noexcept -> Result<std::reference_wrapper<Sink>>
 		{
-			return *dynamic_cast<Sink*>(logger);
+			std::scoped_lock lock{ loggingMutex };
+
+			if (auto* derived = dynamic_cast<Sink*>(logger))
+			{
+				return *derived;
+			}
+
+			return Unexpected{ ErrorCode::NotSet };
 		}
 
 		[[nodiscard]] static auto IsLoggerPresent() noexcept
 		{
+			std::scoped_lock lock{ loggingMutex };
 			return logger != nullptr;
 		}
 
@@ -156,10 +163,10 @@ export namespace PGUI
 			}
 			std::scoped_lock lock{ loggingMutex };
 
-			const auto logSink = GetLogger();
+			const auto logSink = GetLoggerUnsafe();
 			if (!logSink)
 			{
-				throw Exception{ E_POINTER }
+				throw Exception{ ErrorCode::NotSet }
 					.SuggestFix(L"Set logger before using")
 					.AddDetail(L"message", message)
 					.AddDetail(L"logLevel", LogLevelToString(logLevel));
@@ -193,12 +200,12 @@ export namespace PGUI
 			if (message.empty())
 			{
 				// ReSharper disable once StringLiteralTypo
-				Log(logLevel, std::format(L"{:cmsdfx}", error));
+				Log(logLevel, std::format(L"{:a}", error));
 				return;
 			}
 
 			// ReSharper disable once StringLiteralTypo
-			Log(logLevel, std::format(L"Message: {} | {:cmsdfx}", message, error));
+			Log(logLevel, std::format(L"Message: {} | {:a}", message, error));
 		}
 		static auto Log(const Error& error, const std::wstring_view message = L"")
 		{
@@ -298,6 +305,11 @@ export namespace PGUI
 		#else
 			LogLevel::Info;
 		#endif
+
+		[[nodiscard]] static auto GetLoggerUnsafe() noexcept -> Result<std::reference_wrapper<LogSink>>
+		{
+			return *logger;
+		}
 	};
 
 	auto LogIfFailed(const Error& error, const std::wstring_view message = L"")

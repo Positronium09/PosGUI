@@ -17,7 +17,7 @@ namespace PGUI::UI::Animation
 		public Implements<AnimationVariableChangeEventHandlerRouter, IUIAnimationVariableChangeHandler2>
 	{
 		using AnimationVariableChangeHandler = std::function<HRESULT(
-			Storyboard, AnimationVariable,
+			const Storyboard&, const AnimationVariable&,
 			std::span<double>, std::span<double>)>;
 
 		public:
@@ -44,7 +44,7 @@ namespace PGUI::UI::Animation
 		public Implements<AnimationVariableIntegerChangeEventHandlerRouter, IUIAnimationVariableIntegerChangeHandler2>
 	{
 		using AnimationIntegerVariableChangeHandler = std::function<HRESULT(
-			Storyboard, AnimationVariable,
+			const Storyboard&, const AnimationVariable&,
 			std::span<INT32>, std::span<INT32>)>;
 
 		public:
@@ -83,11 +83,11 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] const auto& GetIntegerRouter() const noexcept { return integerRouter; }
 
 		virtual auto OnVariableChanged(
-			Storyboard storyboard, AnimationVariable variable,
+			const Storyboard& storyboard, const AnimationVariable& variable,
 			std::span<double> newValues, std::span<double> previousValues) -> void = 0;
 
 		virtual auto OnVariableIntegerChanged(
-			Storyboard storyboard, AnimationVariable variable,
+			const Storyboard& storyboard, const AnimationVariable& variable,
 			std::span<INT32> newValues, std::span<INT32> previousValues) -> void = 0;
 
 		private:
@@ -113,17 +113,17 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] const auto& VariableIntegerChanged() const noexcept { return variableIntegerChangedEvent; }
 
 		private:
-		Event<Storyboard, AnimationVariable,
+		Event<const Storyboard&, const AnimationVariable&,
 			std::span<double>, std::span<double>> variableChangedEvent;
-		Event<Storyboard, AnimationVariable,
+		Event<const Storyboard&, const AnimationVariable&,
 			std::span<INT32>, std::span<INT32>> variableIntegerChangedEvent;
 
 		auto OnVariableChanged(
-			Storyboard storyboard, AnimationVariable variable,
+			const Storyboard& storyboard, const AnimationVariable& variable,
 			std::span<double> newValues, std::span<double> previousValues) -> void override;
 
 		auto OnVariableIntegerChanged(
-			Storyboard storyboard, AnimationVariable variable,
+			const Storyboard& storyboard, const AnimationVariable& variable,
 			std::span<INT32> newValues, std::span<INT32> previousValues) -> void override;
 	};
 }

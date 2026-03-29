@@ -48,14 +48,14 @@ export namespace PGUI::UI::Animation
 
 		auto AddTransition(
 			const AnimationVariable& variable, 
-			AnimationTransition transition) const noexcept -> Error;
+			const AnimationTransition& transition) const noexcept -> Error;
 
 		auto AddTransitionAtKeyframe(
-			const AnimationVariable& variable, AnimationTransition transition,
+			const AnimationVariable& variable, const AnimationTransition& transition,
 			KeyFrame keyFrame) const noexcept -> Error;
 
 		auto AddTransitionBetweenKeyframes(
-			const AnimationVariable& variable, AnimationTransition transition,
+			const AnimationVariable& variable, const AnimationTransition& transition,
 			KeyFrame startKeyFrame, KeyFrame endKeyFrame) const noexcept -> Error;
 
 		auto RepeatBetweenKeyframes(
@@ -65,7 +65,7 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto GetStatus() const noexcept -> Result<StoryboardStatus>;
 
-		[[nodiscard]] auto GetElapsedTime() const noexcept -> Result<double>;
+		[[nodiscard]] auto GetElapsedTime() const noexcept -> Result<Seconds>;
 
 		auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Error;
 

@@ -202,11 +202,11 @@ namespace PGUI
 		
 		if (UI::Theming::SystemTheme::IsDarkMode())
 		{
-			UI::Theming::ThemeContext::ChangeCurrentTheme(UI::Theming::ThemeContext::DarkTheme);
+			UI::Theming::ThemeContext::ChangeCurrentTheme(UI::Theming::ThemeContext::GetDarkTheme());
 		}
 		else
 		{
-			UI::Theming::ThemeContext::ChangeCurrentTheme(UI::Theming::ThemeContext::LightTheme);
+			UI::Theming::ThemeContext::ChangeCurrentTheme(UI::Theming::ThemeContext::GetLightTheme());
 		}
 
 		UI::Theming::SystemTheme::ColorValuesChanged().AddCallback(

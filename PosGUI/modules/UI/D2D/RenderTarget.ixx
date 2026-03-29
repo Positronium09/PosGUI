@@ -8,6 +8,7 @@ export module PGUI.UI.D2D.RenderTarget;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.Shape2D;
 import PGUI.UI.Brush;
 import PGUI.UI.Color;
@@ -253,7 +254,7 @@ export namespace PGUI::UI::D2D
 			this->Get()->FillGeometry(geometry.GetRaw(), brush, nullptr);
 		}
 
-		auto DrawText(std::wstring_view text, const TextFormat& format, RectF textRect, Brush brush) const noexcept -> void
+		auto DrawText(wzstring_view text, const TextFormat& format, RectF textRect, Brush brush) const noexcept -> void
 		{
 			const auto textFormatPtr = format.GetAs<IDWriteTextFormat>();
 			this->Get()->DrawText(text.data(), static_cast<UINT32>(text.size()),

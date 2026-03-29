@@ -119,6 +119,11 @@ namespace PGUI::UI
 				{
 					clip = RoundCornerClip{ pathResult.value() };
 				}
+				else
+				{
+					Logger::Error(pathResult.error(), L"Failed to create round corner clip geometry");
+					clip = EmptyClip{ };
+				}
 			}
 		}, parameters);
 	}

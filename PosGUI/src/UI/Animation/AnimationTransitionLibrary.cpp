@@ -8,35 +8,98 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
+import PGUI.Utils;
 import PGUI.ErrorHandling;
 import :AnimationTransition;
 
 namespace PGUI::UI::Animation
 {
-	AnimationTransitionLibrary::AnimationTransitionLibrary()
+	auto AnimationTransitionLibrary::GetInstance() -> const AnimationTransitionLibrary&
 	{
-		if (const auto hr = CoCreateInstance(
-			CLSID_UIAnimationTransitionLibrary2,
-			nullptr,
-			CLSCTX_INPROC_SERVER,
-			__uuidof(IUIAnimationTransitionLibrary2),
-			PutVoid());
-			FAILED(hr))
+		static AnimationTransitionLibrary instance;
+		return instance;
+	}
+
+	auto AnimationTransitionLibrary::TransitionFromParameters(
+		const TransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		try
 		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create animation transition library"
+			return Match(
+				parameters,
+				[&](const AccelerateDecelerateTransitionParameters& params)
+				{
+					return AccelerateDecelerateTransition(params);
+				},
+				[&](const ConstantTransitionParameters& params)
+				{
+					return ConstantTransition(params);
+				},
+				[&](const CubicBezierLinearTransitionParameters& params)
+				{
+					return CubicBezierLinearTransition(params);
+				},
+				[&](const CubicTransitionParameters& params)
+				{
+					return CubicTransition(params);
+				},
+				[&](const DiscreteTransitionParameters& params)
+				{
+					return DiscreteTransition(params);
+				},
+				[&](const InstantaneousTransitionParameters& params)
+				{
+					return InstantaneousTransition(params);
+				},
+				[&](const LinearTransitionParameters& params)
+				{
+					return LinearTransition(params);
+				},
+				[&](const LinearTransitionFromSpeedParameters& params)
+				{
+					return LinearTransitionFromSpeed(params);
+				},
+				[&](const ParabolicTransitionFromAccelerationParameters& params)
+				{
+					return ParabolicTransitionFromAcceleration(params);
+				},
+				[&](const ReversalTransitionParameters& params)
+				{
+					return ReversalTransition(params);
+				},
+				[&](const SinusoidalTransitionFromRangeParameters& params)
+				{
+					return SinusoidalTransitionFromRange(params);
+				},
+				[&](const SinusoidalTransitionFromVelocityParameters& params)
+				{
+					return SinusoidalTransitionFromVelocity(params);
+				},
+				[&](const SmoothStopTransitionParameters& params)
+				{
+					return SmoothStopTransition(params);
+				});
+		}
+		catch (const Exception& e)
+		{
+			return Unexpected{ e.GetError() };
+		}
+		catch (const std::exception& e)
+		{
+			return Unexpected{
+				Error{
+					SystemErrorCode::STLFailure
+				}.SetCustomMessage(StringToWString(e.what()))
 			};
 		}
 	}
 
-	auto AnimationTransitionLibrary::GetInstance() -> const AnimationTransitionLibrary&
+	auto AnimationTransitionLibrary::AccelerateDecelerateTransition(
+		const AccelerateDecelerateTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
 	{
-		if (instance == nullptr)
-		{
-			instance = new AnimationTransitionLibrary{ };
-		}
-		return *instance;
+		return AccelerateDecelerateTransition(
+			parameters.duration, parameters.finalValue,
+			parameters.accelerationRatio, parameters.decelerationRatio);
 	}
 
 	auto AnimationTransitionLibrary::AccelerateDecelerateTransition(
@@ -45,15 +108,15 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateAccelerateDecelerateTransition(
+		if (const auto hr = GetInstance().Get()->CreateAccelerateDecelerateTransition(
 				ToWAM(duration), finalValue,
-			accelerationRatio, decelerationRatio,
-			transition.Put());
+				accelerationRatio, decelerationRatio,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
 				.AddDetail(L"Acceleration Ratio", std::format(L"{:.10F}", accelerationRatio))
 				.AddDetail(L"Deceleration Ratio", std::format(L"{:.10F}", decelerationRatio));
@@ -68,19 +131,25 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateConstantTransition(
+		if (const auto hr = GetInstance().Get()->CreateConstantTransition(
 				ToWAM(duration),
-			transition.Put());
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()));
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()));
 			Logger::Error(error, L"Failed to create ConstantTransition");
 			return Unexpected{ error };
 		}
 
 		return transition;
+	}
+
+	auto AnimationTransitionLibrary::ConstantTransition(
+		const ConstantTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		return ConstantTransition(parameters.duration);
 	}
 
 	auto AnimationTransitionLibrary::CubicBezierLinearTransition(
@@ -89,15 +158,15 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateCubicBezierLinearTransition(
+		if (const auto hr = GetInstance().Get()->CreateCubicBezierLinearTransition(
 				ToWAM(duration), finalValue,
-			p1.x, p1.y, p2.x, p2.y,
-			transition.Put());
+				p1.x, p1.y, p2.x, p2.y,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
 				.AddDetail(L"P1", std::format(L"{}", p1))
 				.AddDetail(L"P2", std::format(L"{}", p2));
@@ -115,16 +184,16 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateCubicBezierLinearVectorTransition(
+		if (const auto hr = GetInstance().Get()->CreateCubicBezierLinearVectorTransition(
 				ToWAM(duration), finalValues.data(),
-			static_cast<UINT>(finalValues.size()),
-			p1.x, p1.y, p2.x, p2.y,
-			transition.Put());
+				static_cast<UINT>(finalValues.size()),
+				p1.x, p1.y, p2.x, p2.y,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
 				.AddDetail(L"P1", std::format(L"{}", p1))
 				.AddDetail(L"P2", std::format(L"{}", p2));
@@ -135,6 +204,23 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::CubicBezierLinearTransition(
+		const CubicBezierLinearTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		if (std::holds_alternative<double>(parameters.finalValue))
+		{
+			return CubicBezierLinearTransition(
+				parameters.duration,
+				std::get<double>(parameters.finalValue),
+				parameters.p1, parameters.p2);
+		}
+
+		return CubicBezierLinearTransition(
+			parameters.duration,
+			std::get<std::span<const double>>(parameters.finalValue),
+			parameters.p1, parameters.p2);
+	}
+
 	auto AnimationTransitionLibrary::CubicTransition(
 		const Seconds duration,
 		const double finalValue,
@@ -142,15 +228,15 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateCubicTransition(
+		if (const auto hr = GetInstance().Get()->CreateCubicTransition(
 				ToWAM(duration),
-			finalValue, finalVelocity,
-			transition.Put());
+				finalValue, finalVelocity,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
 				.AddDetail(L"Final Velocity", std::format(L"{:.10F}", finalVelocity));
 			Logger::Error(error, L"Failed to create CubicTransition");
@@ -176,16 +262,16 @@ namespace PGUI::UI::Animation
 
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateCubicVectorTransition(
+		if (const auto hr = GetInstance().Get()->CreateCubicVectorTransition(
 				ToWAM(duration),
-			finalValues.data(), finalVelocities.data(),
-			static_cast<UINT>(finalValues.size()),
-			transition.Put());
+				finalValues.data(), finalVelocities.data(),
+				static_cast<UINT>(finalValues.size()),
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
 				.AddDetail(L"Final Velocities", std::format(L"{}", finalVelocities));
 			Logger::Error(error, L"Failed to create CubicVectorTransition");
@@ -195,21 +281,51 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::CubicTransition(
+		const CubicTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		const auto finalValueIsSingle = std::holds_alternative<double>(parameters.finalValue);
+		const auto finalVelocityIsSingle = std::holds_alternative<double>(parameters.finalVelocity);
+
+		if (finalValueIsSingle && finalVelocityIsSingle)
+		{
+			return CubicTransition(
+				parameters.duration,
+				std::get<double>(parameters.finalValue),
+				std::get<double>(parameters.finalVelocity));
+		}
+		if (!finalValueIsSingle && !finalVelocityIsSingle)
+		{
+			return CubicTransition(
+				parameters.duration,
+				std::get<std::span<const double>>(parameters.finalValue),
+				std::get<std::span<const double>>(parameters.finalVelocity));
+		}
+
+		Error error{ ErrorCode::InvalidArgument };
+		error
+			.SetCustomMessage(L"Final value and final velocity must both be either single values or vectors")
+			.AddDetail(L"Final Value Type", finalValueIsSingle ? L"double" : L"std::span<const double>")
+			.AddDetail(L"Final Velocity Type", finalVelocityIsSingle ? L"double" : L"std::span<const double>");
+		Logger::Error(error, L"Failed to create CubicTransition due to mismatched parameter types");
+		return Unexpected{ error };
+	}
+
 	auto AnimationTransitionLibrary::DiscreteTransition(
 		const Seconds duration,
 		const double finalValue, const double hold) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateDiscreteTransition(
+		if (const auto hr = GetInstance().Get()->CreateDiscreteTransition(
 				ToWAM(duration),
-			finalValue, hold,
-			transition.Put());
+				finalValue, hold,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue))
 				.AddDetail(L"Hold", std::format(L"{:.10F}", hold));
 			Logger::Error(error, L"Failed to create DiscreteTransition");
@@ -225,17 +341,17 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateDiscreteVectorTransition(
+		if (const auto hr = GetInstance().Get()->CreateDiscreteVectorTransition(
 				ToWAM(duration),
-			finalValues.data(),
-			static_cast<UINT>(finalValues.size()),
-			hold,
-			transition.Put());
+				finalValues.data(),
+				static_cast<UINT>(finalValues.size()),
+				hold,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Values", std::format(L"{}", finalValues))
 				.AddDetail(L"Hold", std::format(L"{:.10F}", hold));
 			Logger::Error(error, L"Failed to create DiscreteVectorTransition");
@@ -245,14 +361,31 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::DiscreteTransition(
+		const DiscreteTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		if (std::holds_alternative<double>(parameters.finalValue))
+		{
+			return DiscreteTransition(
+				parameters.duration,
+				std::get<double>(parameters.finalValue),
+				parameters.hold);
+		}
+
+		return DiscreteTransition(
+			parameters.duration,
+			std::get<std::span<const double>>(parameters.finalValue),
+			parameters.hold);
+	}
+
 	auto AnimationTransitionLibrary::InstantaneousTransition(
 		const double finalValue) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateInstantaneousTransition(
-			finalValue,
-			transition.Put());
+		if (const auto hr = GetInstance().Get()->CreateInstantaneousTransition(
+				finalValue,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -270,9 +403,9 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateInstantaneousVectorTransition(
-			finalValues.data(), static_cast<UINT>(finalValues.size()),
-			transition.Put());
+		if (const auto hr = GetInstance().Get()->CreateInstantaneousVectorTransition(
+				finalValues.data(), static_cast<UINT>(finalValues.size()),
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -285,20 +418,31 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::InstantaneousTransition(
+		const InstantaneousTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		if (std::holds_alternative<double>(parameters.finalValue))
+		{
+			return InstantaneousTransition(std::get<double>(parameters.finalValue));
+		}
+
+		return InstantaneousTransition(std::get<std::span<const double>>(parameters.finalValue));
+	}
+
 	auto AnimationTransitionLibrary::LinearTransition(
 		const Seconds duration, const double finalValue) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateLinearTransition(
+		if (const auto hr = GetInstance().Get()->CreateLinearTransition(
 				ToWAM(duration),
-			finalValue,
-			transition.Put());
+				finalValue,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue));
 			Logger::Error(error, L"Failed to create LinearTransition");
 			return Unexpected{ error };
@@ -313,16 +457,16 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateLinearVectorTransition(
+		if (const auto hr = GetInstance().Get()->CreateLinearVectorTransition(
 				ToWAM(duration),
-			finalValues.data(),
-			static_cast<UINT>(finalValues.size()),
-			transition.Put());
+				finalValues.data(),
+				static_cast<UINT>(finalValues.size()),
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Final Values", std::format(L"{}", finalValues));
 			Logger::Error(error, L"Failed to create LinearVectorTransition");
 			return Unexpected{ error };
@@ -331,16 +475,31 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::LinearTransition(
+		const LinearTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		if (std::holds_alternative<double>(parameters.finalValue))
+		{
+			return LinearTransition(
+				parameters.duration,
+				std::get<double>(parameters.finalValue));
+		}
+
+		return LinearTransition(
+			parameters.duration,
+			std::get<std::span<const double>>(parameters.finalValue));
+	}
+
 	auto AnimationTransitionLibrary::LinearTransitionFromSpeed(
 		const double speed,
 		const double finalValue) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateLinearTransitionFromSpeed(
-			speed,
-			finalValue,
-			transition.Put());
+		if (const auto hr = GetInstance().Get()->CreateLinearTransitionFromSpeed(
+				speed,
+				finalValue,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -360,11 +519,11 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateLinearVectorTransitionFromSpeed(
-			speed,
-			finalValues.data(),
-			static_cast<UINT>(finalValues.size()),
-			transition.Put());
+		if (const auto hr = GetInstance().Get()->CreateLinearVectorTransitionFromSpeed(
+				speed,
+				finalValues.data(),
+				static_cast<UINT>(finalValues.size()),
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -378,17 +537,32 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::LinearTransitionFromSpeed(
+		const LinearTransitionFromSpeedParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		if (std::holds_alternative<double>(parameters.finalValue))
+		{
+			return LinearTransitionFromSpeed(
+				parameters.speed,
+				std::get<double>(parameters.finalValue));
+		}
+
+		return LinearTransitionFromSpeed(
+			parameters.speed,
+			std::get<std::span<const double>>(parameters.finalValue));
+	}
+
 	auto AnimationTransitionLibrary::ParabolicTransitionFromAcceleration(
 		const double finalValue,
 		const double finalVelocity, const double acceleration) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateParabolicTransitionFromAcceleration(
-			finalValue,
-			finalVelocity,
-			acceleration,
-			transition.Put());
+		if (const auto hr = GetInstance().Get()->CreateParabolicTransitionFromAcceleration(
+				finalValue,
+				finalVelocity,
+				acceleration,
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -403,23 +577,36 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::ParabolicTransitionFromAcceleration(
+		const ParabolicTransitionFromAccelerationParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		return ParabolicTransitionFromAcceleration(
+			parameters.finalValue, parameters.finalVelocity, parameters.acceleration);
+	}
+
 	auto AnimationTransitionLibrary::ReversalTransition(const Seconds duration) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateReversalTransition(
+		if (const auto hr = GetInstance().Get()->CreateReversalTransition(
 				ToWAM(duration),
-			transition.Put());
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()));
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()));
 			Logger::Error(error, L"Failed to create ReversalTransition");
 			return Unexpected{ error };
 		}
 
 		return transition;
+	}
+
+	auto AnimationTransitionLibrary::ReversalTransition(
+		const ReversalTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		return ReversalTransition(parameters.duration);
 	}
 
 	auto AnimationTransitionLibrary::SinusoidalTransitionFromRange(
@@ -428,15 +615,15 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateSinusoidalTransitionFromRange(
+		if (const auto hr = GetInstance().Get()->CreateSinusoidalTransitionFromRange(
 				ToWAM(duration), minimumValue, maximumValue,
-			period, static_cast<UI_ANIMATION_SLOPE>(slope),
-			transition.Put());
+				period, static_cast<UI_ANIMATION_SLOPE>(slope),
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Minimum Value", std::format(L"{:.10F}", minimumValue))
 				.AddDetail(L"Maximum Value", std::format(L"{:.10F}", maximumValue))
 				.AddDetail(L"Period", std::format(L"{:.10F}", period));
@@ -447,19 +634,28 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::SinusoidalTransitionFromRange(
+		const SinusoidalTransitionFromRangeParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		return SinusoidalTransitionFromRange(
+			parameters.duration,
+			parameters.minimumValue, parameters.maximumValue,
+			parameters.period, parameters.slope);
+	}
+
 	auto AnimationTransitionLibrary::SinusoidalTransitionFromVelocity(
 		const Seconds duration, const double period) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateSinusoidalTransitionFromVelocity(
+		if (const auto hr = GetInstance().Get()->CreateSinusoidalTransitionFromVelocity(
 				ToWAM(duration), period,
-			transition.Put());
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
+				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()))
 				.AddDetail(L"Period", std::format(L"{:.10F}", period));
 			Logger::Error(error, L"Failed to create SinusoidalTransitionFromVelocity");
 			return Unexpected{ error };
@@ -468,24 +664,91 @@ namespace PGUI::UI::Animation
 		return transition;
 	}
 
+	auto AnimationTransitionLibrary::SinusoidalTransitionFromVelocity(
+		const SinusoidalTransitionFromVelocityParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		return SinusoidalTransitionFromVelocity(
+			parameters.duration, parameters.period);
+	}
+
 	auto AnimationTransitionLibrary::SmoothStopTransition(
 		const Seconds maximumDuration, const double finalValue) noexcept -> Result<AnimationTransition>
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = instance->Get()->CreateSmoothStopTransition(
+		if (const auto hr = GetInstance().Get()->CreateSmoothStopTransition(
 				ToWAM(maximumDuration), finalValue,
-			transition.Put());
+				transition.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
 			error
-					.AddDetail(L"Maximum Duration", std::format(L"{:.10F}", maximumDuration.count()))
+				.AddDetail(L"Maximum Duration", std::format(L"{:.10F}", maximumDuration.count()))
 				.AddDetail(L"Final Value", std::format(L"{:.10F}", finalValue));
 			Logger::Error(error, L"Failed to create SmoothStopTransition");
 			return Unexpected{ error };
 		}
 
 		return transition;
+	}
+
+	auto AnimationTransitionLibrary::SmoothStopTransition(
+		const SmoothStopTransitionParameters& parameters) noexcept -> Result<AnimationTransition>
+	{
+		return SmoothStopTransition(
+			parameters.maximumDuration, parameters.finalValue);
+	}
+
+	AnimationTransitionLibrary::AnimationTransitionLibrary()
+	{
+		if (const auto hr = CoCreateInstance(
+				CLSID_UIAnimationTransitionLibrary2,
+				nullptr,
+				CLSCTX_INPROC_SERVER,
+				__uuidof(IUIAnimationTransitionLibrary2),
+				PutVoid());
+			FAILED(hr))
+		{
+			throw Exception{
+				Error{ hr },
+				L"Cannot create animation transition library"
+			};
+		}
+	}
+
+	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, double finalValue) noexcept -> Error
+	{
+		Match(parameters,
+		      [&](const DoesntSupportFinalValue auto&) { },
+		      [&](SupportsFinalValue auto& param)
+		      {
+			      param.finalValue = finalValue;
+		      });
+
+		return Error{ ErrorCode::Success };
+	}
+
+	auto SetFinalValueToTransitionParameters(
+		TransitionParameters& parameters,
+		const std::span<const double> finalValues) noexcept -> Error
+	{
+		auto isSet = true;
+		Match(parameters,
+		      [&](const OnlySupportsSingleValue auto&) { isSet = false; },
+		      [&](const DoesntSupportFinalValue auto&) { },
+		      [&](SupportsVectorValue auto& param)
+		      {
+			      param.finalValue = finalValues;
+		      }
+		);
+
+		if (!isSet)
+		{
+			Error error{ ErrorCode::InvalidArgument };
+			error.SetCustomMessage(L"Cannot set vector final values on parameters that require a single final value");
+			return error;
+		}
+
+		return Error{ ErrorCode::Success };
 	}
 }

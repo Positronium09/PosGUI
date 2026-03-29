@@ -43,7 +43,7 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] auto GetPropertyCount() const noexcept { return Get()->GetPropertyCount(); }
 
-		[[nodiscard]] auto GetPropertyIndex(const std::wstring_view name) const noexcept
+		[[nodiscard]] auto GetPropertyIndex(const wzstring_view name) const noexcept
 		{
 			return Get()->GetPropertyIndex(name.data());
 		}
@@ -95,7 +95,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <typename T>
-		[[nodiscard]] auto GetProperty(const std::wstring_view name) const noexcept -> Result<T>
+		[[nodiscard]] auto GetProperty(const wzstring_view name) const noexcept -> Result<T>
 		{
 			const auto index = GetPropertyIndex(name);
 
@@ -139,7 +139,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<bool>(const std::wstring_view name) const noexcept -> Result<bool>
+		[[nodiscard]] auto GetProperty<bool>(const wzstring_view name) const noexcept -> Result<bool>
 		{
 			const auto index = GetPropertyIndex(name);
 
@@ -182,7 +182,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<UINT32>(const std::wstring_view name) const noexcept -> Result<UINT32>
+		[[nodiscard]] auto GetProperty<UINT32>(const wzstring_view name) const noexcept -> Result<UINT32>
 		{
 			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
@@ -223,7 +223,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<INT32>(const std::wstring_view name) const noexcept -> Result<INT32>
+		[[nodiscard]] auto GetProperty<INT32>(const wzstring_view name) const noexcept -> Result<INT32>
 		{
 			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
@@ -264,7 +264,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <>
-		[[nodiscard]] auto GetProperty<float>(const std::wstring_view name) const noexcept -> Result<float>
+		[[nodiscard]] auto GetProperty<float>(const wzstring_view name) const noexcept -> Result<float>
 		{
 			const auto index = GetPropertyIndex(name);
 			if (index == D2D1_INVALID_PROPERTY_INDEX)
@@ -301,7 +301,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		template <typename T>
-		auto SetProperty(const std::wstring_view name, const T& value) -> void
+		auto SetProperty(const wzstring_view name, const T& value) -> void
 		{
 			const auto index = GetPropertyIndex(name);
 

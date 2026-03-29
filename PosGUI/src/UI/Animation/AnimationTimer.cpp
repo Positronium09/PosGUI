@@ -12,11 +12,8 @@ namespace PGUI::UI::Animation
 {
 	auto AnimationTimer::GetGlobalInstance() -> const AnimationTimer&
 	{
-		if (instance == nullptr)
-		{
-			instance = new AnimationTimer{ };
-		}
-		return *instance;
+		static AnimationTimer instance;
+		return instance;
 	}
 
 	AnimationTimer::AnimationTimer()
@@ -61,7 +58,7 @@ namespace PGUI::UI::Animation
 	auto AnimationTimer::IsEnabled() const noexcept -> Result<bool>
 	{
 		const auto hr = Get()->IsEnabled();
-		if (hr != S_OK || hr == S_FALSE)
+		if (FAILED(hr))
 		{
 			Error error{ hr };
 			Logger::Error(error, L"Failed to check if animation timer is enabled");

@@ -70,11 +70,6 @@ export namespace PGUI::UI
 		{
 			return GetStateGroup<State>().GetState();
 		}
-		template <IsInTypeList<States...> State>
-		[[nodiscard]] auto GetCurrentState() noexcept
-		{
-			return GetStateGroup<State>().GetState();
-		}
 
 		template <IsInTypeList<States...> State>
 		auto SetCurrentState(const State newState) noexcept

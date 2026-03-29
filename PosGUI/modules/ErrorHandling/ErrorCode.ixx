@@ -4,22 +4,28 @@ import std;
 
 export namespace PGUI
 {
+	constexpr auto SuccessValue = 0;
+
 	enum class ErrorCode : int
 	{
-		Success = 0,
+		Success = SuccessValue,
 		Failure,
 		OutOfRange,
 		InvalidArgument,
 		NotImplemented,
 		NullPointer,
 		NotFound,
+		NotSet,
+		NotSupported,
+		NotInitialized,
 		InvalidCast,
 		AllocationFailure
 	};
 
 	enum class SystemErrorCode : int
 	{
-		STLFailure = 100'000,
+		Success = SuccessValue,
+		STLFailure = 32768,
 		InvalidHandle,
 		AccessDenied,
 		NotFound,
@@ -38,11 +44,10 @@ export namespace PGUI
 
 	[[nodiscard]] constexpr auto ToHresult(PGUIErrorCodeEnum auto code) noexcept -> long
 	{
-
 		constexpr std::uint32_t severity = 1;
 		constexpr std::uint32_t customer = 1;
 		
-		if (code == ErrorCode::Success)
+		if (std::to_underlying(code) == SuccessValue)
 		{
 			return customer << 29 | HRConfig::FACILITY << 16;
 		}
@@ -56,7 +61,7 @@ export namespace PGUI
 	{
 		const auto hrValue = static_cast<std::uint32_t>(hr);
 
-		if ((hr & 1 << 29) == 0)
+		if ((hrValue & 1U << 29) == 0)
 		{
 			return false;
 		}
@@ -107,6 +112,12 @@ export namespace PGUI
 					return "Null pointer";
 				case ErrorCode::NotFound:
 					return "Not found";
+				case ErrorCode::NotSet:
+					return "Not set";
+				case ErrorCode::NotSupported:
+					return "Not supported";
+				case ErrorCode::NotInitialized:
+					return "Not initialized";
 				case ErrorCode::InvalidCast:
 					return "Invalid cast";
 				case ErrorCode::AllocationFailure:
@@ -127,6 +138,8 @@ export namespace PGUI
 		{
 			switch (static_cast<SystemErrorCode>(ev))
 			{
+				case SystemErrorCode::Success:
+					return "Success";
 				case SystemErrorCode::STLFailure:
 					return "STL operation failure";
 				case SystemErrorCode::InvalidHandle:

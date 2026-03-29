@@ -7,7 +7,7 @@ import std;
 
 namespace PGUI
 {
-	auto StringToWString(const std::string_view string) noexcept -> std::wstring
+	auto StringToWString(const zstring_view string) noexcept -> std::wstring
 	{
 		if (string.empty())
 		{
@@ -23,7 +23,7 @@ namespace PGUI
 		return converted;
 	}
 
-	auto WStringToString(const std::wstring_view string) noexcept -> std::string
+	auto WStringToString(const wzstring_view string) noexcept -> std::string
 	{
 		if (string.empty())
 		{

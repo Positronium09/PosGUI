@@ -14,14 +14,20 @@ import :AnimationManagerEventHandler;
 
 namespace PGUI::UI::Animation
 {
+	auto AnimationManager::GetGlobalInstance() -> const AnimationManager&
+	{
+		static AnimationManager instance{ };
+		return instance;
+	}
+
 	AnimationManager::AnimationManager()
 	{
 		if (const auto hr = CoCreateInstance(
-			CLSID_UIAnimationManager2,
-			nullptr,
-			CLSCTX_INPROC_SERVER,
-			__uuidof(IUIAnimationManager2),
-			PutVoid());
+				CLSID_UIAnimationManager2,
+				nullptr,
+				CLSCTX_INPROC_SERVER,
+				__uuidof(IUIAnimationManager2),
+				PutVoid());
 			FAILED(hr))
 		{
 			throw Exception{
@@ -29,12 +35,6 @@ namespace PGUI::UI::Animation
 				L"Cannot create animation manager"
 			};
 		}
-	}
-
-	auto AnimationManager::GetGlobalInstance() -> const AnimationManager&
-	{
-		static AnimationManager instance{ };
-		return instance;
 	}
 
 	auto AnimationManager::AbandonAllStoryboards() noexcept -> Error
@@ -108,9 +108,9 @@ namespace PGUI::UI::Animation
 		AnimationVariable variable;
 
 		if (const auto hr = Get()->CreateAnimationVectorVariable(
-			initialValues.data(),
-			static_cast<UINT>(initialValues.size()),
-			variable.Put());
+				initialValues.data(),
+				static_cast<UINT>(initialValues.size()),
+				variable.Put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -151,7 +151,7 @@ namespace PGUI::UI::Animation
 		return static_cast<AnimationManagerStatus>(status);
 	}
 
-	auto AnimationManager::EstimateNextEventTime() const noexcept -> Result<double>
+	auto AnimationManager::EstimateNextEventTime() const noexcept -> Result<Seconds>
 	{
 		double nextEventTime;
 		if (const auto hr = Get()->EstimateNextEventTime(&nextEventTime);
@@ -162,7 +162,7 @@ namespace PGUI::UI::Animation
 			return Unexpected{ error };
 		}
 
-		return nextEventTime;
+		return FromWAM(nextEventTime);
 	}
 
 	auto AnimationManager::SetAnimationMode(AnimationMode mode) const noexcept -> Error
@@ -216,7 +216,7 @@ namespace PGUI::UI::Animation
 
 	auto AnimationManager::ScheduleTransition(
 		const AnimationVariable& variable,
-		AnimationTransition transition, const double currentTime) const noexcept -> Error
+		const AnimationTransition& transition, const double currentTime) const noexcept -> Error
 	{
 		Error error{
 			Get()->ScheduleTransition(
@@ -234,7 +234,7 @@ namespace PGUI::UI::Animation
 		Error error{
 			Get()->SetManagerEventHandler(
 				eventHandler.GetRouter().get(),
-			registerForNext)
+				registerForNext)
 		};
 		LogIfFailed(error, L"SetManagerEventHandler failed");
 		return error;

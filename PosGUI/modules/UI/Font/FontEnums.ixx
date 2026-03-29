@@ -42,7 +42,6 @@ export namespace PGUI::UI::Font
 		constexpr FontWeight Heavy = DWRITE_FONT_WEIGHT_HEAVY;
 		constexpr FontWeight ExtraBlack = DWRITE_FONT_WEIGHT_EXTRA_BLACK;
 		constexpr FontWeight UltraBlack = DWRITE_FONT_WEIGHT_ULTRA_BLACK;
-		constexpr FontWeight CustomWeight = DWRITE_FONT_WEIGHT_EXTRA_LIGHT;
 	}
 
 	class FontStyle

@@ -39,11 +39,11 @@ namespace PGUI::UI
 	{
 		const auto size = rect.Size();
 
-		ellipse.center.x = MapToRange(ellipse.center.x, rect.right, rect.left);
-		ellipse.center.y = MapToRange(ellipse.center.y, rect.bottom, rect.top);
+		ellipse.center.x = MapToRange(ellipse.center.x, rect.left, rect.right);
+		ellipse.center.y = MapToRange(ellipse.center.y, rect.top, rect.bottom);
 
-		offset.x = MapToRange(offset.y, rect.right, rect.left);
-		offset.y = MapToRange(offset.y, rect.bottom, rect.top);
+		offset.x = MapToRange(offset.x, rect.left, rect.right);
+		offset.y = MapToRange(offset.y, rect.top, rect.bottom);
 
 		ellipse.xRadius = MapToRange(ellipse.xRadius, 0.0F, size.cx);
 		ellipse.yRadius = MapToRange(ellipse.yRadius, 0.0F, size.cy);

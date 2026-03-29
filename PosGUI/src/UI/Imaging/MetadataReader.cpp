@@ -31,7 +31,7 @@ namespace PGUI::UI::Imaging
 		return format;
 	}
 
-	auto MetadataReader::GetMetadata(const std::wstring_view name) const noexcept -> Result<PropVariant>
+	auto MetadataReader::GetMetadata(const wzstring_view name) const noexcept -> Result<PropVariant>
 	{
 		PropVariant value;
 		if (const auto hr = Get()->GetMetadataByName(name.data(), &value);
@@ -81,7 +81,7 @@ namespace PGUI::UI::Imaging
 		return enumerator;
 	}
 
-	auto MetadataReader::operator[](const std::wstring_view name) const -> PropVariant
+	auto MetadataReader::operator[](const wzstring_view name) const -> PropVariant
 	{
 		auto metadataResult = GetMetadata(name);
 		if (metadataResult.has_value())

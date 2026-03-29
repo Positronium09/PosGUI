@@ -127,11 +127,7 @@ namespace PGUI::UI
 
 	auto UIHost::Draw(const Graphics& graphics) noexcept -> void
 	{
-		BeginDraw();
-
 		Render(graphics);
 		rootContainer->Render(graphics);
-
-		EndDraw();
 	}
 }

@@ -49,11 +49,11 @@ export namespace PGUI::UI::Animation
 
 		auto SetLowerBound(double bound) const noexcept -> Error;
 
-		auto SetLowerBound(std::span<double> bounds) const noexcept -> Error;
+		auto SetLowerBound(std::span<const double> bounds) const noexcept -> Error;
 
 		auto SetUpperBound(double bound) const noexcept -> Error;
 
-		auto SetUpperBound(std::span<double> bounds) const noexcept -> Error;
+		auto SetUpperBound(std::span<const double> bounds) const noexcept -> Error;
 
 		auto SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Error;
 
@@ -68,10 +68,10 @@ export namespace PGUI::UI::Animation
 		auto ClearVariableChangeHandler(bool registerForNext = false) const noexcept -> Error;
 
 		template <std::floating_point T>
-		explicit(false) operator T() const noexcept { return static_cast<T>(GetValue().value()); }
+		explicit operator T() const { return static_cast<T>(GetValue().value()); }
 
 		template <std::integral T>
-		explicit(false) operator T() const noexcept { return static_cast<T>(GetIntegerValue().value()); }
+		explicit operator T() const { return static_cast<T>(GetIntegerValue().value()); }
 
 		//TODO SetVariableCurveChangeHandler
 	};

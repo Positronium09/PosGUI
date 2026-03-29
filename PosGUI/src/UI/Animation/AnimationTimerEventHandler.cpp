@@ -105,9 +105,12 @@ namespace PGUI::UI::Animation
 
 	AnimationTimerEventHandler::~AnimationTimerEventHandler() noexcept
 	{
-		router->ClearPostUpdateHandler();
-		router->ClearPreUpdateHandler();
-		router->ClearRenderingTooSlowHandler();
+		if (router)
+		{
+			router->ClearPostUpdateHandler();
+			router->ClearPreUpdateHandler();
+			router->ClearRenderingTooSlowHandler();
+		}
 	}
 
 	auto AnimationTimerEventHandler::CallPostUpdateHandler() noexcept -> HRESULT
@@ -117,11 +120,11 @@ namespace PGUI::UI::Animation
 			OnPostUpdate();
 			return S_OK;
 		}
-		catch (Exception& exception)
+		catch (const Exception& exception)
 		{
 			return exception.HResult();
 		}
-		catch (std::exception&)
+		catch (const std::exception&)
 		{
 			return E_FAIL;
 		}
@@ -134,11 +137,11 @@ namespace PGUI::UI::Animation
 			OnPreUpdate();
 			return S_OK;
 		}
-		catch (Exception& exception)
+		catch (const Exception& exception)
 		{
 			return exception.HResult();
 		}
-		catch (std::exception&)
+		catch (const std::exception&)
 		{
 			return E_FAIL;
 		}
@@ -151,11 +154,11 @@ namespace PGUI::UI::Animation
 			OnRenderingTooSlow(fps);
 			return S_OK;
 		}
-		catch (Exception& exception)
+		catch (const Exception& exception)
 		{
 			return exception.HResult();
 		}
-		catch (std::exception&)
+		catch (const std::exception&)
 		{
 			return E_FAIL;
 		}

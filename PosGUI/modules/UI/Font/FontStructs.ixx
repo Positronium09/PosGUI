@@ -97,7 +97,7 @@ export namespace PGUI::UI::Font
 			trimmingOptions{ trimmingOptions }
 		{ }
 
-		DWRITE_TRIMMING trimmingOptions;
+		DWRITE_TRIMMING trimmingOptions{ };
 	};
 
 	struct TextMetrics : DWRITE_TEXT_METRICS

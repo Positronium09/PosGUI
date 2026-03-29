@@ -71,6 +71,7 @@ export namespace PGUI::UI::Animation
 
 	class AnimationTimerEvent final : public AnimationTimerEventHandler
 	{
+		public:
 		[[nodiscard]] auto& PostUpdateEvent() noexcept { return postUpdateEvent; }
 		[[nodiscard]] const auto& PostUpdateEvent() const noexcept { return postUpdateEvent; }
 		[[nodiscard]] auto& PreUpdateEvent() noexcept { return preUpdateEvent; }

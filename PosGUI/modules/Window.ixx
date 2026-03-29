@@ -243,11 +243,11 @@ export namespace PGUI
 		virtual ~MessageHooker() noexcept = default;
 
 		[[nodiscard]] const auto& GetHandlers() const noexcept { return messageHandlerMap; }
-		auto HookToWindow(const RawWindowPtr<> window) -> void
+		auto HookToWindow(const RawWindowPtr<> window) noexcept -> void
 		{
 			if (hookedWindow != nullptr)
 			{
-				throw Exception{ ErrorCode::Failure }.SuggestFix(L"MessageHooker is already hooked to a window");
+				Logger::Error(Error{ ErrorCode::InvalidArgument }, L"MessageHooker is already hooked to a window");
 			}
 			hookedWindow = window;
 		}
@@ -318,8 +318,8 @@ export namespace PGUI
 		virtual ~Window() noexcept;
 		Window(const Window&) = delete;
 		auto operator=(const Window&) -> Window& = delete;
-		Window(Window&&) noexcept = default;
-		auto operator=(Window&&) noexcept -> Window& = default;
+		Window(Window&& other) noexcept = delete;
+		auto operator=(Window&& other) noexcept -> Window& = delete;
 
 		template <WindowType T, typename... Args>
 		[[nodiscard]] static auto Create(const WindowCreateInfo& info, Args&&... args) -> WindowPtr<T>
@@ -579,7 +579,8 @@ export namespace PGUI
 		auto Invalidate(const bool erase = true) const noexcept -> void { InvalidateRect(Hwnd(), nullptr, erase); }
 		auto Invalidate(const RectF rect, const bool erase = true) const noexcept -> void
 		{
-			InvalidateRect(Hwnd(), std::bit_cast<LPRECT>(&rect), erase);
+			const RECT rc = rect;
+			InvalidateRect(Hwnd(), &rc, erase);
 		}
 		auto Redraw(const RedrawFlags flags =
 			RedrawFlags::Invalidate | RedrawFlags::InternalPaint | RedrawFlags::UpdateNow) const noexcept -> void
@@ -590,7 +591,8 @@ export namespace PGUI
 			const RedrawFlags flags =
 			RedrawFlags::Invalidate | RedrawFlags::InternalPaint | RedrawFlags::UpdateNow) const noexcept -> void
 		{
-			RedrawWindow(Hwnd(), std::bit_cast<LPRECT>(&rect), nullptr, ToUnderlying(flags));
+			const RECT rc = rect;
+			RedrawWindow(Hwnd(), &rc, nullptr, ToUnderlying(flags));
 		}
 		auto Update() const noexcept -> void { UpdateWindow(Hwnd()); }
 		auto SetFocus() const noexcept -> void { ::SetFocus(Hwnd()); }

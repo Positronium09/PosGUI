@@ -25,11 +25,11 @@ namespace PGUI
 		return std::make_shared<EnableMakeShared>(std::forward<Args>(args)...);
 	}
 
-	auto WindowClass::Create(const std::wstring& className, UINT style,
+	auto WindowClass::Create(const wzstring_view className, UINT style,
 	                         HBRUSH backgroundBrush, HICON icon, HCURSOR cursor, HICON smIcon) -> WindowClassPtr
 	{
 		WNDCLASSEXW w{ };
-		auto atom = static_cast<ATOM>(GetClassInfoExW(GetHInstance(), className.c_str(), &w));
+		auto atom = static_cast<ATOM>(GetClassInfoExW(GetHInstance(), className.data(), &w));
 
 		std::scoped_lock lock{ mutex };
 
@@ -46,7 +46,7 @@ namespace PGUI
 
 				if (!areParametersSame)
 				{
-					Logger::Warning(
+					Logger::Debug(
 						Error{ ErrorCode::InvalidArgument }
 						.AddDetail(L"Class name", className)
 						.SetCustomMessage(L"Window class already registered with different parameters"));
@@ -71,7 +71,7 @@ namespace PGUI
 		UnregisterClassW(className.c_str(), GetHInstance());
 	}
 
-	WindowClass::WindowClass(const std::wstring& className, const UINT style,
+	WindowClass::WindowClass(const wzstring_view className, const UINT style,
 	                         const HBRUSH backgroundBrush, const HICON icon, const HCURSOR cursor, const HICON smIcon) :
 		className{ className }
 	{
@@ -84,7 +84,7 @@ namespace PGUI
 		wc.hInstance = GetHInstance();
 		wc.hbrBackground = backgroundBrush;
 		wc.lpszMenuName = nullptr;
-		wc.lpszClassName = className.c_str();
+		wc.lpszClassName = className.data();
 		wc.hIcon = icon;
 		wc.hCursor = cursor
 				? cursor

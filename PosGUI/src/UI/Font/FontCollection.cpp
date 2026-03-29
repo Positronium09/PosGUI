@@ -31,7 +31,9 @@ namespace PGUI::UI::Font
 
 	auto FontCollection::LoadFontFile(const std::filesystem::path& filePath) noexcept -> Result<FontCollection>
 	{
-		if (!std::filesystem::exists(filePath))
+		std::error_code ec;
+		if (auto fileExists = std::filesystem::exists(filePath, ec);
+			!fileExists || ec)
 		{
 			Error error{ ErrorCode::InvalidArgument };
 			error
@@ -115,24 +117,24 @@ namespace PGUI::UI::Font
 	{ }
 
 	auto FontCollection::FindFontFamilyByName(
-		const std::wstring_view fontFamilyName) const noexcept -> Result<UINT32>
+		const wzstring_view fontFamilyName) const noexcept -> Result<UINT32>
 	{
 		auto& ptr = Get();
 
 		UINT32 result;
-		BOOL exists;
+		auto exists = static_cast<BOOL>(0);
 		const auto hr = ptr->FindFamilyName(fontFamilyName.data(), &result, &exists);
 		LogIfFailed(
 			Error{ hr }
-			.AddDetail(L"fontFamilName", fontFamilyName),
+			.AddDetail(L"fontFamilyName", fontFamilyName),
 			L"An error occurred while trying to find a font family by name."
 		);
 
-		if (!exists)
+		if (!exists || FAILED(hr))
 		{
 			return Unexpected{
-				Error{ ErrorCode::Failure }
-				.AddDetail(L"Font Family Name", fontFamilyName)
+				Error{ FAILED(hr) ? hr : E_FAIL }
+				.AddDetail(L"fontFamilyName", fontFamilyName)
 				.SuggestFix(L"Ensure the font family name is correct and try again")
 			};
 		}
@@ -141,7 +143,7 @@ namespace PGUI::UI::Font
 	}
 
 	auto FontCollection::GetFontFamily(
-		const std::wstring_view fontFamilyName) const noexcept -> Result<FontFamily>
+		const wzstring_view fontFamilyName) const noexcept -> Result<FontFamily>
 	{
 		return FindFontFamilyByName(fontFamilyName).and_then(
 			[this](const auto& index) -> Result<FontFamily>

@@ -20,6 +20,17 @@ export namespace PGUI::UI
 	};
 	DEFINE_ENUM_FLAG_OPERATORS(MouseButton);
 
+	enum class KeyFlags
+	{
+		Extended = KF_EXTENDED,
+		DlgMode = KF_DLGMODE,
+		MenuMode = KF_MENUMODE,
+		AltDown = KF_ALTDOWN,
+		Repeat = KF_REPEAT,
+		Up = KF_UP
+	};
+	DEFINE_ENUM_FLAG_OPERATORS(KeyFlags);
+
 	constexpr auto MOUSEWHEEL_DELTA = WHEEL_DELTA;
 
 	struct ModifierKeys
@@ -69,18 +80,18 @@ export namespace PGUI::UI
 	}
 	[[nodiscard]] auto GetMouseWheelDeltaFromWparam(const Argument1 arg1) noexcept
 	{
-		return static_cast<int>(HIWORD(arg1));
+		return static_cast<int>(static_cast<short>(HIWORD(arg1)));
 	}
 	[[nodiscard]] auto GetKeyInfoFromLparam(const Argument2 arg2) noexcept
 	{
-		const auto keyFlags = HIWORD(arg2);
+		const auto keyFlags = FromUnderlying<KeyFlags>(HIWORD(arg2));
 
 		KeyInfo keyInfo;
 		keyInfo.repeatCount = LOWORD(arg2);
-		keyInfo.isAltPressed = (keyFlags & KF_ALTDOWN) != 0;
-		keyInfo.isExtended = (keyFlags & KF_EXTENDED) != 0;
-		keyInfo.wasDown = (keyFlags & KF_REPEAT) == KF_REPEAT;
-		keyInfo.isDown = (keyFlags & KF_UP) == KF_UP;
+		keyInfo.isAltPressed = IsFlagSet(keyFlags, KeyFlags::AltDown);
+		keyInfo.isExtended = IsFlagSet(keyFlags, KeyFlags::Extended);
+		keyInfo.wasDown = IsFlagSet(keyFlags, KeyFlags::Repeat);
+		keyInfo.isDown = !IsFlagSet(keyFlags, KeyFlags::Up);
 
 		return keyInfo;
 	}

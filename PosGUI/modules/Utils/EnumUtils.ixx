@@ -34,6 +34,16 @@ export namespace PGUI
 		return (var & flag) != ZeroFlag<T>();
 	}
 	template <EnumFlag T>
+	[[nodiscard]] constexpr auto AreFlagsSet(const T var, const std::same_as<T> auto... flags) noexcept
+	{
+		return (IsFlagSet(var, flags) && ...);
+	}
+	template <EnumFlag T>
+	[[nodiscard]] constexpr auto IsAnyFlagSet(const T var, const std::same_as<T> auto... flags) noexcept
+	{
+		return (IsFlagSet(var, flags) || ...);
+	}
+	template <EnumFlag T>
 	[[nodiscard]] constexpr auto AreAllFlagsSet(const T var, const T flag) noexcept
 	{
 		return (var & flag) == flag;

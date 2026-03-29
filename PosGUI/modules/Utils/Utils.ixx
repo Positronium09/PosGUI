@@ -9,6 +9,8 @@ export import :EnumUtils;
 export import :MetaUtils;
 export import :HashUtils;
 
+import PGUI.Mutex;
+
 export namespace PGUI
 {
 	constexpr auto IsDebugBuild =
@@ -49,5 +51,62 @@ export namespace PGUI
 		private:
 		std::reference_wrapper<T> variable;
 		T oldValue;
+	};
+
+	template <typename Func>
+	struct ScopedDefer
+	{
+		explicit ScopedDefer(Func func) noexcept : func{ std::move(func) }
+		{
+		}
+		~ScopedDefer() noexcept
+		{
+			func();
+		}
+
+		ScopedDefer(const ScopedDefer&) = delete;
+		auto operator=(const ScopedDefer&) -> ScopedDefer& = delete;
+		ScopedDefer(ScopedDefer&&) noexcept = delete;
+		auto operator=(ScopedDefer&&) -> ScopedDefer& = delete;
+
+		private:
+		const Func func;
+	};
+
+	template <typename T, Mutex::SharedMutexType MutexType>
+	struct AccessorProxy
+	{
+		AccessorProxy(const T& value, MutexType& mutex) :
+			value{ value }, lock{ mutex }
+		{
+		}
+
+		AccessorProxy(const AccessorProxy&) = delete;
+		auto operator=(const AccessorProxy&) -> AccessorProxy& = delete;
+		AccessorProxy(AccessorProxy&&) = default;
+		auto operator=(AccessorProxy&&) -> AccessorProxy& = default;
+
+		[[nodiscard]] auto operator->() const noexcept -> const T*
+		{
+			return std::addressof(value);
+		}
+		[[nodiscard]] auto operator*() const noexcept -> const T&
+		{
+			return value;
+		}
+
+		[[nodiscard]] explicit(false) operator const T&() const noexcept
+		{
+			return value;
+		}
+
+		[[nodiscard]] auto Get() const noexcept -> const T&
+		{
+			return value;
+		}
+
+		private:
+		const T& value;
+		std::shared_lock<MutexType> lock;
 	};
 }

@@ -28,13 +28,16 @@ export namespace PGUI
 	constexpr auto TypeCount = sizeof...(Types);
 
 	template <typename... Operands>
-	constexpr auto LogicalOR = std::disjunction_v<Operands...>;
+	constexpr auto LogicalOr = std::disjunction_v<Operands...>;
 
 	template <typename... Operands>
-	constexpr auto LogicalAND = std::conjunction_v<Operands...>;
+	constexpr auto LogicalAnd = std::conjunction_v<Operands...>;
 
 	template <typename Operand>
-	constexpr auto LogicalNOT = std::negation_v<Operand>;
+	constexpr auto LogicalNot = std::negation_v<Operand>;
+
+	template <typename T, typename U>
+	concept NotSameAs = !std::same_as<T, U>;
 
 	template <typename... Types>
 	struct TypeList
@@ -57,4 +60,17 @@ export namespace PGUI
 
 	template <typename T, template <auto...> typename Template>
 	concept IsSpecialization = Detail::IsSpecializationHelper<T, Template>::value;
+
+	template <typename Variant, typename... Visitors>
+	constexpr auto Match(Variant&& variant, Visitors&&... visitors)
+	{
+		struct Overloaded : Visitors...
+		{
+			using Visitors::operator()...;
+		};
+
+		return std::visit(
+			Overloaded{ std::forward<Visitors>(visitors)... }, 
+			std::forward<Variant>(variant));
+	}
 }

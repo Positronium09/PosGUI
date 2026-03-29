@@ -124,7 +124,7 @@ namespace PGUI::UI::Animation
 	}
 
 	auto Storyboard::AddTransition(
-		const AnimationVariable& variable, AnimationTransition transition) const noexcept -> Error
+		const AnimationVariable& variable, const AnimationTransition& transition) const noexcept -> Error
 	{
 		Error error{
 			Get()->AddTransition(variable.GetRaw(), transition.GetRaw())
@@ -135,7 +135,7 @@ namespace PGUI::UI::Animation
 
 	auto Storyboard::AddTransitionAtKeyframe(
 		const AnimationVariable& variable,
-		AnimationTransition transition, const KeyFrame keyFrame) const noexcept -> Error
+		const AnimationTransition& transition, const KeyFrame keyFrame) const noexcept -> Error
 	{
 		Error error{
 			Get()->AddTransitionAtKeyframe(
@@ -147,7 +147,7 @@ namespace PGUI::UI::Animation
 	}
 
 	auto Storyboard::AddTransitionBetweenKeyframes(
-		const AnimationVariable& variable, AnimationTransition transition,
+		const AnimationVariable& variable, const AnimationTransition& transition,
 		const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Error
 	{
 		Error error{
@@ -192,7 +192,7 @@ namespace PGUI::UI::Animation
 		return static_cast<StoryboardStatus>(status);
 	}
 
-	auto Storyboard::GetElapsedTime() const noexcept -> Result<double>
+	auto Storyboard::GetElapsedTime() const noexcept -> Result<Seconds>
 	{
 		auto elapsedTime = 0.0;
 		if (const auto hr = Get()->GetElapsedTime(&elapsedTime);
@@ -203,7 +203,7 @@ namespace PGUI::UI::Animation
 			return Unexpected{ error };
 		}
 
-		return elapsedTime;
+		return FromWAM(elapsedTime);
 	}
 
 	auto Storyboard::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Error

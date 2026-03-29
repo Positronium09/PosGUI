@@ -16,43 +16,9 @@ export namespace PGUI::DataBinding
 		using ValueType = T;
 		using MutexType = Mutex;
 		
-		struct AccessorProxy
-		{
-			AccessorProxy(const T& value, MutexType& mutex) : 
-				value{ value }, lock{ mutex }
-			{
-			}
+		using AccessorProxyType = AccessorProxy<T, Mutex>;
 
-			AccessorProxy(const AccessorProxy&) = delete;
-			auto operator=(const AccessorProxy&) -> AccessorProxy& = delete;
-			AccessorProxy(AccessorProxy&&) = default;
-			auto operator=(AccessorProxy&&) -> AccessorProxy& = default;
-
-			[[nodiscard]] auto operator->() const noexcept -> const T*
-			{
-				return std::addressof(value);
-			}
-			[[nodiscard]] auto operator*() const noexcept -> const T&
-			{
-				return value;
-			}
-			
-			[[nodiscard]] explicit(false) operator const T&() const noexcept
-			{
-				return value;
-			}
-
-			[[nodiscard]] auto Get() const noexcept -> const T&
-			{
-				return value;
-			}
-
-			private:
-			const T& value;
-			std::shared_lock<MutexType> lock;
-		};
-
-		using EventType = EventT<Mutex, const AccessorProxy&>;
+		using EventType = EventT<Mutex, const AccessorProxyType&>;
 
 		Property() noexcept(std::is_nothrow_default_constructible_v<T>) = default;
 
@@ -91,7 +57,7 @@ export namespace PGUI::DataBinding
 
 		[[nodiscard]] auto Get() const noexcept
 		{
-			return AccessorProxy{ value, mutex };
+			return AccessorProxyType{ value, mutex };
 		}
 
 		virtual auto Set(const T& newValue) noexcept(std::is_nothrow_copy_assignable_v<T>) -> void
@@ -132,7 +98,7 @@ export namespace PGUI::DataBinding
 			return std::move(value);
 		}
 
-		auto AddObserver(CallbackType<const AccessorProxy&> auto callback) noexcept
+		auto AddObserver(CallbackType<const AccessorProxyType&> auto callback) noexcept
 		{
 			return valueChangedEvent.AddCallback(callback);
 		}
@@ -169,9 +135,9 @@ export namespace PGUI::DataBinding
 			return *Get() <=> val;
 		}
 
-		virtual auto operator*() const noexcept -> AccessorProxy
+		virtual auto operator*() const noexcept -> AccessorProxyType
 		{
-			return AccessorProxy{ value, mutex };
+			return AccessorProxyType{ value, mutex };
 		}
 
 		private:

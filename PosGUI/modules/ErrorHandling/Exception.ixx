@@ -15,49 +15,59 @@ export namespace PGUI
 	{
 		public:
 		explicit Exception(const std::error_code& code,
-			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::optional<wzstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
 			error{ code }, stacktrace{ stacktrace }
 		{
 			if (customMessage.has_value())
 			{
 				error.SetCustomMessage(customMessage.value());
+				whatBuffer = WStringToString(customMessage.value());
+			}
+			else
+			{
+				whatBuffer = error.Message();
 			}
 		}
 
 		explicit Exception(const Error& error,
-			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::optional<wzstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
 			error{ error }, stacktrace{ stacktrace }
 		{
 			if (customMessage.has_value())
 			{
 				this->error.SetCustomMessage(customMessage.value());
+				whatBuffer = WStringToString(customMessage.value());
+			}
+			else
+			{
+				whatBuffer = this->error.Message();
 			}
 		}
 		template <PGUIErrorCodeEnum ErrorType>
 		explicit Exception(
 			const ErrorType error,
-			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::optional<wzstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
 			Exception{ std::make_error_code(error), customMessage, stacktrace }
 		{
 		}
 
 		explicit Exception(const std::errc& errc,
-			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::optional<wzstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
 			Exception{ std::make_error_code(errc), customMessage, stacktrace }
 		{
 		}
 		explicit Exception(const HRESULT hresult,
-			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::optional<wzstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
 			Exception{ std::error_code{ hresult, std::system_category() }, customMessage, stacktrace }
 		{
 		}
 		explicit Exception(const WINERROR winError,
-			const std::optional<std::wstring_view>& customMessage = std::nullopt,
+			const std::optional<wzstring_view>& customMessage = std::nullopt,
 			const std::stacktrace& stacktrace = std::stacktrace::current()) noexcept :
 			Exception{ HresultFromWin32(winError), customMessage, stacktrace }
 		{
@@ -72,14 +82,10 @@ export namespace PGUI
 
 		[[nodiscard]] auto what() const noexcept -> const char* override
 		{
-			if (error.HasCustomMessage())
-			{
-				return WStringToString(*error.CustomMessage()).c_str();
-			}
-			return error.Message().c_str();
+			return whatBuffer.c_str();
 		}
 		// ReSharper disable once IdentifierTypo
-		[[nodiscard]] auto wwhat() const noexcept
+		[[nodiscard]] auto wwhat() const noexcept -> std::wstring
 		{
 			if (error.HasCustomMessage())
 			{
@@ -133,12 +139,13 @@ export namespace PGUI
 
 		private:
 		Error error;
+		std::string whatBuffer{ "Unspecified" };
 		std::stacktrace stacktrace;
 	};
 
 	inline auto ThrowFailed(
 		const HRESULT hr, 
-		const std::optional<std::wstring_view>& customMessage = std::nullopt)
+		const std::optional<wzstring_view>& customMessage = std::nullopt)
 	{
 		if (FAILED(hr))
 		{
@@ -148,7 +155,7 @@ export namespace PGUI
 
 	inline auto ThrowFailed(
 		const WINERROR wr,
-		const std::optional<std::wstring_view>& customMessage = std::nullopt)
+		const std::optional<wzstring_view>& customMessage = std::nullopt)
 	{
 		if (wr != ERROR_SUCCESS)
 		{
@@ -159,7 +166,7 @@ export namespace PGUI
 	template <typename T>
 	auto ThrowFailed(
 		const Result<T>& result,
-		const std::optional<std::wstring_view>& customMessage = std::nullopt
+		const std::optional<wzstring_view>& customMessage = std::nullopt
 	)
 	{
 		if (!result.has_value())
@@ -170,7 +177,7 @@ export namespace PGUI
 
 	inline auto ThrowError(
 		const Error& error,
-		const std::optional<std::wstring_view>& customMessage = std::nullopt
+		const std::optional<wzstring_view>& customMessage = std::nullopt
 	)
 	{
 		throw Exception{ error, customMessage };

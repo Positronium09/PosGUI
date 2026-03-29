@@ -6,6 +6,7 @@ export module PGUI.UI.Imaging.MetadataReader;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.ComIterator;
 import PGUI.PropVariant;
 import PGUI.UI.Imaging.ContainerFormats;
@@ -21,13 +22,13 @@ export namespace PGUI::UI::Imaging
 
 		[[nodiscard]] auto GetContainerFormat() const noexcept -> Result<ContainerFormat>;
 
-		[[nodiscard]] auto GetMetadata(std::wstring_view name) const noexcept -> Result<PropVariant>;
+		[[nodiscard]] auto GetMetadata(wzstring_view name) const noexcept -> Result<PropVariant>;
 
 		[[nodiscard]] auto Location() const noexcept -> Result<std::wstring>;
 
 		[[nodiscard]] auto GetEnumerator() const noexcept -> Result<ComPtr<IEnumString>>;
 
-		[[nodiscard]] auto operator[](std::wstring_view name) const -> PropVariant;
+		[[nodiscard]] auto operator[](wzstring_view name) const -> PropVariant;
 
 		[[nodiscard]] auto cbegin() const -> EnumStringIterator;
 

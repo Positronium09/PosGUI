@@ -41,11 +41,12 @@ namespace PGUI::UI
 		}
 
 		auto gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
+		const auto batteryFlags = FromUnderlying<BatteryFlag>(powerStatus.BatteryFlag);
 		const auto powerSaverOn = powerStatus.SystemStatusFlag == 1;
-		const bool lowBattery = powerStatus.BatteryFlag & (2 | 4);
-		const auto charging = powerStatus.ACLineStatus != 0 || powerStatus.BatteryFlag & 8;
+		const auto lowBattery = IsAnyFlagSet(batteryFlags, BatteryFlag::Low, BatteryFlag::Critical);
+		const auto charging = powerStatus.ACLineStatus != 0 || IsFlagSet(batteryFlags, BatteryFlag::Charging);
 
-		if (const bool hasBattery = powerStatus.BatteryFlag & 128;
+		if (const auto hasBattery = !IsFlagSet(batteryFlags, BatteryFlag::NoBattery);
 			(powerSaverOn || lowBattery) && (!charging) && hasBattery)
 		{
 			gpuPreference = DXGI_GPU_PREFERENCE_MINIMUM_POWER;
@@ -173,7 +174,7 @@ namespace PGUI::UI
 
 		if (const auto hr = d2Factory->CreateDevice(
 				dxgiDevice.get(),
-				&d2d1Device);
+				d2d1Device.put());
 			FAILED(hr))
 		{
 			throw Exception{
@@ -213,6 +214,8 @@ namespace PGUI::UI
 
 			EndPaint(Hwnd(), &paintStruct);
 
+			Invalidate();
+
 			return std::make_pair(tag1, tag2);
 		}
 		else if (FAILED(hr))
@@ -229,6 +232,8 @@ namespace PGUI::UI
 			DiscardDeviceResources();
 			HandleDeviceLoss();
 			InitDeviceDependent();
+
+			Invalidate();
 		}
 		else if (FAILED(hr))
 		{
@@ -464,7 +469,7 @@ namespace PGUI::UI
 
 			if (!FAILED(hr))
 			{
-				GetAs<ID2D1DeviceContext7, ID2D1RenderTarget>()->SetTextRenderingParams(renderingParams.get());
+				GetD2D1DeviceContext()->SetTextRenderingParams(renderingParams.get());
 			}
 		}
 
@@ -474,7 +479,11 @@ namespace PGUI::UI
 	auto DirectXCompositionWindow::OnPaint(
 		UINT, Argument1, Argument2) -> MessageHandlerResult
 	{
+		BeginDraw();
+
 		Draw(GetGraphics());
+
+		EndDraw();
 
 		return 0;
 	}

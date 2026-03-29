@@ -8,11 +8,11 @@ module PGUI.Utils:WindowsUtils;
 
 import std;
 
-import PGUI.Utils;
+import :StringUtils;
 import PGUI.ErrorHandling;
 
 // ReSharper disable StringLiteralTypo
-constexpr std::array<std::wstring_view, 1025> messageStrings = {
+constexpr std::array<PGUI::wzstring_view, 1025> messageStrings = {
 	L"WM_NULL",
 	L"WM_CREATE",
 	L"WM_DESTROY",
@@ -1114,7 +1114,7 @@ namespace PGUI
 		return *std::bit_cast<LPRECT>(arg2);
 	}
 
-	auto WindowMsgToText(const MessageID msg) noexcept -> std::wstring_view
+	auto WindowMsgToText(const MessageID msg) noexcept -> wzstring_view
 	{
 		if (msg == WM_USER + 7)
 		{

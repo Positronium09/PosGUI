@@ -135,14 +135,14 @@ namespace PGUI::UI::Animation
 	}
 
 	auto AnimationStoryboardEvent::OnStoryBoardStatusChanged(
-		const Storyboard storyboard,
+		const Storyboard& storyboard,
 		const StoryboardStatus newStatus,
 		const StoryboardStatus previousStatus) -> void
 	{
 		storyboardStatusChangedEvent.Invoke(storyboard, newStatus, previousStatus);
 	}
 
-	auto AnimationStoryboardEvent::OnStoryBoardUpdated(const Storyboard storyboard) -> void
+	auto AnimationStoryboardEvent::OnStoryBoardUpdated(const Storyboard& storyboard) -> void
 	{
 		storyboardUpdatedEvent.Invoke(storyboard);
 	}

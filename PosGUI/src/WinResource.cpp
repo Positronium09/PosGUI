@@ -61,7 +61,7 @@ namespace PGUI::Resource
 		{
 			return Unexpected{
 				Error{
-					GetLastError(),
+					ErrorCode::Failure,
 				}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle)))
 				 .AddDetail(L"Resource ID", GetResourceIDString(id))
 			};

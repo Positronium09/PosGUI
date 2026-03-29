@@ -73,7 +73,7 @@ namespace PGUI::UI
 		isFullScreen = false;
 	}
 
-	auto AppWindow::SetTitle(const std::wstring_view title) const noexcept -> void
+	auto AppWindow::SetTitle(const wzstring_view title) const noexcept -> void
 	{
 		SendMsg(WM_SETTEXT, 0, std::bit_cast<Argument2>(title.data()));
 	}

@@ -108,13 +108,15 @@ export namespace PGUI
 		[[nodiscard]] auto CreateMemoryStream() const noexcept -> Result<ComPtr<IStream>>
 		requires std::same_as<T, std::span<const std::byte>>
 		{
-			auto* stream = SHCreateMemStream(reinterpret_cast<const BYTE*>(data.data()), GetSize());
+			auto* stream = SHCreateMemStream(
+				reinterpret_cast<const BYTE*>(data.data()), 
+				std::clamp(GetSize(), 0UL, static_cast<size_t>(std::numeric_limits<UINT>::max())));
 
 			if (stream == nullptr)
 			{
 				return Unexpected{
 					Error{
-						GetLastError(),
+						ErrorCode::Failure,
 					}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle.get())))
 				};
 			}
@@ -143,9 +145,9 @@ export namespace PGUI
 
 	namespace Resource
 	{
-		[[nodiscard]] auto LoadResourceModule(const std::wstring& moduleName) noexcept -> Result<wil::unique_hmodule>
+		[[nodiscard]] auto LoadResourceModule(const wzstring_view moduleName) noexcept -> Result<wil::unique_hmodule>
 		{
-			const auto hModule = LoadLibraryExW(moduleName.c_str(), nullptr,
+			const auto hModule = LoadLibraryExW(moduleName.data(), nullptr,
 				LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE | LOAD_LIBRARY_AS_IMAGE_RESOURCE);
 
 			if (hModule == nullptr)
@@ -153,7 +155,7 @@ export namespace PGUI
 				return Unexpected{
 					Error{
 						GetLastError(),
-					}.AddDetail(L"Module", moduleName.c_str())
+					}.AddDetail(L"Module", moduleName.data())
 				};
 			}
 
@@ -161,9 +163,9 @@ export namespace PGUI
 		}
 
 		[[nodiscard]] auto LoadFromModule(HMODULE moduleHandle, const ResourceID& id, const ResourceType& type) noexcept -> Result<RawDataModulePair>;
-		[[nodiscard]] auto LoadFromModule(const std::wstring_view moduleName, const ResourceID& id, const ResourceType& type) noexcept -> Result<RawDataModulePair>
+		[[nodiscard]] auto LoadFromModule(const wzstring_view moduleName, const ResourceID& id, const ResourceType& type) noexcept -> Result<RawDataModulePair>
 		{
-			auto hModule = LoadResourceModule(moduleName.data());
+			auto hModule = LoadResourceModule(moduleName);
 
 			if (!hModule.has_value())
 			{
@@ -186,15 +188,15 @@ export namespace PGUI
 		{
 			return LoadFromModule(moduleHandle, id, WinResourceType::Data);
 		}
-		[[nodiscard]] auto LoadRaw(const std::wstring_view moduleName, const ResourceID& id) noexcept
+		[[nodiscard]] auto LoadRaw(const wzstring_view moduleName, const ResourceID& id) noexcept
 		{
 			return LoadFromModule(moduleName, id, WinResourceType::Data);
 		}
 
 		[[nodiscard]] auto LoadAccelerator(HMODULE moduleHandle, const ResourceID& id) noexcept -> Result<AcceleratorModulePair>;
-		[[nodiscard]] auto LoadAccelerator(const std::wstring_view moduleName, const ResourceID& id) noexcept -> Result<AcceleratorModulePair>
+		[[nodiscard]] auto LoadAccelerator(const wzstring_view moduleName, const ResourceID& id) noexcept -> Result<AcceleratorModulePair>
 		{
-			auto hModule = LoadResourceModule(moduleName.data());
+			auto hModule = LoadResourceModule(moduleName);
 
 			if (!hModule.has_value())
 			{
@@ -215,9 +217,9 @@ export namespace PGUI
 		}
 
 		[[nodiscard]] auto LoadBitmapResource(HMODULE moduleHandle, const ResourceID& id) noexcept -> Result<BitmapModulePair>;
-		[[nodiscard]] auto LoadBitmapResource(const std::wstring_view moduleName, const ResourceID& id) noexcept -> Result<BitmapModulePair>
+		[[nodiscard]] auto LoadBitmapResource(const wzstring_view moduleName, const ResourceID& id) noexcept -> Result<BitmapModulePair>
 		{
-			auto hModule = LoadResourceModule(moduleName.data());
+			auto hModule = LoadResourceModule(moduleName);
 			
 			if (!hModule.has_value())
 			{
@@ -241,10 +243,10 @@ export namespace PGUI
 			HMODULE moduleHandle, 
 			const ResourceID& id, SizeI size = SizeI{ }) noexcept -> Result<CursorModulePair>;
 		[[nodiscard]] auto LoadCursorResource(
-			const std::wstring_view moduleName, 
+			const wzstring_view moduleName, 
 			const ResourceID& id, const SizeI size = SizeI{ }) noexcept -> Result<CursorModulePair>
 		{
-			auto hModule = LoadResourceModule(moduleName.data());
+			auto hModule = LoadResourceModule(moduleName);
 			
 			if (!hModule.has_value())
 			{
@@ -270,10 +272,10 @@ export namespace PGUI
 			HMODULE moduleHandle, 
 			const ResourceID& id, SizeI size = SizeI{ }) noexcept -> Result<IconModulePair>;
 		[[nodiscard]] auto LoadIconResource(
-			const std::wstring_view moduleName, 
+			const wzstring_view moduleName, 
 			const ResourceID& id, const SizeI size = SizeI{ }) noexcept -> Result<IconModulePair>
 		{
-			auto hModule = LoadResourceModule(moduleName.data());
+			auto hModule = LoadResourceModule(moduleName);
 			
 			if (!hModule.has_value())
 			{
@@ -296,9 +298,9 @@ export namespace PGUI
 		}
 
 		[[nodiscard]] auto LoadMenuResource(HMODULE moduleHandle, const ResourceID& id) noexcept -> Result<MenuModulePair>;
-		[[nodiscard]] auto LoadMenuResource(const std::wstring_view moduleName, const ResourceID& id) noexcept -> Result<MenuModulePair>
+		[[nodiscard]] auto LoadMenuResource(const wzstring_view moduleName, const ResourceID& id) noexcept -> Result<MenuModulePair>
 		{
-			auto hModule = LoadResourceModule(moduleName.data());
+			auto hModule = LoadResourceModule(moduleName);
 			
 			if (!hModule.has_value())
 			{
@@ -319,9 +321,9 @@ export namespace PGUI
 		}
 
 		[[nodiscard]] auto LoadStringResource(HMODULE moduleHandle, UINT id) noexcept -> Result<std::wstring>;
-		[[nodiscard]] auto LoadStringResource(const std::wstring_view moduleName, const UINT id) noexcept -> Result<std::wstring>
+		[[nodiscard]] auto LoadStringResource(const wzstring_view moduleName, const UINT id) noexcept -> Result<std::wstring>
 		{
-			auto hModule = LoadResourceModule(moduleName.data());
+			auto hModule = LoadResourceModule(moduleName);
 			
 			if (!hModule.has_value())
 			{

@@ -2,6 +2,9 @@ export module PGUI.UI.Theming.ThemeAware;
 
 import std;
 
+import PGUI.Event;
+import PGUI.Utils;
+import PGUI.ErrorHandling;
 import PGUI.UI.Theming.Styles;
 import PGUI.UI.Theming.Theme;
 
@@ -11,15 +14,21 @@ export namespace PGUI::UI::Theming
 	class ThemeAware
 	{
 		public:
-		virtual ~ThemeAware() noexcept = default;
+		virtual ~ThemeAware() noexcept
+		{
+			ThemeContext::ThemeChangedEvent().RemoveCallback(callbackId);
+		}
 
 		virtual auto ApplyStyle(const StyleType& style) -> void = 0;
 
 		protected:
 		ThemeAware() noexcept
 		{
-			ThemeContext::ThemeChangedEvent().AddCallback(
-				std::bind_front(&ThemeAware::OnThemeChanged, this));
+			callbackId = ThemeContext::ThemeChangedEvent().AddCallback(
+				[this](const AccessorProxy<Theme, Mutex::SRWMutex>& theme)
+				{
+					OnThemeChanged(theme.Get());
+				});
 		}
 
 		auto ApplyTheme(const Theme& theme) noexcept -> void
@@ -45,9 +54,19 @@ export namespace PGUI::UI::Theming
 
 			if (theme.HasCustomStyle<StyleType>())
 			{
-				const auto& style = theme.GetCustomStyle<StyleType>();
-				ApplyStyle(style);
+				if (const auto& style = theme.GetCustomStyle<StyleType>();
+					style.has_value())
+				{
+					ApplyStyle(style.value().get());
+				}
+				else
+				{
+					Logger::Warning(style.error(), L"Cannot unwrap style object");
+				}
 			}
 		}
+
+		private:
+		CallbackId callbackId;
 	};
 }

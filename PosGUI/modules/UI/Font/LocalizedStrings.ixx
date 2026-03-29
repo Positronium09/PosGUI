@@ -6,6 +6,7 @@ export module PGUI.UI.Font.LocalizedStrings;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.ErrorHandling;
 
 export namespace PGUI::UI::Font
@@ -15,7 +16,7 @@ export namespace PGUI::UI::Font
 		public:
 		explicit(false) LocalizedStrings(const ComPtr<IDWriteLocalizedStrings>& strings) noexcept;
 
-		[[nodiscard]] auto FindLocaleName(std::wstring_view name) const noexcept -> Result<UINT32>;
+		[[nodiscard]] auto FindLocaleName(wzstring_view name) const noexcept -> Result<UINT32>;
 
 		[[nodiscard]] auto GetCount() const noexcept { return Get()->GetCount(); }
 

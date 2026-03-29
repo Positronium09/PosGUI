@@ -22,6 +22,11 @@ export namespace PGUI::UI
 
 	struct RGBA
 	{
+		float r = 0.0F;
+		float g = 0.0F;
+		float b = 0.0F;
+		float a = 0.0F;
+
 		constexpr RGBA() noexcept = default;
 
 		constexpr RGBA(const float r, const float g, const float b, const float a = 1.0F) noexcept :
@@ -42,9 +47,9 @@ export namespace PGUI::UI
 		{ }
 
 		explicit(false) constexpr RGBA(const std::uint32_t rgb, const float a = 1.0F) noexcept :
-			r{ ((rgb & 0xff << 16) >> 16) / 255.0F },
-			g{ ((rgb & 0xff << 8) >> 8) / 255.0F },
-			b{ (rgb & 0xff) / 255.0F },
+			r{ ((rgb >> 16) & 0xFF) / 255.0F },
+			g{ ((rgb >> 8) & 0xFF) / 255.0F },
+			b{ (rgb & 0xFF) / 255.0F },
 			a{ a }
 		{ }
 
@@ -101,10 +106,10 @@ export namespace PGUI::UI
 		explicit(false) constexpr operator winrt::Windows::UI::Color() const noexcept
 		{
 			return winrt::Windows::UI::Color{
-				static_cast<BYTE>(a / 255.0F),
-				static_cast<BYTE>(r / 255.0F),
-				static_cast<BYTE>(g / 255.0F),
-				static_cast<BYTE>(b / 255.0F)
+				static_cast<BYTE>(a * 255.0F),
+				static_cast<BYTE>(r * 255.0F),
+				static_cast<BYTE>(g * 255.0F),
+				static_cast<BYTE>(b * 255.0F)
 			};
 		}
 
@@ -173,16 +178,15 @@ export namespace PGUI::UI
 				static_cast<T>(a)
 			};
 		}
-
-		float r = 0.0F;
-		float g = 0.0F;
-		float b = 0.0F;
-		float a = 0.0F;
 	};
 	// ReSharper disable once CppInconsistentNaming
 
 	struct sRGB
 	{
+		float r = 0.0F;
+		float g = 0.0F;
+		float b = 0.0F;
+
 		constexpr sRGB() noexcept = default;
 
 		constexpr sRGB(const float r, const float g, const float b) noexcept :
@@ -199,14 +203,14 @@ export namespace PGUI::UI
 		{
 			return 0.2126F * r + 0.7152F * g + 0.0722F * b;
 		}
-
-		float r = 0.0F;
-		float g = 0.0F;
-		float b = 0.0F;
 	};
 
 	struct HSL
 	{
+		float h = 0.0F;
+		float s = 0.0F;
+		float l = 0.0F;
+
 		constexpr HSL() noexcept = default;
 
 		constexpr HSL(const float h, const float s, const float l) noexcept :
@@ -218,14 +222,14 @@ export namespace PGUI::UI
 		explicit(false) operator RGBA() const noexcept;
 
 		[[nodiscard]] constexpr auto operator==(const HSL& other) const noexcept -> bool = default;
-
-		float h = 0.0F;
-		float s = 0.0F;
-		float l = 0.0F;
 	};
 
 	struct HSV
 	{
+		float h = 0.0F;
+		float s = 0.0F;
+		float v = 0.0F;
+
 		constexpr HSV() noexcept = default;
 
 		constexpr HSV(const float h, const float s, const float v) noexcept :
@@ -237,14 +241,15 @@ export namespace PGUI::UI
 		explicit(false) operator RGBA() const noexcept;
 
 		[[nodiscard]] constexpr auto operator==(const HSV& other) const noexcept -> bool = default;
-
-		float h = 0.0F;
-		float s = 0.0F;
-		float v = 0.0F;
 	};
 
 	struct CMYK
 	{
+		float c = 0.0F;
+		float m = 0.0F;
+		float y = 0.0F;
+		float k = 0.0F;
+
 		constexpr CMYK() noexcept = default;
 
 		constexpr CMYK(const float c, const float m, const float y, const float k) noexcept :
@@ -253,7 +258,16 @@ export namespace PGUI::UI
 
 		explicit(false) constexpr CMYK(const RGBA& rgb) noexcept
 		{
-			k = std::max({ rgb.r, rgb.g, rgb.b });
+			k = 1.0F - std::max({ rgb.r, rgb.g, rgb.b });
+
+			if (k >= 1.0F)
+			{
+				c = 0.0F;
+				m = 0.0F;
+				y = 0.0F;
+
+				return;
+			}
 
 			c = (1 - rgb.r - k) / (1 - k);
 			m = (1 - rgb.g - k) / (1 - k);
@@ -266,11 +280,6 @@ export namespace PGUI::UI
 		}
 
 		[[nodiscard]] constexpr auto operator==(const CMYK& other) const noexcept -> bool = default;
-
-		float c = 0.0F;
-		float m = 0.0F;
-		float y = 0.0F;
-		float k = 0.0F;
 	};
 
 	[[nodiscard]] constexpr auto WICColorToRGBA(const WICColor color) noexcept
@@ -325,10 +334,20 @@ export namespace PGUI::UI
 		float uiComponents;
 	};
 
-	std::unordered_map<std::wstring, const ContrastValues> contrastLevels = {
-		{ L"AA", { 4.5F, 3.0F, 3.0F } },
-		{ L"AAA", { 7.0F, 4.5F, 4.5F } }
-	};
+	[[nodiscard]] constexpr auto GetContrastValues(const std::wstring_view level) noexcept
+		-> std::optional<ContrastValues>
+	{
+		if (level == L"AA")
+		{
+			return ContrastValues{ 4.5F, 3.0F, 3.0F };
+		}
+		if (level == L"AAA")
+		{
+			return ContrastValues{ 7.0F, 4.5F, 4.5F };
+		}
+
+		return std::nullopt;
+	}
 
 	[[nodiscard]] constexpr auto IsContrastSufficient(
 		const ColorType auto& color1, 
@@ -343,10 +362,11 @@ export namespace PGUI::UI
 		const ColorType auto& color2,
 		const std::wstring_view level) noexcept
 	{
-		if (contrastLevels.contains(level.data()))
+		if (const auto contrastValues = GetContrastValues(level); 
+			contrastValues.has_value())
 		{
 			return IsContrastSufficient(
-				color1, color2, contrastLevels.at(level.data()).normalText);
+				color1, color2, contrastValues->normalText);
 		}
 		
 		return false;
@@ -357,10 +377,11 @@ export namespace PGUI::UI
 		const ColorType auto& color2,
 		const std::wstring_view level) noexcept
 	{
-		if (contrastLevels.contains(level.data()))
+		if (const auto contrastValues = GetContrastValues(level); 
+			contrastValues.has_value())
 		{
 			return IsContrastSufficient(
-				color1, color2, contrastLevels.at(level.data()).largeText);
+				color1, color2, contrastValues->largeText);
 		}
 		
 		return false;
@@ -371,10 +392,11 @@ export namespace PGUI::UI
 		const ColorType auto& color2,
 		const std::wstring_view level) noexcept
 	{
-		if (contrastLevels.contains(level.data()))
+		if (const auto contrastValues = GetContrastValues(level); 
+			contrastValues.has_value())
 		{
 			return IsContrastSufficient(
-				color1, color2, contrastLevels.at(level.data()).uiComponents);
+				color1, color2, contrastValues->uiComponents);
 		}
 	
 		return false;
@@ -393,7 +415,7 @@ export namespace PGUI::UI
 			bool largeTextAA : 1 = false;
 			bool largeTextAAA : 1 = false;
 			bool uiComponentsAA : 1 = false;
-			bool uiComponentsAAA : 1 = true;
+			bool uiComponentsAAA : 1 = false;
 			
 			// ReSharper restore CppInconsistentNaming
 		};

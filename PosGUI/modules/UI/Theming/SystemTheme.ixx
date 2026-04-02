@@ -6,6 +6,7 @@ module;
 export module PGUI.UI.Theming.SystemTheme;
 
 import PGUI.UI.Color;
+import PGUI.ErrorHandling;
 import PGUI.Event;
 
 export namespace PGUI::UI::Theming
@@ -30,79 +31,81 @@ export namespace PGUI::UI::Theming
 
 		[[nodiscard]] static auto& ColorValuesChanged() noexcept { return colorValuesChangedEvent; }
 
-		[[nodiscard]] static auto IsDarkMode() -> bool;
+		[[nodiscard]] static auto IsDarkMode() noexcept -> bool;
 
-		[[nodiscard]] static auto IsLightMode() { return !IsDarkMode(); }
+		[[nodiscard]] static auto IsLightMode() noexcept { return !IsDarkMode(); }
 
-		[[nodiscard]] static auto GetColor(ColorType colorType) -> RGBA;
+		[[nodiscard]] static auto GetColor(ColorType colorType) noexcept -> Result<RGBA>;
 
-		[[nodiscard]] static auto GetTextColor()
+		[[nodiscard]] static auto GetTextColor() noexcept
 		{
 			return GetColor(ColorType::Foreground);
 		}
 
-		[[nodiscard]] static auto GetBackgroundColor()
+		[[nodiscard]] static auto GetBackgroundColor() noexcept
 		{
 			return GetColor(ColorType::Background);
 		}
 
-		[[nodiscard]] static auto GetForegroundColor()
+		[[nodiscard]] static auto GetForegroundColor() noexcept
 		{
 			return GetColor(ColorType::Foreground);
 		}
 
-		[[nodiscard]] static auto GetAccentDark3Color()
+		[[nodiscard]] static auto GetAccentDark3Color() noexcept
 		{
 			return GetColor(ColorType::AccentDark3);
 		}
 
-		[[nodiscard]] static auto GetAccentDark2Color()
+		[[nodiscard]] static auto GetAccentDark2Color() noexcept
 		{
 			return GetColor(ColorType::AccentDark2);
 		}
 
-		[[nodiscard]] static auto GetAccentDark1Color()
+		[[nodiscard]] static auto GetAccentDark1Color() noexcept
 		{
 			return GetColor(ColorType::AccentDark1);
 		}
 
-		[[nodiscard]] static auto GetAccentColor()
+		[[nodiscard]] static auto GetAccentColor() noexcept
 		{
 			return GetColor(ColorType::Accent);
 		}
 
-		[[nodiscard]] static auto GetAccentLight3Color()
+		[[nodiscard]] static auto GetAccentLight3Color() noexcept
 		{
 			return GetColor(ColorType::AccentLight3);
 		}
 
-		[[nodiscard]] static auto GetAccentLight2Color()
+		[[nodiscard]] static auto GetAccentLight2Color() noexcept
 		{
 			return GetColor(ColorType::AccentLight2);
 		}
 
-		[[nodiscard]] static auto GetAccentLight1Color()
+		[[nodiscard]] static auto GetAccentLight1Color() noexcept
 		{
 			return GetColor(ColorType::AccentLight1);
 		}
 
-		static auto RegisterSystemEventChanges() -> void
+		static auto RegisterSystemEventChanges() noexcept -> void
 		{
 			static std::once_flag onceFlag;
-			static winrt::event_token colorValuesChangedToken;
-			std::call_once(onceFlag, []()
+			std::call_once(onceFlag, []
 			{
-				colorValuesChangedToken = uiSettings.ColorValuesChanged([](
-					const winrt::Windows::UI::ViewManagement::UISettings&,
-					const winrt::Windows::Foundation::IInspectable&)
+				[[maybe_unused]] auto colorValuesChangedToken = 
+					GetUISettings().ColorValuesChanged([](
+						const winrt::Windows::UI::ViewManagement::UISettings&,
+						const winrt::Windows::Foundation::IInspectable&)
 				{
-					colorValuesChangedEvent.InvokeAsync();
+					colorValuesChangedEvent.Invoke();
 				});
 			});
 		}
 
 		private:
-		inline static winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+
+		[[nodiscard]] static auto GetUISettings() noexcept -> winrt::Windows::UI::ViewManagement::UISettings&;
+
 		inline static Event<> colorValuesChangedEvent;
 	};
 }

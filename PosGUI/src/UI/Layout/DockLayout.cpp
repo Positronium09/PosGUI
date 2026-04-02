@@ -1,4 +1,5 @@
-﻿module;
+﻿
+module;
 #include <Windows.h>
 
 module PGUI.UI.Layout.DockLayout;
@@ -90,7 +91,7 @@ namespace PGUI::UI::Layout
 		{
 			return;
 		}
-		if (dockPriorities.at(position) == priority)
+		if (dockPriorities[position] == priority)
 		{
 			return;
 		}
@@ -244,8 +245,8 @@ namespace PGUI::UI::Layout
 			LayoutPanel::OnItemAdded(layoutItem);
 			return;
 		}
-		dockPositions.insert_or_assign(GetItemCount() - 1, DockPosition::None);
 		LayoutPanel::OnItemAdded(layoutItem);
+		dockPositions.insert_or_assign(GetItemCount() - 1, DockPosition::None);
 	}
 
 	auto DockLayout::OnItemRemoved(const std::size_t id) -> void

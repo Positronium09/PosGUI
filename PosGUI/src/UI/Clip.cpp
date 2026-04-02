@@ -88,7 +88,7 @@ namespace PGUI::UI
 		parameters{ parameters }
 	{ }
 
-	auto Clip::CreateClip() -> void
+	auto Clip::CreateClip() noexcept -> void
 	{
 		ReleaseClip();
 		std::visit([this]<typename T>(const T& parameters)
@@ -140,31 +140,32 @@ namespace PGUI::UI
 	}
 
 	// ReSharper disable once CppParameterNamesMismatch
-	// ReSharper disable once CppInconsistentNaming
-	auto Clip::SetParameters(const ClipParameters& _parameters) noexcept -> void
+	auto Clip::SetParameters(const ClipParameters& newParameters) noexcept -> void
 	{
-		if (!std::holds_alternative<RoundedRectangleClipParameters>(_parameters) &&
-		    !std::holds_alternative<RoundCornerClipParameters>(_parameters))
+		if (!std::holds_alternative<RoundedRectangleClipParameters>(newParameters) &&
+		    !std::holds_alternative<RoundCornerClipParameters>(newParameters))
 		{
-			parameters = _parameters;
+			parameters = newParameters;
 			return;
 		}
-		if (std::holds_alternative<RoundedRectangleClipParameters>(_parameters))
+		if (std::holds_alternative<RoundedRectangleClipParameters>(newParameters))
 		{
-			if (const auto& params = std::get<RoundedRectangleClipParameters>(_parameters);
+			if (const auto& params = std::get<RoundedRectangleClipParameters>(newParameters);
 				params.rect.xRadius == 0.0f && params.rect.yRadius == 0.0f)
 			{
 				parameters = RectangleClipParameters{ RectF{ params.rect } };
 				return;
 			}
+			parameters = newParameters;
+			return;
 		}
 
-		const auto& params = std::get<RoundCornerClipParameters>(_parameters);
+		const auto& params = std::get<RoundCornerClipParameters>(newParameters);
 		if (params.topLeftRadius != params.topRightRadius ||
 		    params.topRightRadius != params.bottomLeftRadius ||
 		    params.bottomLeftRadius != params.bottomRightRadius)
 		{
-			parameters = _parameters;
+			parameters = newParameters;
 			return;
 		}
 

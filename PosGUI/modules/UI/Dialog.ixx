@@ -8,7 +8,6 @@ import std;
 import PGUI.Window;
 import PGUI.WindowClass;
 import PGUI.ErrorHandling;
-import PGUI.ErrorHandling;
 import PGUI.Shape2D;
 import PGUI.UI.DirectXCompositionWindow;
 
@@ -62,12 +61,18 @@ export namespace PGUI::UI
 			};
 
 			const auto parent = GetWindowPtrFromHWND(dialogInfo.parentHwnd);
+			if (parent == nullptr)
+			{
+				Logger::Critical(L"Parent Window is null");
+				throw Exception{ Error{ ErrorCode::NullPointer } };
+			}
 
 			dialogRect.CenterAround(parent->GetWindowRect().Center());
 
 			const auto position = dialogRect.TopLeft();
 			const auto size = dialogRect.Size();
-
+			
+			/*
 			WindowCreateInfo inf{
 				wndInfo.title,
 				position,
@@ -75,6 +80,7 @@ export namespace PGUI::UI
 				style,
 				exStyle
 			};
+			*/
 
 			auto window = std::make_shared<T>(std::forward<Args>(args)...);
 

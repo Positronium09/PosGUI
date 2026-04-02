@@ -11,7 +11,7 @@ import PGUI.ErrorHandling;
 
 namespace PGUI::UI::Theming
 {
-	auto SystemTheme::IsDarkMode() -> bool
+	auto SystemTheme::IsDarkMode() noexcept -> bool
 	{
 		DWORD value = 0;
 
@@ -29,22 +29,28 @@ namespace PGUI::UI::Theming
 		return value == 0;
 	}
 
-	auto SystemTheme::GetColor(ColorType colorType) -> RGBA
+	auto SystemTheme::GetColor(ColorType colorType) noexcept -> Result<RGBA>
 	{
 		try
 		{
 			return RGBA{
-				uiSettings.GetColorValue(
+				GetUISettings().GetColorValue(
 					static_cast<winrt::Windows::UI::ViewManagement::UIColorType>(colorType))
 			};
 		}
 		catch (const winrt::hresult_error& error)
 		{
-			throw Exception{
+			return Unexpected{
 				Error{
 					static_cast<HRESULT>(error.code().value)
-				}
+				}.SetCustomMessage(error.message())
 			};
 		}
+	}
+
+	auto SystemTheme::GetUISettings() noexcept -> winrt::Windows::UI::ViewManagement::UISettings&
+	{
+		static winrt::Windows::UI::ViewManagement::UISettings uiSettings;
+		return uiSettings;
 	}
 }

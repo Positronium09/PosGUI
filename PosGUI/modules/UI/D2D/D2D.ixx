@@ -9,4 +9,5 @@ export import PGUI.UI.D2D.D2DBitmap;
 export import PGUI.UI.D2D.Geometry;
 export import PGUI.UI.D2D.D2DEnums;
 export import PGUI.UI.D2D.D2DStructs;
+export import PGUI.UI.D2D.D2DLayer;
 export import PGUI.UI.D2D.BitmapRenderTarget;

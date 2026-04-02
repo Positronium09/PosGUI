@@ -171,7 +171,7 @@ export namespace PGUI::UI::Layout
 		{
 			return managedItems;
 		}
-		[[nodiscard]] auto GetItem(const std::size_t& index) const noexcept -> Result<std::reference_wrapper<const LayoutItem>>
+		[[nodiscard]] auto GetItem(const std::size_t index) const noexcept -> Result<std::reference_wrapper<const LayoutItem>>
 		{
 			if (index >= managedItems.size())
 			{
@@ -182,7 +182,7 @@ export namespace PGUI::UI::Layout
 
 			return managedItems.at(index);
 		}
-		[[nodiscard]] auto GetItem(const std::size_t& index) noexcept -> Result<std::reference_wrapper<LayoutItem>>
+		[[nodiscard]] auto GetItem(const std::size_t index) noexcept -> Result<std::reference_wrapper<LayoutItem>>
 		{
 			if (index >= managedItems.size())
 			{
@@ -212,7 +212,7 @@ export namespace PGUI::UI::Layout
 		}
 		auto GetItemSizeUpToIndex(const std::size_t index) const noexcept
 		{
-			if (index >= GetItems().size())
+			if (index >= GetItemCount())
 			{
 				return SizeF{ 0, 0 };
 			}
@@ -228,9 +228,13 @@ export namespace PGUI::UI::Layout
 		auto GetItemSizeBetweenIndices(
 			const std::size_t startIndex, const std::size_t endIndex) const noexcept
 		{
-			const auto end = std::clamp(endIndex, 0ULL, GetItems().size() - 1);
+			if (GetItemCount() == 0)
+			{
+				return SizeF{ 0, 0 };
+			}
+			const auto end = std::clamp(endIndex, 0ULL, GetItemCount() - 1);
 
-			if (startIndex >= GetItems().size() || startIndex > end)
+			if (startIndex >= GetItemCount() || startIndex > end)
 			{
 				return SizeF{ 0, 0 };
 			}

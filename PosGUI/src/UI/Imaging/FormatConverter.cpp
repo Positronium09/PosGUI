@@ -28,7 +28,7 @@ namespace PGUI::UI::Imaging
 		{
 			Logger::Error(
 				Error{ hr },
-				L"Cannot create format converted"
+				L"Cannot create format converter"
 			);
 			return;
 		}
@@ -51,7 +51,7 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Logger::Error(
-				Error{ ErrorCode::InvalidArgument },
+				Error{ hr },
 				L"Cannot initialize format converter"
 			);
 		}

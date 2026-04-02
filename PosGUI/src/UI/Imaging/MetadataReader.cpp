@@ -38,9 +38,8 @@ namespace PGUI::UI::Imaging
 			FAILED(hr))
 		{
 			Error error{ hr };
-			error
-				.AddDetail(L"Name", name);
-			Logger::Error(error, L"Failed to get metadata for name: {}");
+			error.AddDetail(L"Name", name);
+			Logger::Error(error, L"Failed to get metadata");
 			return Unexpected{ error };
 		}
 
@@ -58,11 +57,13 @@ namespace PGUI::UI::Imaging
 			return Unexpected{ error };
 		}
 
-		std::wstring location(length, L'\0');
+		std::wstring location(length - 1, L'\0');
 
 		if (const auto hr = Get()->GetLocation(length, location.data(), &length);
 			FAILED(hr))
-		{ }
+		{
+			return Unexpected{ Error{ hr }.AddDetail(L"Length", std::to_wstring(length)) };
+		}
 
 		return location;
 	}

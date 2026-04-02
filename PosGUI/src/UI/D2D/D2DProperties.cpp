@@ -16,7 +16,7 @@ namespace PGUI::UI::D2D
 
 	auto D2DProperties::GetPropertyName(const UINT32 index) const noexcept -> Result<std::wstring>
 	{
-		auto& ptr = Get();
+		const auto& ptr = Get();
 		const auto nameLength = ptr->GetPropertyNameLength(index);
 
 		std::wstring name(nameLength, L'\0');
@@ -36,7 +36,7 @@ namespace PGUI::UI::D2D
 	auto D2DProperties::GetSubProperty(const UINT32 index) const noexcept -> Result<D2DProperties>
 	{
 		ComPtr<ID2D1Properties> subProperty;
-		if (const auto hr = Get()->GetSubProperties(index, &subProperty);
+		if (const auto hr = Get()->GetSubProperties(index, subProperty.put());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -47,52 +47,5 @@ namespace PGUI::UI::D2D
 		}
 
 		return D2DProperties{ subProperty };
-	}
-
-	auto D2DProperties::GetProperty(const UINT32 index, std::span<BYTE> bytes) const noexcept -> bool
-	{
-		if constexpr (bytes.extent == std::dynamic_extent)
-		{
-			const auto size = GetValueSize(index);
-			if (size > bytes.size())
-			{
-				Logger::Error(
-					Error{ ErrorCode::InvalidArgument }
-					.AddDetail(L"Index", std::to_wstring(index))
-					.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
-					.AddDetail(L"Value Size", std::to_wstring(size)),
-					L"Value size is bigger than the given span");
-				return false;
-			}
-
-			const auto hr = Get()->GetValue(index, bytes.data(), size);
-
-			if (FAILED(hr))
-			{
-				Error error{ hr };
-				error
-					.AddDetail(L"Index", std::to_wstring(index))
-					.AddDetail(L"Span Size", std::to_wstring(bytes.size()));
-				Logger::Error(error, L"Failed to get property value");
-				return false;
-			}
-
-			return hr == S_OK;
-		}
-		else
-		{
-			auto hr = Get()->GetValue(index, bytes.data(), static_cast<UINT32>(bytes.size()));
-			if (FAILED(hr))
-			{
-				Error error{ hr };
-				error
-					.AddDetail(L"Index", std::to_wstring(index))
-					.AddDetail(L"Span Size", std::to_wstring(bytes.size()));
-				Logger::Error(error, L"Failed to get property value");
-				return false;
-			}
-
-			return hr == S_OK;
-		}
 	}
 }

@@ -110,7 +110,7 @@ export namespace PGUI
 		{
 			auto* stream = SHCreateMemStream(
 				reinterpret_cast<const BYTE*>(data.data()), 
-				std::clamp(GetSize(), 0UL, static_cast<size_t>(std::numeric_limits<UINT>::max())));
+				std::clamp(GetSize(), 0ULL, static_cast<size_t>(std::numeric_limits<UINT>::max())));
 
 			if (stream == nullptr)
 			{

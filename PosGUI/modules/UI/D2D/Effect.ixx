@@ -23,11 +23,11 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] auto GetOutput() const noexcept -> D2DImage<>;
 
-		auto SetInput(UINT32 index, D2DImage<> image, bool invalidate) noexcept -> void;
+		auto SetInput(UINT32 index, D2DImage<> image, bool invalidate) const noexcept -> void;
 
-		auto SetInputEffect(UINT32 index, Effect effect, bool invalidate) noexcept -> void;
+		auto SetInputEffect(UINT32 index, Effect effect, bool invalidate) const noexcept -> void;
 
-		auto SetInputCount(UINT32 count) noexcept -> Error;
+		auto SetInputCount(UINT32 count) const noexcept -> Error;
 
 		auto GetProperties() const noexcept { return D2DProperties{ Get() }; }
 	};

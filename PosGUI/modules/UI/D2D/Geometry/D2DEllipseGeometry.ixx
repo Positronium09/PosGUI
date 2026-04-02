@@ -23,7 +23,7 @@ export namespace PGUI::UI::D2D
 		{
 		}
 
-		explicit D2DEllipseGeometry(const Ellipse ellipse)
+		explicit D2DEllipseGeometry(const Ellipse ellipse) noexcept
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 

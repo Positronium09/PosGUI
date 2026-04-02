@@ -144,7 +144,7 @@ export namespace PGUI::UI
 
 		auto ReleaseBrush() noexcept -> void;
 
-		auto SetGradientBrushRect(RectF rect) -> void;
+		auto SetGradientBrushRect(RectF rect) noexcept -> void;
 
 		[[nodiscard]] const auto& GetParameters() const noexcept { return parameters; }
 

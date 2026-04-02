@@ -98,7 +98,7 @@ namespace PGUI::UI::Imaging
 		};
 	}
 
-	auto BitmapDecoder::CopyPalette() noexcept -> Result<Palette>
+	auto BitmapDecoder::CopyPalette() const noexcept -> Result<Palette>
 	{
 		Palette palette{ };
 
@@ -185,7 +185,9 @@ namespace PGUI::UI::Imaging
 
 		return contexts | std::views::transform([](auto context)
 		{
-			return ComPtr<IWICColorContext>{ context };
+			ComPtr<IWICColorContext> colorContext;
+			colorContext.attach(context);
+			return colorContext;
 		}) | std::ranges::to<std::vector<ComPtr<IWICColorContext>>>();
 	}
 
@@ -214,7 +216,7 @@ namespace PGUI::UI::Imaging
 				error
 					.AddDetail(L"Frame Index", std::to_wstring(index))
 					.AddDetail(L"Frame Count", std::to_wstring(frameCount))
-					.SuggestFix(L"Requested index is is bigger than or equal to frame count");
+					.SuggestFix(L"Requested index is bigger than or equal to frame count");
 				Logger::Error(error, L"Invalid frame index requested");
 				return Unexpected{ error };
 			}
@@ -231,10 +233,6 @@ namespace PGUI::UI::Imaging
 			}
 
 			return BitmapFrameDecode{ frameDecode };
-		}).or_else([](const Error& error) -> Result<BitmapFrameDecode>
-		{
-			Logger::Error(error, L"Failed to get frame from decoder");
-			return Unexpected{ error };
 		});
 	}
 

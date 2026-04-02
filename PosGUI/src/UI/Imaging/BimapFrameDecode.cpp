@@ -61,7 +61,9 @@ namespace PGUI::UI::Imaging
 
 		return contexts | std::ranges::views::transform([](auto context)
 		{
-			return ComPtr<IWICColorContext>{ context };
+			ComPtr<IWICColorContext> colorContext;
+			colorContext.attach(context);
+			return colorContext;
 		}) | std::ranges::to<std::vector<ComPtr<IWICColorContext>>>();
 	}
 }

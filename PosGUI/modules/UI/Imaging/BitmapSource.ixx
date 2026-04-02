@@ -92,9 +92,13 @@ export namespace PGUI::UI::Imaging
 
 		[[nodiscard]] auto CopyPixels(UINT stride) const noexcept -> Result<std::vector<BYTE>>
 		{
-			auto size = this->GetSize();
-			const RectI rect = { 0, 0, size.cx, size.cy };
-			std::vector<BYTE> buffer(rect.Area() * stride);
+			auto sizeResult = this->GetSize();
+			if (!sizeResult)
+			{
+				return Unexpected{ sizeResult.error() };
+			}
+			const auto size = sizeResult.value();
+			std::vector<BYTE> buffer(size.cy * stride);
 
 			if (const auto hr = this->Get()->CopyPixels(nullptr, stride,
 				static_cast<UINT>(buffer.size()), buffer.data());

@@ -34,21 +34,21 @@ export namespace PGUI::UI
 					const FontCollection& fontCollection = FontCollection{ nullptr },
 		           wzstring_view localeName = GetUserLocaleName()) noexcept;
 
-		auto SetFlowDirection(FlowDirection flowDirection) noexcept -> Error;
+		auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Error;
 
-		auto SetIncrementalTabStop(float incrementalTabStop) noexcept -> Error;
+		auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Error;
 
-		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) noexcept -> Error;
+		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Error;
 
-		auto SetReadingDirection(ReadingDirection readingDirection) noexcept -> Error;
+		auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Error;
 
-		auto SetTextAlignment(TextAlignment textAlignment) noexcept -> Error;
+		auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Error;
 
-		auto SetWordWrapping(WordWrapping wordWrapping) noexcept -> Error;
+		auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Error;
 
-		auto SetTrimming(const Trimming& trimming) noexcept -> Error;
+		auto SetTrimming(const Trimming& trimming) const noexcept -> Error;
 
-		auto SetLineSpacing(const LineSpacing& lineSpacing) noexcept -> Error;
+		auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Error;
 
 		[[nodiscard]] auto GetFlowDirection() const noexcept -> FlowDirection;
 

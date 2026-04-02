@@ -234,7 +234,7 @@ struct std::formatter<PGUI::UI::Font::TextRange, Char>
 			return iter;
 		}
 
-		throw std::format_error{ "No format specifiers is supported" };
+		throw std::format_error{ "Format specifiers are not supported" };
 	}
 
 	template <typename FormatContext>

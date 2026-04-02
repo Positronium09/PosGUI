@@ -49,14 +49,19 @@ export namespace PGUI
 		return (var & flag) == flag;
 	}
 
-	template <Enumeration T>
-	constexpr auto ToUnderlying(const T val) noexcept
+	template <typename UnderlyingT>
+	[[nodiscard]] constexpr auto ToUnderlying(const Enumeration auto val) noexcept
+	{
+		return static_cast<UnderlyingT>(val);
+	}
+
+	[[nodiscard]] constexpr auto ToUnderlying(const Enumeration auto val) noexcept
 	{
 		return std::to_underlying(val);
 	}
 
 	template <Enumeration T>
-	constexpr auto FromUnderlying(const UnderlyingType<T> val) noexcept
+	[[nodiscard]] constexpr auto FromUnderlying(const UnderlyingType<T> val) noexcept
 	{
 		return static_cast<T>(val);
 	}

@@ -222,7 +222,7 @@
     <ClCompile Include="src\UI\Imaging\BitmapDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\Imaging\BimapFrameDecode.ixx">
+    <ClCompile Include="modules\UI\Imaging\BitmapFrameDecode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\UI\Imaging\BimapFrameDecode.cpp">
@@ -300,7 +300,7 @@
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\D2D\Geometry\D2DLayer.ixx">
+    <ClCompile Include="modules\UI\D2D\D2DLayer.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Theming\Theme.ixx">
@@ -519,9 +519,6 @@
     <ClCompile Include="src\UI\Animation\AnimationTimerEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\DragDrop\DropTarget.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\UI\Input.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -531,16 +528,7 @@
     <ClCompile Include="modules\UI\DragDrop\DragDrop.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\DragDrop\DragDropTypes.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\UI\DragDrop\DropSource.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\UI\DragDrop\DropSource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\UI\DragDrop\DataObject.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\VisualState\VisualStateGroup.ixx">

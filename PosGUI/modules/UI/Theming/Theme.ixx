@@ -1,6 +1,3 @@
-module;
-#include <ranges>
-
 export module PGUI.UI.Theming.Theme;
 
 import std;
@@ -27,10 +24,6 @@ export namespace PGUI::UI::Theming
 			try
 			{
 				customStyles.insert_or_assign(typeid(T), style);
-			}
-			catch (const std::bad_any_cast&)
-			{
-				return Error{ ErrorCode::InvalidCast }.SetCustomMessage(L"Failed to add custom style due to bad any cast");
 			}
 			catch (const std::exception& e)
 			{
@@ -187,7 +180,7 @@ export namespace PGUI::UI::Theming
 
 		static auto InitializeThemes() noexcept -> void;
 
-		static auto OnSystemThemeChanged() -> void;
+		static auto OnSystemThemeChanged() noexcept -> void;
 
 		private:
 		inline static Theme DarkTheme;

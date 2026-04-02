@@ -13,18 +13,16 @@ export namespace PGUI::UI
 {
 	struct GradientStop : D2D1_GRADIENT_STOP
 	{
-		GradientStop() noexcept = default;
+		constexpr GradientStop() noexcept = default;
 
-		GradientStop(const float _position, const RGBA _color) noexcept :
-			D2D1_GRADIENT_STOP{ .position = _position, .color = _color }
+		constexpr GradientStop(const float gradientPosition, const RGBA gradientColor) noexcept :
+			D2D1_GRADIENT_STOP{ .position = gradientPosition, .color = gradientColor }
 		{
 		}
 
-		explicit(false) GradientStop(const D2D1_GRADIENT_STOP& gradientStop) noexcept :
-			D2D1_GRADIENT_STOP{ }
+		explicit(false) constexpr GradientStop(const D2D1_GRADIENT_STOP& gradientStop) noexcept :
+			D2D1_GRADIENT_STOP{ .position = gradientStop.position, .color = gradientStop.color }
 		{
-			position = gradientStop.position;
-			color = gradientStop.color;
 		}
 	};
 
@@ -42,7 +40,7 @@ export namespace PGUI::UI
 		}
 
 		[[nodiscard]] auto GetPositioningMode() const noexcept { return mode; }
-		auto SetPositioningMode(const PositioningMode _mode) noexcept -> void { mode = _mode; }
+		auto SetPositioningMode(const PositioningMode newMode) noexcept -> void { mode = newMode; }
 
 		virtual auto ApplyReferenceRect(RectF rect) noexcept -> void = 0;
 
@@ -60,9 +58,9 @@ export namespace PGUI::UI
 		LinearGradient(PointF start, PointF end, const GradientStops& stops) noexcept;
 
 		[[nodiscard]] auto Start() const noexcept { return start; }
-		auto Start(const PointF _start) noexcept -> void { start = _start; }
+		auto Start(const PointF newStart) noexcept -> void { start = newStart; }
 		[[nodiscard]] auto End() const noexcept { return end; }
-		auto End(const PointF _end) noexcept -> void { end = _end; }
+		auto End(const PointF newEnd) noexcept -> void { end = newEnd; }
 
 		auto ApplyReferenceRect(RectF rect) noexcept -> void override;
 
@@ -79,9 +77,9 @@ export namespace PGUI::UI
 		RadialGradient(Ellipse ellipse, PointF offset, const GradientStops& stops) noexcept;
 
 		[[nodiscard]] auto GetEllipse() const noexcept { return ellipse; }
-		auto SetEllipse(const Ellipse _ellipse) noexcept -> void { ellipse = _ellipse; }
+		auto SetEllipse(const Ellipse newEllipse) noexcept -> void { ellipse = newEllipse; }
 		[[nodiscard]] auto Offset() const noexcept { return offset; }
-		auto Offset(const PointF _offset) noexcept -> void { offset = _offset; }
+		auto Offset(const PointF newOffset) noexcept -> void { offset = newOffset; }
 
 		auto ApplyReferenceRect(RectF rect) noexcept -> void override;
 

@@ -7,6 +7,7 @@ module PGUI.UI.Imaging.Palette;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.Factories;
 import PGUI.UI.Color;
 
@@ -57,8 +58,8 @@ namespace PGUI::UI::Imaging
 		if (const auto hr = factory->CreatePalette(Put());
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create palette");
+			Logger::Error(Error{ hr }, L"Failed to create palette");
+			return;
 		}
 
 		auto wicColors = colors | std::ranges::to<std::vector<WICColor>>();
@@ -68,8 +69,7 @@ namespace PGUI::UI::Imaging
 				static_cast<UINT>(wicColors.size()));
 			FAILED(hr))
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to initialize palette from colors");
+			Logger::Error(Error{ hr }, L"Failed to initialize palette from colors");
 		}
 	}
 
@@ -84,7 +84,7 @@ namespace PGUI::UI::Imaging
 			return Unexpected{ error };
 		}
 
-		return static_cast<PaletteType>(type);
+		return FromUnderlying<PaletteType>(type);
 	}
 
 	auto Palette::GetColorCount() const noexcept -> Result<UINT>

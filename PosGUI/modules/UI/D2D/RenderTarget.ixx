@@ -75,8 +75,7 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Size", std::format(L"{}", size));
+				error.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot create bitmap");
 				return Unexpected{ error };
 			}
@@ -85,8 +84,7 @@ export namespace PGUI::UI::D2D
 			if (bitmap1.get() == nullptr)
 			{
 				Error error{ E_NOINTERFACE };
-				error
-					.AddDetail(L"Size", std::format(L"{}", size));
+				error.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}
@@ -104,9 +102,7 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Size", std::format(L"{}", size))
-;
+				error.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot create bitmap");
 				return Unexpected{ error };
 			}
@@ -115,9 +111,7 @@ export namespace PGUI::UI::D2D
 			if (bitmap1.get() == nullptr)
 			{
 				Error error{ E_NOINTERFACE };
-				error
-					.AddDetail(L"Size", std::format(L"{}", size))
-;
+				error.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}
@@ -133,19 +127,19 @@ export namespace PGUI::UI::D2D
 
 			if (auto hr = this->Get()->CreateBitmapFromWicBitmap(
 				bitmapSourcePtr.get(),
-				properties.has_value() ? &properties : nullptr, &bitmap); 
+				properties.has_value() ? &properties.value() : nullptr, &bitmap); 
 				FAILED(hr))
 			{
 				Error error{ hr };
-				Logger::Error(error, L"Cannot create bitmap from source {}");
+				Logger::Error(error, L"Cannot create bitmap from source");
 				return Unexpected{ error };
 			}
 
 			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
 			if (bitmap1.get() == nullptr)
 			{
-				Error error{ E_NOINTERFACE };
-				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface {}");
+				Error error{ SystemErrorCode::InterfaceNotSupported };
+				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}
 
@@ -161,15 +155,15 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				Logger::Error(error, L"Cannot create bitmap from source {}");
+				Logger::Error(error, L"Cannot create bitmap from source");
 				return Unexpected{ error };
 			}
 
 			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
 			if (bitmap1.get() == nullptr)
 			{
-				Error error{ E_NOINTERFACE };
-				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface {}");
+				Error error{ SystemErrorCode::InterfaceNotSupported };
+				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
 			}
 			return D2DBitmap{ bitmap1 };
@@ -183,9 +177,8 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				error
-					.AddDetail(L"Size", std::format(L"{}", size));
-				Logger::Error(error, L"Cannot create layer {}");
+				error.AddDetail(L"Size", std::format(L"{}", size));
+				Logger::Error(error, L"Cannot create layer");
 				return Unexpected{ error };
 			}
 			return D2DLayer{ layer };
@@ -198,7 +191,7 @@ export namespace PGUI::UI::D2D
 				FAILED(hr))
 			{
 				Error error{ hr };
-				Logger::Error(error, L"Cannot create layer {}");
+				Logger::Error(error, L"Cannot create layer");
 				return Unexpected{ error };
 			}
 			return D2DLayer{ layer };
@@ -254,7 +247,7 @@ export namespace PGUI::UI::D2D
 			this->Get()->FillGeometry(geometry.GetRaw(), brush, nullptr);
 		}
 
-		auto DrawText(wzstring_view text, const TextFormat& format, RectF textRect, Brush brush) const noexcept -> void
+		auto DrawText(const wzstring_view text, const TextFormat& format, RectF textRect, Brush brush) const noexcept -> void
 		{
 			const auto textFormatPtr = format.GetAs<IDWriteTextFormat>();
 			this->Get()->DrawText(text.data(), static_cast<UINT32>(text.size()),
@@ -262,42 +255,40 @@ export namespace PGUI::UI::D2D
 		}
 
 		auto DrawText(const TextLayout& layout, PointF origin, Brush brush,
-		              DrawTextOptions drawTextOptions = DrawTextOptions::EnableColorFont) const noexcept -> void
+		              const DrawTextOptions drawTextOptions = DrawTextOptions::EnableColorFont) const noexcept -> void
 		{
-			const auto textLayoutPtr = layout.GetAs<IDWriteTextFormat>();
+			const auto textLayoutPtr = layout.GetAs<IDWriteTextLayout>();
 			this->Get()->DrawTextLayout(origin, textLayoutPtr.get(), brush,
-			                            static_cast<D2D1_DRAW_TEXT_OPTIONS>(drawTextOptions));
+			                            ToUnderlying<D2D1_DRAW_TEXT_OPTIONS>(drawTextOptions));
 		}
 
 		auto DrawBitmap(D2DBitmap bitmap,
 		                std::optional<RectF> destinationRect = std::nullopt,
 		                std::optional<RectF> sourceRect = std::nullopt,
-		                BitmapInterpolationMode interpolationMode = BitmapInterpolationMode::Linear,
+		                const BitmapInterpolationMode interpolationMode = BitmapInterpolationMode::Linear,
 		                float opacity = 1.0F) const noexcept -> void
 		{
 			D2D1_RECT_F* destRect = nullptr;
 			if (destinationRect.has_value())
 			{
-				destRect = std::bit_cast<D2D1_RECT_F*>(&destinationRect.value());
+				destRect = reinterpret_cast<D2D1_RECT_F*>(&destinationRect.value());
 			}
 
 			D2D1_RECT_F* srcRect = nullptr;
 			if (sourceRect.has_value())
 			{
-				srcRect = std::bit_cast<D2D1_RECT_F*>(&sourceRect.value());
+				srcRect = reinterpret_cast<D2D1_RECT_F*>(&sourceRect.value());
 			}
 
 			this->Get()->DrawBitmap(bitmap.GetRaw(), destRect, opacity,
-			                        static_cast<D2D1_BITMAP_INTERPOLATION_MODE>(interpolationMode), srcRect);
+			                        ToUnderlying<D2D1_BITMAP_INTERPOLATION_MODE>(interpolationMode), srcRect);
 		}
 
 		auto FillOpacityMask(D2DBitmap bitmap, Brush brush,
 		                     RectF destinationRect, RectF sourceRect) const noexcept -> void
 		{
 			this->Get()->FillOpacityMask(bitmap.GetRaw(), brush,
-			                             D2D1_OPACITY_MASK_CONTENT_GRAPHICS |
-			                             D2D1_OPACITY_MASK_CONTENT_TEXT_NATURAL |
-			                             D2D1_OPACITY_MASK_CONTENT_TEXT_GDI_COMPATIBLE,
+			                             D2D1_OPACITY_MASK_CONTENT_TEXT_NATURAL,
 			                             destinationRect, sourceRect);
 		}
 
@@ -322,24 +313,24 @@ export namespace PGUI::UI::D2D
 			return transform;
 		}
 
-		auto SetAntialiasingMode(AntiAliasingMode mode) const noexcept -> void
+		auto SetAntialiasingMode(const AntiAliasingMode mode) const noexcept -> void
 		{
-			this->Get()->SetAntialiasMode(static_cast<D2D1_ANTIALIAS_MODE>(mode));
+			this->Get()->SetAntialiasMode(ToUnderlying<D2D1_ANTIALIAS_MODE>(mode));
 		}
 
 		[[nodiscard]] auto GetAntialiasingMode() const noexcept
 		{
-			return static_cast<AntiAliasingMode>(this->Get()->GetAntialiasMode());
+			return FromUnderlying<AntiAliasingMode>(this->Get()->GetAntialiasMode());
 		}
 
-		auto SetTextAntialiasingMode(TextAntialiasingMode mode) const noexcept -> void
+		auto SetTextAntialiasingMode(const TextAntialiasingMode mode) const noexcept -> void
 		{
-			this->Get()->SetTextAntialiasMode(static_cast<D2D1_TEXT_ANTIALIAS_MODE>(mode));
+			this->Get()->SetTextAntialiasMode(ToUnderlying<D2D1_TEXT_ANTIALIAS_MODE>(mode));
 		}
 
-		auto GetTextAntialiasingMode() const noexcept
+		[[nodiscard]] auto GetTextAntialiasingMode() const noexcept
 		{
-			return static_cast<TextAntialiasingMode>(this->Get()->GetTextAntialiasMode());
+			return FromUnderlying<TextAntialiasingMode>(this->Get()->GetTextAntialiasMode());
 		}
 
 		auto SetTextRenderingParams(const ComPtr<IDWriteRenderingParams>& params) const noexcept -> void
@@ -350,7 +341,7 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto GetTextRenderingParams() const noexcept
 		{
 			ComPtr<IDWriteRenderingParams> params;
-			this->Get()->GetTextRenderingParams(&params);
+			this->Get()->GetTextRenderingParams(params.put());
 
 			return params;
 		}
@@ -398,7 +389,7 @@ export namespace PGUI::UI::D2D
 
 		auto PushAxisAlignedClip(const RectF clipRect, const AntiAliasingMode antialiasMode) const noexcept -> void
 		{
-			this->Get()->PushAxisAlignedClip(clipRect, static_cast<D2D1_ANTIALIAS_MODE>(antialiasMode));
+			this->Get()->PushAxisAlignedClip(clipRect, ToUnderlying<D2D1_ANTIALIAS_MODE>(antialiasMode));
 		}
 
 		auto PopAxisAlignedClip() const noexcept -> void

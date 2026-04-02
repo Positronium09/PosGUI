@@ -105,7 +105,7 @@ export namespace PGUI::UI
 		float bottomLeftRadius;
 		float bottomRightRadius;
 
-		RoundCornerClipParameters(
+		constexpr RoundCornerClipParameters(
 			const RectF rect, const float topLeftRadius,
 			const float topRightRadius, const float bottomLeftRadius,
 			const float bottomRightRadius) noexcept :
@@ -136,7 +136,7 @@ export namespace PGUI::UI
 
 		explicit Clip(ClipParameters parameters) noexcept;
 
-		auto CreateClip() -> void;
+		auto CreateClip() noexcept -> void;
 
 		auto ReleaseClip() noexcept -> void;
 

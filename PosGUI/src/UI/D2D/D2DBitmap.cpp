@@ -17,16 +17,6 @@ namespace PGUI::UI::D2D
 		D2DImage{ bitmap }
 	{ }
 
-	auto D2DBitmap::GetSize() const noexcept -> SizeF
-	{
-		return Get()->GetSize();
-	}
-
-	auto D2DBitmap::GetPixelSize() const noexcept -> SizeU
-	{
-		return Get()->GetPixelSize();
-	}
-
 	auto D2DBitmap::GetDpi() const noexcept -> std::pair<float, float>
 	{
 		auto dpiX = 0.0F;
@@ -34,16 +24,6 @@ namespace PGUI::UI::D2D
 		Get()->GetDpi(&dpiX, &dpiY);
 
 		return std::make_pair(dpiX, dpiY);
-	}
-
-	auto D2DBitmap::GetPixelFormat() const noexcept -> D2D1_PIXEL_FORMAT
-	{
-		return Get()->GetPixelFormat();
-	}
-
-	auto D2DBitmap::GetBitmapOptions() const noexcept -> D2D1_BITMAP_OPTIONS
-	{
-		return Get()->GetOptions();
 	}
 
 	auto D2DBitmap::GetSurface() const noexcept -> Result<ComPtr<IDXGISurface>>
@@ -87,66 +67,75 @@ namespace PGUI::UI::D2D
 	auto D2DBitmap::CopyFromBitmap(
 		D2DBitmap bitmap,
 		std::optional<PointU> destPoint,
-		std::optional<RectU> srcRect) noexcept -> Error
+		std::optional<RectU> srcRect) const noexcept -> Error
 	{
 		const D2D1_RECT_U* srcRectPtr = nullptr;
 		if (srcRect.has_value())
 		{
-			srcRectPtr = std::bit_cast<D2D1_RECT_U*>(&srcRect.value());
+			srcRectPtr = reinterpret_cast<D2D1_RECT_U*>(&srcRect.value());
 		}
 		const D2D1_POINT_2U* destPointPtr = nullptr;
 		if (destPoint.has_value())
 		{
-			destPointPtr = std::bit_cast<D2D1_POINT_2U*>(&destPoint.value());
+			destPointPtr = reinterpret_cast<D2D1_POINT_2U*>(&destPoint.value());
 		}
 
 		Error error{
 			Get()->CopyFromBitmap(
 				destPointPtr, bitmap.GetRaw(), srcRectPtr)
 		};
-		error
-			.AddDetail(L"Destination Point",
-			           std::format(L"{}",
-			                       destPoint.value_or(PointU{
-				                       static_cast<std::uint32_t>(-1),
-				                       static_cast<std::uint32_t>(-1)
-			                       })))
-			.AddDetail(L"Source Rect",
-			           std::format(L"{}",
-			                       srcRect.value_or(RectU{
-				                       static_cast<std::uint32_t>(-1),
-				                       static_cast<std::uint32_t>(-1),
-				                       static_cast<std::uint32_t>(-1),
-				                       static_cast<std::uint32_t>(-1)
-			                       })));
-		LogIfFailed(error, L"Cannot copy from bitmap");
+		if (error.IsFailure())
+		{
+			if (destPoint.has_value())
+			{
+				error.AddDetail(L"Destination Point", std::format(L"{}", destPoint.value()));
+			}
+			else
+			{
+				error.AddDetail(L"Destination Point", L"None");
+			}
+			if (srcRect.has_value())
+			{
+				error.AddDetail(L"Source Rect", std::format(L"{}", srcRect.value()));
+			}
+			else
+			{
+				error.AddDetail(L"Source Rect", L"None");
+			}
+
+			Logger::Error(error, L"Cannot copy from bitmap");
+		}
 		return error;
 	}
 
 	auto D2DBitmap::CopyFromMemory(
 		const void* source, const UINT32 pitch,
-		std::optional<RectU> destRect) noexcept -> Error
+		std::optional<RectU> destRect) const noexcept -> Error
 	{
 		const D2D1_RECT_U* destRectPtr = nullptr;
 		if (destRect.has_value())
 		{
-			destRectPtr = std::bit_cast<D2D1_RECT_U*>(&destRect.value());
+			destRectPtr = reinterpret_cast<D2D1_RECT_U*>(&destRect.value());
 		}
 
 		Error error{
 			Get()->CopyFromMemory(destRectPtr, source, pitch)
 		};
-		error
-			.AddDetail(L"Source pointer", std::format(L"{:p}", source))
-			.AddDetail(L"Pitch", std::to_wstring(pitch))
-			.AddDetail(L"Destination Rect",
-			           std::format(L"{}", destRect.value_or(RectU{
-				                       static_cast<std::uint32_t>(-1),
-				                       static_cast<std::uint32_t>(-1),
-				                       static_cast<std::uint32_t>(-1),
-				                       static_cast<std::uint32_t>(-1)
-			                       })));
-		LogIfFailed(error, L"Cannot copy from memory");
+		if (error.IsFailure())
+		{
+			error
+				.AddDetail(L"Source pointer", std::format(L"{:p}", source))
+				.AddDetail(L"Pitch", std::to_wstring(pitch));
+			if (destRect.has_value())
+			{
+				error.AddDetail(L"Destination Rect", std::format(L"{}", destRect.value()));
+			}
+			else
+			{
+				error.AddDetail(L"Destination Rect", L"None");
+			}
+			Logger::Error(error, L"Cannot copy from memory");
+		}
 		return error;
 	}
 }

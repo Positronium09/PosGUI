@@ -4,11 +4,12 @@ module;
 
 export module PGUI.UI.Font.FontEnums;
 
+import std;
+
 export namespace PGUI::UI::Font
 {
-	class FontWeight
+	struct FontWeight
 	{
-		public:
 		constexpr FontWeight() noexcept :
 			fontWeight{ DWRITE_FONT_WEIGHT_NORMAL }
 		{ }
@@ -18,6 +19,12 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_FONT_WEIGHT() const noexcept { return fontWeight; }
+
+		constexpr auto operator==(const FontWeight&) const noexcept -> bool = default;
+		constexpr auto operator<=>(const FontWeight& other) const noexcept
+		{
+			return std::to_underlying(fontWeight) <=> std::to_underlying(other.fontWeight);
+		}
 
 		private:
 		DWRITE_FONT_WEIGHT fontWeight;
@@ -44,9 +51,8 @@ export namespace PGUI::UI::Font
 		constexpr FontWeight UltraBlack = DWRITE_FONT_WEIGHT_ULTRA_BLACK;
 	}
 
-	class FontStyle
+	struct FontStyle
 	{
-		public:
 		constexpr FontStyle() noexcept :
 			fontStyle{ DWRITE_FONT_STYLE_NORMAL }
 		{ }
@@ -56,6 +62,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_FONT_STYLE() const noexcept { return fontStyle; }
+
+		constexpr auto operator==(const FontStyle&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_FONT_STYLE fontStyle;
@@ -68,9 +76,8 @@ export namespace PGUI::UI::Font
 		constexpr FontStyle Italic = DWRITE_FONT_STYLE_ITALIC;
 	}
 
-	class FontStretch
+	struct FontStretch
 	{
-		public:
 		constexpr FontStretch() noexcept :
 			fontStretch{ DWRITE_FONT_STRETCH_NORMAL }
 		{ }
@@ -80,6 +87,12 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_FONT_STRETCH() const noexcept { return fontStretch; }
+
+		constexpr auto operator==(const FontStretch&) const noexcept -> bool = default;
+		constexpr auto operator<=>(const FontStretch& other) const noexcept
+		{
+			return std::to_underlying(fontStretch) <=> std::to_underlying(other.fontStretch);
+		}
 
 		private:
 		DWRITE_FONT_STRETCH fontStretch;
@@ -100,9 +113,8 @@ export namespace PGUI::UI::Font
 		constexpr FontStretch UltraExpanded = DWRITE_FONT_STRETCH_ULTRA_EXPANDED;
 	}
 
-	class FlowDirection
+	struct FlowDirection
 	{
-		public:
 		constexpr FlowDirection() noexcept :
 			flowDirection{ DWRITE_FLOW_DIRECTION_LEFT_TO_RIGHT }
 		{ }
@@ -112,6 +124,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_FLOW_DIRECTION() const noexcept { return flowDirection; }
+
+		constexpr auto operator==(const FlowDirection&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_FLOW_DIRECTION flowDirection;
@@ -125,11 +139,10 @@ export namespace PGUI::UI::Font
 		constexpr FlowDirection BottomToTop = DWRITE_FLOW_DIRECTION_BOTTOM_TO_TOP;
 	}
 
-	class ParagraphAlignment
+	struct ParagraphAlignment
 	{
-		public:
 		constexpr ParagraphAlignment() noexcept :
-			paragraphAlignment{ DWRITE_PARAGRAPH_ALIGNMENT_CENTER }
+			paragraphAlignment{ DWRITE_PARAGRAPH_ALIGNMENT_NEAR }
 		{ }
 
 		explicit(false) constexpr ParagraphAlignment(const DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment) noexcept :
@@ -137,6 +150,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_PARAGRAPH_ALIGNMENT() const noexcept { return paragraphAlignment; }
+
+		constexpr auto operator==(const ParagraphAlignment&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment;
@@ -149,9 +164,8 @@ export namespace PGUI::UI::Font
 		constexpr ParagraphAlignment Far = DWRITE_PARAGRAPH_ALIGNMENT_FAR;
 	}
 
-	class ReadingDirection
+	struct ReadingDirection
 	{
-		public:
 		constexpr ReadingDirection() noexcept :
 			readingDirection{ DWRITE_READING_DIRECTION_LEFT_TO_RIGHT }
 		{ }
@@ -161,6 +175,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_READING_DIRECTION() const noexcept { return readingDirection; }
+
+		constexpr auto operator==(const ReadingDirection&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_READING_DIRECTION readingDirection;
@@ -174,11 +190,10 @@ export namespace PGUI::UI::Font
 		constexpr ReadingDirection BottomToTop = DWRITE_READING_DIRECTION_BOTTOM_TO_TOP;
 	}
 
-	class TextAlignment
+	struct TextAlignment
 	{
-		public:
 		constexpr TextAlignment() noexcept :
-			textAlignment{ DWRITE_TEXT_ALIGNMENT_CENTER }
+			textAlignment{ DWRITE_TEXT_ALIGNMENT_LEADING }
 		{ }
 
 		explicit(false) constexpr TextAlignment(const DWRITE_TEXT_ALIGNMENT textAlignment) noexcept :
@@ -186,6 +201,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_TEXT_ALIGNMENT() const noexcept { return textAlignment; }
+
+		constexpr auto operator==(const TextAlignment&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_TEXT_ALIGNMENT textAlignment;
@@ -199,11 +216,10 @@ export namespace PGUI::UI::Font
 		constexpr TextAlignment Trailing = DWRITE_TEXT_ALIGNMENT_TRAILING;
 	}
 
-	class WordWrapping
+	struct WordWrapping
 	{
-		public:
 		constexpr WordWrapping() noexcept :
-			wordWrapping{ DWRITE_WORD_WRAPPING_EMERGENCY_BREAK }
+			wordWrapping{ DWRITE_WORD_WRAPPING_WHOLE_WORD }
 		{ }
 
 		explicit(false) constexpr WordWrapping(const DWRITE_WORD_WRAPPING wordWrapping) noexcept :
@@ -211,6 +227,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_WORD_WRAPPING() const noexcept { return wordWrapping; }
+
+		constexpr auto operator==(const WordWrapping&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_WORD_WRAPPING wordWrapping;
@@ -225,9 +243,8 @@ export namespace PGUI::UI::Font
 		constexpr WordWrapping Wrap = DWRITE_WORD_WRAPPING_WRAP;
 	}
 
-	class FontAxisTag
+	struct FontAxisTag
 	{
-		public:
 		constexpr FontAxisTag() noexcept :
 			fontAxisTag{ DWRITE_FONT_AXIS_TAG_WEIGHT }
 		{ }
@@ -237,6 +254,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_FONT_AXIS_TAG() const noexcept { return fontAxisTag; }
+
+		constexpr auto operator==(const FontAxisTag&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_FONT_AXIS_TAG fontAxisTag;
@@ -249,9 +268,8 @@ export namespace PGUI::UI::Font
 		constexpr FontAxisTag Slant = DWRITE_FONT_AXIS_TAG_SLANT;
 	}
 
-	class LineSpacingMethod
+	struct LineSpacingMethod
 	{
-		public:
 		constexpr LineSpacingMethod() noexcept :
 			lineSpacingMethod{ DWRITE_LINE_SPACING_METHOD_DEFAULT }
 		{ }
@@ -261,6 +279,8 @@ export namespace PGUI::UI::Font
 		{ }
 
 		explicit(false) constexpr operator DWRITE_LINE_SPACING_METHOD() const noexcept { return lineSpacingMethod; }
+
+		constexpr auto operator==(const LineSpacingMethod&) const noexcept -> bool = default;
 
 		private:
 		DWRITE_LINE_SPACING_METHOD lineSpacingMethod;
@@ -273,9 +293,8 @@ export namespace PGUI::UI::Font
 		constexpr LineSpacingMethod Proportional = DWRITE_LINE_SPACING_METHOD_PROPORTIONAL;
 	}
 
-	class MeasuringMode
+	struct MeasuringMode
 	{
-		public:
 		constexpr MeasuringMode() noexcept :
 			measuringMode{ DWRITE_MEASURING_MODE_NATURAL }
 		{ }
@@ -286,7 +305,16 @@ export namespace PGUI::UI::Font
 
 		explicit(false) constexpr operator DWRITE_MEASURING_MODE() const noexcept { return measuringMode; }
 
+		constexpr auto operator==(const MeasuringMode&) const noexcept -> bool = default;
+
 		private:
 		DWRITE_MEASURING_MODE measuringMode;
 	};
+
+	namespace MeasuringModes
+	{
+		constexpr MeasuringMode GDIClassic = DWRITE_MEASURING_MODE_GDI_CLASSIC;
+		constexpr MeasuringMode GDINatural = DWRITE_MEASURING_MODE_GDI_NATURAL;
+		constexpr MeasuringMode Natural = DWRITE_MEASURING_MODE_NATURAL;
+	}
 }

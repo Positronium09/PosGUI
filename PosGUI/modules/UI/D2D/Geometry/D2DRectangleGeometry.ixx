@@ -23,7 +23,7 @@ export namespace PGUI::UI::D2D
 		{
 		}
 
-		explicit D2DRectangleGeometry(const RectF rect)
+		explicit D2DRectangleGeometry(const RectF rect) noexcept
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
@@ -32,7 +32,7 @@ export namespace PGUI::UI::D2D
 			{
 				Logger::Error(Error{ hr }
 					.AddDetail(L"Rect", std::format(L"{}", rect)),
-					L"Failed to create rounded rectangle geometry");
+					L"Failed to create rectangle geometry");
 			}
 
 		}

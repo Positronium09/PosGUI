@@ -46,7 +46,7 @@ namespace PGUI::UI::Font
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 		ComPtr<IDWriteFontSetBuilder2> fontSetBuilder;
 
-		auto hr = factory->CreateFontSetBuilder(&fontSetBuilder);
+		auto hr = factory->CreateFontSetBuilder(fontSetBuilder.put());
 		if (FAILED(hr))
 		{
 			Error error{ hr };
@@ -57,7 +57,7 @@ namespace PGUI::UI::Font
 		}
 
 		ComPtr<IDWriteFontFile> fontFile;
-		hr = factory->CreateFontFileReference(filePath.c_str(), nullptr, &fontFile);
+		hr = factory->CreateFontFileReference(filePath.c_str(), nullptr, fontFile.put());
 		if (FAILED(hr))
 		{
 			Error error{ hr };
@@ -78,7 +78,7 @@ namespace PGUI::UI::Font
 		}
 
 		ComPtr<IDWriteFontSet> fontSet;
-		hr = fontSetBuilder->CreateFontSet(&fontSet);
+		hr = fontSetBuilder->CreateFontSet(fontSet.put());
 		if (FAILED(hr))
 		{
 			Error error{ hr };
@@ -89,7 +89,7 @@ namespace PGUI::UI::Font
 		}
 
 		ComPtr<IDWriteFontCollection1> fontCollection;
-		hr = factory->CreateFontCollectionFromFontSet(fontSet.get(), &fontCollection);
+		hr = factory->CreateFontCollectionFromFontSet(fontSet.get(), fontCollection.put());
 		if (FAILED(hr))
 		{
 			Error error{ hr };
@@ -123,17 +123,20 @@ namespace PGUI::UI::Font
 
 		UINT32 result;
 		auto exists = static_cast<BOOL>(0);
-		const auto hr = ptr->FindFamilyName(fontFamilyName.data(), &result, &exists);
-		LogIfFailed(
-			Error{ hr }
-			.AddDetail(L"fontFamilyName", fontFamilyName),
-			L"An error occurred while trying to find a font family by name."
-		);
+		if (const auto hr = ptr->FindFamilyName(fontFamilyName.data(), &result, &exists);
+			FAILED(hr))
+		{
+			Logger::Error(
+				Error{ hr }
+				.AddDetail(L"fontFamilyName", fontFamilyName),
+				L"An error occurred while trying to find a font family by name."
+			);
+		}
 
-		if (!exists || FAILED(hr))
+		if (!exists)
 		{
 			return Unexpected{
-				Error{ FAILED(hr) ? hr : E_FAIL }
+				Error{ ErrorCode::NotFound }
 				.AddDetail(L"fontFamilyName", fontFamilyName)
 				.SuggestFix(L"Ensure the font family name is correct and try again")
 			};
@@ -170,7 +173,7 @@ namespace PGUI::UI::Font
 		return family;
 	}
 
-	auto FontCollection::GetFontSet() const -> Result<FontSet>
+	auto FontCollection::GetFontSet() const noexcept -> Result<FontSet>
 	{
 		auto& ptr = Get();
 
@@ -190,7 +193,6 @@ namespace PGUI::UI::Font
 			Logger::Error(error, L"Failed to cast font set to IDWriteFontSet4.");
 			return Unexpected{ error };
 		}
-
 
 		return fontSet;
 	}

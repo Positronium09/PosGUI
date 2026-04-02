@@ -35,7 +35,7 @@ namespace PGUI::UI
 			auto fontCollectionResult = FontCollection::GetSystemFontCollection();
 			if (!fontCollectionResult.has_value())
 			{
-				LogIfFailed(Error{ fontCollectionResult.error() });
+				Logger::Error(Error{ fontCollectionResult.error() });
 				return;
 			}
 			collection = fontCollectionResult.value();
@@ -44,7 +44,7 @@ namespace PGUI::UI
 		const auto fontSetResult = collection.GetFontSet();
 		if (!fontSetResult.has_value())
 		{
-			LogIfFailed(Error{ fontSetResult.error() });
+			Logger::Error(Error{ fontSetResult.error() });
 			return;
 		}
 		const auto& fontSet = fontSetResult.value();
@@ -57,16 +57,19 @@ namespace PGUI::UI
 			collectionPtr.get(),
 			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
 			fontSize, localeName.data(), Put());
-		LogIfFailed(
-			Error{ hr }
-			.AddDetail(L"FontFamilyName", fontFamilyName)
-			.AddDetail(L"FontSize", std::to_wstring(fontSize))
-			.AddDetail(L"FontWeight", std::to_wstring(fontWeight))
-			.AddDetail(L"FontStyle", std::to_wstring(fontStyle))
-			.AddDetail(L"FontStretch", std::to_wstring(fontStretch))
-			.AddDetail(L"FontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
-			.AddDetail(L"LocaleName", localeName)
-		);
+
+		if (Error error{ hr };
+			error.IsFailure())
+		{
+			error.AddDetail(L"FontFamilyName", fontFamilyName)
+			     .AddDetail(L"FontSize", std::to_wstring(fontSize))
+			     .AddDetail(L"FontWeight", std::to_wstring(fontWeight))
+			     .AddDetail(L"FontStyle", std::to_wstring(fontStyle))
+			     .AddDetail(L"FontStretch", std::to_wstring(fontStretch))
+			     .AddDetail(L"FontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
+			     .AddDetail(L"LocaleName", localeName);
+			Logger::Error(error, L"Failed to create text format");
+		}
 	}
 
 	TextFormat::TextFormat(
@@ -84,7 +87,7 @@ namespace PGUI::UI
 			auto fontCollectionResult = FontCollection::GetSystemFontCollection();
 			if (!fontCollectionResult.has_value())
 			{
-				LogIfFailed(Error{ fontCollectionResult.error() });
+				Logger::Error(Error{ fontCollectionResult.error() });
 				return;
 			}
 			collection = fontCollectionResult.value();
@@ -97,16 +100,18 @@ namespace PGUI::UI
 			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
 			fontSize, localeName.data(), Put());
 
-		LogIfFailed(
-			Error{ hr }
-			.AddDetail(L"FontFamilyName", fontFamilyName)
-			.AddDetail(L"FontSize", std::to_wstring(fontSize))
-			.AddDetail(L"FontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
-			.AddDetail(L"LocaleName", localeName)
-		);
+		if (Error error{ hr };
+			error.IsFailure())
+		{
+			error.AddDetail(L"FontFamilyName", fontFamilyName)
+			     .AddDetail(L"FontSize", std::to_wstring(fontSize))
+			     .AddDetail(L"FontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
+			     .AddDetail(L"LocaleName", localeName);
+			Logger::Error(error, L"Failed to create text format");
+		}
 	}
 
-	auto TextFormat::SetFlowDirection(const FlowDirection flowDirection) noexcept -> Error
+	auto TextFormat::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetFlowDirection(flowDirection)
@@ -115,7 +120,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextFormat::SetIncrementalTabStop(const float incrementalTabStop) noexcept -> Error
+	auto TextFormat::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetIncrementalTabStop(incrementalTabStop)
@@ -124,7 +129,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextFormat::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) noexcept -> Error
+	auto TextFormat::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetParagraphAlignment(paragraphAlignment)
@@ -133,7 +138,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextFormat::SetReadingDirection(const ReadingDirection readingDirection) noexcept -> Error
+	auto TextFormat::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetReadingDirection(readingDirection)
@@ -142,7 +147,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextFormat::SetTextAlignment(const TextAlignment textAlignment) noexcept -> Error
+	auto TextFormat::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetTextAlignment(textAlignment)
@@ -151,7 +156,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextFormat::SetWordWrapping(const WordWrapping wordWrapping) noexcept -> Error
+	auto TextFormat::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetWordWrapping(wordWrapping)
@@ -160,7 +165,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextFormat::SetTrimming(const Trimming& trimming) noexcept -> Error
+	auto TextFormat::SetTrimming(const Trimming& trimming) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetTrimming(&trimming.trimmingOptions, trimming.GetRaw())
@@ -169,7 +174,7 @@ namespace PGUI::UI
 		return error;
 	}
 
-	auto TextFormat::SetLineSpacing(const LineSpacing& lineSpacing) noexcept -> Error
+	auto TextFormat::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Error
 	{
 		Error error{
 			Get()->SetLineSpacing(&lineSpacing)
@@ -208,7 +213,7 @@ namespace PGUI::UI
 
 	auto TextFormat::GetFontFamilyName() const noexcept -> Result<std::wstring>
 	{
-		auto& ptr = Get();
+		const auto& ptr = Get();
 
 		const auto length = ptr->GetFontFamilyNameLength();
 
@@ -251,7 +256,7 @@ namespace PGUI::UI
 
 	auto TextFormat::GetLocaleName() const noexcept -> Result<std::wstring>
 	{
-		auto& ptr = Get();
+		const auto& ptr = Get();
 
 		const auto length = ptr->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');

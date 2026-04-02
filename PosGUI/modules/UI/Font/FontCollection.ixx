@@ -34,7 +34,7 @@ export namespace PGUI::UI::Font
 
 		[[nodiscard]] auto GetFontFamily(UINT32 index) const noexcept -> Result<FontFamily>;
 
-		[[nodiscard]] auto GetFontSet() const -> Result<FontSet>;
+		[[nodiscard]] auto GetFontSet() const noexcept -> Result<FontSet>;
 
 		[[nodiscard]] auto GetFontFamilyCount() const noexcept -> UINT32;
 

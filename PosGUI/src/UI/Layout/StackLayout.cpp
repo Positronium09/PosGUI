@@ -50,20 +50,47 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto StackLayout::SetMainAxisGap(const float _gap) noexcept -> void
+	auto StackLayout::SetOrientation(const LayoutOrientation newOrientation) noexcept -> void
 	{
-		if (mainAxisGap != _gap)
+		if (orientation != newOrientation)
 		{
-			mainAxisGap = _gap;
+			orientation = newOrientation;
 			RearrangeItems();
 		}
 	}
 
-	auto StackLayout::SetCrossAxisGap(const float _crossGap) noexcept -> void
+	auto StackLayout::SetMainAxisAlignment(const MainAxisAlignment alignment) noexcept -> void
 	{
-		if (crossAxisGap != _crossGap)
+		if (mainAxisAlignment != alignment)
 		{
-			crossAxisGap = _crossGap;
+			mainAxisAlignment = alignment;
+			RearrangeItems();
+		}
+	}
+
+	auto StackLayout::SetCrossAxisAlignment(const CrossAxisAlignment alignment) noexcept -> void
+	{
+		if (crossAxisAlignment != alignment)
+		{
+			crossAxisAlignment = alignment;
+			RearrangeItems();
+		}
+	}
+
+	auto StackLayout::SetMainAxisGap(const float gap) noexcept -> void
+	{
+		if (mainAxisGap != gap)
+		{
+			mainAxisGap = gap;
+			RearrangeItems();
+		}
+	}
+
+	auto StackLayout::SetCrossAxisGap(const float crossGap) noexcept -> void
+	{
+		if (crossAxisGap != crossGap)
+		{
+			crossAxisGap = crossGap;
 			if (wrapMode == WrapMode::Wrap)
 			{
 				RearrangeItems();
@@ -71,11 +98,11 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto StackLayout::SetPadding(const StackLayoutPadding _padding) noexcept -> void
+	auto StackLayout::SetPadding(const StackLayoutPadding newPadding) noexcept -> void
 	{
-		if (padding != _padding)
+		if (padding != newPadding)
 		{
-			padding = _padding;
+			padding = newPadding;
 			RearrangeItems();
 		}
 	}
@@ -107,48 +134,21 @@ namespace PGUI::UI::Layout
 		SetCrossAxisGap(crossAxis);
 	}
 
-	auto StackLayout::SetAll(const LayoutOrientation orient, const MainAxisAlignment mainAxisAlign,
-	                         const CrossAxisAlignment crossAxisAlign,
-	                         const WrapMode wrap, const StackLayoutPadding pad,
-	                         const float mainAxis,
-	                         const float crossAxis) noexcept -> void
+	auto StackLayout::SetAll(const LayoutOrientation newOrientation, const MainAxisAlignment newMainAxisAlignment,
+	                         const CrossAxisAlignment newCrossAxisAlignment,
+	                         const WrapMode newWrapMode, const StackLayoutPadding newPadding,
+	                         const float newMainAxisGap,
+	                         const float newCrossAxisGap) noexcept -> void
 	{
 		ScopedValue scoped{ batchChanges, true };
 
-		SetOrientation(orient);
-		SetMainAxisAlignment(mainAxisAlign);
-		SetCrossAxisAlignment(crossAxisAlign);
-		SetWrapMode(wrap);
-		SetPadding(pad);
-		SetMainAxisGap(mainAxis);
-		SetCrossAxisGap(crossAxis);
-	}
-
-	auto StackLayout::SetOrientation(const LayoutOrientation _orientation) noexcept -> void
-	{
-		if (orientation != _orientation)
-		{
-			orientation = _orientation;
-			RearrangeItems();
-		}
-	}
-
-	auto StackLayout::SetMainAxisAlignment(const MainAxisAlignment alignment) noexcept -> void
-	{
-		if (mainAxisAlignment != alignment)
-		{
-			mainAxisAlignment = alignment;
-			RearrangeItems();
-		}
-	}
-
-	auto StackLayout::SetCrossAxisAlignment(const CrossAxisAlignment alignment) noexcept -> void
-	{
-		if (crossAxisAlignment != alignment)
-		{
-			crossAxisAlignment = alignment;
-			RearrangeItems();
-		}
+		SetOrientation(newOrientation);
+		SetMainAxisAlignment(newMainAxisAlignment);
+		SetCrossAxisAlignment(newCrossAxisAlignment);
+		SetWrapMode(newWrapMode);
+		SetPadding(newPadding);
+		SetMainAxisGap(newMainAxisGap);
+		SetCrossAxisGap(newCrossAxisGap);
 	}
 
 	auto StackLayout::RearrangeHorizontalNoWrap() noexcept -> void
@@ -193,7 +193,7 @@ namespace PGUI::UI::Layout
 				}
 				case CrossAxisAlignment::Stretch:
 				{
-					ResizeItem(item, { size.cy, itemSize.cx });
+					ResizeItem(item, { itemSize.cx, size.cy });
 					break;
 				}
 			}

@@ -61,7 +61,7 @@ export namespace PGUI::UI::Imaging
 
 		//TODO GetDecoderInfo
 
-		[[nodiscard]] auto CopyPalette() noexcept -> Result<Palette>;
+		[[nodiscard]] auto CopyPalette() const noexcept -> Result<Palette>;
 
 		[[nodiscard]] auto GetMetadataReader() const noexcept -> Result<MetadataReader>;
 

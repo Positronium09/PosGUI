@@ -19,7 +19,6 @@ export namespace PGUI::UI::Font
 		[[nodiscard]] auto ConvertWeightStretchStyleToFontAxisValues(
 			FontWeight weight, FontStretch stretch, FontStyle style,
 			float fontSize,
-			const std::optional<std::span<const FontAxisValue>>& inputValues = std::nullopt) const noexcept -> std::vector<
-			FontAxisValue>;
+			const std::optional<std::span<const FontAxisValue>>& inputValues = std::nullopt) const noexcept -> std::vector<FontAxisValue>;
 	};
 }

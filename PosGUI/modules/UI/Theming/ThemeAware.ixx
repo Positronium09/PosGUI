@@ -51,17 +51,19 @@ export namespace PGUI::UI::Theming
 				auto& appWindowStyle = theme.appWindowStyle;
 				ApplyStyle(appWindowStyle);
 			}
-
-			if (theme.HasCustomStyle<StyleType>())
+			else
 			{
-				if (const auto& style = theme.GetCustomStyle<StyleType>();
-					style.has_value())
+				if (theme.HasCustomStyle<StyleType>())
 				{
-					ApplyStyle(style.value().get());
-				}
-				else
-				{
-					Logger::Warning(style.error(), L"Cannot unwrap style object");
+					if (const auto& style = theme.GetCustomStyle<StyleType>();
+						style.has_value())
+					{
+						ApplyStyle(style.value().get());
+					}
+					else
+					{
+						Logger::Warning(style.error(), L"Cannot unwrap style object");
+					}
 				}
 			}
 		}

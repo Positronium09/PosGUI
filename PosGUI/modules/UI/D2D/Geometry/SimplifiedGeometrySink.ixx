@@ -28,45 +28,45 @@ export namespace PGUI::UI::D2D
 			ComPtrHolder<Interface>{ ptr }
 		{ }
 
-		auto& BeginFigure(PointF startPoint, FigureBegin figureBegin) noexcept
+		const auto& BeginFigure(PointF startPoint, FigureBegin figureBegin) const noexcept
 		{
 			this->Get()->BeginFigure(startPoint, static_cast<D2D1_FIGURE_BEGIN>(figureBegin));
 			return *this;
 		}
 
-		auto& EndFigure(FigureEnd figureEnd) noexcept
+		const auto& EndFigure(FigureEnd figureEnd) const noexcept
 		{
 			this->Get()->EndFigure(static_cast<D2D1_FIGURE_END>(figureEnd));
 			return *this;
 		}
 
-		auto Close() noexcept -> Error
+		auto Close() const noexcept -> Error
 		{
 			Error error{ this->Get()->Close() };
 			LogIfFailed(error, L"Failed to close the sink");
 			return error;
 		}
 
-		auto& SetFillMode(FillMode fillMode) noexcept
+		const auto& SetFillMode(FillMode fillMode) const noexcept
 		{
 			this->Get()->SetFillMode(static_cast<D2D1_FILL_MODE>(fillMode));
 			return *this;
 		}
 
-		auto& SetSegmentFlags(SegmentFlags segmentFlags) noexcept
+		const auto& SetSegmentFlags(SegmentFlags segmentFlags) const noexcept
 		{
 			this->Get()->SetSegmentFlags(static_cast<D2D1_PATH_SEGMENT>(segmentFlags));
 			return *this;
 		}
 
-		auto& AddLines(const std::span<const PointF> points) noexcept
+		const auto& AddLines(const std::span<const PointF> points) const noexcept
 		{
-			this->Get()->AddLines(std::bit_cast<const D2D1_POINT_2F*>(points.data()),
+			this->Get()->AddLines(reinterpret_cast<const D2D1_POINT_2F*>(points.data()),
 			                      static_cast<UINT32>(points.size()));
 			return *this;
 		}
 
-		auto& AddBeziers(const std::span<const BezierSegment> beziers) noexcept
+		const auto& AddBeziers(const std::span<const BezierSegment> beziers) const noexcept
 		{
 			this->Get()->AddBeziers(static_cast<const D2D1_BEZIER_SEGMENT*>(beziers.data()),
 			                        static_cast<UINT32>(beziers.size()));

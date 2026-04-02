@@ -18,13 +18,12 @@ export namespace PGUI::UI::D2D
 
 		explicit(false) D2DPathGeometry(const ComPtr<ID2D1PathGeometry1>& ptr) noexcept;
 
-		auto GetFigureCount() noexcept -> Result<UINT32>;
+		[[nodiscard]] auto GetFigureCount() const noexcept -> Result<UINT32>;
 
-		auto GetSegmentCount() noexcept -> Result<UINT32>;
+		[[nodiscard]] auto GetSegmentCount() const noexcept -> Result<UINT32>;
 
-		auto Open() noexcept -> Result<GeometrySink>;
-
-		auto Stream(const GeometrySink& sink) noexcept -> Error;
+		[[nodiscard]] auto Open() const noexcept -> Result<GeometrySink>;
+		auto Stream(const GeometrySink& sink) const noexcept -> Error;
 
 		[[nodiscard]] static auto CreateRoundRectWithPathGeometry(
 			RectF rect,

@@ -15,13 +15,20 @@ export namespace PGUI::UI::Imaging
 {
 	enum class PaletteType
 	{
-		Grayscale = WICBitmapPaletteTypeFixedBW,
-		RGB = WICBitmapPaletteTypeFixedHalftone8,
-		Indexed = WICBitmapPaletteTypeFixedHalftone64,
-		Gray4 = WICBitmapPaletteTypeFixedHalftone256,
-		Gray16 = WICBitmapPaletteTypeFixedGray4,
-		Gray256 = WICBitmapPaletteTypeFixedGray16,
-		Gray2 = WICBitmapPaletteTypeFixedGray256,
+		Custom = WICBitmapPaletteTypeCustom,
+		MedianCut = WICBitmapPaletteTypeMedianCut,
+		BlackAndWhite = WICBitmapPaletteTypeFixedBW,
+		Halftone8 = WICBitmapPaletteTypeFixedHalftone8,
+		Halftone27 = WICBitmapPaletteTypeFixedHalftone27,
+		Halftone64 = WICBitmapPaletteTypeFixedHalftone64,
+		Halftone125 = WICBitmapPaletteTypeFixedHalftone125,
+		Halftone216 = WICBitmapPaletteTypeFixedHalftone216,
+		WebPalette = WICBitmapPaletteTypeFixedWebPalette,
+		Halftone252 = WICBitmapPaletteTypeFixedHalftone252,
+		Halftone256 = WICBitmapPaletteTypeFixedHalftone256,
+		Gray4 = WICBitmapPaletteTypeFixedGray4,
+		Gray16 = WICBitmapPaletteTypeFixedGray16,
+		Gray256 = WICBitmapPaletteTypeFixedGray256
 	};
 
 	class Palette : public ComPtrHolder<IWICPalette>
@@ -32,21 +39,21 @@ export namespace PGUI::UI::Imaging
 		explicit(false) Palette(const ComPtr<IWICPalette>& palette) noexcept;
 
 		template <typename T>
-		Palette(BitmapSource<T> source, UINT count, bool addTransparentColor) noexcept
+		Palette(BitmapSource<T> source, const UINT count, const bool addTransparentColor) noexcept
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
 
 			auto hr = factory->CreatePalette(Put());
 			if (FAILED(hr))
 			{
-				Logger::Error(L"Failed to create palette");
+				Logger::Error(Error{ hr } , L"Failed to create palette");
 				return;
 			}
 
-			hr = InitializeFromBitmap(source.Get(), count, addTransparentColor);
+			hr = Get()->InitializeFromBitmap(source.Get(), count, addTransparentColor);
 			if (FAILED(hr))
 			{
-				Logger::Error(L"Failed to initialize palette from bitmap");
+				Logger::Error(Error{ hr }, L"Failed to initialize palette from bitmap");
 			}
 		}
 

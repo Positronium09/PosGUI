@@ -36,7 +36,7 @@ export namespace PGUI::UI::Layout
 
 		auto RearrangeItems() noexcept -> void override;
 
-		auto SetOrientation(LayoutOrientation orientation) noexcept -> void;
+		auto SetOrientation(LayoutOrientation newOrientation) noexcept -> void;
 		[[nodiscard]] auto GetOrientation() const noexcept { return orientation; }
 
 		auto SetMainAxisAlignment(MainAxisAlignment alignment) noexcept -> void;
@@ -51,23 +51,23 @@ export namespace PGUI::UI::Layout
 		auto SetCrossAxisGap(float crossGap) noexcept -> void;
 		[[nodiscard]] auto GetCrossAxisGap() const noexcept { return crossAxisGap; }
 
-		auto SetPadding(StackLayoutPadding padding) noexcept -> void;
+		auto SetPadding(StackLayoutPadding newPadding) noexcept -> void;
 		[[nodiscard]] auto GetPadding() const noexcept { return padding; }
 
-		auto SetWrapMode(WrapMode wrapMode) noexcept -> void;
+		auto SetWrapMode(WrapMode mode) noexcept -> void;
 		[[nodiscard]] auto GetWrapMode() const noexcept { return wrapMode; }
 
 		auto SetAlignment(MainAxisAlignment mainAxis, CrossAxisAlignment crossAxis) noexcept -> void;
 		auto SetGaps(float mainAxis, float crossAxis) noexcept -> void;
 
 		auto SetAll(
-			LayoutOrientation orientation,
-			MainAxisAlignment mainAxisAlignment,
-			CrossAxisAlignment crossAxisAlignment,
-			WrapMode wrapMode,
-			StackLayoutPadding padding,
-			float mainAxisGap,
-			float crossAxisGap
+			LayoutOrientation newOrientation,
+			MainAxisAlignment newMainAxisAlignment,
+			CrossAxisAlignment newCrossAxisAlignment,
+			WrapMode newWrapMode,
+			StackLayoutPadding newPadding,
+			float newMainAxisGap,
+			float newCrossAxisGap
 		) noexcept -> void;
 
 		protected:

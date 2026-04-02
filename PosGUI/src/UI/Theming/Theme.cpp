@@ -21,18 +21,15 @@ namespace PGUI::UI::Theming
 
 	auto ThemeContext::InitializeThemes() noexcept -> void
 	{
-		static auto initialized = false;
-		if (initialized)
+		static std::once_flag initializedFlag;
+
+		std::call_once(initializedFlag, []
 		{
-			return;
-		}
-
-		RefreshThemes();
-
-		initialized = true;
+			RefreshThemes();
+		});
 	}
 
-	auto ThemeContext::OnSystemThemeChanged() -> void
+	auto ThemeContext::OnSystemThemeChanged() noexcept -> void
 	{
 		if (respondToSystemThemeChange && IsCurrentThemeBuiltin())
 		{
@@ -52,32 +49,34 @@ namespace PGUI::UI::Theming
 	{
 		std::scoped_lock lock{ darkThemeMutex, lightThemeMutex };
 
+		using namespace Colors;
+
 		DarkTheme.colorContext = {
-			.text = SystemTheme::GetTextColor(),
-			.background = SystemTheme::GetBackgroundColor(),
-			.primary = SystemTheme::GetAccentLight1Color(),
+			.text = SystemTheme::GetTextColor().value_or(White),
+			.background = SystemTheme::GetBackgroundColor().value_or(RGBA{ 0x1E1E1E }),
+			.primary = SystemTheme::GetAccentLight1Color().value_or(RGBA{ 0x60CDFF }),
 			.secondary = RGBA{ 0x1b1b1b },
-			.accent = SystemTheme::GetAccentColor()
+			.accent = SystemTheme::GetAccentColor().value_or(RGBA{ 0x0078D4 })
 		};
 		DarkTheme.appWindowStyle = {
-			.borderColor = Colors::Transparent,
-			.captionColor = Colors::Transparent,
-			.captionTextColor = Colors::Transparent,
+			.borderColor = Transparent,
+			.captionColor = Transparent,
+			.captionTextColor = Transparent,
 			.darkMode = true,
 			.cornerPreference = CornerPreference::Default
 		};
 
 		LightTheme.colorContext = {
-			.text = SystemTheme::GetTextColor(),
-			.background = SystemTheme::GetBackgroundColor(),
-			.primary = SystemTheme::GetAccentDark1Color(),
-			.secondary = Colors::AntiqueWhite,
-			.accent = SystemTheme::GetAccentColor()
+			.text = SystemTheme::GetTextColor().value_or(Black),
+			.background = SystemTheme::GetBackgroundColor().value_or(RGBA{ 0xF3F3F3 }),
+			.primary = SystemTheme::GetAccentDark1Color().value_or(RGBA{ 0x005A9E }),
+			.secondary = AntiqueWhite,
+			.accent = SystemTheme::GetAccentColor().value_or(RGBA{ 0x0078D4 })
 		};
 		LightTheme.appWindowStyle = {
-			.borderColor = Colors::Transparent,
-			.captionColor = Colors::Transparent,
-			.captionTextColor = Colors::Transparent,
+			.borderColor = Transparent,
+			.captionColor = Transparent,
+			.captionTextColor = Transparent,
 			.darkMode = false,
 			.cornerPreference = CornerPreference::Default
 		};

@@ -20,7 +20,7 @@ export namespace PGUI::UI::D2D
 			RectF contentBounds,
 			AntiAliasingMode antiAliasingMode = AntiAliasingMode::PerPrimitive,
 			LayerOptions layerOptions = LayerOptions::None,
-			D2DGeometry<> geometryMask = D2DGeometry<>{ },
+			D2DGeometry<> geometryMask = D2DGeometry{ },
 			Matrix3x2 maskTransform = Matrix3x2::Identity(),
 			Brush opacityBrush = Brush{ EmptyBrush{ } }, float opacity = 1.0F) noexcept :
 			D2D1_LAYER_PARAMETERS1{
@@ -36,15 +36,7 @@ export namespace PGUI::UI::D2D
 
 		explicit(false) operator D2D1_LAYER_PARAMETERS1() const noexcept
 		{
-			return D2D1_LAYER_PARAMETERS1{
-				.contentBounds = contentBounds,
-				.geometricMask = geometricMask,
-				.maskAntialiasMode = static_cast<D2D1_ANTIALIAS_MODE>(maskAntialiasMode),
-				.maskTransform = maskTransform,
-				.opacity = opacity,
-				.opacityBrush = opacityBrush,
-				.layerOptions = static_cast<D2D1_LAYER_OPTIONS1>(layerOptions)
-			};
+			return *this;
 		}
 
 		[[nodiscard]] auto GetContentBounds() const noexcept -> RectF { return contentBounds; }
@@ -52,7 +44,7 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] auto GetMaskAntialiasMode() const noexcept
 		{
-			return static_cast<AntiAliasingMode>(maskAntialiasMode);
+			return FromUnderlying<AntiAliasingMode>(maskAntialiasMode);
 		}
 
 		[[nodiscard]] auto GetMaskTransform() const noexcept -> Matrix3x2
@@ -65,7 +57,7 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] auto GetLayerOptions() const noexcept
 		{
-			return static_cast<LayerOptions>(layerOptions);
+			return FromUnderlying<LayerOptions>(layerOptions);
 		}
 	};
 

@@ -7,8 +7,10 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
+import PGUI.Utils;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DImage;
+import PGUI.UI.D2D.D2DEnums;
 import PGUI.UI.D2D.D2DStructs;
 
 export namespace PGUI::UI::D2D
@@ -29,15 +31,27 @@ export namespace PGUI::UI::D2D
 
 		explicit(false) D2DBitmap(const ComPtr<ID2D1Bitmap1>& bitmap) noexcept;
 
-		[[nodiscard]] auto GetSize() const noexcept -> SizeF;
+		[[nodiscard]] auto GetSize() const noexcept -> SizeF
+		{
+			return Get()->GetSize();
+		}
 
-		[[nodiscard]] auto GetPixelSize() const noexcept -> SizeU;
+		[[nodiscard]] auto GetPixelSize() const noexcept -> SizeU
+		{
+			return Get()->GetPixelSize();
+		}
 
 		[[nodiscard]] auto GetDpi() const noexcept -> std::pair<float, float>;
 
-		[[nodiscard]] auto GetPixelFormat() const noexcept -> D2D1_PIXEL_FORMAT;
+		[[nodiscard]] auto GetPixelFormat() const noexcept
+		{
+			return Get()->GetPixelFormat();
+		}
 
-		[[nodiscard]] auto GetBitmapOptions() const noexcept -> D2D1_BITMAP_OPTIONS;
+		[[nodiscard]] auto GetBitmapOptions() const noexcept
+		{
+			return FromUnderlying<BitmapOptions>(Get()->GetOptions());
+		}
 
 		[[nodiscard]] auto GetSurface() const noexcept -> Result<ComPtr<IDXGISurface>>;
 
@@ -48,11 +62,11 @@ export namespace PGUI::UI::D2D
 		auto CopyFromBitmap(
 			D2DBitmap bitmap,
 			std::optional<PointU> destPoint = std::nullopt,
-			std::optional<RectU> srcRect = std::nullopt) noexcept -> Error;
+			std::optional<RectU> srcRect = std::nullopt) const noexcept -> Error;
 
 		auto CopyFromMemory(
 			const void* source, UINT32 pitch,
-			std::optional<RectU> destRect = std::nullopt) noexcept -> Error;
+			std::optional<RectU> destRect = std::nullopt) const noexcept -> Error;
 
 		//TODO GetColorContext
 	};

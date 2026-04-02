@@ -109,4 +109,7 @@ export namespace PGUI
 		const T& value;
 		std::shared_lock<MutexType> lock;
 	};
+
+	auto Unused([[maybe_unused]] auto&&... args) noexcept -> void
+	{ }
 }

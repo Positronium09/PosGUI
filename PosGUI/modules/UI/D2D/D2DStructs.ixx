@@ -34,7 +34,7 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] constexpr auto Pitch() const noexcept { return pitch; }
 		[[nodiscard]] constexpr auto Bytes() const noexcept { return bytes; }
-		[[nodiscard]] constexpr auto operator[](size_t index) const noexcept { return bytes[index]; }
+		[[nodiscard]] constexpr auto operator[](const std::size_t index) const noexcept { return bytes[index]; }
 		[[nodiscard]] constexpr auto begin() const noexcept { return bytes.begin(); }
 		[[nodiscard]] constexpr auto end() const noexcept { return bytes.end(); }
 		[[nodiscard]] constexpr auto cbegin() const noexcept { return bytes.cbegin(); }
@@ -127,6 +127,13 @@ export namespace PGUI::UI::D2D
 				.interpolationMode = interpolationMode
 			};
 		}
+
+		[[nodiscard]] auto GetExtendModeX() const noexcept { return static_cast<ExtendMode>(extendModeX); }
+		[[nodiscard]] auto GetExtendModeY() const noexcept { return static_cast<ExtendMode>(extendModeY); }
+		[[nodiscard]] auto GetInterpolationMode() const noexcept
+		{
+			return static_cast<BitmapInterpolationMode>(interpolationMode);
+		}
 	};
 
 	struct BezierSegment : D2D1_BEZIER_SEGMENT
@@ -168,7 +175,7 @@ export namespace PGUI::UI::D2D
 	{
 		constexpr ArcSegment() noexcept = default;
 
-		ArcSegment(const PointF point, const SizeF size, const float rotationAngle,
+		constexpr ArcSegment(const PointF point, const SizeF size, const float rotationAngle,
 		           ArcSize arcSize, SweepDirection sweepDirection) noexcept :
 			D2D1_ARC_SEGMENT{
 				.point = point,

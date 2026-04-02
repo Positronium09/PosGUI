@@ -206,9 +206,9 @@ namespace PGUI::UI
 
 		const D2D::D2DBitmap bmp{ bitmap1 };
 
-		const auto extendModeX = static_cast<D2D::ExtendMode>(ptr->GetExtendModeX());
-		const auto extendModeY = static_cast<D2D::ExtendMode>(ptr->GetExtendModeY());
-		const auto interpolationMode = static_cast<D2D::BitmapInterpolationMode>(ptr->GetInterpolationMode());
+		const auto extendModeX = FromUnderlying<D2D::ExtendMode>(ptr->GetExtendModeX());
+		const auto extendModeY = FromUnderlying<D2D::ExtendMode>(ptr->GetExtendModeY());
+		const auto interpolationMode = FromUnderlying<D2D::BitmapInterpolationMode>(ptr->GetInterpolationMode());
 
 		const D2D::BitmapBrushProperties bitmapBrushProperties{
 			extendModeX,
@@ -232,11 +232,6 @@ namespace PGUI::UI
 			nullptr
 		};
 		
-		auto hrSolidColor = holder.AsAssign<ID2D1Brush, ID2D1SolidColorBrush>();
-		auto hrLinearGradient = holder.AsAssign<ID2D1Brush, ID2D1LinearGradientBrush>();
-		auto hrRadialGradient = holder.AsAssign<ID2D1Brush, ID2D1RadialGradientBrush>();
-		auto hrBitmapBrush = holder.AsAssign<ID2D1Brush, ID2D1BitmapBrush>();
-
 		if (holder.IsInitialized<ID2D1SolidColorBrush>())
 		{
 			const auto& solidBrush = holder.Get<ID2D1SolidColorBrush>();
@@ -279,7 +274,7 @@ namespace PGUI::UI
 
 		brush = EmptyBrush{ };
 
-		Logger::Warning(L"Unknown brush type. Brush is set to empty");
+		Logger::Error(L"Unknown brush type. Brush is set to empty");
 	}
 
 	Brush::Brush(const BrushParameters& parameters) noexcept :
@@ -303,7 +298,7 @@ namespace PGUI::UI
 	auto Brush::CreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget) noexcept -> void
 	{
 		ReleaseBrush();
-		std::visit([&renderTarget, this]<typename T>(T& param)
+		std::visit([&renderTarget, this]<typename T>(const T& param)
 		{
 			if constexpr (std::is_same_v<T, RGBA>)
 			{
@@ -329,7 +324,7 @@ namespace PGUI::UI
 		brush = std::monostate{ };
 	}
 
-	auto Brush::SetGradientBrushRect(RectF rect) -> void
+	auto Brush::SetGradientBrushRect(RectF rect) noexcept -> void
 	{
 		std::visit([rect]<typename T>(T& param)
 		{

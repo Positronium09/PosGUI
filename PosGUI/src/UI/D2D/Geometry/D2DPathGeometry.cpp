@@ -5,6 +5,7 @@ module PGUI.UI.D2D.D2DPathGeometry;
 
 import std;
 
+import PGUI.Utils;
 import PGUI.ComPtr;
 import PGUI.Shape2D;
 import PGUI.Factories;
@@ -33,7 +34,7 @@ namespace PGUI::UI::D2D
 		D2DGeometry{ ptr }
 	{ }
 
-	auto D2DPathGeometry::GetFigureCount() noexcept -> Result<UINT32>
+	auto D2DPathGeometry::GetFigureCount() const noexcept -> Result<UINT32>
 	{
 		UINT32 count = 0;
 
@@ -48,7 +49,7 @@ namespace PGUI::UI::D2D
 		return count;
 	}
 
-	auto D2DPathGeometry::GetSegmentCount() noexcept -> Result<UINT32>
+	auto D2DPathGeometry::GetSegmentCount() const noexcept -> Result<UINT32>
 	{
 		UINT32 count = 0;
 		if (const auto hr = Get()->GetSegmentCount(&count);
@@ -61,7 +62,7 @@ namespace PGUI::UI::D2D
 		return count;
 	}
 
-	auto D2DPathGeometry::Open() noexcept -> Result<GeometrySink>
+	auto D2DPathGeometry::Open() const noexcept -> Result<GeometrySink>
 	{
 		ComPtr<ID2D1GeometrySink> sink;
 		if (const auto hr = Get()->Open(sink.put());
@@ -74,7 +75,7 @@ namespace PGUI::UI::D2D
 		return GeometrySink{ sink };
 	}
 
-	auto D2DPathGeometry::Stream(const GeometrySink& sink) noexcept -> Error
+	auto D2DPathGeometry::Stream(const GeometrySink& sink) const noexcept -> Error
 	{
 		Error error{
 			Get()->Stream(sink.GetRaw())
@@ -109,8 +110,8 @@ namespace PGUI::UI::D2D
 		point1 = { rect.left + topLeft, rect.top };
 		point2 = { rect.right - topRight, rect.top };
 
-		sink.BeginFigure(point1, FigureBegin::Filled);
-		sink.AddLines(points);
+		Unused(sink.BeginFigure(point1, FigureBegin::Filled));
+		Unused(sink.AddLines(points));
 
 		point1 = { rect.right, rect.top + topRight };
 		if (topRight)
@@ -123,11 +124,11 @@ namespace PGUI::UI::D2D
 				ArcSize::Small,
 				SweepDirection::Clockwise
 			};
-			sink.AddArc(arcSegment);
+			Unused(sink.AddArc(arcSegment));
 		}
 
 		point2 = { rect.right, rect.bottom - bottomRight };
-		sink.AddLines(points);
+		Unused(sink.AddLines(points));
 
 		point1 = { rect.right - bottomRight, rect.bottom };
 		if (bottomRight)
@@ -140,11 +141,11 @@ namespace PGUI::UI::D2D
 				ArcSize::Small,
 				SweepDirection::Clockwise
 			};
-			sink.AddArc(arcSegment);
+			Unused(sink.AddArc(arcSegment));
 		}
 
 		point2 = { rect.left + bottomLeft, rect.bottom };
-		sink.AddLines(points);
+		Unused(sink.AddLines(points));
 
 		point1 = { rect.left, rect.bottom - bottomLeft };
 		if (bottomLeft)
@@ -157,11 +158,12 @@ namespace PGUI::UI::D2D
 				ArcSize::Small,
 				SweepDirection::Clockwise
 			};
-			sink.AddArc(arcSegment);
+			Unused(sink.AddArc(arcSegment));
 		}
 
 		point2 = { rect.left, rect.top + topLeft };
-		sink.AddLines(points);
+		Unused(sink.AddLines(points));
+
 		point1 = { rect.left + topLeft, rect.top };
 		if (topLeft)
 		{
@@ -173,10 +175,10 @@ namespace PGUI::UI::D2D
 				ArcSize::Small,
 				SweepDirection::Clockwise
 			};
-			sink.AddArc(arcSegment);
+			Unused(sink.AddArc(arcSegment));
 		}
 
-		sink.EndFigure(FigureEnd::Closed);
+		Unused(sink.EndFigure(FigureEnd::Closed));
 
 		if (auto error = sink.Close();
 			error.IsFailure())

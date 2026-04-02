@@ -22,7 +22,7 @@ export namespace PGUI::UI::Imaging
 		FormatConverter(
 			BitmapSource<> bitmapSource, WICPixelFormatGUID destinationFormat,
 			WICBitmapDitherType ditherType = WICBitmapDitherTypeNone,
-			double alphaThresholdPercent = 0.0F, std::optional<Palette> palette = std::nullopt,
+			double alphaThresholdPercent = 0.0, std::optional<Palette> palette = std::nullopt,
 			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) noexcept;
 
 		[[nodiscard]] auto CanConvert(
@@ -32,7 +32,7 @@ export namespace PGUI::UI::Imaging
 		[[nodiscard]] static auto ConvertToD2DBitmap(
 			const BitmapSource<>& bitmapSource,
 			WICBitmapDitherType ditherType = WICBitmapDitherTypeNone,
-			double alphaThresholdPercent = 0.0F,
+			double alphaThresholdPercent = 0.0,
 			const std::optional<Palette>& palette = std::nullopt,
 			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) noexcept -> Result<FormatConverter>;
 	};

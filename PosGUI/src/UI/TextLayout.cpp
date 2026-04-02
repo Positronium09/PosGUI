@@ -30,14 +30,13 @@ namespace PGUI::UI
 			textLayoutPtr.put());
 		Set(textLayoutPtr.try_query<IDWriteTextLayout4>());
 
-		LogIfFailed(
-			Error{
-				hr
-			}
-			.AddDetail(L"Text", text)
-			.AddDetail(L"MaxSize", std::format(L"{}", maxSize)),
-			L"Cannot create text layout"
-		);
+		if (Error error{ hr };
+			error.IsFailure())
+		{
+			error.AddDetail(L"Text", text)
+			     .AddDetail(L"MaxSize", std::format(L"{}", maxSize));
+			Logger::Error(error, L"Cannot create text layout");
+		}
 	}
 
 	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Error
@@ -90,9 +89,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetIncrementalTabStop(incrementalTabStop)
 		};
-		error
-			.AddDetail(L"Incremental Tab Stop", std::format(L"{:.5F}", incrementalTabStop));
-		LogIfFailed(error, L"Cannot set incremental tab stop");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Incremental Tab Stop", std::format(L"{:.5F}", incrementalTabStop));
+			Logger::Error(error, L"Cannot set incremental tab stop");
+		}
 		return error;
 	}
 
@@ -111,9 +112,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetMaxWidth(maxWidth)
 		};
-		error
-			.AddDetail(L"Max Width", std::format(L"{:.5F}", maxWidth));
-		LogIfFailed(error, L"Cannot set max width");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Max Width", std::format(L"{:.5F}", maxWidth));
+			Logger::Error(error, L"Cannot set max width");
+		}
 		return error;
 	}
 
@@ -122,9 +125,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetMaxHeight(maxHeight)
 		};
-		error
-			.AddDetail(L"Max Height", std::format(L"{:.5F}", maxHeight));
-		LogIfFailed(error, L"Cannot set max height");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Max Height", std::format(L"{:.5F}", maxHeight));
+			Logger::Error(error, L"Cannot set max height");
+		}
 		return error;
 	}
 
@@ -147,9 +152,11 @@ namespace PGUI::UI
 				fontCollectionPtr.get(),
 				textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set font collection");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set font collection");
+		}
 		return error;
 	}
 
@@ -159,10 +166,12 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetFontFamilyName(fontFamilyName.data(), textRange)
 		};
-		error
-			.AddDetail(L"Font Family Name", fontFamilyName)
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set font family name");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Font Family Name", fontFamilyName)
+			     .AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set font family name");
+		}
 		return error;
 	}
 
@@ -171,9 +180,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetFontWeight(fontWeight, textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set font weight");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set font weight");
+		}
 		return error;
 	}
 
@@ -182,9 +193,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetFontStyle(fontStyle, textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set font style");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set font style");
+		}
 		return error;
 	}
 
@@ -193,9 +206,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetFontStretch(fontStretch, textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set font stretch");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set font stretch");
+		}
 		return error;
 	}
 
@@ -204,9 +219,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetFontSize(fontSize, textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set font size");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set font size");
+		}
 		return error;
 	}
 
@@ -215,9 +232,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetUnderline(hasUnderline, textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set underline");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set underline");
+		}
 		return error;
 	}
 
@@ -226,9 +245,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetStrikethrough(hasStrikethrough, textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set strikethrough");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set strikethrough");
+		}
 		return error;
 	}
 
@@ -238,9 +259,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetDrawingEffect(drawingEffect.get(), textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set drawing effect");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set drawing effect");
+		}
 		return error;
 	}
 
@@ -250,9 +273,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetInlineObject(inlineObject.get(), textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set inline object");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set inline object");
+		}
 		return error;
 	}
 
@@ -262,9 +287,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetTypography(typography.get(), textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set typography");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set typography");
+		}
 		return error;
 	}
 
@@ -274,9 +301,11 @@ namespace PGUI::UI
 		Error error{
 			Get()->SetLocaleName(localeName.data(), textRange)
 		};
-		error
-			.AddDetail(L"Text Range", std::format(L"{}", textRange));
-		LogIfFailed(error, L"Cannot set locale name");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
+			Logger::Error(error, L"Cannot set locale name");
+		}
 		return error;
 	}
 
@@ -441,7 +470,7 @@ namespace PGUI::UI
 	auto TextLayout::GetFontFamilyName() const noexcept -> Result<std::wstring>
 	{
 		const auto length = Get()->GetFontFamilyNameLength();
-		std::wstring fontFamilyName(length + 1, L'\0');
+		std::wstring fontFamilyName(length, L'\0');
 
 		if (const auto hr = Get()->GetFontFamilyName(
 				fontFamilyName.data(), length + 1);
@@ -467,7 +496,7 @@ namespace PGUI::UI
 			Logger::Error(error, L"Cannot get font family name");
 			return Unexpected{ error };
 		}
-		std::wstring fontFamilyName(length + 1, L'\0');
+		std::wstring fontFamilyName(length, L'\0');
 
 		if (const auto hr = Get()->GetFontFamilyName(
 				position, fontFamilyName.data(), length + 1);
@@ -496,7 +525,7 @@ namespace PGUI::UI
 			Logger::Error(error, L"Cannot get font family name");
 			return Unexpected{ error };
 		}
-		std::wstring fontFamilyName(length + 1, L'\0');
+		std::wstring fontFamilyName(length, L'\0');
 
 		if (const auto hr = Get()->GetFontFamilyName(
 				position, fontFamilyName.data(), length + 1, &textRange);
@@ -843,7 +872,7 @@ namespace PGUI::UI
 	{
 		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
-		if (const auto hr = Get()->GetLocaleName(localeName.data(), length);
+		if (const auto hr = Get()->GetLocaleName(localeName.data(), length + 1);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -860,7 +889,7 @@ namespace PGUI::UI
 		std::wstring localeName(length, L'\0');
 
 		if (const auto hr = Get()->GetLocaleName(
-				position, localeName.data(), length);
+				position, localeName.data(), length + 1);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -878,7 +907,7 @@ namespace PGUI::UI
 		const auto length = Get()->GetLocaleNameLength();
 		std::wstring localeName(length, L'\0');
 		if (const auto hr = Get()->GetLocaleName(
-				position, localeName.data(), length, &textRange);
+				position, localeName.data(), length + 1, &textRange);
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -936,7 +965,7 @@ namespace PGUI::UI
 		std::vector<LineMetrics> lineMetricsBuffer(lineCount);
 		UINT32 actualLineCount{ };
 		if (const auto hr = Get()->GetLineMetrics(
-				std::bit_cast<DWRITE_LINE_METRICS1*>(lineMetricsBuffer.data()),
+				reinterpret_cast<DWRITE_LINE_METRICS1*>(lineMetricsBuffer.data()),
 				lineCount,
 				&actualLineCount);
 			FAILED(hr))

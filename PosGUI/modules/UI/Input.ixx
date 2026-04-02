@@ -71,12 +71,12 @@ export namespace PGUI::UI
 	}
 	[[nodiscard]] auto GetModifierKeysFromWparam(const Argument1 arg1) noexcept -> ModifierKeys
 	{
-		ModifierKeys modifierKeys;
-		modifierKeys.shift = (arg1 & MK_SHIFT) != 0;
-		modifierKeys.control = (arg1 & MK_CONTROL) != 0;
-		modifierKeys.alt = (GetKeyState(VK_MENU) & 0x8000) != 0;
-		modifierKeys.super = (GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0;
-		return modifierKeys;
+		return ModifierKeys{
+			.shift = (arg1 & MK_SHIFT) != 0,
+			.control = (arg1 & MK_CONTROL) != 0,
+			.alt = (GetKeyState(VK_MENU) & 0x8000) != 0,
+			.super = (GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0
+		};
 	}
 	[[nodiscard]] auto GetMouseWheelDeltaFromWparam(const Argument1 arg1) noexcept
 	{
@@ -86,14 +86,14 @@ export namespace PGUI::UI
 	{
 		const auto keyFlags = FromUnderlying<KeyFlags>(HIWORD(arg2));
 
-		KeyInfo keyInfo;
-		keyInfo.repeatCount = LOWORD(arg2);
-		keyInfo.isAltPressed = IsFlagSet(keyFlags, KeyFlags::AltDown);
-		keyInfo.isExtended = IsFlagSet(keyFlags, KeyFlags::Extended);
-		keyInfo.wasDown = IsFlagSet(keyFlags, KeyFlags::Repeat);
-		keyInfo.isDown = !IsFlagSet(keyFlags, KeyFlags::Up);
-
-		return keyInfo;
+		return KeyInfo{
+			.isDown = !IsFlagSet(keyFlags, KeyFlags::Up),
+			.wasDown = IsFlagSet(keyFlags, KeyFlags::Repeat),
+			.isExtended = IsFlagSet(keyFlags, KeyFlags::Extended),
+			.isAltPressed = IsFlagSet(keyFlags, KeyFlags::AltDown),
+			.transitionState = IsFlagSet(keyFlags, KeyFlags::Up) ? Releasing : Pressing,
+			.repeatCount = static_cast<short>(LOWORD(arg2))
+		};
 	}
 	[[nodiscard]] auto GetMouseButtonForMessage(const MessageID msg, const Argument1 arg1) noexcept
 	{
@@ -105,21 +105,21 @@ export namespace PGUI::UI
 			case WM_LBUTTONUP:
 			case WM_LBUTTONDBLCLK:
 			{
-				mouseButton |= MouseButton::Left;
+				mouseButton = MouseButton::Left;
 				break;
 			}
 			case WM_RBUTTONDOWN:
 			case WM_RBUTTONUP:
 			case WM_RBUTTONDBLCLK:
 			{
-				mouseButton |= MouseButton::Right;
+				mouseButton = MouseButton::Right;
 				break;
 			}
 			case WM_MBUTTONDOWN:
 			case WM_MBUTTONUP:
 			case WM_MBUTTONDBLCLK:
 			{
-				mouseButton |= MouseButton::Middle;
+				mouseButton = MouseButton::Middle;
 				break;
 			}
 			case WM_XBUTTONDOWN:
@@ -128,11 +128,11 @@ export namespace PGUI::UI
 			{
 				if (HIWORD(arg1) == XBUTTON1)
 				{
-					mouseButton |= MouseButton::XButton1;
+					mouseButton = MouseButton::XButton1;
 				}
 				else if (HIWORD(arg1) == XBUTTON2)
 				{
-					mouseButton |= MouseButton::XButton2;
+					mouseButton = MouseButton::XButton2;
 				}
 				break;
 			}

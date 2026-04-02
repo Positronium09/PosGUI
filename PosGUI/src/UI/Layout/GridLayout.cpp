@@ -227,7 +227,7 @@ namespace PGUI::UI::Layout
 						tryColumn++;
 						continue;
 					}
-					populateStructures(id, row, column, actualRowSpan, actualColumnSpan);
+					populateStructures(id, row, tryColumn, actualRowSpan, actualColumnSpan);
 					placed = true;
 				}
 				if (!placed)
@@ -237,7 +237,7 @@ namespace PGUI::UI::Layout
 					{
 						tryColumn--;
 					}
-					populateStructures(id, row, column, actualRowSpan, actualColumnSpan);
+					populateStructures(id, row, tryColumn, actualRowSpan, actualColumnSpan);
 				}
 			}
 			else if (row == AUTO_PLACE && column != AUTO_PLACE)
@@ -252,7 +252,7 @@ namespace PGUI::UI::Layout
 				{
 					if (IsUnoccupied(occupiedPositions, tryRow, column, actualRowSpan, actualColumnSpan))
 					{
-						populateStructures(id, row, column, actualRowSpan, actualColumnSpan);
+						populateStructures(id, tryRow, column, actualRowSpan, actualColumnSpan);
 						break;
 					}
 					tryRow++;
@@ -636,7 +636,10 @@ namespace PGUI::UI::Layout
 	auto GridLayout::OnItemAdded(const LayoutItem& layoutItem) -> void
 	{
 		LayoutPanel::OnItemAdded(layoutItem);
-		SetItemProperty(GetItemCount() - 1, GridItemProperties{ });
+		if (!HasEntry(GetItemCount() - 1).has_value())
+		{
+			SetItemProperty(GetItemCount() - 1, GridItemProperties{ });
+		}
 	}
 
 	auto GridLayout::OnItemRemoved(std::size_t size) -> void

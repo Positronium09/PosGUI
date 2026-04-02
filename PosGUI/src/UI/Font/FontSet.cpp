@@ -1,6 +1,5 @@
 module;
 #include <dwrite_3.h>
-#include <ranges>
 
 module PGUI.UI.Font.FontSet;
 
@@ -19,14 +18,14 @@ namespace PGUI::UI::Font
 		const float fontSize,
 		const std::optional<std::span<const FontAxisValue>>& inputValues) const noexcept -> std::vector<FontAxisValue>
 	{
-		auto& ptr = Get();
+		const auto& ptr = Get();
 
 		const DWRITE_FONT_AXIS_VALUE* inputValuesArr = nullptr;
 		UINT32 inputValuesArrCount = 0;
 
 		if (inputValues)
 		{
-			inputValuesArr = static_cast<const DWRITE_FONT_AXIS_VALUE*>(inputValues->data());
+			inputValuesArr = inputValues->data();
 			inputValuesArrCount = static_cast<UINT32>(inputValues->size());
 		}
 		std::vector<FontAxisValue> values(DWRITE_STANDARD_FONT_AXIS_COUNT + inputValuesArrCount);

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(review-table)",
+      "Bash(PYTHONIOENCODING=utf-8 python \"C:\\\\Users\\\\orcun\\\\.claude\\\\skills\\\\review-table\\\\scripts\\\\generate_table.py\" \"C:\\\\Users\\\\orcun\\\\.claude\\\\skills\\\\review-table\\\\temp\\\\review_input.json\")",
+      "Bash(PYTHONIOENCODING=utf-8 python \"C:\\\\Users\\\\orcun\\\\.claude\\\\skills\\\\review-table\\\\scripts\\\\generate_table.py\" \"D:\\\\Code\\\\CPP\\\\PosGUI\\\\temp\\\\review_input.json\")",
+      "mcp__claude_ai_Microsoft_Learn__microsoft_docs_fetch",
+      "mcp__claude_ai_Microsoft_Learn__microsoft_docs_search"
+    ]
+  }
+}

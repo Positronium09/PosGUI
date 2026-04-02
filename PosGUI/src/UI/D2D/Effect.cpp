@@ -33,7 +33,7 @@ namespace PGUI::UI::D2D
 	auto Effect::SetInput(
 		const UINT32 index,
 		D2DImage<> image,
-		const bool invalidate) noexcept -> void
+		const bool invalidate) const noexcept -> void
 	{
 		Get()->SetInput(index, image.GetRaw(), invalidate);
 	}
@@ -41,17 +41,19 @@ namespace PGUI::UI::D2D
 	auto Effect::SetInputEffect(
 		const UINT32 index,
 		Effect effect,
-		const bool invalidate) noexcept -> void
+		const bool invalidate) const noexcept -> void
 	{
 		Get()->SetInputEffect(index, effect.GetRaw(), invalidate);
 	}
 
-	auto Effect::SetInputCount(const UINT32 count) noexcept -> Error
+	auto Effect::SetInputCount(const UINT32 count) const noexcept -> Error
 	{
 		Error error{ Get()->SetInputCount(count) };
-		error
-			.AddDetail(L"Count", std::to_wstring(count));
-		LogIfFailed(error, L"Failed to set input count");
+		if (error.IsFailure())
+		{
+			error.AddDetail(L"Count", std::to_wstring(count));
+			Logger::Error(error, L"Failed to set input count");
+		}
 		return error;
 	}
 }

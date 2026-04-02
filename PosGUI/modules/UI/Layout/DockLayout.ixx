@@ -36,8 +36,8 @@ export namespace PGUI::UI::Layout
 		template <typename T>
 		auto AddItem(const T& item, DockPosition position) noexcept -> void
 		{
-			dockPositions.insert_or_assign(GetItemCount() - 1, position);
 			LayoutPanel::AddItem(item);
+			dockPositions.insert_or_assign(GetItemCount() - 1, position);
 		}
 
 		auto SetDockPosition(const LayoutItem& item, DockPosition position) -> void;
@@ -52,7 +52,14 @@ export namespace PGUI::UI::Layout
 		auto SetDockPriority(DockPosition position, DockPriority priority) noexcept -> void;
 		[[nodiscard]] auto GetDockPriority(const DockPosition position) const noexcept -> DockPriority
 		{
-			return dockPriorities.at(position);
+			try
+			{
+				return dockPriorities.at(position);
+			}
+			catch (...)
+			{
+				std::unreachable();
+			}
 		}
 
 		private:

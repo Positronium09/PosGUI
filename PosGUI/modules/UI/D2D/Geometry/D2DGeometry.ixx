@@ -65,7 +65,6 @@ export namespace PGUI::UI::D2D
 				Logger::Error(error, L"Failed to get widened bounds");
 				return Unexpected{ error };
 			}
-			
 
 			return RectF{ bounds };
 		}

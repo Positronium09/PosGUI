@@ -9,6 +9,7 @@ import std;
 
 import PGUI.Shape2D;
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.RenderTarget;
 import PGUI.UI.D2D.D2DStructs;
@@ -50,47 +51,47 @@ export namespace PGUI::UI::D2D
 		auto DrawImage(D2DImage<> image,
 		               std::optional<PointF> targetOffset = std::nullopt,
 		               std::optional<RectF> imageRect = std::nullopt,
-		               InterpolationMode interpolationMode = InterpolationMode::Linear,
-		               CompositeMode compositeMode = CompositeMode::SourceOver) const noexcept -> void
+		               const InterpolationMode interpolationMode = InterpolationMode::Linear,
+		               const CompositeMode compositeMode = CompositeMode::SourceOver) const noexcept -> void
 		{
 			D2D1_POINT_2F* offset = nullptr;
-			if (imageRect.has_value())
+			if (targetOffset.has_value())
 			{
-				offset = std::bit_cast<D2D1_POINT_2F*>(&targetOffset.value());
+				offset = reinterpret_cast<D2D1_POINT_2F*>(&targetOffset.value());
 			}
 
 			D2D1_RECT_F* imgRect = nullptr;
 			if (imageRect.has_value())
 			{
-				imgRect = std::bit_cast<D2D1_RECT_F*>(&imageRect.value());
+				imgRect = reinterpret_cast<D2D1_RECT_F*>(&imageRect.value());
 			}
 
 			this->Get()->DrawImage(image.GetRaw(), offset, imgRect,
-			                       static_cast<D2D1_INTERPOLATION_MODE>(interpolationMode),
-			                       static_cast<D2D1_COMPOSITE_MODE>(compositeMode));
+			                       ToUnderlying(interpolationMode),
+			                       ToUnderlying(compositeMode));
 		}
 
 		auto DrawImage(Effect effect,
 		               std::optional<PointF> targetOffset = std::nullopt,
 		               std::optional<RectF> imageRect = std::nullopt,
-		               InterpolationMode interpolationMode = InterpolationMode::Linear,
-		               CompositeMode compositeMode = CompositeMode::SourceOver) const noexcept -> void
+		               const InterpolationMode interpolationMode = InterpolationMode::Linear,
+		               const CompositeMode compositeMode = CompositeMode::SourceOver) const noexcept -> void
 		{
 			D2D1_POINT_2F* offset = nullptr;
 			if (targetOffset.has_value())
 			{
-				offset = std::bit_cast<D2D1_POINT_2F*>(&targetOffset.value());
+				offset = reinterpret_cast<D2D1_POINT_2F*>(&targetOffset.value());
 			}
 
 			D2D1_RECT_F* imgRect = nullptr;
 			if (imageRect.has_value())
 			{
-				imgRect = std::bit_cast<D2D1_RECT_F*>(&imageRect.value());
+				imgRect = reinterpret_cast<D2D1_RECT_F*>(&imageRect.value());
 			}
 
 			this->Get()->DrawImage(effect.GetRaw(), offset, imgRect,
-			                       static_cast<D2D1_INTERPOLATION_MODE>(interpolationMode),
-			                       static_cast<D2D1_COMPOSITE_MODE>(compositeMode));
+			                       ToUnderlying(interpolationMode),
+			                       ToUnderlying(compositeMode));
 		}
 	};
 }

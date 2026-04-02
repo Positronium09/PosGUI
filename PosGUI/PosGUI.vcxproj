@@ -49,11 +49,7 @@
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx" />
     <ClCompile Include="modules\UI\DComp\DComp.ixx" />
     <ClCompile Include="modules\UI\DComp\Surface.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DataObject.ixx" />
     <ClCompile Include="modules\UI\DragDrop\DragDrop.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DragDropTypes.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DropSource.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DropTarget.ixx" />
     <ClCompile Include="modules\UI\Input.ixx" />
     <ClCompile Include="modules\UI\Layout\DockLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
@@ -111,7 +107,7 @@
     <ClCompile Include="modules\UI\D2D\Effect.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DEllipseGeometry.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DGeometry.ixx" />
-    <ClCompile Include="modules\UI\D2D\Geometry\D2DLayer.ixx" />
+    <ClCompile Include="modules\UI\D2D\D2DLayer.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DPathGeometry.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DRectangleGeometry.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\D2DRoundedRectangleGeometry.ixx" />
@@ -129,7 +125,7 @@
     <ClCompile Include="modules\UI\Font\LocalizedStrings.ixx" />
     <ClCompile Include="modules\UI\Gradient.ixx" />
     <ClCompile Include="modules\UI\Graphics.ixx" />
-    <ClCompile Include="modules\UI\Imaging\BimapFrameDecode.ixx" />
+    <ClCompile Include="modules\UI\Imaging\BitmapFrameDecode.ixx" />
     <ClCompile Include="modules\UI\Imaging\BitmapDecoder.ixx" />
     <ClCompile Include="modules\UI\Imaging\BitmapSource.ixx" />
     <ClCompile Include="modules\UI\Imaging\ContainerFormats.ixx" />

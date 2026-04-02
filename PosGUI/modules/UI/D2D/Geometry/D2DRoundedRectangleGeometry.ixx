@@ -23,7 +23,7 @@ export namespace PGUI::UI::D2D
 		{
 		}
 
-		explicit D2DRoundedRectangleGeometry(const RoundedRect& roundedRect)
+		explicit D2DRoundedRectangleGeometry(const RoundedRect& roundedRect) noexcept
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 

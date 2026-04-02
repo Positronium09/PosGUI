@@ -5,6 +5,7 @@ export module PGUI.Event;
 
 import std;
 import PGUI.Mutex;
+import PGUI.Utils;
 
 export namespace PGUI
 {
@@ -121,10 +122,7 @@ export namespace PGUI
 					if (std::holds_alternative<CancellingCallback>(callbackCopy))
 					{
 						auto& cancellingCallback = std::get<CancellingCallback>(callbackCopy);
-						if (!cancellingCallback(argsCopy...))
-						{
-							// Asynchronous invocation cannot be cancelled
-						}
+						Unused(cancellingCallback(argsCopy...));
 					}
 					else
 					{
@@ -137,7 +135,7 @@ export namespace PGUI
 
 		EventT() noexcept = default;
 
-		~EventT() = default;
+		~EventT() noexcept = default;
 
 		EventT(EventT&&) = default;
 
@@ -147,7 +145,7 @@ export namespace PGUI
 
 		auto operator=(const EventT&) -> EventT& = delete;
 
-		auto operator+=(const CallbackType<Args...> auto& callback) -> EventT&
+		auto operator+=(const CallbackType<Args...> auto& callback) noexcept -> EventT&
 		{
 			AddCallback(callback);
 			return *this;

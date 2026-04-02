@@ -84,7 +84,7 @@ namespace PGUI::UI::Imaging
 
 		if (const auto hr = factory->CreateBitmapFromSourceRect(
 			source.GetRaw(),
-			rect.left, rect.right, size.cx, size.cy,
+			rect.left, rect.top, size.cx, size.cy,
 			Put());
 			FAILED(hr))
 		{
@@ -125,10 +125,13 @@ namespace PGUI::UI::Imaging
 		Error error{
 			Get()->SetResolution(dpiX, dpiY)
 		};
-		error
-			.AddDetail(L"DPI X", std::to_wstring(dpiX))
-			.AddDetail(L"DPI Y", std::to_wstring(dpiY));
-		LogIfFailed(error, L"Failed to set resolution for WICBitmap");
+		if (error.IsFailure())
+		{
+			error
+				.AddDetail(L"DPI X", std::to_wstring(dpiX))
+				.AddDetail(L"DPI Y", std::to_wstring(dpiY));
+			Logger::Error(error, L"Failed to set resolution for WICBitmap");
+		}
 		return error;
 	}
 

@@ -1,18 +1,18 @@
 module;
 #include <objidl.h>
 
-export module PGUI.UI.DragDrop.DataObject;
+export module PGUI.UI.OLE.DataObject;
 
 import PGUI.Utils;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
-import PGUI.UI.DragDrop.DragDropEnums;
-import PGUI.UI.DragDrop.DragDropStructs;
-import PGUI.UI.DragDrop.EnumFormatData;
+import PGUI.UI.OLE.OLEEnums;
+import PGUI.UI.OLE.OLEStructs;
+import PGUI.UI.OLE.EnumFormatData;
 
 import std;
 
-export namespace PGUI::UI::DragDrop
+export namespace PGUI::UI::OLE
 {
 	template <typename Derived, typename ObjBase>
 	concept DataObjectDerived = requires(
@@ -404,5 +404,44 @@ export namespace PGUI::UI::DragDrop
 		StorageVector formatStoragePairs;
 	};
 
+	/*
+	 * 		{ Derived::CanStore(formatDataView) } -> std::same_as<bool>;
+		{ Derived::SupportedFormats() } -> std::convertible_to<std::span<const FormatData>>;
+		{ Derived::MatchesFormat(formatDataView, supportedFormatView) } -> std::same_as<bool>;
+		{ obj.ToMedium(t, formatDataView) } -> std::same_as<Result<StorageMedium>>;
+		{ obj.FromMedium(formatDataView, storageMedium) } -> std::same_as<Result<typename ObjBase::StoredType>>;
 
+	 */
+	struct TextDataObject : DataObjectBase<TextDataObject, std::wstring>
+	{
+		[[nodiscard]] static auto CanStore(const FormatDataView& formatDataView) noexcept -> bool
+		{
+			return (
+				formatDataView.format == ClipboardFormat::UnicodeText ||
+				formatDataView.format == ClipboardFormat::Text) &&
+				formatDataView.aspect == DVAspect::Content &&
+				IsFlagSet(formatDataView.storageMediumType, StorageMediumType::HGlobalMemory);
+		}
+
+		[[nodiscard]] static auto SupportedFormats() noexcept -> std::span<const FormatData>
+		{
+			static std::array supportedFormats{
+				FormatData{
+					ClipboardFormat::UnicodeText, DVAspect::Content,
+					StorageMediumType::HGlobalMemory
+				}
+			};
+
+			return supportedFormats;
+		}
+
+		[[nodiscard]] static auto MatchesFormat(
+			const FormatDataView& formatDataView, 
+			const FormatDataView& supportedFormatView) noexcept -> bool
+		{
+			return formatDataView.format == supportedFormatView.format &&
+				formatDataView.aspect == supportedFormatView.aspect &&
+				AreAllFlagsSet(formatDataView.storageMediumType, supportedFormatView.storageMediumType);
+		}
+	};
 }

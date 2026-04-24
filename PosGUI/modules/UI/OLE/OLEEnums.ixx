@@ -1,9 +1,9 @@
 module;
 #include <Windows.h>
 
-export module PGUI.UI.DragDrop.DragDropEnums;
+export module PGUI.UI.OLE.OLEEnums;
 
-export namespace PGUI::UI::DragDrop
+export namespace PGUI::UI::OLE
 {
 	enum class ClipboardFormat : CLIPFORMAT
 	{

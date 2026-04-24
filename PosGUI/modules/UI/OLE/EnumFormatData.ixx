@@ -1,16 +1,16 @@
 module;
 #include <objidl.h>
 
-export module PGUI.UI.DragDrop.EnumFormatData;
+export module PGUI.UI.OLE.EnumFormatData;
 
 import PGUI.Utils;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
-import PGUI.UI.DragDrop.DragDropStructs;
+import PGUI.UI.OLE.OLEStructs;
 
 import std;
 
-export namespace PGUI::UI::DragDrop
+export namespace PGUI::UI::OLE
 {
 	class EnumFormatData final : public Implements<EnumFormatData, IEnumFORMATETC>
 	{

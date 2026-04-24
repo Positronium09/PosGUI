@@ -4,16 +4,16 @@ module;
 #include <objidl.h>
 #include <wil/resource.h>
 
-export module PGUI.UI.DragDrop.DragDropStructs;
+export module PGUI.UI.OLE.OLEStructs;
 
-import PGUI.UI.DragDrop.DragDropEnums;
+import PGUI.UI.OLE.OLEEnums;
 import PGUI.ErrorHandling;
 import PGUI.Utils;
 import PGUI.ComPtr;
 
 import std;
 
-export namespace PGUI::UI::DragDrop
+export namespace PGUI::UI::OLE
 {
 	struct FormatData
 	{

@@ -49,11 +49,11 @@
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx" />
     <ClCompile Include="modules\UI\DComp\DComp.ixx" />
     <ClCompile Include="modules\UI\DComp\Surface.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DataObject.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DragDrop.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DragDropEnums.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\DragDropStructs.ixx" />
-    <ClCompile Include="modules\UI\DragDrop\EnumFormatData.ixx" />
+    <ClCompile Include="modules\UI\OLE\DataObject.ixx" />
+    <ClCompile Include="modules\UI\OLE\DragDrop\DragDrop.ixx" />
+    <ClCompile Include="modules\UI\OLE\OLEEnums.ixx" />
+    <ClCompile Include="modules\UI\OLE\OLEStructs.ixx" />
+    <ClCompile Include="modules\UI\OLE\EnumFormatData.ixx" />
     <ClCompile Include="modules\UI\Input.ixx" />
     <ClCompile Include="modules\UI\Layout\DockLayout.ixx" />
     <ClCompile Include="modules\UI\Layout\GridLayout.ixx" />
@@ -62,6 +62,7 @@
     <ClCompile Include="modules\UI\Layout\LayoutStructs.ixx" />
     <ClCompile Include="modules\UI\Layout\StackLayout.ixx" />
     <ClCompile Include="modules\ScopedTimer.ixx" />
+    <ClCompile Include="modules\UI\OLE\OLE.ixx" />
     <ClCompile Include="modules\UI\ResourceManager.ixx" />
     <ClCompile Include="modules\UI\UICore\Interface.ixx" />
     <ClCompile Include="modules\UI\UICore\UIContainer.ixx" />

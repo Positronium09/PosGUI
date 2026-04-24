@@ -11,6 +11,7 @@
 *.sln.docstates
 
 temp/
+PosGUI/.*/**
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -363,3 +364,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/PosGUI/.claude/settings.local.json

@@ -1,6 +1,5 @@
 module;
 #include <Windows.h>
-#define WIL_SUPPRESS_EXCEPTIONS 0
 #include <wil/registry.h>
 #include <winrt/windows.ui.viewmanagement.h>
 

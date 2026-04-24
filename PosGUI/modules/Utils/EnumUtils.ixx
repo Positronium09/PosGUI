@@ -28,6 +28,17 @@ export namespace PGUI
 		return static_cast<T>(0);
 	}
 
+	template <typename UnderlyingT>
+	[[nodiscard]] constexpr auto ToUnderlying(const Enumeration auto val) noexcept
+	{
+		return static_cast<UnderlyingT>(val);
+	}
+
+	[[nodiscard]] constexpr auto ToUnderlying(const Enumeration auto val) noexcept
+	{
+		return std::to_underlying(val);
+	}
+
 	template <EnumFlag T>
 	[[nodiscard]] constexpr auto IsFlagSet(const T var, const T flag) noexcept
 	{
@@ -48,16 +59,31 @@ export namespace PGUI
 	{
 		return (var & flag) == flag;
 	}
-
-	template <typename UnderlyingT>
-	[[nodiscard]] constexpr auto ToUnderlying(const Enumeration auto val) noexcept
+	template <EnumFlag T>
+	[[nodiscard]] constexpr auto AreAllFlagsSet(const T var, const std::same_as<T> auto... flags) noexcept
 	{
-		return static_cast<UnderlyingT>(val);
+		return (AreAllFlagsSet(var, flags) && ...);
 	}
-
-	[[nodiscard]] constexpr auto ToUnderlying(const Enumeration auto val) noexcept
+	template <EnumFlag T>
+	[[nodiscard]] constexpr auto IsNoFlagSet(const T var, const T flag) noexcept
 	{
-		return std::to_underlying(val);
+		return (var & flag) == ZeroFlag<T>();
+	}
+	template <EnumFlag T>
+	[[nodiscard]] constexpr auto AreNoFlagsSet(const T var, const std::same_as<T> auto... flags) noexcept
+	{
+		return (IsNoFlagSet(var, flags) && ...);
+	}
+	template <EnumFlag T>
+	[[nodiscard]] constexpr auto HasMultipleFlagsSet(const T var) noexcept
+	{
+		const auto underlyingValue = ToUnderlying(var);
+		if (underlyingValue == 0)
+		{
+			return false;
+		}
+
+		return (underlyingValue & underlyingValue - 1) != 0;
 	}
 
 	template <Enumeration T>

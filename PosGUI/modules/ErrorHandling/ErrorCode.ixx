@@ -19,7 +19,8 @@ export namespace PGUI
 		NotSupported,
 		NotInitialized,
 		InvalidCast,
-		AllocationFailure
+		AllocationFailure,
+		InvalidFormat
 	};
 
 	enum class SystemErrorCode : int

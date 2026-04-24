@@ -1,5 +1,4 @@
 module;
-#define WIL_SUPPRESS_EXCEPTIONS 0
 #include <bit>
 #include <wil/com.h>
 #include <winrt/base.h>

@@ -522,13 +522,7 @@
     <ClCompile Include="modules\UI\Input.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\DragDrop\DropTarget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\UI\DragDrop\DragDrop.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UI\DragDrop\DropSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\VisualState\VisualStateGroup.ixx">
@@ -589,6 +583,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\DComp\Surface.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\DataObject.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\DragDropStructs.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\DragDropEnums.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\DragDrop\DragDropStructs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DragDrop\EnumFormatData.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

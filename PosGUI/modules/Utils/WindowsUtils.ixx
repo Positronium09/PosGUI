@@ -171,4 +171,35 @@ export namespace PGUI
 	auto HResultToString(HRESULT hresult) noexcept -> std::wstring;
 
 	auto WinErrToString(DWORD errorCode) noexcept -> std::wstring;
+
+	namespace Handles
+	{
+		struct Handle
+		{
+			HANDLE handle = nullptr;
+		};
+		struct HGlobal
+		{
+			HGLOBAL handle = nullptr;
+		};
+		struct HLocal
+		{
+			HLOCAL handle = nullptr;
+		};
+		struct HMetaFilePict
+		{
+			HMETAFILEPICT handle = nullptr;
+		};
+	}
+
+	struct CoTaskDeleter
+	{
+		auto operator()(void* ptr) const noexcept -> void
+		{
+			if (ptr)
+			{
+				CoTaskMemFree(ptr);
+			}
+		}
+	};
 }

@@ -77,13 +77,14 @@ export namespace PGUI
 	class FileSink final : public LogSink
 	{
 		public:
-		explicit FileSink(const std::filesystem::path& filePath)
+		explicit FileSink(const std::filesystem::path& filePath) noexcept
 			: file{ filePath }
 		{
 			if (!file)
 			{
-				throw Exception{ std::errc::no_such_file_or_directory }
-				.AddDetail(L"filePath", filePath.wstring());
+				OutputDebugStringW(
+					std::format(L"[{}] {}\n", LogLevelToString(LogLevel::Error), std::format(L"Failed to open file: {}", filePath.wstring())).c_str()
+				);
 			}
 		}
 
@@ -94,6 +95,13 @@ export namespace PGUI
 
 		private:
 		std::wofstream file;
+	};
+
+	class NullSink final : public LogSink
+	{
+		public:
+		auto Log(const LogLevel, const std::wstring_view) -> void override
+		{ }
 	};
 
 	class Logger final
@@ -298,7 +306,15 @@ export namespace PGUI
 
 		private:
 		static inline Mutex::CSMutex loggingMutex;
-		static inline LogSink* logger = nullptr;
+		static inline DebugConsoleSink defaultDebugSink;
+		static inline NullSink defaultNullSink;
+		
+		#ifdef _DEBUG
+		static inline LogSink* logger = &defaultDebugSink;
+		#else
+		static inline LogSink* logger = &defaultNullSink;
+		#endif
+
 		static inline auto defaultLogLevel =
 			#ifdef _DEBUG
 			LogLevel::Debug;

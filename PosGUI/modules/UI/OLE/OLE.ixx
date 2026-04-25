@@ -1,4 +1,4 @@
-export module OLE;
+export module PGUI.UI.OLE;
 
 export import PGUI.UI.OLE.DataObject;
 export import PGUI.UI.OLE.EnumFormatData;

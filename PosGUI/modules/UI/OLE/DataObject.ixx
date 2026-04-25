@@ -23,11 +23,11 @@ export namespace PGUI::UI::OLE
 		const StorageMedium& storageMedium)
 	{
 		requires std::derived_from<Derived, ObjBase>;
-		{ Derived::CanStore(formatDataView) } -> std::same_as<bool>;
-		{ Derived::SupportedFormats() } -> std::convertible_to<std::span<const FormatData>>;
-		{ Derived::MatchesFormat(formatDataView, supportedFormatView) } -> std::same_as<bool>;
-		{ obj.ToMedium(t, formatDataView) } -> std::same_as<Result<StorageMedium>>;
-		{ obj.FromMedium(formatDataView, storageMedium) } -> std::same_as<Result<typename ObjBase::StoredType>>;
+		//{ Derived::CanStore(formatDataView) } -> std::same_as<bool>;
+		//{ Derived::SupportedFormats() } -> std::convertible_to<std::span<const FormatData>>;
+		//{ Derived::MatchesFormat(formatDataView, supportedFormatView) } -> std::same_as<bool>;
+		//{ obj.ToMedium(t, formatDataView) } -> std::same_as<Result<StorageMedium>>;
+		//{ obj.FromMedium(formatDataView, storageMedium) } -> std::same_as<Result<typename ObjBase::StoredType>>;
 	};
 
 	template <typename Derived>
@@ -39,12 +39,16 @@ export namespace PGUI::UI::OLE
 	template <typename Derived, typename T, bool AllowExtraFormat = false>
 	class DataObjectBase : public Implements<DataObjectBase<Derived, T, AllowExtraFormat>, IDataObject>
 	{
-		static_assert(DataObjectDerived<Derived, DataObjectBase>);
 		public:
 		using StoredType = T;
 		static constexpr auto ExtraFormatsAllowed = AllowExtraFormat;
 		using FormatStoragePair = std::pair<FormatData, StorageMedium>;
 		using StorageVector = std::vector<FormatStoragePair>;
+		
+		DataObjectBase() noexcept
+		{
+			static_assert(DataObjectDerived<Derived, DataObjectBase>);
+		}
 
 		auto AddData(const T& data, const FormatData& formatData) noexcept -> Error
 		{
@@ -138,20 +142,24 @@ export namespace PGUI::UI::OLE
 			FORMATETC* formatEtc, DWORD advf,
 			IAdviseSink* pAdvSink, DWORD* pdwConnection) -> HRESULT override
 		{
+			Unused(formatEtc, advf, pAdvSink, pdwConnection);
 			return OLE_E_ADVISENOTSUPPORTED;
 		}
 		auto DUnadvise(DWORD connection) -> HRESULT override
 		{
+			Unused(connection);
 			return OLE_E_ADVISENOTSUPPORTED;
 		}
 		auto EnumDAdvise(IEnumSTATDATA** enumAdvise) -> HRESULT override
 		{
+			Unused(enumAdvise);
 			return OLE_E_ADVISENOTSUPPORTED;
 		}
 		
 		// ReSharper restore CppParameterNeverUsed
+		// ReSharper disable CppParameterMayBeConstPtrOrRef
 
-		auto QueryGetData(const FORMATETC* formatEtc) -> HRESULT override
+		auto QueryGetData(FORMATETC* formatEtc) -> HRESULT override
 		{
 			if (formatEtc == nullptr)
 			{
@@ -181,7 +189,7 @@ export namespace PGUI::UI::OLE
 			return DV_E_FORMATETC;
 		}
 
-		auto GetData(const FORMATETC* formatEtc, STGMEDIUM* medium) -> HRESULT override
+		auto GetData(FORMATETC* formatEtc, STGMEDIUM* medium) -> HRESULT override
 		{
 			if (formatEtc == nullptr || medium == nullptr)
 			{
@@ -241,7 +249,7 @@ export namespace PGUI::UI::OLE
 			return DV_E_FORMATETC;
 		}
 
-		auto SetData(const FORMATETC* formatEtc, STGMEDIUM* medium, BOOL release) -> HRESULT override
+		auto SetData(FORMATETC* formatEtc, STGMEDIUM* medium, BOOL release) -> HRESULT override
 		{
 			if (formatEtc == nullptr || medium == nullptr)
 			{
@@ -392,6 +400,7 @@ export namespace PGUI::UI::OLE
 			}
 		}
 
+		// ReSharper restore CppParameterMayBeConstPtrOrRef
 		// ReSharper restore IdentifierTypo
 
 		#pragma endregion
@@ -412,7 +421,8 @@ export namespace PGUI::UI::OLE
 		{ obj.FromMedium(formatDataView, storageMedium) } -> std::same_as<Result<typename ObjBase::StoredType>>;
 
 	 */
-	struct TextDataObject : DataObjectBase<TextDataObject, std::wstring>
+
+	struct TextDataObject final : DataObjectBase<TextDataObject, std::wstring>
 	{
 		[[nodiscard]] static auto CanStore(const FormatDataView& formatDataView) noexcept -> bool
 		{
@@ -442,6 +452,18 @@ export namespace PGUI::UI::OLE
 			return formatDataView.format == supportedFormatView.format &&
 				formatDataView.aspect == supportedFormatView.aspect &&
 				AreAllFlagsSet(formatDataView.storageMediumType, supportedFormatView.storageMediumType);
+		}
+
+		[[nodiscard]] auto ToMedium(const std::wstring& text, const FormatDataView& formatDataView) const noexcept -> Result<StorageMedium>
+		{
+			Unused(text, formatDataView);
+			return Unexpected{ Error{ E_NOTIMPL } };
+		}
+
+		[[nodiscard]] auto FromMedium(const FormatDataView& formatDataView, const StorageMedium& storageMedium) const noexcept -> Result<std::wstring>
+		{
+			Unused(formatDataView, storageMedium);
+			return Unexpected{ Error{ E_NOTIMPL } };
 		}
 	};
 }

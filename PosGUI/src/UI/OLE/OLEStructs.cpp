@@ -5,16 +5,16 @@ module;
 #include <strsafe.h>
 #include <wil/resource.h>
 
-module PGUI.UI.DragDrop.DragDropStructs;
+module PGUI.UI.OLE.OLEStructs;
 
-import PGUI.UI.DragDrop.DragDropEnums;
+import PGUI.UI.OLE.OLEEnums;
 import PGUI.ErrorHandling;
 import PGUI.Utils;
 import PGUI.ComPtr;
 
 import std;
 
-namespace PGUI::UI::DragDrop
+namespace PGUI::UI::OLE
 {
 	auto StorageMedium::CopyFrom(const STGMEDIUM& medium) noexcept -> Result<StorageMedium>
 	{

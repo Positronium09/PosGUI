@@ -594,7 +594,7 @@
     <ClCompile Include="modules\UI\OLE\OLEEnums.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\DragDrop\DragDropStructs.cpp">
+    <ClCompile Include="src\UI\OLE\OLEStructs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\OLE\EnumFormatData.ixx">

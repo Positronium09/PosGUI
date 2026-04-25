@@ -185,7 +185,7 @@
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
     <ClCompile Include="src\UI\Dialog.cpp" />
     <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
-    <ClCompile Include="src\UI\DragDrop\DragDropStructs.cpp" />
+    <ClCompile Include="src\UI\OLE\OLEStructs.cpp" />
     <ClCompile Include="src\UI\Font\FontCollection.cpp" />
     <ClCompile Include="src\UI\Font\FontFamily.cpp" />
     <ClCompile Include="src\UI\Font\FontSet.cpp" />

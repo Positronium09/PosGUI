@@ -19,7 +19,7 @@ export namespace PGUI::UI::Theming
 		std::unordered_map<std::type_index, std::any> customStyles{ };
 
 		template <typename T>
-		auto AddCustomStyle(const T& style) noexcept -> Error
+		auto AddCustomStyle(const T& style) noexcept -> Result<void>
 		{
 			try
 			{
@@ -27,10 +27,10 @@ export namespace PGUI::UI::Theming
 			}
 			catch (const std::exception& e)
 			{
-				return Error{ SystemErrorCode::STLFailure  }.SetCustomMessage(StringToWString(e.what()));
+				return Unexpected{ Error{ SystemErrorCode::STLFailure  }.SetCustomMessage(StringToWString(e.what())) };
 			}
 
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
 		template <typename T>

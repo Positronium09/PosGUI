@@ -151,17 +151,17 @@ export namespace PGUI::UI::Layout
 			OnItemAdded(managedItems.back());
 		}
 
-		auto RemoveItem(const std::size_t index) -> Error
+		auto RemoveItem(const std::size_t index) -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
+				return Unexpected{ Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range") };
 			}
 
 			managedItems.erase(managedItems.begin() + index);
 			OnItemRemoved(index);
 
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 		[[nodiscard]] const auto& GetItems() const noexcept
 		{
@@ -329,32 +329,32 @@ export namespace PGUI::UI::Layout
 		{
 			item.Resize(size);
 		}
-		auto ArrangeItem(const std::size_t index, const RectF assignedBounds) noexcept -> Error
+		auto ArrangeItem(const std::size_t index, const RectF assignedBounds) noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
+				return Unexpected{ Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range") };
 			}
 			ArrangeItem(managedItems.at(index), assignedBounds);
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
-		auto MoveItem(const std::size_t index, const PointF point) noexcept -> Error
+		auto MoveItem(const std::size_t index, const PointF point) noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
+				return Unexpected{ Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range") };
 			}
 			MoveItem(managedItems.at(index), point);
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
-		auto ResizeItem(const std::size_t index, const SizeF size) noexcept -> Error
+		auto ResizeItem(const std::size_t index, const SizeF size) noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
-				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range");
+				return Unexpected{ Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given index is out of range") };
 			}
 			ResizeItem(managedItems.at(index), size);
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
 		virtual auto OnItemAdded(const LayoutItem&) -> void

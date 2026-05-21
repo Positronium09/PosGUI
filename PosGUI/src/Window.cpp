@@ -74,30 +74,30 @@ namespace PGUI
 
 	auto Window::_OnDpiChanged(const MessageID msg, const Argument1, const Argument2 arg2) -> MessageHandlerResult
 	{
-		LRESULT result = 0;
-		if (const auto error = logicalRect.SetDpi(GetDpi());
-			error.IsFailure())
+		LRESULT messageResult = 0;
+		if (const auto result = logicalRect.SetDpi(GetDpi());
+			!result.has_value())
 		{
-			Logger::Error(error, L"SetDpi failed in _OnDpiChanged");
+			Logger::Error(result.error(), L"SetDpi failed in _OnDpiChanged");
 		}
 
 		if (msg == WM_DPICHANGED)
 		{
 			logicalRect.SetPhysicalValue(*std::bit_cast<LPRECT>(arg2));
-			result = OnDpiChanged(GetDpi());
+			messageResult = OnDpiChanged(GetDpi());
 		}
 		else if (msg == WM_DPICHANGED_AFTERPARENT)
 		{
-			result = OnDpiChangedAfterParent(GetDpi());
+			messageResult = OnDpiChangedAfterParent(GetDpi());
 		}
 		else if (msg == WM_DPICHANGED_BEFOREPARENT)
 		{
-			result = OnDpiChangedBeforeParent(GetDpi());
+			messageResult = OnDpiChangedBeforeParent(GetDpi());
 		}
 
 		Redraw();
 
-		return result;
+		return messageResult;
 	}
 
 	auto Window::_OnWindowPosChanged(UINT, Argument1, const Argument2 arg2) -> MessageHandlerResult
@@ -189,10 +189,10 @@ namespace PGUI
 
 			window->hWnd = hWnd;
 			window->parentHwnd = createStruct->hwndParent;
-			if (const auto error = window->logicalRect.SetDpi(window->GetDpi());
-				error.IsFailure())
+			if (const auto result = window->logicalRect.SetDpi(window->GetDpi());
+				!result.has_value())
 			{
-				Logger::Error(error, L"SetDpi failed in WM_NCCREATE");
+				Logger::Error(result.error(), L"SetDpi failed in WM_NCCREATE");
 			}
 
 			SetWindowPtrToHWND(hWnd, window);

@@ -467,7 +467,7 @@ export namespace PGUI
 	using RectU = Rect<std::uint32_t>;
 }
 
-export template <typename T, typename Char>
+template <typename T, typename Char>
 struct std::formatter<PGUI::Rect<T>, Char>
 {
 	template <typename FormatParseContext>

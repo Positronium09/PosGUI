@@ -94,11 +94,11 @@ export namespace PGUI
 			return std::abs(m * other.m + 1) < std::numeric_limits<T>::epsilon();
 		}
 
-		[[nodiscard]] auto Intersection(const Line& other) const noexcept -> std::expected<Point<T>, std::monostate>
+		[[nodiscard]] auto Intersection(const Line& other) const noexcept -> std::optional<Point<T>>
 		{
 			if (IsParallel(other))
 			{
-				return std::unexpected{ std::monostate{ } };
+				return std::nullopt;
 			}
 			if (IsVertical())
 			{
@@ -131,7 +131,7 @@ export namespace PGUI
 	using LineF = Line<float>;
 }
 
-export template <typename T, typename Char>
+template <typename T, typename Char>
 struct std::formatter<PGUI::Line<T>, Char>
 {
 	template <typename FormatParseContext>

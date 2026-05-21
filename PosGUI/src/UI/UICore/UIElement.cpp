@@ -37,11 +37,11 @@ namespace PGUI::UI
 		}
 	}
 
-	auto UIElement::CompositionModeChanged(const bool enabled) noexcept -> Error
+	auto UIElement::CompositionModeChanged(const bool enabled) noexcept -> Result<void>
 	{
 		if (IsComposed() == enabled)
 		{
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
 		const auto& rootVisual = host->GetDCompositionVisual();
@@ -51,14 +51,14 @@ namespace PGUI::UI
 			if (const auto hr = rootVisual->RemoveVisual(compositionVisual.get());
 				FAILED(hr))
 			{
-				return Error{ hr }.SetCustomMessage(L"Failed to remove the visual");
+				return Unexpected{ Error{ hr }.SetCustomMessage(L"Failed to remove the visual") };
 			}
 			(void)compositionVisual->SetContent(nullptr);
 
 			compositionVisual.reset();
 			compositionSurface.reset();
 
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
 		const auto& device = host->DCompositionDevice();
@@ -69,14 +69,14 @@ namespace PGUI::UI
 
 		if (FAILED(hr))
 		{
-			return Error{ hr }.SetCustomMessage(L"Cannot create DComposition visual");
+			return Unexpected{ Error{ hr }.SetCustomMessage(L"Cannot create DComposition visual") };
 		}
 
 		compositionVisual = visualBase.try_query<IDCompositionVisual3>();
 
 		if (compositionVisual.get() == nullptr)
 		{
-			return Error{ E_NOINTERFACE }.SetCustomMessage(L"Cannot query IDCompositionVisual3 interface");
+			return Unexpected{ Error{ E_NOINTERFACE }.SetCustomMessage(L"Cannot query IDCompositionVisual3 interface") };
 		}
 
 		hr = device->CreateVirtualSurface(
@@ -86,21 +86,21 @@ namespace PGUI::UI
 
 		if (FAILED(hr))
 		{
-			return Error{ hr }.SetCustomMessage(L"Failed to create the virtual surface");
+			return Unexpected{ Error{ hr }.SetCustomMessage(L"Failed to create the virtual surface") };
 		}
 
 		hr = compositionVisual->SetContent(compositionSurface.get());
 		if (FAILED(hr))
 		{
-			return Error{ hr }.SetCustomMessage(L"Failed to set the visual content");
+			return Unexpected{ Error{ hr }.SetCustomMessage(L"Failed to set the visual content") };
 		}
 
 		hr = rootVisual->AddVisual(compositionVisual.get(), TRUE, nullptr);
 		if (FAILED(hr))
 		{
-			return Error{ hr }.SetCustomMessage(L"Failed to add the visual to the root visual");
+			return Unexpected{ Error{ hr }.SetCustomMessage(L"Failed to add the visual to the root visual") };
 		}
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 }

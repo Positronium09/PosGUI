@@ -1,10 +1,14 @@
 module;
+#include <Windows.h>
+
 #include <objidl.h>
+#include <wil/resource.h>
 
 export module PGUI.UI.OLE.DataObject;
 
 import PGUI.Utils;
 import PGUI.ComPtr;
+import PGUI.ComIterator;
 import PGUI.ErrorHandling;
 import PGUI.UI.OLE.OLEEnums;
 import PGUI.UI.OLE.OLEStructs;
@@ -14,20 +18,18 @@ import std;
 
 export namespace PGUI::UI::OLE
 {
-	template <typename Derived, typename ObjBase>
-	concept DataObjectDerived = requires(
-		const Derived& obj, 
-		const typename ObjBase::StoredType& t, 
+	template <typename T>
+	concept DataObjectHandler = requires(
+		const typename T::ValueType& value, 
 		const FormatDataView& formatDataView,
 		const FormatDataView& supportedFormatView,
 		const StorageMedium& storageMedium)
 	{
-		requires std::derived_from<Derived, ObjBase>;
-		//{ Derived::CanStore(formatDataView) } -> std::same_as<bool>;
-		//{ Derived::SupportedFormats() } -> std::convertible_to<std::span<const FormatData>>;
-		//{ Derived::MatchesFormat(formatDataView, supportedFormatView) } -> std::same_as<bool>;
-		//{ obj.ToMedium(t, formatDataView) } -> std::same_as<Result<StorageMedium>>;
-		//{ obj.FromMedium(formatDataView, storageMedium) } -> std::same_as<Result<typename ObjBase::StoredType>>;
+		{ T::CanStore(formatDataView) } -> std::same_as<bool>;
+		{ T::SupportedFormats() } -> std::convertible_to<std::span<const FormatData>>;
+		{ T::MatchesFormat(formatDataView, supportedFormatView) } -> std::same_as<bool>;
+		{ T::ToMedium(value, formatDataView) } -> std::same_as<Result<StorageMedium>>;
+		{ T::FromMedium(formatDataView, storageMedium) } -> std::same_as<Result<typename T::ValueType>>;
 	};
 
 	template <typename Derived>
@@ -36,43 +38,38 @@ export namespace PGUI::UI::OLE
 		requires Derived::ReadOnlyFromCOM == true;
 	};
 
-	template <typename Derived, typename T, bool AllowExtraFormat = false>
-	class DataObjectBase : public Implements<DataObjectBase<Derived, T, AllowExtraFormat>, IDataObject>
+	template <DataObjectHandler Handler, bool AllowExtraFormat = false>
+	class DataObject final : public Implements<DataObject<Handler, AllowExtraFormat>, IDataObject>
 	{
 		public:
-		using StoredType = T;
+		using StoredType = Handler::ValueType;
 		static constexpr auto ExtraFormatsAllowed = AllowExtraFormat;
 		using FormatStoragePair = std::pair<FormatData, StorageMedium>;
 		using StorageVector = std::vector<FormatStoragePair>;
-		
-		DataObjectBase() noexcept
-		{
-			static_assert(DataObjectDerived<Derived, DataObjectBase>);
-		}
 
-		auto AddData(const T& data, const FormatData& formatData) noexcept -> Error
+		auto AddData(const StoredType& data, const FormatData& formatData) noexcept -> Result<void>
 		{
 			const FormatDataView formatDataView{ formatData };
 
-			if (!Derived::CanStore(formatDataView))
+			if (!Handler::CanStore(formatDataView))
 			{
-				return Error{ ErrorCode::InvalidFormat };
+				return Unexpected{ Error{ ErrorCode::InvalidFormat } };
 			}
 
 			for (const auto& storedFormat : formatStoragePairs | std::views::keys)
 			{
-				if (Derived::MatchesFormat(formatDataView, FormatDataView{ storedFormat }))
+				if (Handler::MatchesFormat(formatDataView, FormatDataView{ storedFormat }))
 				{
-					return Error{
+					return Unexpected{ Error{
 						ErrorCode::InvalidFormat
-					}.SetCustomMessage(L"Duplicate format");
+					}.SetCustomMessage(L"Duplicate format") };
 				}
 			}
 
-			auto storageResult = static_cast<const Derived*>(this)->ToMedium(data, formatDataView);
+			auto storageResult = Handler::ToMedium(data, formatDataView);
 			if (!storageResult.has_value())
 			{
-				return storageResult.error();
+				return Unexpected{ storageResult.error() };
 			}
 			try
 			{
@@ -85,21 +82,21 @@ export namespace PGUI::UI::OLE
 			}
 			catch (const std::exception& e)
 			{
-				return Error{
+				return Unexpected{ Error{
 					SystemErrorCode::STLFailure
-				}.SetCustomMessage(StringToWString(e.what()));
+				}.SetCustomMessage(StringToWString(e.what())) };
 			}
 
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
-		auto AddData(const T& data) noexcept -> Error
+		auto AddData(const StoredType& data) noexcept -> Result<void>
 		{
 			const auto initialSize = formatStoragePairs.size();
-			for (const auto& formatData : Derived::SupportedFormats())
+			for (const auto& formatData : Handler::SupportedFormats())
 			{
 				if (const auto result = AddData(data, formatData);
-					result.IsFailure() && result.Code() != ErrorCode::InvalidFormat)
+					!result.has_value() && result.error().Code() != ErrorCode::InvalidFormat)
 				{
 					formatStoragePairs.erase(
 						formatStoragePairs.begin() + initialSize,
@@ -109,7 +106,7 @@ export namespace PGUI::UI::OLE
 				}
 			}
 
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
 		auto ClearData() noexcept -> void
@@ -117,21 +114,37 @@ export namespace PGUI::UI::OLE
 			formatStoragePairs.clear();
 		}
 
-		[[nodiscard]] auto GetData(const FormatData& formatData) const noexcept -> Result<T>
+		[[nodiscard]] auto GetData(const FormatData& formatData) const noexcept -> Result<StoredType>
 		{
 			const FormatDataView formatDataView{ formatData };
 
 			for (const auto& [storedFormat, storage] : formatStoragePairs)
 			{
 				if (const FormatDataView storedFormatView{ storedFormat };
-					Derived::MatchesFormat(formatDataView, storedFormatView))
+					Handler::MatchesFormat(formatDataView, storedFormatView))
 				{
-					return static_cast<const Derived*>(this)->FromMedium(storedFormatView, storage);
+					return Handler::FromMedium(storedFormatView, storage);
 				}
 			}
 
-			return Error{ ErrorCode::NotFound };
+			return Unexpected{ Error{ ErrorCode::NotFound } };
 		}
+
+		template <DataObjectHandler H>
+		[[nodiscard]] auto GetData(const FormatData& formatData) const noexcept -> Result<typename H::ValueType>
+		{
+			const FormatDataView formatDataView{ formatData };
+			for (const auto& [storedFormat, storage] : formatStoragePairs)
+			{
+				if (const FormatDataView storedFormatView{ storedFormat };
+					H::MatchesFormat(formatDataView, storedFormatView))
+				{
+					return H::FromMedium(storedFormatView, storage);
+				}
+			}
+			return Unexpected{ Error{ ErrorCode::NotFound } };
+		}
+		
 
 		#pragma region COM Methods
 
@@ -167,9 +180,9 @@ export namespace PGUI::UI::OLE
 			}
 
 			const FormatDataView formatData{ *formatEtc };
-			for (const auto& supportedFormat : Derived::SupportedFormats())
+			for (const auto& supportedFormat : Handler::SupportedFormats())
 			{
-				if (Derived::MatchesFormat(formatData, FormatDataView{ supportedFormat }))
+				if (Handler::MatchesFormat(formatData, FormatDataView{ supportedFormat }))
 				{
 					return S_OK;
 				}
@@ -179,7 +192,7 @@ export namespace PGUI::UI::OLE
 			{
 				for (const auto& storedFormat : formatStoragePairs | std::views::keys)
 				{
-					if (Derived::MatchesFormat(formatData, FormatDataView{ storedFormat }))
+					if (Handler::MatchesFormat(formatData, FormatDataView{ storedFormat }))
 					{
 						return S_OK;
 					}
@@ -201,7 +214,7 @@ export namespace PGUI::UI::OLE
 
 			for (const auto& [storedFormat, storage] : formatStoragePairs)
 			{
-				if (!Derived::MatchesFormat(formatData, FormatDataView{ storedFormat }))
+				if (!Handler::MatchesFormat(formatData, FormatDataView{ storedFormat }))
 				{
 					continue;
 				}
@@ -232,15 +245,15 @@ export namespace PGUI::UI::OLE
 
 			for (const auto& [storedFormat, storage] : formatStoragePairs)
 			{
-				if (!Derived::MatchesFormat(formatData, FormatDataView{ storedFormat }))
+				if (!Handler::MatchesFormat(formatData, FormatDataView{ storedFormat }))
 				{
 					continue;
 				}
 
-				if (const auto error = storage.WriteToSTGMEDIUM(mediumRef);
-					error.IsFailure())
+				if (const auto result = storage.WriteToSTGMEDIUM(mediumRef);
+					!result.has_value())
 				{
-					return error.HResult();
+					return result.error().HResult();
 				}
 
 				return S_OK;
@@ -256,13 +269,13 @@ export namespace PGUI::UI::OLE
 				return E_POINTER;
 			}
 
-			if constexpr (IsReadOnlyFromCOM<Derived>)
+			if constexpr (IsReadOnlyFromCOM<Handler>)
 			{
 				return E_NOTIMPL;
 			}
 
 			const FormatDataView formatData{ *formatEtc };
-			if (!Derived::CanStore(formatData))
+			if (!Handler::CanStore(formatData))
 			{
 				if constexpr (!ExtraFormatsAllowed)
 				{
@@ -281,7 +294,7 @@ export namespace PGUI::UI::OLE
 
 			const auto it = std::ranges::find_if(formatStoragePairs, [&](const auto& pair)
 			{
-				return Derived::MatchesFormat(formatData, FormatDataView{ pair.first });
+				return Handler::MatchesFormat(formatData, FormatDataView{ pair.first });
 			});
 			if (it != formatStoragePairs.end())
 			{
@@ -331,7 +344,7 @@ export namespace PGUI::UI::OLE
 
 			try
 			{
-				*ppenumFormatEtc = new (std::nothrow) EnumFormatData{ Derived::SupportedFormats() };
+				*ppenumFormatEtc = new (std::nothrow) EnumFormatData{ Handler::SupportedFormats() };
 
 				if (*ppenumFormatEtc == nullptr)
 				{
@@ -368,7 +381,7 @@ export namespace PGUI::UI::OLE
 
 			if constexpr (HasCanonicalFormat)
 			{
-				auto canonicalFormatResult = Derived::GetCanonicalFormatFor(input);
+				auto canonicalFormatResult = Handler::GetCanonicalFormatFor(input);
 				if (!canonicalFormatResult.has_value())
 				{
 					return canonicalFormatResult.error().HResult();
@@ -408,27 +421,19 @@ export namespace PGUI::UI::OLE
 		private:
 		static constexpr auto HasCanonicalFormat = requires(const FormatDataView& formatDataView)
 		{
-			{ Derived::GetCanonicalFormatFor(formatDataView) } -> std::same_as<Result<FormatData>>;
+			{ Handler::GetCanonicalFormatFor(formatDataView) } -> std::same_as<Result<FormatData>>;
 		};
 		StorageVector formatStoragePairs;
 	};
 
-	/*
-	 * 		{ Derived::CanStore(formatDataView) } -> std::same_as<bool>;
-		{ Derived::SupportedFormats() } -> std::convertible_to<std::span<const FormatData>>;
-		{ Derived::MatchesFormat(formatDataView, supportedFormatView) } -> std::same_as<bool>;
-		{ obj.ToMedium(t, formatDataView) } -> std::same_as<Result<StorageMedium>>;
-		{ obj.FromMedium(formatDataView, storageMedium) } -> std::same_as<Result<typename ObjBase::StoredType>>;
-
-	 */
-
-	struct TextDataObject final : DataObjectBase<TextDataObject, std::wstring>
+	struct TextDataHandler final
 	{
+		using ValueType = std::wstring;
+
 		[[nodiscard]] static auto CanStore(const FormatDataView& formatDataView) noexcept -> bool
 		{
 			return (
-				formatDataView.format == ClipboardFormat::UnicodeText ||
-				formatDataView.format == ClipboardFormat::Text) &&
+				formatDataView.format == ClipboardFormat::UnicodeText) &&
 				formatDataView.aspect == DVAspect::Content &&
 				IsFlagSet(formatDataView.storageMediumType, StorageMediumType::HGlobalMemory);
 		}
@@ -454,16 +459,175 @@ export namespace PGUI::UI::OLE
 				AreAllFlagsSet(formatDataView.storageMediumType, supportedFormatView.storageMediumType);
 		}
 
-		[[nodiscard]] auto ToMedium(const std::wstring& text, const FormatDataView& formatDataView) const noexcept -> Result<StorageMedium>
+		[[nodiscard]] static auto ToMedium(const std::wstring& text, const FormatDataView& formatDataView) noexcept -> Result<StorageMedium>
 		{
-			Unused(text, formatDataView);
-			return Unexpected{ Error{ E_NOTIMPL } };
+			if (!CanStore(formatDataView))
+			{
+				return Unexpected{ Error{ ErrorCode::InvalidFormat } };
+			}
+			
+			const auto bytesRequired = (text.size() + 1) * sizeof(wchar_t);
+			wil::unique_hglobal hMem{ GlobalAlloc(GMEM_MOVEABLE, bytesRequired) };
+			if (hMem.get() == nullptr)
+			{
+				return Unexpected{ Error{ E_OUTOFMEMORY } };
+			}
+
+			const wil::unique_hglobal_locked lockedMem{ hMem.get() };
+			if (lockedMem.get() == nullptr)
+			{
+				return Unexpected{ Error{ E_POINTER } };
+			}
+
+			std::memcpy(lockedMem.get(), text.c_str(), bytesRequired);
+
+			return StorageMedium{ 
+				StorageMediumType::HGlobalMemory, 
+				StorageHolder{ Handles::HGlobal{ hMem.release() } },
+				nullptr,
+				true
+			};
 		}
 
-		[[nodiscard]] auto FromMedium(const FormatDataView& formatDataView, const StorageMedium& storageMedium) const noexcept -> Result<std::wstring>
+		[[nodiscard]] static auto FromMedium(const FormatDataView& formatDataView, const StorageMedium& storageMedium) noexcept -> Result<std::wstring>
 		{
-			Unused(formatDataView, storageMedium);
-			return Unexpected{ Error{ E_NOTIMPL } };
+			if (!CanStore(formatDataView))
+			{
+				return Unexpected{ Error{ ErrorCode::InvalidFormat } };
+			}
+			if (const auto result = storageMedium.GetHolder().HasDataOfType(StorageMediumType::HGlobalMemory);
+				!result.has_value())
+			{
+				return Unexpected{ result.error() };
+			}
+			else if (!result.value())
+			{
+				return Unexpected{ Error{ ErrorCode::InvalidFormat } };
+			}
+
+			const auto [handle] = storageMedium.GetHolder().GetDataOfType<Handles::HGlobal>().value();
+			if (handle == nullptr)
+			{
+				return Unexpected{ Error{ E_POINTER } };
+			}
+			const auto byteSize = GlobalSize(handle);
+			if (byteSize < sizeof(wchar_t))
+			{
+				return Unexpected{ Error{ ErrorCode::InvalidArgument } };
+			}
+
+			const wil::unique_hglobal_locked lockedMem{ handle };
+			if (lockedMem.get() == nullptr)
+			{
+				return Unexpected{ Error{ E_POINTER } };
+			}
+			const auto charCount = byteSize / sizeof(wchar_t);
+			try
+			{
+				std::wstring str{ static_cast<const wchar_t*>(lockedMem.get()), charCount - 1 };
+				return str;
+			}
+			catch (const std::exception& e)
+			{
+				return Unexpected{ 
+					Error{
+						E_OUTOFMEMORY 
+					}.SetCustomMessage(StringToWString(e.what())) };
+			}
+		}
+	};
+	using TextDataObject = DataObject<TextDataHandler>;
+
+	class DataObjectReadWrite final : public ComPtrHolder<IDataObject>
+	{
+		public:
+		explicit DataObjectReadWrite(const ComPtr<IDataObject>& dataObject) noexcept 
+			: ComPtrHolder{ dataObject }
+		{ }
+		explicit DataObjectReadWrite(ComPtr<IDataObject>&& dataObject) noexcept
+			: ComPtrHolder{ std::move(dataObject) }
+		{}
+
+		auto SetData(const FormatData& formatData, const StorageMedium& storageMedium) const noexcept -> Result<void>
+		{
+			auto formatEtcResult = formatData.ToFORMATETC();
+			if (!formatEtcResult.has_value())
+			{
+				return Unexpected{ formatEtcResult.error() };
+			}
+			FormatData::TargetDevicePtr targetDevice{ formatEtcResult.value().ptd };
+
+			auto storageMediumResult = storageMedium.CopyToSTGMEDIUM();
+			if (!storageMediumResult.has_value())
+			{
+				return Unexpected{ storageMediumResult.error() };
+			}
+
+			if (Error error{
+					Get()->SetData(
+						&formatEtcResult.value(),
+						&storageMediumResult.value(),
+						true)
+				};
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			return EmptyResult;
+		}
+
+		[[nodiscard]] auto GetData(const FormatData& formatData) const noexcept -> Result<StorageMedium>
+		{
+			auto formatEtcResult = formatData.ToFORMATETC();
+			if (!formatEtcResult.has_value())
+			{
+				return Unexpected{ formatEtcResult.error() };
+			}
+			FormatData::TargetDevicePtr targetDevice{ formatEtcResult.value().ptd };
+
+			STGMEDIUM medium{ };
+			
+			if (const auto error = Error{ Get()->GetData(&formatEtcResult.value(), &medium) };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+
+			return StorageMedium::MoveFrom(std::move(medium));
+		}
+
+		template <DataObjectHandler H>
+		[[nodiscard]] auto GetData(const FormatData& formatData) const noexcept -> Result<typename H::ValueType>
+		{
+			auto formatEtcResult = formatData.ToFORMATETC();
+			if (!formatEtcResult.has_value())
+			{
+				return Unexpected{ formatEtcResult.error() };
+			}
+			FormatData::TargetDevicePtr targetDevice{ formatEtcResult.value().ptd };
+			
+			STGMEDIUM medium{ };
+
+			if (const auto error = Error{ Get()->GetData(&formatEtcResult.value(), &medium) };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			auto storageMedium = StorageMedium::MoveFrom(std::move(medium));
+			
+			return H::FromMedium(FormatDataView{ formatData }, storageMedium);
+		}
+
+		[[nodiscard]] auto EnumerateFormats(const DataDirection direction = DataDirection::Get) const noexcept -> Result<EnumFORMATETCIterator>
+		{
+			ComPtr<IEnumFORMATETC> ptr;
+			if (const auto error = Error{ Get()->EnumFormatEtc(ToUnderlying(direction), ptr.put()) };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			
+			return EnumFORMATETCIterator{ ptr };
 		}
 	};
 }

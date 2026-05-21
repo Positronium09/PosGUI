@@ -33,25 +33,33 @@ namespace PGUI::UI::Animation
 		return static_cast<AnimationSchedulingResult>(result);
 	}
 
-	auto Storyboard::Abandon() const noexcept -> Error
+	auto Storyboard::Abandon() const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Abandon()
 		};
 		LogIfFailed(error, L"Abandoning failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto Storyboard::Conclude() const noexcept -> Error
+	auto Storyboard::Conclude() const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Conclude()
 		};
 		LogIfFailed(error, L"Concluding failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto Storyboard::Finish(const Seconds completionDeadline) const noexcept -> Error
+	auto Storyboard::Finish(const Seconds completionDeadline) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Finish(ToWAM(completionDeadline))
@@ -59,10 +67,14 @@ namespace PGUI::UI::Animation
 		error
 				.AddDetail(L"Completion Deadline", std::format(L"{:.10F}", completionDeadline.count()));
 		LogIfFailed(error, L"Finish failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto Storyboard::SetSkipDuration(const Seconds duration) const noexcept -> Error
+	auto Storyboard::SetSkipDuration(const Seconds duration) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetSkipDuration(ToWAM(duration))
@@ -70,10 +82,14 @@ namespace PGUI::UI::Animation
 		error
 				.AddDetail(L"Duration", std::format(L"{:.10F}", duration.count()));
 		LogIfFailed(error, L"Setting skip duration failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto Storyboard::SetLongestAcceptableDelay(const Seconds delay) const noexcept -> Error
+	auto Storyboard::SetLongestAcceptableDelay(const Seconds delay) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetLongestAcceptableDelay(ToWAM(delay))
@@ -81,16 +97,24 @@ namespace PGUI::UI::Animation
 		error
 				.AddDetail(L"Delay", std::format(L"{:.10F}", delay.count()));
 		LogIfFailed(error, L"Setting longest acceptable delay failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto Storyboard::HoldVariable(const AnimationVariable& variable) const noexcept -> Error
+	auto Storyboard::HoldVariable(const AnimationVariable& variable) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->HoldVariable(variable.GetRaw())
 		};
 		LogIfFailed(error, L"Hold variable failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto Storyboard::AddKeyframeAfterTransition(
@@ -124,18 +148,22 @@ namespace PGUI::UI::Animation
 	}
 
 	auto Storyboard::AddTransition(
-		const AnimationVariable& variable, const AnimationTransition& transition) const noexcept -> Error
+		const AnimationVariable& variable, const AnimationTransition& transition) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->AddTransition(variable.GetRaw(), transition.GetRaw())
 		};
 		LogIfFailed(error, L"AddTransition failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto Storyboard::AddTransitionAtKeyframe(
 		const AnimationVariable& variable,
-		const AnimationTransition& transition, const KeyFrame keyFrame) const noexcept -> Error
+		const AnimationTransition& transition, const KeyFrame keyFrame) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->AddTransitionAtKeyframe(
@@ -143,12 +171,16 @@ namespace PGUI::UI::Animation
 				transition.GetRaw(), keyFrame)
 		};
 		LogIfFailed(error, L"AddTransitionAtKeyframe failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto Storyboard::AddTransitionBetweenKeyframes(
 		const AnimationVariable& variable, const AnimationTransition& transition,
-		const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Error
+		const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->AddTransitionBetweenKeyframes(
@@ -156,13 +188,17 @@ namespace PGUI::UI::Animation
 			transition.GetRaw(), startKeyFrame, endKeyFrame)
 		};
 		LogIfFailed(error, L"AddTransitionBetweenKeyframes failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto Storyboard::RepeatBetweenKeyframes(
 		const KeyFrame startKeyFrame, const KeyFrame endKeyFrame,
 		const double iterationCount, AnimationRepeatMode repeatMode,
-		const bool registerForNext) const noexcept -> Error
+		const bool registerForNext) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->RepeatBetweenKeyframes(
@@ -174,7 +210,11 @@ namespace PGUI::UI::Animation
 			.AddDetail(L"Iteration Count", std::format(L"{:.10F}", iterationCount))
 			.AddDetail(L"Register for Next", std::format(L"{}", registerForNext));
 		LogIfFailed(error, L"RepeatBetweenKeyframes failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto Storyboard::GetStatus() const noexcept -> Result<StoryboardStatus>
@@ -206,7 +246,7 @@ namespace PGUI::UI::Animation
 		return FromWAM(elapsedTime);
 	}
 
-	auto Storyboard::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Error
+	auto Storyboard::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetTag(obj.get(), id)
@@ -214,7 +254,11 @@ namespace PGUI::UI::Animation
 		error
 			.AddDetail(L"ID", std::to_wstring(id));
 		LogIfFailed(error, L"SetTag failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto Storyboard::GetTag() const noexcept -> Result<std::pair<ComPtr<IUnknown>, UINT32>>
@@ -233,12 +277,16 @@ namespace PGUI::UI::Animation
 	}
 
 	auto Storyboard::SetStoryboardEventHandler(
-		AnimationStoryboardEventHandler& eventHandler) const noexcept -> Error
+		AnimationStoryboardEventHandler& eventHandler) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetStoryboardEventHandler(eventHandler.GetRouter().get())
 		};
 		LogIfFailed(error, L"SetStoryboardEventHandler failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 }

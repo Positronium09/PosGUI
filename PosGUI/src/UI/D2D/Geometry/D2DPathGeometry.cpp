@@ -75,13 +75,17 @@ namespace PGUI::UI::D2D
 		return GeometrySink{ sink };
 	}
 
-	auto D2DPathGeometry::Stream(const GeometrySink& sink) const noexcept -> Error
+	auto D2DPathGeometry::Stream(const GeometrySink& sink) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Stream(sink.GetRaw())
 		};
 		LogIfFailed(error, L"Streaming failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto D2DPathGeometry::CreateRoundRectWithPathGeometry(
@@ -180,11 +184,11 @@ namespace PGUI::UI::D2D
 
 		Unused(sink.EndFigure(FigureEnd::Closed));
 
-		if (auto error = sink.Close();
-			error.IsFailure())
+		if (auto result = sink.Close();
+			!result.has_value())
 		{
-			Logger::Error(error, L"Failed to close geometry sink");
-			return Unexpected{ error };
+			Logger::Error(result.error(), L"Failed to close geometry sink");
+			return Unexpected{ result.error() };
 		}
 
 		return pathGeometry;

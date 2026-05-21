@@ -111,76 +111,108 @@ namespace PGUI::UI
 		}
 	}
 
-	auto TextFormat::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Error
+	auto TextFormat::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFlowDirection(flowDirection)
 		};
 		LogIfFailed(error, L"Cannot set flow direction");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextFormat::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> Error
+	auto TextFormat::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetIncrementalTabStop(incrementalTabStop)
 		};
 		LogIfFailed(error, L"Cannot set incremental tab stop");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextFormat::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> Error
+	auto TextFormat::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetParagraphAlignment(paragraphAlignment)
 		};
 		LogIfFailed(error, L"Cannot set paragraph alignment");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextFormat::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> Error
+	auto TextFormat::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetReadingDirection(readingDirection)
 		};
 		LogIfFailed(error, L"Cannot set reading direction");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextFormat::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Error
+	auto TextFormat::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetTextAlignment(textAlignment)
 		};
 		LogIfFailed(error, L"Cannot set text alignment");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextFormat::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> Error
+	auto TextFormat::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetWordWrapping(wordWrapping)
 		};
 		LogIfFailed(error, L"Cannot set word wrapping");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextFormat::SetTrimming(const Trimming& trimming) const noexcept -> Error
+	auto TextFormat::SetTrimming(const Trimming& trimming) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetTrimming(&trimming.trimmingOptions, trimming.GetRaw())
 		};
 		LogIfFailed(error, L"Cannot set trimming");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextFormat::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Error
+	auto TextFormat::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetLineSpacing(&lineSpacing)
 		};
 		LogIfFailed(error, L"Cannot set line spacing");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto TextFormat::GetFlowDirection() const noexcept -> FlowDirection

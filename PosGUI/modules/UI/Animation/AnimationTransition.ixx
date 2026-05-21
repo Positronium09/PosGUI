@@ -24,12 +24,12 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto IsDurationKnown() const noexcept -> bool;
 
-		auto SetInitialValue(double value) const noexcept -> Error;
+		auto SetInitialValue(double value) const noexcept -> Result<void>;
 
-		auto SetInitialValue(std::span<const double> values) const noexcept -> Error;
+		auto SetInitialValue(std::span<const double> values) const noexcept -> Result<void>;
 
-		auto SetInitialVelocity(double velocity) const noexcept -> Error;
+		auto SetInitialVelocity(double velocity) const noexcept -> Result<void>;
 
-		auto SetInitialVelocity(std::span<const double> velocities) const noexcept -> Error;
+		auto SetInitialVelocity(std::span<const double> velocities) const noexcept -> Result<void>;
 	};
 }

@@ -68,7 +68,7 @@ export namespace PGUI
 	}
 }
 
-export template <typename Char>
+template <typename Char>
 struct std::formatter<PGUI::Ellipse, Char>
 {
 	template <typename FormatParseContext>

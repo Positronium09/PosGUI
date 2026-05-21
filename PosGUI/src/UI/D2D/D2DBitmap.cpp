@@ -56,18 +56,22 @@ namespace PGUI::UI::D2D
 		return MappedRect{ mappedRect, GetPixelSize().cy };
 	}
 
-	auto D2DBitmap::Unmap() const noexcept -> Error
+	auto D2DBitmap::Unmap() const noexcept -> Result<void>
 	{
 		const auto hr = Get()->Unmap();
 		Error error{ hr };
 		LogIfFailed(error, L"Cannot Unmap");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto D2DBitmap::CopyFromBitmap(
 		D2DBitmap bitmap,
 		std::optional<PointU> destPoint,
-		std::optional<RectU> srcRect) const noexcept -> Error
+		std::optional<RectU> srcRect) const noexcept -> Result<void>
 	{
 		const D2D1_RECT_U* srcRectPtr = nullptr;
 		if (srcRect.has_value())
@@ -104,13 +108,14 @@ namespace PGUI::UI::D2D
 			}
 
 			Logger::Error(error, L"Cannot copy from bitmap");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
 	auto D2DBitmap::CopyFromMemory(
 		const void* source, const UINT32 pitch,
-		std::optional<RectU> destRect) const noexcept -> Error
+		std::optional<RectU> destRect) const noexcept -> Result<void>
 	{
 		const D2D1_RECT_U* destRectPtr = nullptr;
 		if (destRect.has_value())
@@ -135,7 +140,8 @@ namespace PGUI::UI::D2D
 				error.AddDetail(L"Destination Rect", L"None");
 			}
 			Logger::Error(error, L"Cannot copy from memory");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 }

@@ -218,7 +218,7 @@ export namespace PGUI
 	using PointU = Point<std::uint32_t>;
 }
 
-export template <typename T, typename Char>
+template <typename T, typename Char>
 struct std::formatter<PGUI::Point<T>, Char>
 {
 	template <typename FormatParseContext>

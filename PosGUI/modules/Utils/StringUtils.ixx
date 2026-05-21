@@ -154,7 +154,7 @@ export namespace PGUI
 	[[nodiscard]] auto WStringToString(wzstring_view string) noexcept -> std::string;
 }
 
-export template <typename CharT, typename Traits>
+template <typename CharT, typename Traits>
 struct std::formatter<PGUI::basic_zstring_view<CharT, Traits>, CharT> :
 	std::formatter<std::basic_string_view<CharT, Traits>, CharT>
 {

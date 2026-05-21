@@ -431,7 +431,7 @@ export namespace PGUI::UI
 	}
 }
 
-export template <typename Char>
+template <typename Char>
 struct std::formatter<PGUI::UI::RGBA, Char>
 {
 	template <typename FormatParseContext>

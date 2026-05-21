@@ -39,52 +39,72 @@ namespace PGUI::UI
 		}
 	}
 
-	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Error
+	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetTextAlignment(textAlignment)
 		};
 		LogIfFailed(error, L"Cannot set text alignment");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> Error
+	auto TextLayout::SetParagraphAlignment(const ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetParagraphAlignment(paragraphAlignment)
 		};
 		LogIfFailed(error, L"Cannot set paragraph alignment");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> Error
+	auto TextLayout::SetWordWrapping(const WordWrapping wordWrapping) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetWordWrapping(wordWrapping)
 		};
 		LogIfFailed(error, L"Cannot set word wrapping");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> Error
+	auto TextLayout::SetReadingDirection(const ReadingDirection readingDirection) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetReadingDirection(readingDirection)
 		};
 		LogIfFailed(error, L"Cannot set reading direction");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Error
+	auto TextLayout::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFlowDirection(flowDirection)
 		};
 		LogIfFailed(error, L"Cannot set flow direction");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> Error
+	auto TextLayout::SetIncrementalTabStop(const float incrementalTabStop) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetIncrementalTabStop(incrementalTabStop)
@@ -93,21 +113,26 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Incremental Tab Stop", std::format(L"{:.5F}", incrementalTabStop));
 			Logger::Error(error, L"Cannot set incremental tab stop");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Error
+	auto TextLayout::SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetLineSpacing(
 				lineSpacing.method, lineSpacing.height, lineSpacing.baseline)
 		};
 		LogIfFailed(error, L"Cannot set line spacing");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetMaxWidth(const float maxWidth) const noexcept -> Error
+	auto TextLayout::SetMaxWidth(const float maxWidth) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetMaxWidth(maxWidth)
@@ -116,11 +141,12 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Max Width", std::format(L"{:.5F}", maxWidth));
 			Logger::Error(error, L"Cannot set max width");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetMaxHeight(const float maxHeight) const noexcept -> Error
+	auto TextLayout::SetMaxHeight(const float maxHeight) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetMaxHeight(maxHeight)
@@ -129,22 +155,23 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Max Height", std::format(L"{:.5F}", maxHeight));
 			Logger::Error(error, L"Cannot set max height");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetMaxSize(const SizeF maxSize) const noexcept -> Error
+	auto TextLayout::SetMaxSize(const SizeF maxSize) const noexcept -> Result<void>
 	{
-		if (const auto error = SetMaxWidth(maxSize.cx);
-			error.IsFailure())
+		if (const auto result = SetMaxWidth(maxSize.cx);
+			!result.has_value())
 		{
-			return error;
+			return result;
 		}
 		return SetMaxHeight(maxSize.cy);
 	}
 
 	auto TextLayout::SetFontCollection(const FontCollection& fontCollection,
-	                                   const TextRange textRange) const noexcept -> Error
+	                                   const TextRange textRange) const noexcept -> Result<void>
 	{
 		const auto fontCollectionPtr = fontCollection.GetAs<IDWriteFontCollection>();
 		Error error{
@@ -156,12 +183,13 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set font collection");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
 	auto TextLayout::SetFontFamilyName(const wzstring_view fontFamilyName,
-	                                   const TextRange textRange) const noexcept -> Error
+	                                   const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFontFamilyName(fontFamilyName.data(), textRange)
@@ -171,11 +199,12 @@ namespace PGUI::UI
 			error.AddDetail(L"Font Family Name", fontFamilyName)
 			     .AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set font family name");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetFontWeight(const FontWeight fontWeight, const TextRange textRange) const noexcept -> Error
+	auto TextLayout::SetFontWeight(const FontWeight fontWeight, const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFontWeight(fontWeight, textRange)
@@ -184,11 +213,12 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set font weight");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetFontStyle(const FontStyle fontStyle, const TextRange textRange) const noexcept -> Error
+	auto TextLayout::SetFontStyle(const FontStyle fontStyle, const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFontStyle(fontStyle, textRange)
@@ -197,11 +227,12 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set font style");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetFontStretch(const FontStretch fontStretch, const TextRange textRange) const noexcept -> Error
+	auto TextLayout::SetFontStretch(const FontStretch fontStretch, const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFontStretch(fontStretch, textRange)
@@ -210,11 +241,12 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set font stretch");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetFontSize(const float fontSize, const TextRange textRange) const noexcept -> Error
+	auto TextLayout::SetFontSize(const float fontSize, const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFontSize(fontSize, textRange)
@@ -223,11 +255,12 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set font size");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetUnderline(const bool hasUnderline, const TextRange textRange) const noexcept -> Error
+	auto TextLayout::SetUnderline(const bool hasUnderline, const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetUnderline(hasUnderline, textRange)
@@ -236,11 +269,12 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set underline");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetStrikethrough(const bool hasStrikethrough, const TextRange textRange) const noexcept -> Error
+	auto TextLayout::SetStrikethrough(const bool hasStrikethrough, const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetStrikethrough(hasStrikethrough, textRange)
@@ -249,12 +283,13 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set strikethrough");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
 	auto TextLayout::SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect,
-	                                  const TextRange textRange) const noexcept -> Error
+	                                  const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetDrawingEffect(drawingEffect.get(), textRange)
@@ -263,12 +298,13 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set drawing effect");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
 	auto TextLayout::SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject,
-	                                 const TextRange textRange) const noexcept -> Error
+	                                 const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetInlineObject(inlineObject.get(), textRange)
@@ -277,12 +313,13 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set inline object");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
 	auto TextLayout::SetTypography(const ComPtr<IDWriteTypography>& typography,
-	                               const TextRange textRange) const noexcept -> Error
+	                               const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetTypography(typography.get(), textRange)
@@ -291,12 +328,13 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set typography");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
 	auto TextLayout::SetLocaleName(const wzstring_view localeName,
-	                               const TextRange textRange) const noexcept -> Error
+	                               const TextRange textRange) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetLocaleName(localeName.data(), textRange)
@@ -305,18 +343,23 @@ namespace PGUI::UI
 		{
 			error.AddDetail(L"Text Range", std::format(L"{}", textRange));
 			Logger::Error(error, L"Cannot set locale name");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto TextLayout::SetTrimming(const Trimming& trimming) const noexcept -> Error
+	auto TextLayout::SetTrimming(const Trimming& trimming) const noexcept -> Result<void>
 	{
 		auto& trimmingOptions = trimming.trimmingOptions;
 		Error error{
 			Get()->SetTrimming(&trimmingOptions, trimming.GetRaw())
 		};
 		LogIfFailed(error, L"Cannot set trimming");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto TextLayout::GetTrimming() const noexcept -> Result<Trimming>

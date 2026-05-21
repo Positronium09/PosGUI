@@ -6,6 +6,7 @@ export module PGUI.ComIterator;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.UI.OLE.OLEStructs;
 
 namespace PGUI
 {
@@ -41,6 +42,7 @@ namespace PGUI
 export namespace PGUI
 {
 	template <typename Derived, ComInterface T, typename IteratorType, typename ValueType>
+		requires std::is_default_constructible_v<ValueType>
 	class ComIterator : ComPtrHolder<T>
 	{
 		public:
@@ -97,13 +99,10 @@ export namespace PGUI
 		}
 
 		protected:
-		[[nodiscard]] auto& GetCurrentValue() noexcept
+		template <typename Self>
+		[[nodiscard]] auto&& GetCurrentValue(this Self&& self) noexcept
 		{
-			return current;
-		}
-		[[nodiscard]] const auto& GetCurrentValue() const noexcept
-		{
-			return current;
+			return std::forward_like<Self>(self.current);
 		}
 
 		private:
@@ -206,4 +205,34 @@ export namespace PGUI
 
 	using EnumIUnknownIterator = EnumInterfaceIterator<IUnknown, IEnumUnknown>;
 	static_assert(IteratorDerivedType<EnumIUnknownIterator, IUnknown*>);
+
+	// ReSharper disable once CppInconsistentNaming
+	// ReSharper disable once IdentifierTypo
+
+	struct EnumFORMATETCIterator : ComIterator<EnumFORMATETCIterator, IEnumFORMATETC, FORMATETC, UI::OLE::FormatData>
+	{
+		using ComIterator::ComIterator;
+
+		static auto DeleteCurrent() noexcept -> void
+		{
+		}
+
+		auto ConvertItem(FORMATETC& fmt) noexcept -> void
+		{
+			if (auto result = UI::OLE::FormatData::FromFORMATETC(std::move(fmt));
+				result.has_value())
+			{
+				GetCurrentValue() = std::move(result).value();
+			}
+		}
+
+		static auto DeleteItem(FORMATETC& fmt) noexcept -> void
+		{
+			if (fmt.ptd != nullptr)
+			{
+				CoTaskMemFree(fmt.ptd);
+				fmt.ptd = nullptr;
+			}
+		}
+	};
 }

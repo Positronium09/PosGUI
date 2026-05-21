@@ -274,6 +274,6 @@ export namespace PGUI::UI::Animation
 		AnimationTransitionLibrary();
 	};
 
-	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, double finalValue) noexcept -> Error;
-	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, std::span<const double> finalValues) noexcept -> Error;
+	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, double finalValue) noexcept -> Result<void>;
+	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, std::span<const double> finalValues) noexcept -> Result<void>;
 }

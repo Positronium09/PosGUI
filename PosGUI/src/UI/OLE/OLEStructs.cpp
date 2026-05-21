@@ -332,13 +332,13 @@ namespace PGUI::UI::OLE
 		return medium;
 	}
 
-	auto StorageMedium::WriteToSTGMEDIUM(const STGMEDIUM& dest) const noexcept -> Error
+	auto StorageMedium::WriteToSTGMEDIUM(const STGMEDIUM& dest) const noexcept -> Result<void>
 	{
 		if (dest.tymed != ToUnderlying(type))
 		{
-			return Error{
+			return Unexpected{ Error{
 				DV_E_TYMED
-			}.SetCustomMessage(L"Destination storage medium type does not match");
+			}.SetCustomMessage(L"Destination storage medium type does not match") };
 		}
 
 		switch (type)
@@ -349,17 +349,17 @@ namespace PGUI::UI::OLE
 				const wil::unique_hglobal_locked globalLocked{ hGlobal };
 				if (!globalLocked.is_valid())
 				{
-					return Error{
+					return Unexpected{ Error{
 						GetLastError()
-					}.SetCustomMessage(L"Failed to lock global memory");
+					}.SetCustomMessage(L"Failed to lock global memory") };
 				}
 				const wil::unique_hglobal_locked destGlobalLocked{ dest.hGlobal };
 				if (!destGlobalLocked.is_valid())
 				{
-					return Error{
+					return Unexpected{ Error{
 						GetLastError()
-					}.SetCustomMessage(L"Failed to lock destination global memory");
-				
+					}.SetCustomMessage(L"Failed to lock destination global memory") };
+
 				}
 
 				SetLastError(ERROR_SUCCESS);
@@ -368,17 +368,17 @@ namespace PGUI::UI::OLE
 				if (const auto lastError = GetLastError();
 					(srcSize == 0 || destSize == 0) && lastError != ERROR_SUCCESS)
 				{
-					return Error{
+					return Unexpected{ Error{
 						lastError
-					}.SetCustomMessage(L"Failed to get size of global memory block");
+					}.SetCustomMessage(L"Failed to get size of global memory block") };
 				}
 				if (srcSize > destSize)
 				{
-					return Error{
+					return Unexpected{ Error{
 							STG_E_MEDIUMFULL
 						}.SetCustomMessage(L"Destination global memory block is too small to hold the data")
 						 .AddDetail(L"Required Size", std::to_wstring(srcSize))
-						 .AddDetail(L"Destination Size", std::to_wstring(destSize));
+						 .AddDetail(L"Destination Size", std::to_wstring(destSize)) };
 				}
 
 				std::memcpy(destGlobalLocked.get(), globalLocked.get(), srcSize);
@@ -389,9 +389,9 @@ namespace PGUI::UI::OLE
 			{
 				if (!CopyFileW(storage.GetDataOfType<StorageHolder::FilePath>().value(), dest.lpszFileName, false))
 				{
-					return Error{
+					return Unexpected{ Error{
 						GetLastError()
-					}.SetCustomMessage(L"Failed to copy file");
+					}.SetCustomMessage(L"Failed to copy file") };
 				}
 
 				break;
@@ -402,9 +402,9 @@ namespace PGUI::UI::OLE
 				auto hr = srcStream->Seek({ }, STREAM_SEEK_SET, nullptr);
 				if (FAILED(hr))
 				{
-					return Error{
+					return Unexpected{ Error{
 						hr
-					}.SetCustomMessage(L"Failed to seek to the beginning of the source stream");
+					}.SetCustomMessage(L"Failed to seek to the beginning of the source stream") };
 				}
 				const auto& destStream = dest.pstm;
 				hr = srcStream->CopyTo(
@@ -414,9 +414,9 @@ namespace PGUI::UI::OLE
 
 				if (FAILED(hr))
 				{
-					return Error{
+					return Unexpected{ Error{
 						hr
-					}.SetCustomMessage(L"Failed to copy data from source stream to destination stream");
+					}.SetCustomMessage(L"Failed to copy data from source stream to destination stream") };
 				}
 
 				break;
@@ -427,9 +427,9 @@ namespace PGUI::UI::OLE
 				if (const auto hr = srcStorage->CopyTo(0, nullptr, nullptr, dest.pstg);
 					FAILED(hr))
 				{
-					return Error{
+					return Unexpected{ Error{
 						hr
-					}.SetCustomMessage(L"Failed to copy data from source storage to destination storage");
+					}.SetCustomMessage(L"Failed to copy data from source storage to destination storage") };
 				}
 
 				break;
@@ -440,12 +440,12 @@ namespace PGUI::UI::OLE
 			case StorageMediumType::MetaFilePict:
 			case StorageMediumType::EnhancedMetaFile:
 			{
-				return Error{ DV_E_TYMED };
+				return Unexpected{ Error{ DV_E_TYMED } };
 			}
 			default: ;
 		}
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 
 	// ReSharper restore IdentifierTypo

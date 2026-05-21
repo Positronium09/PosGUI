@@ -37,40 +37,56 @@ namespace PGUI::UI::Animation
 		}
 	}
 
-	auto AnimationManager::AbandonAllStoryboards() noexcept -> Error
+	auto AnimationManager::AbandonAllStoryboards() noexcept -> Result<void>
 	{
 		Error error{
 			Get()->AbandonAllStoryboards()
 		};
 		LogIfFailed(error, L"AbandonAllStoryboards failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationManager::Pause() const noexcept -> Error
+	auto AnimationManager::Pause() const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Pause()
 		};
 		LogIfFailed(error, L"Pause failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationManager::Resume() const noexcept -> Error
+	auto AnimationManager::Resume() const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Resume()
 		};
 		LogIfFailed(error, L"Resume failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationManager::Shutdown() const noexcept -> Error
+	auto AnimationManager::Shutdown() const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Shutdown()
 		};
 		LogIfFailed(error, L"Shutdown failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto AnimationManager::Update(const Seconds timeNow) const noexcept -> Result<AnimationUpdateResult>
@@ -165,22 +181,30 @@ namespace PGUI::UI::Animation
 		return FromWAM(nextEventTime);
 	}
 
-	auto AnimationManager::SetAnimationMode(AnimationMode mode) const noexcept -> Error
+	auto AnimationManager::SetAnimationMode(AnimationMode mode) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetAnimationMode(static_cast<UI_ANIMATION_MODE>(mode))
 		};
 		LogIfFailed(error, L"SetAnimationMode failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationManager::SetDefaultLongestAcceptableDelay(const Seconds delay) const noexcept -> Error
+	auto AnimationManager::SetDefaultLongestAcceptableDelay(const Seconds delay) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetDefaultLongestAcceptableDelay(ToWAM(delay))
 		};
 		LogIfFailed(error, L"SetDefaultLongestAcceptableDelay failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto AnimationManager::GetStoryboardFromTag(
@@ -216,7 +240,7 @@ namespace PGUI::UI::Animation
 
 	auto AnimationManager::ScheduleTransition(
 		const AnimationVariable& variable,
-		const AnimationTransition& transition, const double currentTime) const noexcept -> Error
+		const AnimationTransition& transition, const double currentTime) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->ScheduleTransition(
@@ -225,11 +249,15 @@ namespace PGUI::UI::Animation
 				currentTime)
 		};
 		LogIfFailed(error, L"ScheduleTransition failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto AnimationManager::SetManagerEventHandler(
-		AnimationManagerEventHandler& eventHandler, const bool registerForNext) const noexcept -> Error
+		AnimationManagerEventHandler& eventHandler, const bool registerForNext) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetManagerEventHandler(
@@ -237,15 +265,23 @@ namespace PGUI::UI::Animation
 				registerForNext)
 		};
 		LogIfFailed(error, L"SetManagerEventHandler failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationManager::ClearManagerEventHandler(const bool registerForNext) const noexcept -> Error
+	auto AnimationManager::ClearManagerEventHandler(const bool registerForNext) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetManagerEventHandler(nullptr, registerForNext)
 		};
 		LogIfFailed(error, L"SetManagerEventHandler failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 }

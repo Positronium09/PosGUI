@@ -7,6 +7,7 @@ export namespace PGUI::UI::OLE
 {
 	enum class ClipboardFormat : CLIPFORMAT
 	{
+		Null = CF_NULL,
 		Text = CF_TEXT,
 		Bitmap = CF_BITMAP,
 		MetaFilePict = CF_METAFILEPICT,

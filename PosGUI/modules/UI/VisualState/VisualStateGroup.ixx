@@ -17,32 +17,32 @@ export namespace PGUI::UI
 		}
 		~VisualStateGroup() noexcept = default;
 
-		auto AllowTransition(const StateT from, StateT to) noexcept -> Error
+		auto AllowTransition(const StateT from, StateT to) noexcept -> Result<void>
 		{
 			try
 			{
 				allowedTransitions[from].emplace_back(to);
-				return Error{ ErrorCode::Success };
+				return EmptyResult;
 			}
 			catch (const std::exception& e)
 			{
-				return Error{ SystemErrorCode::STLFailure }
+				return Unexpected{ Error{ SystemErrorCode::STLFailure }
 				.SetCustomMessage(
-					StringToWString(e.what()));
+					StringToWString(e.what())) };
 			}
 		}
-		auto DisallowTransition(const StateT from, StateT to) noexcept -> Error
+		auto DisallowTransition(const StateT from, StateT to) noexcept -> Result<void>
 		{
 			try
 			{
 				disallowedTransitions[from].emplace_back(to);
-				return Error{ ErrorCode::Success };
+				return EmptyResult;
 			}
 			catch (const std::exception& e)
 			{
-				return Error{ SystemErrorCode::STLFailure }
+				return Unexpected{ Error{ SystemErrorCode::STLFailure }
 				.SetCustomMessage(
-					StringToWString(e.what()));
+					StringToWString(e.what())) };
 			}
 		}
 

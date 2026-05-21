@@ -197,9 +197,11 @@ export namespace PGUI
 		std::optional<std::wstring> customMessage;
 		std::vector<std::wstring> fixSuggestions;
 	};
+
+	const auto EmptyResult = Result<void>{ };
 }
 
-export template <typename Char>
+template <typename Char>
 struct std::formatter<PGUI::Error, Char>
 {
 	template <typename FormatParseContext>

@@ -49,8 +49,13 @@
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx" />
     <ClCompile Include="modules\UI\DComp\DComp.ixx" />
     <ClCompile Include="modules\UI\DComp\Surface.ixx" />
+    <ClCompile Include="modules\UI\OLE\Clipboard.ixx" />
     <ClCompile Include="modules\UI\OLE\DataObject.ixx" />
     <ClCompile Include="modules\UI\OLE\DragDrop\DragDrop.ixx" />
+    <ClCompile Include="modules\UI\OLE\DragDrop\DragDropEnums.ixx" />
+    <ClCompile Include="modules\UI\OLE\DragDrop\DragDropStructs.ixx" />
+    <ClCompile Include="modules\UI\OLE\DragDrop\DropSource.ixx" />
+    <ClCompile Include="modules\UI\OLE\DragDrop\DropTarget.ixx" />
     <ClCompile Include="modules\UI\OLE\OLEEnums.ixx" />
     <ClCompile Include="modules\UI\OLE\OLEStructs.ixx" />
     <ClCompile Include="modules\UI\OLE\EnumFormatData.ixx" />
@@ -185,6 +190,8 @@
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
     <ClCompile Include="src\UI\Dialog.cpp" />
     <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
+    <ClCompile Include="src\UI\OLE\DropSource.cpp" />
+    <ClCompile Include="src\UI\OLE\DropTarget.cpp" />
     <ClCompile Include="src\UI\OLE\OLEStructs.cpp" />
     <ClCompile Include="src\UI\Font\FontCollection.cpp" />
     <ClCompile Include="src\UI\Font\FontFamily.cpp" />
@@ -236,26 +243,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>

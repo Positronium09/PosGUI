@@ -24,53 +24,53 @@ export namespace PGUI::UI
 
 		TextLayout(wzstring_view text, const TextFormat& textFormat, SizeF maxSize) noexcept;
 
-		auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Error;
+		auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
 
-		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Error;
+		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>;
 
-		auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Error;
+		auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Result<void>;
 
-		auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Error;
+		auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Result<void>;
 
-		auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Error;
+		auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Result<void>;
 
-		auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Error;
+		auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Result<void>;
 
-		auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Error;
+		auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>;
 
-		auto SetMaxWidth(float maxWidth) const noexcept -> Error;
+		auto SetMaxWidth(float maxWidth) const noexcept -> Result<void>;
 
-		auto SetMaxHeight(float maxHeight) const noexcept -> Error;
+		auto SetMaxHeight(float maxHeight) const noexcept -> Result<void>;
 
-		auto SetMaxSize(SizeF maxSize) const noexcept -> Error;
+		auto SetMaxSize(SizeF maxSize) const noexcept -> Result<void>;
 
-		auto SetFontCollection(const FontCollection& fontCollection, TextRange textRange) const noexcept -> Error;
+		auto SetFontCollection(const FontCollection& fontCollection, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontFamilyName(wzstring_view fontFamilyName, TextRange textRange) const noexcept -> Error;
+		auto SetFontFamilyName(wzstring_view fontFamilyName, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontWeight(FontWeight fontWeight, TextRange textRange) const noexcept -> Error;
+		auto SetFontWeight(FontWeight fontWeight, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontStyle(FontStyle fontStyle, TextRange textRange) const noexcept -> Error;
+		auto SetFontStyle(FontStyle fontStyle, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontStretch(FontStretch fontStretch, TextRange textRange) const noexcept -> Error;
+		auto SetFontStretch(FontStretch fontStretch, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontSize(float fontSize, TextRange textRange) const noexcept -> Error;
+		auto SetFontSize(float fontSize, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetUnderline(bool hasUnderline, TextRange textRange) const noexcept -> Error;
+		auto SetUnderline(bool hasUnderline, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetStrikethrough(bool hasStrikethrough, TextRange textRange) const noexcept -> Error;
+		auto SetStrikethrough(bool hasStrikethrough, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect, TextRange textRange) const noexcept -> Error;
+		auto SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect, TextRange textRange) const noexcept -> Result<void>;
 
 		//? Maybe write a wrapper for IDWriteInlineObject
-		auto SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject, TextRange textRange) const noexcept -> Error;
+		auto SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject, TextRange textRange) const noexcept -> Result<void>;
 
 		//? Maybe write a wrapper for IDWriteTypography
-		auto SetTypography(const ComPtr<IDWriteTypography>& typography, TextRange textRange) const noexcept -> Error;
+		auto SetTypography(const ComPtr<IDWriteTypography>& typography, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetLocaleName(wzstring_view localeName, TextRange textRange) const noexcept -> Error;
+		auto SetLocaleName(wzstring_view localeName, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetTrimming(const Trimming& trimming) const noexcept -> Error;
+		auto SetTrimming(const Trimming& trimming) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetTrimming() const noexcept -> Result<Trimming>;
 

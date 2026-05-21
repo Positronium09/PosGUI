@@ -225,7 +225,7 @@ export namespace PGUI
 		}
 
 		template <IsInTypeList<Interfaces...> T, IsInTypeList<Interfaces...> U>
-		auto AsAssign() noexcept -> Error
+		auto AsAssign() noexcept -> Result<void>
 		{
 			auto ptr = GetAs<T, U>();
 
@@ -236,11 +236,11 @@ export namespace PGUI
 					.AddDetail(L"From", StringToWString(typeid(T).name()))
 					.AddDetail(L"To", StringToWString(typeid(U).name()));
 				Logger::Error(error, L"Cannot cast between interfaces");
-				return error;
+				return Unexpected{ error };
 			}
 
 			Set(ptr);
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
 		template <IsInTypeList<Interfaces...> T = FirstType>
@@ -326,7 +326,7 @@ export namespace PGUI
 	};
 }
 
-export template <typename Char>
+template <typename Char>
 struct std::formatter<IID, Char>
 {
 	template <typename FormatParseContext>
@@ -353,7 +353,7 @@ struct std::formatter<IID, Char>
 };
 
 
-export template <typename T, typename Char, typename... Policies>
+template <typename T, typename Char, typename... Policies>
 struct std::formatter<wil::com_ptr_t<T, Policies...>, Char>
 {
 	template <typename FormatParseContext>

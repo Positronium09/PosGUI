@@ -156,17 +156,17 @@ export namespace PGUI
 			return logicalValue;
 		}
 
-		auto SetDpi(const float newDpi) noexcept -> Error
+		auto SetDpi(const float newDpi) noexcept -> Result<void>
 		{
 			if (newDpi <= 0.0F)
 			{
 				Error error{ ErrorCode::InvalidArgument };
 				Logger::Warning(error);
 
-				return error;
+				return Unexpected{ error };
 			}
 			dpi = newDpi;
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 		constexpr auto GetDpi() const noexcept -> float
 		{

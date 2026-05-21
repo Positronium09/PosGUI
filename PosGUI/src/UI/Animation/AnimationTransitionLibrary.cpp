@@ -716,7 +716,7 @@ namespace PGUI::UI::Animation
 		}
 	}
 
-	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, double finalValue) noexcept -> Error
+	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, double finalValue) noexcept -> Result<void>
 	{
 		Match(parameters,
 		      [&](const DoesntSupportFinalValue auto&) { },
@@ -725,12 +725,12 @@ namespace PGUI::UI::Animation
 			      param.finalValue = finalValue;
 		      });
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 
 	auto SetFinalValueToTransitionParameters(
 		TransitionParameters& parameters,
-		const std::span<const double> finalValues) noexcept -> Error
+		const std::span<const double> finalValues) noexcept -> Result<void>
 	{
 		auto isSet = true;
 		Match(parameters,
@@ -746,9 +746,9 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ ErrorCode::InvalidArgument };
 			error.SetCustomMessage(L"Cannot set vector final values on parameters that require a single final value");
-			return error;
+			return Unexpected{ error };
 		}
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 }

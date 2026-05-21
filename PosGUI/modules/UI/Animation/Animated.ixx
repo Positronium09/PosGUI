@@ -221,10 +221,10 @@ export namespace PGUI::UI::Animation
 				result.has_value())
 			{
 				variable = result.value();
-				if (auto error = variable.SetVariableChangeHandler(animationVariableChangeEvent, true);
-					error.IsFailure())
+				if (auto handlerResult = variable.SetVariableChangeHandler(animationVariableChangeEvent, true);
+					!handlerResult.has_value())
 				{
-					Logger::Error(error, L"Failed to set variable change handler");
+					Logger::Error(handlerResult.error(), L"Failed to set variable change handler");
 				}
 				if constexpr (std::floating_point<T>)
 				{
@@ -251,18 +251,18 @@ export namespace PGUI::UI::Animation
 			}
 		}
 
-		auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Error
+		auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<void>
 		{
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			const auto& transition = transitionResult.value();
@@ -271,7 +271,7 @@ export namespace PGUI::UI::Animation
 			auto nowResult = timer.GetTime();
 			if (!nowResult.has_value())
 			{
-				return nowResult.error();
+				return Unexpected{ nowResult.error() };
 			}
 
 			return animationManager.ScheduleTransition(variable, transition, nowResult.value());
@@ -279,10 +279,10 @@ export namespace PGUI::UI::Animation
 
 		auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<AnimateResult>
 		{
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
+				!result.has_value())
 			{
-				return Unexpected{ error };
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
@@ -300,10 +300,10 @@ export namespace PGUI::UI::Animation
 				return storyboardResult.error();
 			}
 			const auto& storyboard = storyboardResult.value();
-			if (auto error = storyboard.AddTransition(variable, transition);
-				error.IsFailure())
+			if (auto addResult = storyboard.AddTransition(variable, transition);
+				!addResult.has_value())
 			{
-				return Unexpected{ error };
+				return Unexpected{ addResult.error() };
 			}
 
 			const auto& timer = AnimationTimer::GetGlobalInstance();
@@ -323,54 +323,54 @@ export namespace PGUI::UI::Animation
 		}
 
 		auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters,
-			const Storyboard& storyboard) const noexcept -> Error
+			const Storyboard& storyboard) const noexcept -> Result<void>
 		{
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			return storyboard.AddTransition(variable, transitionResult.value());
 		}
 
 		auto AnimateToAtKeyframe(const T& targetValue, TransitionParameters transitionParameters,
-			const Storyboard& storyboard, const KeyFrame keyFrame) const noexcept -> Error
+			const Storyboard& storyboard, const KeyFrame keyFrame) const noexcept -> Result<void>
 		{
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			return storyboard.AddTransitionAtKeyframe(variable, transitionResult.value(), keyFrame);
 		}
 
 		auto AnimateToBetweenKeyframes(const T& targetValue, TransitionParameters transitionParameters,
-			const Storyboard& storyboard, const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Error
+			const Storyboard& storyboard, const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Result<void>
 		{
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			return storyboard.AddTransitionBetweenKeyframes(variable, transitionResult.value(), startKeyFrame, endKeyFrame);
@@ -444,32 +444,32 @@ export namespace PGUI::UI::Animation
 			}
 		}
 
-		auto SetLowerBound(const T& bound) const noexcept -> Error
+		auto SetLowerBound(const T& bound) const noexcept -> Result<void>
 		{
 			return variable.SetLowerBound(static_cast<double>(bound));
 		}
 
-		auto SetUpperBound(const T& bound) const noexcept -> Error
+		auto SetUpperBound(const T& bound) const noexcept -> Result<void>
 		{
 			return variable.SetUpperBound(static_cast<double>(bound));
 		}
 
-		auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Error
+		auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Result<void>
 		{
-			if (auto error = SetLowerBound(lowerBound);
-				error.IsFailure())
+			if (auto result = SetLowerBound(lowerBound);
+				!result.has_value())
 			{
-				return error;
+				return result;
 			}
 			return SetUpperBound(upperBound);
 		}
 
-		auto SetRoundingMode(const AnimationRoundingMode mode) const noexcept -> Error
+		auto SetRoundingMode(const AnimationRoundingMode mode) const noexcept -> Result<void>
 		{
 			return variable.SetRoundingMode(mode);
 		}
 
-		auto SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Error
+		auto SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Result<void>
 		{
 			return variable.SetTag(obj, id);
 		}
@@ -537,10 +537,10 @@ export namespace PGUI::UI::Animation
 				result.has_value())
 			{
 				variable = result.value();
-				if (auto error = variable.SetVariableChangeHandler(animationVariableChangeEvent, true);
-					error.IsFailure())
+				if (auto handlerResult = variable.SetVariableChangeHandler(animationVariableChangeEvent, true);
+					!handlerResult.has_value())
 				{
-					Logger::Error(error, L"Failed to set variable change handler");
+					Logger::Error(handlerResult.error(), L"Failed to set variable change handler");
 					return;
 				}
 				animationVariableChangeEvent.VariableChanged().AddCallback(
@@ -558,19 +558,19 @@ export namespace PGUI::UI::Animation
 			}
 		}
 
-		auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Error
+		auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			const auto& transition = transitionResult.value();
@@ -580,7 +580,7 @@ export namespace PGUI::UI::Animation
 			auto nowResult = timer.GetTime();
 			if (!nowResult.has_value())
 			{
-				return nowResult.error();
+				return Unexpected{ nowResult.error() };
 			}
 
 			return animationManager.ScheduleTransition(variable, transition, nowResult.value());
@@ -589,10 +589,10 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<AnimateResult>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
+				!result.has_value())
 			{
-				return Unexpected{ error };
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
@@ -610,10 +610,10 @@ export namespace PGUI::UI::Animation
 			}
 
 			const auto& storyboard = storyboardResult.value();
-			if (auto error = storyboard.AddTransition(variable, transition);
-				error.IsFailure())
+			if (auto addResult = storyboard.AddTransition(variable, transition);
+				!addResult.has_value())
 			{
-				return Unexpected{ error };
+				return Unexpected{ addResult.error() };
 			}
 
 			const auto& timer = AnimationTimer::GetGlobalInstance();
@@ -634,57 +634,57 @@ export namespace PGUI::UI::Animation
 		}
 
 		auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters,
-			const Storyboard& storyboard) const noexcept -> Error
+			const Storyboard& storyboard) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
-			
+
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			return storyboard.AddTransition(variable, transitionResult.value());
 		}
 
 		auto AnimateToAtKeyframe(const T& targetValue, TransitionParameters transitionParameters,
-			const Storyboard& storyboard, const KeyFrame keyFrame) const noexcept -> Error
+			const Storyboard& storyboard, const KeyFrame keyFrame) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			return storyboard.AddTransitionAtKeyframe(variable, transitionResult.value(), keyFrame);
 		}
 
 		auto AnimateToBetweenKeyframes(const T& targetValue, TransitionParameters transitionParameters,
-			const Storyboard& storyboard, const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Error
+			const Storyboard& storyboard, const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
-			if (auto error = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
-				error.IsFailure())
+			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
+				!result.has_value())
 			{
-				return error;
+				return Unexpected{ result.error() };
 			}
 
 			auto transitionResult = AnimationTransitionLibrary::TransitionFromParameters(transitionParameters);
 			if (!transitionResult.has_value())
 			{
-				return transitionResult.error();
+				return Unexpected{ transitionResult.error() };
 			}
 
 			return storyboard.AddTransitionBetweenKeyframes(variable, transitionResult.value(), startKeyFrame, endKeyFrame);
@@ -742,24 +742,24 @@ export namespace PGUI::UI::Animation
 			return result.value();
 		}
 
-		auto SetUpperBound(const T& bound) const noexcept -> Error
+		auto SetUpperBound(const T& bound) const noexcept -> Result<void>
 		{
 			const auto boundArray = Converter::ConvertFromValue(bound);
 			return variable.SetUpperBound(boundArray);
 		}
-		
-		auto SetLowerBound(const T& bound) const noexcept -> Error
+
+		auto SetLowerBound(const T& bound) const noexcept -> Result<void>
 		{
 			const auto boundArray = Converter::ConvertFromValue(bound);
 			return variable.SetLowerBound(boundArray);
 		}
 
-		auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Error
+		auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Result<void>
 		{
-			if (auto error = SetLowerBound(lowerBound);
-				error.IsFailure())
+			if (auto result = SetLowerBound(lowerBound);
+				!result.has_value())
 			{
-				return error;
+				return result;
 			}
 			return SetUpperBound(upperBound);
 		}

@@ -89,13 +89,18 @@ namespace PGUI::UI::Imaging
 
 	auto BitmapDecoder::Initialize(
 		const ComPtr<IStream>& stream,
-		BitmapDecoderOptions decoderOptions) const noexcept -> Error
+		BitmapDecoderOptions decoderOptions) const noexcept -> Result<void>
 	{
-		return Error{
-			Get()->Initialize(
-				stream.get(),
-			static_cast<WICDecodeOptions>(decoderOptions))
-		};
+		if (Error error{
+				Get()->Initialize(
+					stream.get(),
+					static_cast<WICDecodeOptions>(decoderOptions))
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto BitmapDecoder::CopyPalette() const noexcept -> Result<Palette>

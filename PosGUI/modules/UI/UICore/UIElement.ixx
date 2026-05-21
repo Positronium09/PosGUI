@@ -159,11 +159,11 @@ export namespace PGUI::UI
 			return std::forward_like<Self>(self.redrawRequestedEvent);
 		}
 
-		auto EnableComposition() noexcept -> Error
+		auto EnableComposition() noexcept -> Result<void>
 		{
 			return CompositionModeChanged(true);
 		}
-		auto DisableComposition() noexcept -> Error
+		auto DisableComposition() noexcept -> Result<void>
 		{
 			return CompositionModeChanged(false);
 		}
@@ -181,6 +181,6 @@ export namespace PGUI::UI
 		ComPtr<IDCompositionVisual3> compositionVisual = nullptr;
 		ComPtr<IDCompositionVirtualSurface> compositionSurface = nullptr;
 
-		auto CompositionModeChanged(bool enabled) noexcept -> Error;
+		auto CompositionModeChanged(bool enabled) noexcept -> Result<void>;
 	};
 }

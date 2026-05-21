@@ -57,7 +57,7 @@ export namespace PGUI::UI::Imaging
 			const std::optional<GUID>& vendorGUID = std::nullopt) noexcept;
 
 		auto Initialize(const ComPtr<IStream>& stream,
-			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand) const noexcept -> Error;
+			BitmapDecoderOptions decoderOptions = BitmapDecoderOptions::DecodeMetadataCacheOnDemand) const noexcept -> Result<void>;
 
 		//TODO GetDecoderInfo
 

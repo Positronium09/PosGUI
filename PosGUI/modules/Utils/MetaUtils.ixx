@@ -6,10 +6,10 @@ namespace PGUI::Detail
 {
 	struct DummyTemplateCheck { };
 
-	template <typename, template <auto...> typename>
+	template <typename, template <typename...> typename>
 	struct IsSpecializationHelper : std::false_type { };
 
-	template <template <auto...> typename Template, auto... Args>
+	template <template <typename...> typename Template, typename... Args>
 	struct IsSpecializationHelper<Template<Args...>, Template> : std::true_type { };
 }
 
@@ -58,7 +58,7 @@ export namespace PGUI
 		static constexpr auto Contains = IsInTypeList<T, Types...>;
 	};
 
-	template <typename T, template <auto...> typename Template>
+	template <typename T, template <typename...> typename Template>
 	concept IsSpecialization = Detail::IsSpecializationHelper<T, Template>::value;
 
 	template <typename Variant, typename... Visitors>

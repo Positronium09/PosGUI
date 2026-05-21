@@ -5,7 +5,7 @@ import std;
 import :MetaUtils;
 import :StringUtils;
 
-export template <typename CharT, typename Traits>
+template <typename CharT, typename Traits>
 struct std::hash<PGUI::basic_zstring_view<CharT, Traits>>
 {
 	[[nodiscard]] auto operator()(const PGUI::basic_zstring_view<CharT, Traits> sv) const noexcept -> size_t

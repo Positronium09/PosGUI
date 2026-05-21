@@ -236,16 +236,20 @@ namespace PGUI::UI::Animation
 		});
 	}
 
-	auto AnimationVariable::SetLowerBound(const double bound) const noexcept -> Error
+	auto AnimationVariable::SetLowerBound(const double bound) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetLowerBound(bound)
 		};
 		LogIfFailed(error, L"Failed to set lower bound");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationVariable::SetLowerBound(const std::span<const double> bounds) const noexcept -> Error
+	auto AnimationVariable::SetLowerBound(const std::span<const double> bounds) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetLowerBoundVector(
@@ -253,19 +257,27 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(bounds.size()))
 		};
 		LogIfFailed(error, L"Failed to set lower bound vector");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationVariable::SetUpperBound(const double bound) const noexcept -> Error
+	auto AnimationVariable::SetUpperBound(const double bound) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetUpperBound(bound)
 		};
 		LogIfFailed(error, L"Failed to set upper bound");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationVariable::SetUpperBound(const std::span<const double> bounds) const noexcept -> Error
+	auto AnimationVariable::SetUpperBound(const std::span<const double> bounds) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetUpperBoundVector(
@@ -273,26 +285,38 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(bounds.size()))
 		};
 		LogIfFailed(error, L"Failed to set upper bound vector");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationVariable::SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Error
+	auto AnimationVariable::SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetRoundingMode(
 				static_cast<UI_ANIMATION_ROUNDING_MODE>(mode))
 		};
 		LogIfFailed(error, L"Failed to set rounding mode");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationVariable::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Error
+	auto AnimationVariable::SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetTag(obj.get(), id)
 		};
 		LogIfFailed(error, L"Failed to set tag");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto AnimationVariable::GetTag() const noexcept -> Result<std::pair<ComPtr<IUnknown>, UINT32>>
@@ -312,7 +336,7 @@ namespace PGUI::UI::Animation
 
 	auto AnimationVariable::SetVariableChangeHandler(
 		AnimationVariableChangeEventHandler& handler,
-		const bool registerForNext) const noexcept -> Error
+		const bool registerForNext) const noexcept -> Result<void>
 	{
 		const auto& ptr = Get();
 
@@ -323,7 +347,7 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ hr };
 			Logger::Error(error, L"Failed to set variable change handler");
-			return error;
+			return Unexpected{ error };
 		}
 
 		if (const auto hr = ptr->SetVariableIntegerChangeHandler(
@@ -333,13 +357,13 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ hr };
 			Logger::Error(error, L"Failed to set variable integer change handler");
-			return error;
+			return Unexpected{ error };
 		}
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 
-	auto AnimationVariable::ClearVariableChangeHandler(const bool registerForNext) const noexcept -> Error
+	auto AnimationVariable::ClearVariableChangeHandler(const bool registerForNext) const noexcept -> Result<void>
 	{
 		const auto& ptr = Get();
 
@@ -348,7 +372,7 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ hr };
 			Logger::Error(error, L"Failed to clear variable change handler");
-			return error;
+			return Unexpected{ error };
 		}
 
 		if (const auto hr = ptr->SetVariableIntegerChangeHandler(nullptr, registerForNext);
@@ -356,9 +380,9 @@ namespace PGUI::UI::Animation
 		{
 			Error error{ hr };
 			Logger::Error(error, L"Failed to clear variable integer change handler");
-			return error;
+			return Unexpected{ error };
 		}
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 }

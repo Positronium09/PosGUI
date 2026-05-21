@@ -95,11 +95,11 @@ export namespace PGUI
 			       p.y >= std::min(start.y, end.y) && p.y <= std::max(start.y, end.y);
 		}
 
-		[[nodiscard]] auto Intersect(LineSegment lineSegment) const noexcept -> std::expected<Point<T>, std::monostate>
+		[[nodiscard]] auto Intersect(LineSegment lineSegment) const noexcept -> std::optional<Point<T>>
 		{
 			if (IsParallel(lineSegment))
 			{
-				return std::unexpected{ std::monostate{ } };
+				return std::nullopt;
 			}
 			
 			T x;
@@ -159,7 +159,7 @@ export namespace PGUI
 	using LineSegmentF = LineSegment<float>;
 }
 
-export template <typename T, typename Char>
+template <typename T, typename Char>
 struct std::formatter<PGUI::LineSegment<T>, Char>
 {
 	template <typename FormatParseContext>

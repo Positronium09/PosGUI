@@ -50,16 +50,20 @@ namespace PGUI::UI::Animation
 		return Get()->IsDurationKnown() == S_OK;
 	}
 
-	auto AnimationTransition::SetInitialValue(const double value) const noexcept -> Error
+	auto AnimationTransition::SetInitialValue(const double value) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetInitialValue(value)
 		};
 		LogIfFailed(error, L"Failed to set initial value");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationTransition::SetInitialValue(const std::span<const double> values) const noexcept -> Error
+	auto AnimationTransition::SetInitialValue(const std::span<const double> values) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetInitialVectorValue(
@@ -67,19 +71,27 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(values.size()))
 		};
 		LogIfFailed(error, L"Failed to set initial vector value");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationTransition::SetInitialVelocity(const double velocity) const noexcept -> Error
+	auto AnimationTransition::SetInitialVelocity(const double velocity) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetInitialVelocity(velocity)
 		};
 		LogIfFailed(error, L"Failed to set initial velocity");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationTransition::SetInitialVelocity(const std::span<const double> velocities) const noexcept -> Error
+	auto AnimationTransition::SetInitialVelocity(const std::span<const double> velocities) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetInitialVectorVelocity(
@@ -87,6 +99,10 @@ namespace PGUI::UI::Animation
 				static_cast<UINT>(velocities.size()))
 		};
 		LogIfFailed(error, L"Failed to set initial vector velocity");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 }

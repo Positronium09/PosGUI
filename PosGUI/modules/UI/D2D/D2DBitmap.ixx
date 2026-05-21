@@ -57,16 +57,16 @@ export namespace PGUI::UI::D2D
 
 		[[nodiscard]] auto Map(MapOptions options) const noexcept -> Result<MappedRect>;
 
-		auto Unmap() const noexcept -> Error;
+		auto Unmap() const noexcept -> Result<void>;
 
 		auto CopyFromBitmap(
 			D2DBitmap bitmap,
 			std::optional<PointU> destPoint = std::nullopt,
-			std::optional<RectU> srcRect = std::nullopt) const noexcept -> Error;
+			std::optional<RectU> srcRect = std::nullopt) const noexcept -> Result<void>;
 
 		auto CopyFromMemory(
 			const void* source, UINT32 pitch,
-			std::optional<RectU> destRect = std::nullopt) const noexcept -> Error;
+			std::optional<RectU> destRect = std::nullopt) const noexcept -> Result<void>;
 
 		//TODO GetColorContext
 	};

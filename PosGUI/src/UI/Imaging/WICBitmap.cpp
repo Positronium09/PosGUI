@@ -111,16 +111,20 @@ namespace PGUI::UI::Imaging
 		return lock;
 	}
 
-	auto WICBitmap::SetPalette(Palette palette) noexcept -> Error
+	auto WICBitmap::SetPalette(Palette palette) noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetPalette(palette.GetRaw())
 		};
 		LogIfFailed(error, L"Failed to set palette for WICBitmap");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto WICBitmap::SetResolution(const double dpiX, const double dpiY) noexcept -> Error
+	auto WICBitmap::SetResolution(const double dpiX, const double dpiY) noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetResolution(dpiX, dpiY)
@@ -131,11 +135,12 @@ namespace PGUI::UI::Imaging
 				.AddDetail(L"DPI X", std::to_wstring(dpiX))
 				.AddDetail(L"DPI Y", std::to_wstring(dpiY));
 			Logger::Error(error, L"Failed to set resolution for WICBitmap");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 
-	auto WICBitmap::SetResolution(const Size<double> dpi) noexcept -> Error
+	auto WICBitmap::SetResolution(const Size<double> dpi) noexcept -> Result<void>
 	{
 		return SetResolution(dpi.cx, dpi.cy);
 	}

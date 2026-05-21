@@ -125,7 +125,7 @@ export namespace PGUI
 	using SizeU = Size<std::uint32_t>;
 }
 
-export template <typename T, typename Char>
+template <typename T, typename Char>
 struct std::formatter<PGUI::Size<T>, Char>
 {
 	template <typename FormatParseContext>

@@ -168,8 +168,8 @@ export namespace PGUI::UI::Layout
 			RearrangeItems();
 		}
 
-		auto RemoveColumnDefinitionAtIndex(std::size_t index) noexcept -> Error;
-		auto RemoveRowDefinitionAtIndex(std::size_t index) noexcept -> Error;
+		auto RemoveColumnDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
+		auto RemoveRowDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
 
 		auto SetGrowToFit(const bool grow) noexcept -> void
 		{
@@ -191,12 +191,12 @@ export namespace PGUI::UI::Layout
 			return padding;
 		}
 
-		auto SetAutoCellSize(const GridCellDefinition size) noexcept -> Error
+		auto SetAutoCellSize(const GridCellDefinition size) noexcept -> Result<void>
 		{
 			autoCellSize = size;
 			RearrangeItems();
 
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 		[[nodiscard]] auto GetAutoCellSize() const noexcept
 		{
@@ -213,27 +213,27 @@ export namespace PGUI::UI::Layout
 			return placementType;
 		}
 
-		auto InsertBlankCell(const long row, const long column) noexcept -> Error
+		auto InsertBlankCell(const long row, const long column) noexcept -> Result<void>
 		{
 			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
 			{
-				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Cannot insert a blank cell with auto place");
+				return Unexpected{ Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Cannot insert a blank cell with auto place") };
 			}
 			blankCells.emplace(row, column);
 			RearrangeItems();
 
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
-		auto RemoveBlankCell(const long row, const long column) noexcept -> Error
+		auto RemoveBlankCell(const long row, const long column) noexcept -> Result<void>
 		{
 			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
 			{
-				return Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Cannot remove a blank cell with auto place");
+				return Unexpected{ Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Cannot remove a blank cell with auto place") };
 			}
 
 			blankCells.erase(std::make_pair(row, column));
 			RearrangeItems();
-			return Error{ ErrorCode::Success };
+			return EmptyResult;
 		}
 
 		protected:

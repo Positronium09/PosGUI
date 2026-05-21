@@ -25,6 +25,7 @@ export namespace PGUI::UI::OLE
 		long index = -1;
 		StorageMediumType storageMediumType{ };
 
+		constexpr FormatData() noexcept = default;
 		constexpr FormatData(
 			const ClipboardFormat format,
 			const DVAspect aspect,
@@ -159,9 +160,6 @@ export namespace PGUI::UI::OLE
 
 			return copy;
 		}
-
-		private:
-		FormatData() noexcept = default;
 	};
 
 	struct FormatDataView
@@ -317,6 +315,15 @@ export namespace PGUI::UI::OLE
 		[[nodiscard]] static auto MoveFrom(STGMEDIUM&& medium) noexcept -> StorageMedium;
 
 		constexpr StorageMedium() = default;
+		StorageMedium(
+			const StorageMediumType type, 
+			StorageHolder&& storage, 
+			ComPtr<IUnknown>&& unknown = nullptr,
+			const bool dataOwned = false) noexcept :
+			type{ type }, storage{ std::move(storage) }, 
+			unknown{ std::move(unknown) }, dataOwned{ dataOwned }
+		{ }
+
 		~StorageMedium() noexcept;
 
 		StorageMedium(const StorageMedium&) = delete;
@@ -330,7 +337,12 @@ export namespace PGUI::UI::OLE
 		[[nodiscard]] auto CopyToSTGMEDIUM() const noexcept -> Result<STGMEDIUM>;
 		[[nodiscard]] auto MoveToSTGMEDIUM() noexcept -> STGMEDIUM;
 
-		auto WriteToSTGMEDIUM(const STGMEDIUM& dest) const noexcept -> Error;
+		[[nodiscard]] const auto& GetHolder() const noexcept
+		{
+			return storage;
+		}
+
+		auto WriteToSTGMEDIUM(const STGMEDIUM& dest) const noexcept -> Result<void>;
 
 		// ReSharper restore IdentifierTypo
 		// ReSharper restore CppInconsistentNaming

@@ -221,7 +221,7 @@ export namespace PGUI::UI::Font
 	};
 }
 
-export template <typename Char>
+template <typename Char>
 struct std::formatter<PGUI::UI::Font::TextRange, Char>
 {
 	template <typename FormatParseContext>

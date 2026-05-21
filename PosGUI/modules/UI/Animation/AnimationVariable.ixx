@@ -47,25 +47,25 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto GetFinalVectorValue() const noexcept -> Result<std::vector<double>>;
 
-		auto SetLowerBound(double bound) const noexcept -> Error;
+		auto SetLowerBound(double bound) const noexcept -> Result<void>;
 
-		auto SetLowerBound(std::span<const double> bounds) const noexcept -> Error;
+		auto SetLowerBound(std::span<const double> bounds) const noexcept -> Result<void>;
 
-		auto SetUpperBound(double bound) const noexcept -> Error;
+		auto SetUpperBound(double bound) const noexcept -> Result<void>;
 
-		auto SetUpperBound(std::span<const double> bounds) const noexcept -> Error;
+		auto SetUpperBound(std::span<const double> bounds) const noexcept -> Result<void>;
 
-		auto SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Error;
+		auto SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Result<void>;
 
-		auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Error;
+		auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetTag() const noexcept -> Result<std::pair<ComPtr<IUnknown>, UINT32>>;
 
 		auto SetVariableChangeHandler(
 			AnimationVariableChangeEventHandler& handler,
-			bool registerForNext = false) const noexcept -> Error;
+			bool registerForNext = false) const noexcept -> Result<void>;
 
-		auto ClearVariableChangeHandler(bool registerForNext = false) const noexcept -> Error;
+		auto ClearVariableChangeHandler(bool registerForNext = false) const noexcept -> Result<void>;
 
 		template <std::floating_point T>
 		explicit operator T() const { return static_cast<T>(GetValue().value()); }

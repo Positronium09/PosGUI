@@ -23,22 +23,37 @@ export namespace PGUI::DComp
 
 		//TODO BeginDraw
 
-		auto EndDraw() const noexcept -> Error
+		auto EndDraw() const noexcept -> Result<void>
 		{
-			return Error{ this->Get()->EndDraw() };
+			if (Error error{ this->Get()->EndDraw() };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			return EmptyResult;
 		}
 
-		auto ResumeDraw() const noexcept -> Error
+		auto ResumeDraw() const noexcept -> Result<void>
 		{
-			return Error{ this->Get()->ResumeDraw() };
+			if (Error error{ this->Get()->ResumeDraw() };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			return EmptyResult;
 		}
 
-		auto SuspendDraw() const noexcept
+		auto SuspendDraw() const noexcept -> Result<void>
 		{
-			return Error{ this->Get()->SuspendDraw() };
+			if (Error error{ this->Get()->SuspendDraw() };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			return EmptyResult;
 		}
 
-		auto Scroll(RectL scrollRect, SizeI offset, std::optional<RectL> clipRect) const noexcept
+		auto Scroll(RectL scrollRect, SizeI offset, std::optional<RectL> clipRect) const noexcept -> Result<void>
 		{
 			const RECT* rect = nullptr;
 			if (clipRect.has_value())
@@ -46,11 +61,16 @@ export namespace PGUI::DComp
 				rect = std::bit_cast<RECT*>(&clipRect.value());
 			}
 
-			return Error{
-				this->Get()->Scroll(
-				std::bit_cast<const RECT*>(&scrollRect),
-				rect, offset.cx, offset.cy)
-			};
+			if (Error error{
+					this->Get()->Scroll(
+					std::bit_cast<const RECT*>(&scrollRect),
+					rect, offset.cx, offset.cy)
+				};
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			return EmptyResult;
 		}
 
 		explicit(false) operator Surface<>() const noexcept
@@ -67,24 +87,34 @@ export namespace PGUI::DComp
 			Surface{ ptr }
 		{ }
 
-		auto Resize(const SizeU size) const noexcept
+		auto Resize(const SizeU size) const noexcept -> Result<void>
 		{
-			return Error{ Get()->Resize(size.cx, size.cy) };
+			if (Error error{ Get()->Resize(size.cx, size.cy) };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			return EmptyResult;
 		}
 
-		auto Trim(std::span<RectL> rects) const noexcept
+		auto Trim(std::span<RectL> rects) const noexcept -> Result<void>
 		{
 			const RECT* rectArray = nullptr;
 			if (!rects.empty())
 			{
 				rectArray = std::bit_cast<const RECT*>(rects.data());
 			}
-			return Error{ 
-				Get()->Trim(
-					rectArray, 
-					static_cast<UINT>(rects.size())
-				)
-			};
+			if (Error error{
+					Get()->Trim(
+						rectArray,
+						static_cast<UINT>(rects.size())
+					)
+				};
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+			return EmptyResult;
 		}
 	};
 }

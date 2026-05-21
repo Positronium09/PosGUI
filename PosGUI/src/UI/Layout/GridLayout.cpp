@@ -113,17 +113,17 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto GridLayout::RemoveColumnDefinitionAtIndex(const std::size_t index) noexcept -> Error
+	auto GridLayout::RemoveColumnDefinitionAtIndex(const std::size_t index) noexcept -> Result<void>
 	{
 		if (index >= columnDefinitions.size())
 		{
-			return Error{ ErrorCode::InvalidArgument };
+			return Unexpected{ Error{ ErrorCode::InvalidArgument } };
 		}
 
 		if (columnDefinitions.size() == 1)
 		{
-			return Error{ ErrorCode::InvalidArgument }
-				.SuggestFix(L"Cannot remove the last column definition");
+			return Unexpected{ Error{ ErrorCode::InvalidArgument }
+				.SuggestFix(L"Cannot remove the last column definition") };
 		}
 
 		columnDefinitions.erase(
@@ -131,14 +131,14 @@ namespace PGUI::UI::Layout
 
 		RearrangeItems();
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 
-	auto GridLayout::RemoveRowDefinitionAtIndex(const std::size_t index) noexcept -> Error
+	auto GridLayout::RemoveRowDefinitionAtIndex(const std::size_t index) noexcept -> Result<void>
 	{
 		if (index >= rowDefinitions.size())
 		{
-			return Error{ ErrorCode::InvalidArgument };
+			return Unexpected{ Error{ ErrorCode::InvalidArgument } };
 		}
 
 		rowDefinitions.erase(
@@ -146,7 +146,7 @@ namespace PGUI::UI::Layout
 
 		RearrangeItems();
 
-		return Error{ ErrorCode::Success };
+		return EmptyResult;
 	}
 
 	auto GridLayout::RearrangeItems() noexcept -> void

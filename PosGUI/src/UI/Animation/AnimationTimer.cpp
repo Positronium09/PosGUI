@@ -37,22 +37,30 @@ namespace PGUI::UI::Animation
 		ComPtrHolder{ ptr }
 	{ }
 
-	auto AnimationTimer::Enable() const noexcept -> Error
+	auto AnimationTimer::Enable() const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Enable()
 		};
 		LogIfFailed(error, L"Enable failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationTimer::Disable() const noexcept -> Error
+	auto AnimationTimer::Disable() const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->Disable()
 		};
 		LogIfFailed(error, L"Disable failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
 	auto AnimationTimer::IsEnabled() const noexcept -> Result<bool>
@@ -82,21 +90,29 @@ namespace PGUI::UI::Animation
 		return FromWAM(time);
 	}
 
-	auto AnimationTimer::SetFrameRateThreshold(const UINT32 threshold) const noexcept -> Error
+	auto AnimationTimer::SetFrameRateThreshold(const UINT32 threshold) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetFrameRateThreshold(threshold)
 		};
 		LogIfFailed(error, L"Set frame rate threshold failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 
-	auto AnimationTimer::SetTimerEventHandler(AnimationTimerEventHandler& handler) const noexcept -> Error
+	auto AnimationTimer::SetTimerEventHandler(AnimationTimerEventHandler& handler) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->SetTimerEventHandler(handler.GetRouter().get())
 		};
 		LogIfFailed(error, L"SetTimerEventHandler failed");
-		return error;
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
 	}
 }

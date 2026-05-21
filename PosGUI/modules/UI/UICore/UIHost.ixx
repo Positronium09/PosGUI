@@ -11,6 +11,7 @@ import PGUI.Event;
 
 export namespace PGUI::UI
 {
+	//TODO Rewrite as MessageHooker
 	class UIHost : public DirectXCompositionWindow
 	{
 		public:

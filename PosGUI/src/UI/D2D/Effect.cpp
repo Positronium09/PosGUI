@@ -46,14 +46,15 @@ namespace PGUI::UI::D2D
 		Get()->SetInputEffect(index, effect.GetRaw(), invalidate);
 	}
 
-	auto Effect::SetInputCount(const UINT32 count) const noexcept -> Error
+	auto Effect::SetInputCount(const UINT32 count) const noexcept -> Result<void>
 	{
 		Error error{ Get()->SetInputCount(count) };
 		if (error.IsFailure())
 		{
 			error.AddDetail(L"Count", std::to_wstring(count));
 			Logger::Error(error, L"Failed to set input count");
+			return Unexpected{ error };
 		}
-		return error;
+		return EmptyResult;
 	}
 }

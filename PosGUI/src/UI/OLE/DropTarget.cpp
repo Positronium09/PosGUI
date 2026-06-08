@@ -19,10 +19,10 @@ namespace PGUI::UI::OLE::DragDrop
 {
 	DropTarget::DropTarget(DragEnterCallback dragEnterCallback, DragLeaveCallback dragLeaveCallback,
 	                       DragOverCallback dragOverCallback, DropCallback dropCallback) noexcept :
-		dragEnterCallback{ std::move(dragEnterCallback) },
-		dragLeaveCallback{ std::move(dragLeaveCallback) },
-		dragOverCallback{ std::move(dragOverCallback) },
-		dropCallback{ std::move(dropCallback) }
+		dragEnterCallback{ MoveChecked(dragEnterCallback) },
+		dragLeaveCallback{ MoveChecked(dragLeaveCallback) },
+		dragOverCallback{ MoveChecked(dragOverCallback) },
+		dropCallback{ MoveChecked(dropCallback) }
 	{ }
 
 	auto DropTarget::DragEnter(IDataObject* obj, DWORD keyStateFlag, POINTL point, DWORD* effect) -> HRESULT

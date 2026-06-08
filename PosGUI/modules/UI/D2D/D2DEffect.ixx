@@ -27,7 +27,7 @@ export namespace PGUI::UI::D2D
 
 		auto SetInputEffect(UINT32 index, Effect effect, bool invalidate) const noexcept -> void;
 
-		auto SetInputCount(UINT32 count) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetInputCount(UINT32 count) const noexcept -> Result<void>;
 
 		auto GetProperties() const noexcept { return D2DProperties{ Get() }; }
 	};

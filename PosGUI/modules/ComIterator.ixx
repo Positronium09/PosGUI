@@ -6,6 +6,7 @@ export module PGUI.ComIterator;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.UI.OLE.OLEStructs;
 
 namespace PGUI
@@ -219,10 +220,10 @@ export namespace PGUI
 
 		auto ConvertItem(FORMATETC& fmt) noexcept -> void
 		{
-			if (auto result = UI::OLE::FormatData::FromFORMATETC(std::move(fmt));
+			if (auto result = UI::OLE::FormatData::FromFORMATETC(MoveChecked(fmt));
 				result.has_value())
 			{
-				GetCurrentValue() = std::move(result).value();
+				GetCurrentValue() = MoveChecked(result).value();
 			}
 		}
 

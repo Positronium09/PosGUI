@@ -4,6 +4,7 @@ import std;
 
 import PGUI.DataBinding.Property;
 import PGUI.Mutex;
+import PGUI.Utils;
 
 export namespace PGUI::DataBinding
 {
@@ -30,7 +31,7 @@ export namespace PGUI::DataBinding
 		{ }
 
 		ValidatedProperty(ValidatedProperty&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
-			Property<T, Mutex>{ std::move(other) }, validators{ std::move(other.validators) }
+			Property<T, Mutex>{ MoveChecked(other) }, validators{ MoveChecked(other.validators) }
 		{ }
 
 		~ValidatedProperty() override = default;
@@ -57,7 +58,7 @@ export namespace PGUI::DataBinding
 		{
 			if (IsValueValid(newValue))
 			{
-				Property<T, Mutex>::Set(std::move(newValue));
+				Property<T, Mutex>::Set(MoveChecked(newValue));
 			}
 		}
 
@@ -69,7 +70,7 @@ export namespace PGUI::DataBinding
 
 		auto operator=(T&& val) noexcept(std::is_nothrow_move_assignable_v<T>) -> ValidatedProperty& override
 		{
-			Set(std::move(val));
+			Set(MoveChecked(val));
 			return *this;
 		}
 

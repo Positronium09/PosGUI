@@ -1,4 +1,4 @@
-﻿module;
+module;
 #include <Windows.h>
 
 #undef GetObject
@@ -151,7 +151,7 @@ export namespace PGUI::UI::Layout
 			OnItemAdded(managedItems.back());
 		}
 
-		auto RemoveItem(const std::size_t index) -> Result<void>
+		[[nodiscard]] auto RemoveItem(const std::size_t index) -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
@@ -329,7 +329,7 @@ export namespace PGUI::UI::Layout
 		{
 			item.Resize(size);
 		}
-		auto ArrangeItem(const std::size_t index, const RectF assignedBounds) noexcept -> Result<void>
+		[[nodiscard]] auto ArrangeItem(const std::size_t index, const RectF assignedBounds) noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
@@ -338,7 +338,7 @@ export namespace PGUI::UI::Layout
 			ArrangeItem(managedItems.at(index), assignedBounds);
 			return EmptyResult;
 		}
-		auto MoveItem(const std::size_t index, const PointF point) noexcept -> Result<void>
+		[[nodiscard]] auto MoveItem(const std::size_t index, const PointF point) noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
@@ -347,7 +347,7 @@ export namespace PGUI::UI::Layout
 			MoveItem(managedItems.at(index), point);
 			return EmptyResult;
 		}
-		auto ResizeItem(const std::size_t index, const SizeF size) noexcept -> Result<void>
+		[[nodiscard]] auto ResizeItem(const std::size_t index, const SizeF size) noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{

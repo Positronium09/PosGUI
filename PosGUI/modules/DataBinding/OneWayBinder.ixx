@@ -3,6 +3,7 @@ export module PGUI.DataBinding.OneWayBinder;
 import std;
 
 import PGUI.Event;
+import PGUI.Utils;
 import PGUI.DataBinding.Property;
 
 export namespace PGUI::DataBinding
@@ -26,7 +27,7 @@ export namespace PGUI::DataBinding
 		             Func converter) noexcept :
 			source{ source }
 		{
-			observerId = source.AddObserver([&target, converter = std::move(converter)](const auto& value)
+			observerId = source.AddObserver([&target, converter = MoveChecked(converter)](const auto& value)
 			{
 				target.Set(static_cast<TargetType>(converter(value)));
 			});

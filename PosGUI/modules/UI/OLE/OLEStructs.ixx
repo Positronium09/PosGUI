@@ -33,7 +33,7 @@ export namespace PGUI::UI::OLE
 			TargetDevicePtr&& targetDevice = nullptr,
 			const long index = -1) noexcept :
 			format{ format },
-			targetDevice{ std::move(targetDevice) },
+			targetDevice{ MoveChecked(targetDevice) },
 			aspect{ aspect },
 			index{ index },
 			storageMediumType{ storageMediumType }
@@ -66,7 +66,7 @@ export namespace PGUI::UI::OLE
 				return Unexpected{ newDeviceResult.error() };
 			}
 
-			formatData.targetDevice = std::move(newDeviceResult).value();
+			formatData.targetDevice = MoveChecked(newDeviceResult).value();
 			return formatData;
 		}
 
@@ -155,7 +155,7 @@ export namespace PGUI::UI::OLE
 				{
 					return Unexpected{ newPtdResult.error() };
 				}
-				copy.targetDevice = std::move(newPtdResult).value();
+				copy.targetDevice = MoveChecked(newPtdResult).value();
 			}
 
 			return copy;
@@ -320,8 +320,8 @@ export namespace PGUI::UI::OLE
 			StorageHolder&& storage, 
 			ComPtr<IUnknown>&& unknown = nullptr,
 			const bool dataOwned = false) noexcept :
-			type{ type }, storage{ std::move(storage) }, 
-			unknown{ std::move(unknown) }, dataOwned{ dataOwned }
+			type{ type }, storage{ MoveChecked(storage) }, 
+			unknown{ MoveChecked(unknown) }, dataOwned{ dataOwned }
 		{ }
 
 		~StorageMedium() noexcept;
@@ -342,7 +342,7 @@ export namespace PGUI::UI::OLE
 			return storage;
 		}
 
-		auto WriteToSTGMEDIUM(const STGMEDIUM& dest) const noexcept -> Result<void>;
+		[[nodiscard]] auto WriteToSTGMEDIUM(const STGMEDIUM& dest) const noexcept -> Result<void>;
 
 		// ReSharper restore IdentifierTypo
 		// ReSharper restore CppInconsistentNaming

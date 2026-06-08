@@ -123,7 +123,7 @@ export namespace PGUI
 		template <IsInTypeList<Interfaces...> T>
 		constexpr auto operator=(ComPtr<T>&& ptr) -> ComPtrHolder&
 		{
-			Set(std::move(ptr));
+			Set(MoveChecked(ptr));
 			return *this;
 		}
 
@@ -143,13 +143,19 @@ export namespace PGUI
 		template <IsInTypeList<Interfaces...> T>
 		constexpr auto Set(ComPtr<T>&& ptr) noexcept -> void
 		{
-			std::get<ComPtr<T>>(interfaces) = std::move(ptr);
+			std::get<ComPtr<T>>(interfaces) = MoveChecked(ptr);
 		}
 
 		template <IsInTypeList<Interfaces...> T>
 		constexpr auto Set(T* ptr) noexcept -> void
 		{
 			std::get<ComPtr<T>>(interfaces) = ptr;
+		}
+
+		template <IsInTypeList<Interfaces...> T = FirstType>
+		constexpr auto Reset() noexcept -> void
+		{
+			std::get<ComPtr<T>>(interfaces).reset();
 		}
 
 		template <IsInTypeList<Interfaces...> T = FirstType>
@@ -174,6 +180,20 @@ export namespace PGUI
 		[[nodiscard]] auto GetAs() const noexcept
 		{
 			return Get<FirstType>().template try_query<U>();
+		}
+
+		template <IsInTypeList<Interfaces...> T, typename U> requires
+			std::derived_from<T, U>
+		[[nodiscard]] auto GetUpCast() const noexcept
+		{
+			return static_cast<U*>(GetRaw<T>());
+		}
+
+		template <typename U> requires
+			std::derived_from<FirstType, U>
+		[[nodiscard]] auto GetUpCast() const noexcept
+		{
+			return static_cast<U*>(GetRaw<FirstType>());
 		}
 
 		template <IsInTypeList<Interfaces...> T = FirstType>
@@ -225,7 +245,7 @@ export namespace PGUI
 		}
 
 		template <IsInTypeList<Interfaces...> T, IsInTypeList<Interfaces...> U>
-		auto AsAssign() noexcept -> Result<void>
+		[[nodiscard]] auto AsAssign() noexcept -> Result<void>
 		{
 			auto ptr = GetAs<T, U>();
 

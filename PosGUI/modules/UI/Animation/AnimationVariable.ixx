@@ -7,6 +7,8 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
+import PGUI.UI.DComp.Animation;
+import PGUI.UI.DComp.Device;
 import :AnimationInterface;
 import :AnimationEnums;
 
@@ -47,25 +49,33 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto GetFinalVectorValue() const noexcept -> Result<std::vector<double>>;
 
-		auto SetLowerBound(double bound) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetLowerBound(double bound) const noexcept -> Result<void>;
 
-		auto SetLowerBound(std::span<const double> bounds) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetLowerBound(std::span<const double> bounds) const noexcept -> Result<void>;
 
-		auto SetUpperBound(double bound) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetUpperBound(double bound) const noexcept -> Result<void>;
 
-		auto SetUpperBound(std::span<const double> bounds) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetUpperBound(std::span<const double> bounds) const noexcept -> Result<void>;
 
-		auto SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetRoundingMode(AnimationRoundingMode mode) const noexcept -> Result<void>;
 
-		auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetTag() const noexcept -> Result<std::pair<ComPtr<IUnknown>, UINT32>>;
 
-		auto SetVariableChangeHandler(
+		[[nodiscard]] auto SetVariableChangeHandler(
 			AnimationVariableChangeEventHandler& handler,
 			bool registerForNext = false) const noexcept -> Result<void>;
 
-		auto ClearVariableChangeHandler(bool registerForNext = false) const noexcept -> Result<void>;
+		[[nodiscard]] auto ClearVariableChangeHandler(bool registerForNext = false) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto GetCurve(const DComp::Animation& animation) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto GetCurve(const DComp::Device& device) const noexcept -> Result<DComp::Animation>;
+
+		[[nodiscard]] auto GetVectorCurve(std::span<const DComp::Animation> animations) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto GetVectorCurve(const DComp::Device& device) const noexcept -> Result<std::vector<DComp::Animation>>;
 
 		template <std::floating_point T>
 		explicit operator T() const { return static_cast<T>(GetValue().value()); }

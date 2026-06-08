@@ -53,7 +53,7 @@ export namespace PGUI::DataBinding
 		             Func1 converter1, Func2 converter2) noexcept :
 			property1{ property1 }, property2{ property2 }
 		{
-			observer1Id = property1.AddObserver([this, &property2, converter1 = std::move(converter1)](const auto& value)
+			observer1Id = property1.AddObserver([this, &property2, converter1 = MoveChecked(converter1)](const auto& value)
 			{
 				if (isUpdating.load(std::memory_order_relaxed))
 				{
@@ -68,7 +68,7 @@ export namespace PGUI::DataBinding
 
 				property2.Set(static_cast<Type2>(converter1(value)));
 			});
-			observer2Id = property2.AddObserver([this, &property1, converter2 = std::move(converter2)](const auto& value)
+			observer2Id = property2.AddObserver([this, &property1, converter2 = MoveChecked(converter2)](const auto& value)
 			{
 				if (isUpdating.load(std::memory_order_relaxed))
 				{

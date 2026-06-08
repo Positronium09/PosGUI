@@ -57,7 +57,7 @@ export namespace PGUI
 		auto operator=(ScopedTimer&&) -> ScopedTimer& = delete;
 
 		private:
-		inline static std::chrono::nanoseconds durationThreshold = std::chrono::milliseconds{ 100 };
+		static inline std::chrono::nanoseconds durationThreshold = std::chrono::milliseconds{ 100 };
 
 		std::wstring timerName;
 		bool overrideThreshold;

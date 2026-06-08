@@ -1,4 +1,4 @@
-﻿export module PGUI.UI.Animation:Animated;
+export module PGUI.UI.Animation:Animated;
 
 import :AnimationInterface;
 import :AnimationEnums;
@@ -17,6 +17,8 @@ import PGUI.ErrorHandling;
 import PGUI.Utils;
 import PGUI.UI.Color;
 import PGUI.Shape2D;
+import PGUI.UI.DComp.Animation;
+import PGUI.UI.DComp.Device;
 
 export namespace PGUI::UI::Animation
 {
@@ -251,7 +253,7 @@ export namespace PGUI::UI::Animation
 			}
 		}
 
-		auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<void>
+		[[nodiscard]] auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<void>
 		{
 			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
 				!result.has_value())
@@ -322,7 +324,7 @@ export namespace PGUI::UI::Animation
 			return AnimateResult{ .storyboard = storyboard, .schedulingResult = schedulingResult.value() };
 		}
 
-		auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters,
+		[[nodiscard]] auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters,
 			const Storyboard& storyboard) const noexcept -> Result<void>
 		{
 			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
@@ -340,7 +342,7 @@ export namespace PGUI::UI::Animation
 			return storyboard.AddTransition(variable, transitionResult.value());
 		}
 
-		auto AnimateToAtKeyframe(const T& targetValue, TransitionParameters transitionParameters,
+		[[nodiscard]] auto AnimateToAtKeyframe(const T& targetValue, TransitionParameters transitionParameters,
 			const Storyboard& storyboard, const KeyFrame keyFrame) const noexcept -> Result<void>
 		{
 			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
@@ -358,7 +360,7 @@ export namespace PGUI::UI::Animation
 			return storyboard.AddTransitionAtKeyframe(variable, transitionResult.value(), keyFrame);
 		}
 
-		auto AnimateToBetweenKeyframes(const T& targetValue, TransitionParameters transitionParameters,
+		[[nodiscard]] auto AnimateToBetweenKeyframes(const T& targetValue, TransitionParameters transitionParameters,
 			const Storyboard& storyboard, const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Result<void>
 		{
 			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, static_cast<double>(targetValue));
@@ -444,17 +446,17 @@ export namespace PGUI::UI::Animation
 			}
 		}
 
-		auto SetLowerBound(const T& bound) const noexcept -> Result<void>
+		[[nodiscard]] auto SetLowerBound(const T& bound) const noexcept -> Result<void>
 		{
 			return variable.SetLowerBound(static_cast<double>(bound));
 		}
 
-		auto SetUpperBound(const T& bound) const noexcept -> Result<void>
+		[[nodiscard]] auto SetUpperBound(const T& bound) const noexcept -> Result<void>
 		{
 			return variable.SetUpperBound(static_cast<double>(bound));
 		}
 
-		auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Result<void>
+		[[nodiscard]] auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Result<void>
 		{
 			if (auto result = SetLowerBound(lowerBound);
 				!result.has_value())
@@ -464,12 +466,12 @@ export namespace PGUI::UI::Animation
 			return SetUpperBound(upperBound);
 		}
 
-		auto SetRoundingMode(const AnimationRoundingMode mode) const noexcept -> Result<void>
+		[[nodiscard]] auto SetRoundingMode(const AnimationRoundingMode mode) const noexcept -> Result<void>
 		{
 			return variable.SetRoundingMode(mode);
 		}
 
-		auto SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Result<void>
+		[[nodiscard]] auto SetTag(const ComPtr<IUnknown>& obj, const UINT32 id) const noexcept -> Result<void>
 		{
 			return variable.SetTag(obj, id);
 		}
@@ -477,6 +479,16 @@ export namespace PGUI::UI::Animation
 		[[nodiscard]] auto GetTag() const noexcept -> Result<std::pair<ComPtr<IUnknown>, UINT32>>
 		{
 			return variable.GetTag();
+		}
+
+		[[nodiscard]] auto GetCurve(const DComp::Animation& animation) const noexcept -> Result<void>
+		{
+			return variable.GetCurve(animation);
+		}
+
+		[[nodiscard]] auto GetCurve(const DComp::Device& device) const noexcept -> Result<DComp::Animation>
+		{
+			return variable.GetCurve(device);
 		}
 
 		[[nodiscard]] auto Get() const noexcept -> Result<T>
@@ -558,7 +570,7 @@ export namespace PGUI::UI::Animation
 			}
 		}
 
-		auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<void>
+		[[nodiscard]] auto TransitionTo(const T& targetValue, TransitionParameters transitionParameters) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
 			if (auto result = SetFinalValueToTransitionParameters(transitionParameters, targetArray);
@@ -633,7 +645,7 @@ export namespace PGUI::UI::Animation
 			return AnimateResult{ .storyboard = storyboard, .schedulingResult = schedulingResult.value() };
 		}
 
-		auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters,
+		[[nodiscard]] auto AnimateTo(const T& targetValue, TransitionParameters transitionParameters,
 			const Storyboard& storyboard) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
@@ -652,7 +664,7 @@ export namespace PGUI::UI::Animation
 			return storyboard.AddTransition(variable, transitionResult.value());
 		}
 
-		auto AnimateToAtKeyframe(const T& targetValue, TransitionParameters transitionParameters,
+		[[nodiscard]] auto AnimateToAtKeyframe(const T& targetValue, TransitionParameters transitionParameters,
 			const Storyboard& storyboard, const KeyFrame keyFrame) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
@@ -671,7 +683,7 @@ export namespace PGUI::UI::Animation
 			return storyboard.AddTransitionAtKeyframe(variable, transitionResult.value(), keyFrame);
 		}
 
-		auto AnimateToBetweenKeyframes(const T& targetValue, TransitionParameters transitionParameters,
+		[[nodiscard]] auto AnimateToBetweenKeyframes(const T& targetValue, TransitionParameters transitionParameters,
 			const Storyboard& storyboard, const KeyFrame startKeyFrame, const KeyFrame endKeyFrame) const noexcept -> Result<void>
 		{
 			const auto targetArray = Converter::ConvertFromValue(targetValue);
@@ -742,19 +754,29 @@ export namespace PGUI::UI::Animation
 			return result.value();
 		}
 
-		auto SetUpperBound(const T& bound) const noexcept -> Result<void>
+		[[nodiscard]] auto GetVectorCurve(std::span<const DComp::Animation> animations) const noexcept -> Result<void>
+		{
+			return variable.GetVectorCurve(animations);
+		}
+
+		[[nodiscard]] auto GetVectorCurve(const DComp::Device& device) const noexcept -> Result<std::vector<DComp::Animation>>
+		{
+			return variable.GetVectorCurve(device);
+		}
+
+		[[nodiscard]] auto SetUpperBound(const T& bound) const noexcept -> Result<void>
 		{
 			const auto boundArray = Converter::ConvertFromValue(bound);
 			return variable.SetUpperBound(boundArray);
 		}
 
-		auto SetLowerBound(const T& bound) const noexcept -> Result<void>
+		[[nodiscard]] auto SetLowerBound(const T& bound) const noexcept -> Result<void>
 		{
 			const auto boundArray = Converter::ConvertFromValue(bound);
 			return variable.SetLowerBound(boundArray);
 		}
 
-		auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Result<void>
+		[[nodiscard]] auto SetBounds(const T& lowerBound, const T& upperBound) const noexcept -> Result<void>
 		{
 			if (auto result = SetLowerBound(lowerBound);
 				!result.has_value())

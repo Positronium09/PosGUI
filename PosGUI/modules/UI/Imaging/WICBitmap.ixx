@@ -54,9 +54,9 @@ export namespace PGUI::UI::Imaging
 
 		[[nodiscard]] auto Lock(RectI rect, LockFlags flags) const noexcept -> Result<WICBitmapLock>;
 
-		auto SetPalette(Palette palette) noexcept -> Result<void>;
+		[[nodiscard]] auto SetPalette(Palette palette) noexcept -> Result<void>;
 
-		auto SetResolution(double dpiX, double dpiY) noexcept -> Result<void>;
-		auto SetResolution(Size<double> dpi) noexcept -> Result<void>;
+		[[nodiscard]] auto SetResolution(double dpiX, double dpiY) noexcept -> Result<void>;
+		[[nodiscard]] auto SetResolution(Size<double> dpi) noexcept -> Result<void>;
 	};
 }

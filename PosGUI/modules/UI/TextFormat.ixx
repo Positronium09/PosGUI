@@ -34,21 +34,21 @@ export namespace PGUI::UI
 					const FontCollection& fontCollection = FontCollection{ nullptr },
 		           wzstring_view localeName = GetUserLocaleName()) noexcept;
 
-		auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Result<void>;
 
-		auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Result<void>;
 
-		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>;
 
-		auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Result<void>;
 
-		auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
 
-		auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Result<void>;
 
-		auto SetTrimming(const Trimming& trimming) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTrimming(const Trimming& trimming) const noexcept -> Result<void>;
 
-		auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetFlowDirection() const noexcept -> FlowDirection;
 

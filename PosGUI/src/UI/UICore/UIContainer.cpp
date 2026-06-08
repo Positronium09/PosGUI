@@ -6,6 +6,7 @@ import :UIEvent;
 
 import PGUI.UI.Graphics;
 import PGUI.UI.D2D.D2DEnums;
+import PGUI.Utils;
 
 import std;
 
@@ -32,7 +33,7 @@ namespace PGUI::UI
 			return Unexpected{ Error{ ErrorCode::NotFound } };
 		}
 
-		auto elementPtr = std::move(*it);
+		auto elementPtr = MoveChecked(*it);
 		children.erase(it);
 		ChildRemovedEvent().Invoke(element);
 

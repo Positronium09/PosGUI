@@ -379,7 +379,7 @@ namespace PGUI
 		{
 			return nullptr;
 		}
-		auto childWindow = std::move(*found);
+		auto childWindow = MoveChecked(*found);
 
 		SetParent(childHwnd, nullptr);
 		childWindow->parentHwnd = nullptr;

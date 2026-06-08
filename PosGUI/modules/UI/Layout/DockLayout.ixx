@@ -1,4 +1,4 @@
-﻿module;
+module;
 #include <Windows.h>
 
 export module PGUI.UI.Layout.DockLayout;
@@ -46,7 +46,7 @@ export namespace PGUI::UI::Layout
 		[[nodiscard]] auto GetItemPosition(std::size_t id) const noexcept -> Result<DockPosition>;
 		[[nodiscard]] auto GetDockPosition(const LayoutItem& item) const noexcept -> Result<DockPosition>;
 
-		auto SetMaxDockSize(DockPosition position, float size) noexcept -> Result<void>;
+		[[nodiscard]] auto SetMaxDockSize(DockPosition position, float size) noexcept -> Result<void>;
 		auto ClearMaxDockSize(DockPosition position) noexcept -> void;
 
 		auto SetDockPriority(DockPosition position, DockPriority priority) noexcept -> void;

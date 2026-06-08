@@ -1,4 +1,5 @@
 module;
+#include <d2d1_3.h>
 #include <dcomp.h>
 
 export module PGUI.UI.DComp.Surface;
@@ -7,23 +8,46 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Shape2D;
+import PGUI.Utils;
+import PGUI.UI.Graphics;
 import PGUI.ErrorHandling;
 
-export namespace PGUI::DComp
+export namespace PGUI::UI::DComp
 {
 	template <typename Interface = IDCompositionSurface>
 	class Surface : public ComPtrHolder<Interface>
 	{
 		static_assert(std::derived_from<Interface, IDCompositionSurface>);
+
 		public:
 		Surface() noexcept = default;
-		explicit(false) Surface(Interface* ptr) noexcept : 
+		explicit(false) Surface(const ComPtr<Interface>& ptr) noexcept :
 			ComPtrHolder<Interface>{ ptr }
 		{ }
 
-		//TODO BeginDraw
+		[[nodiscard]] auto BeginDraw(std::optional<RectL> updateRect = std::nullopt) const noexcept -> Result<UI::Graphics>
+		{
+			const RECT* rect = nullptr;
+			if (updateRect.has_value())
+			{
+				rect = std::bit_cast<const RECT*>(&updateRect.value());
+			}
 
-		auto EndDraw() const noexcept -> Result<void>
+			ComPtr<ID2D1DeviceContext7> dc{ nullptr };
+			POINT updateOffset{ };
+			if (Error error{ this->Get()->BeginDraw(rect, GetIID<ID2D1DeviceContext7>(), dc.put_void(), &updateOffset) };
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+
+			UI::Graphics graphics{ dc };
+			graphics.PushTranslation(PointL{ updateOffset });
+
+			return graphics;
+		}
+
+		[[nodiscard]] auto EndDraw() const noexcept -> Result<void>
 		{
 			if (Error error{ this->Get()->EndDraw() };
 				error.IsFailure())
@@ -33,7 +57,7 @@ export namespace PGUI::DComp
 			return EmptyResult;
 		}
 
-		auto ResumeDraw() const noexcept -> Result<void>
+		[[nodiscard]] auto ResumeDraw() const noexcept -> Result<void>
 		{
 			if (Error error{ this->Get()->ResumeDraw() };
 				error.IsFailure())
@@ -43,7 +67,7 @@ export namespace PGUI::DComp
 			return EmptyResult;
 		}
 
-		auto SuspendDraw() const noexcept -> Result<void>
+		[[nodiscard]] auto SuspendDraw() const noexcept -> Result<void>
 		{
 			if (Error error{ this->Get()->SuspendDraw() };
 				error.IsFailure())
@@ -53,7 +77,7 @@ export namespace PGUI::DComp
 			return EmptyResult;
 		}
 
-		auto Scroll(RectL scrollRect, SizeI offset, std::optional<RectL> clipRect) const noexcept -> Result<void>
+		[[nodiscard]] auto Scroll(RectL scrollRect, SizeI offset, std::optional<RectL> clipRect) const noexcept -> Result<void>
 		{
 			const RECT* rect = nullptr;
 			if (clipRect.has_value())
@@ -61,7 +85,7 @@ export namespace PGUI::DComp
 				rect = std::bit_cast<RECT*>(&clipRect.value());
 			}
 
-			if (Error error{
+			if (const Error error{
 					this->Get()->Scroll(
 					std::bit_cast<const RECT*>(&scrollRect),
 					rect, offset.cx, offset.cy)
@@ -83,11 +107,11 @@ export namespace PGUI::DComp
 	{
 		public:
 		VirtualSurface() noexcept = default;
-		explicit(false) VirtualSurface(IDCompositionVirtualSurface* ptr) noexcept :
+		explicit(false) VirtualSurface(const ComPtr<IDCompositionVirtualSurface>& ptr) noexcept :
 			Surface{ ptr }
 		{ }
 
-		auto Resize(const SizeU size) const noexcept -> Result<void>
+		[[nodiscard]] auto Resize(const SizeU size) const noexcept -> Result<void>
 		{
 			if (Error error{ Get()->Resize(size.cx, size.cy) };
 				error.IsFailure())
@@ -97,14 +121,14 @@ export namespace PGUI::DComp
 			return EmptyResult;
 		}
 
-		auto Trim(std::span<RectL> rects) const noexcept -> Result<void>
+		[[nodiscard]] auto Trim(std::span<RectL> rects) const noexcept -> Result<void>
 		{
 			const RECT* rectArray = nullptr;
 			if (!rects.empty())
 			{
 				rectArray = std::bit_cast<const RECT*>(rects.data());
 			}
-			if (Error error{
+			if (const Error error{
 					Get()->Trim(
 						rectArray,
 						static_cast<UINT>(rects.size())

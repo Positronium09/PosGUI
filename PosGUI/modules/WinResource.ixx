@@ -83,10 +83,15 @@ export namespace PGUI
 	struct DataModulePair
 	{
 		explicit DataModulePair(T data, wil::unique_hmodule moduleHandle = { nullptr }) noexcept :
-			data{ std::move(data) },
-			moduleHandle{ std::move(moduleHandle) }
+			data{ MoveChecked(data) },
+			moduleHandle{ MoveChecked(moduleHandle) }
 		{
 		}
+
+		DataModulePair(const DataModulePair&) = delete;
+		auto operator=(const DataModulePair&) -> DataModulePair & = delete;
+		DataModulePair(DataModulePair&&) noexcept = default;
+		auto operator=(DataModulePair&&) noexcept -> DataModulePair & = default;
 
 		template <typename Self>
 		[[nodiscard]] auto&& GetData(this Self&& self) noexcept
@@ -102,7 +107,7 @@ export namespace PGUI
 
 		auto AdoptModuleHandle(wil::unique_hmodule mod) noexcept
 		{
-			moduleHandle = std::move(mod);
+			moduleHandle = MoveChecked(mod);
 		}
 
 		[[nodiscard]] auto CreateMemoryStream() const noexcept -> Result<ComPtr<IStream>>
@@ -125,11 +130,6 @@ export namespace PGUI
 			streamPtr.attach(stream);
 			return streamPtr;
 		}
-
-		DataModulePair(const DataModulePair&) = delete;
-		auto operator=(const DataModulePair&) -> DataModulePair& = delete;
-		DataModulePair(DataModulePair&&) noexcept = default;
-		auto operator=(DataModulePair&&) noexcept -> DataModulePair& = default;
 
 		private:
 		T data;
@@ -175,7 +175,7 @@ export namespace PGUI
 			auto result = LoadFromModule(hModule.value().get(), id, type);
 			if (result.has_value())
 			{
-				result.value().AdoptModuleHandle(std::move(hModule.value()));
+				result.value().AdoptModuleHandle(MoveChecked(hModule.value()));
 			}
 
 			return result;
@@ -206,7 +206,7 @@ export namespace PGUI
 			auto result = LoadAccelerator(hModule.value().get(), id);
 			if (result.has_value())
 			{
-				result.value().AdoptModuleHandle(std::move(hModule.value()));
+				result.value().AdoptModuleHandle(MoveChecked(hModule.value()));
 			}
 
 			return result;
@@ -229,7 +229,7 @@ export namespace PGUI
 			auto result = LoadBitmapResource(hModule.value().get(), id);
 			if (result.has_value())
 			{
-				result.value().AdoptModuleHandle(std::move(hModule.value()));
+				result.value().AdoptModuleHandle(MoveChecked(hModule.value()));
 			}
 
 			return result;
@@ -256,7 +256,7 @@ export namespace PGUI
 			auto result = LoadCursorResource(hModule.value().get(), id, size);
 			if (result.has_value())
 			{
-				result.value().AdoptModuleHandle(std::move(hModule.value()));
+				result.value().AdoptModuleHandle(MoveChecked(hModule.value()));
 			}
 
 			return result;
@@ -285,7 +285,7 @@ export namespace PGUI
 			auto result = LoadIconResource(hModule.value().get(), id, size);
 			if (result.has_value())
 			{
-				result.value().AdoptModuleHandle(std::move(hModule.value()));
+				result.value().AdoptModuleHandle(MoveChecked(hModule.value()));
 			}
 
 			return result;
@@ -310,7 +310,7 @@ export namespace PGUI
 			auto result = LoadMenuResource(hModule.value().get(), id);
 			if (result.has_value())
 			{
-				result.value().AdoptModuleHandle(std::move(hModule.value()));
+				result.value().AdoptModuleHandle(MoveChecked(hModule.value()));
 			}
 
 			return result;

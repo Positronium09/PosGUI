@@ -28,7 +28,7 @@ export namespace PGUI::UI::D2D
 		public:
 		DeviceContext() noexcept = default;
 
-		explicit(false) DeviceContext(ComPtr<Interface> deviceContext) noexcept :
+		explicit(false) DeviceContext(const ComPtr<Interface>& deviceContext) noexcept :
 			RenderTarget<Interface>{ deviceContext }
 		{ }
 

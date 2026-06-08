@@ -366,7 +366,7 @@ export namespace PGUI
 				throw Exception{ error };
 			}
 
-			childWindows.push_back(std::move(window));
+			childWindows.push_back(MoveChecked(window));
 
 			OnChildAdded(childWindows.back().get());
 
@@ -384,7 +384,7 @@ export namespace PGUI
 			SetParent(wnd->Hwnd(), Hwnd());
 			wnd->parentHwnd = Hwnd();
 
-			childWindows.push_back(std::move(window));
+			childWindows.push_back(MoveChecked(window));
 
 			OnChildAdded(childWindows.back().get());
 

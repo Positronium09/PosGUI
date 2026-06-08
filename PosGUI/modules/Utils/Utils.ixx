@@ -114,11 +114,11 @@ export namespace PGUI
 	{ }
 
 	template <typename T>
-	[[nodiscard]] auto Move(T&& var) noexcept -> std::remove_reference_t<T>&&
+	[[nodiscard]] auto MoveChecked(T&& var) noexcept -> std::remove_reference_t<T>&&
 	{
 		return std::move(var);
 	}
 
 	template <typename T>
-	auto Move(const T& var) -> void = delete;
+	auto MoveChecked(const T& var) -> void = delete;
 }

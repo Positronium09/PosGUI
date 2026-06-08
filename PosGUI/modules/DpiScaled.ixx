@@ -112,7 +112,7 @@ export namespace PGUI
 		{
 		}
 		explicit DpiScaled(T&& value, const float dpi = DEFAULT_SCREEN_DPI) noexcept(std::is_nothrow_move_constructible_v<T>) :
-			dpi{ dpi }, logicalValue{ std::move(value) }
+			dpi{ dpi }, logicalValue{ MoveChecked(value) }
 		{
 		}
 		DpiScaled(const DpiScaled& other) noexcept(std::is_nothrow_copy_constructible_v<T>) :
@@ -126,13 +126,13 @@ export namespace PGUI
 			return *this;
 		}
 		DpiScaled(DpiScaled&& other) noexcept(std::is_nothrow_move_constructible_v<T>) :
-			dpi{ other.dpi }, logicalValue{ std::move(other.logicalValue) }
+			dpi{ other.dpi }, logicalValue{ MoveChecked(other.logicalValue) }
 		{
 		}
 		auto operator=(DpiScaled&& other) noexcept(std::is_nothrow_move_assignable_v<T>) -> DpiScaled&
 		{
 			dpi = other.dpi;
-			logicalValue = std::move(other.logicalValue);
+			logicalValue = MoveChecked(other.logicalValue);
 			return *this;
 		}
 
@@ -143,7 +143,7 @@ export namespace PGUI
 		}
 		auto operator=(T&& other) noexcept(std::is_nothrow_move_assignable_v<T>) -> DpiScaled&
 		{
-			logicalValue = std::move(other);
+			logicalValue = MoveChecked(other);
 			return *this;
 		}
 
@@ -156,7 +156,7 @@ export namespace PGUI
 			return logicalValue;
 		}
 
-		auto SetDpi(const float newDpi) noexcept -> Result<void>
+		[[nodiscard]] auto SetDpi(const float newDpi) noexcept -> Result<void>
 		{
 			if (newDpi <= 0.0F)
 			{
@@ -183,7 +183,7 @@ export namespace PGUI
 		}
 		auto SetLogicalValue(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) -> void
 		{
-			logicalValue = std::move(value);
+			logicalValue = MoveChecked(value);
 		}
 		auto SetPhysicalValue(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) -> void
 		{

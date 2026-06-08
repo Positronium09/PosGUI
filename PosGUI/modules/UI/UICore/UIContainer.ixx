@@ -5,6 +5,7 @@ import :UIElement;
 import PGUI.Event;
 import PGUI.ErrorHandling;
 import PGUI.UI.Layout;
+import PGUI.Utils;
 
 import std;
 
@@ -36,7 +37,7 @@ export namespace PGUI::UI
 				};
 			}
 
-			children.push_back(std::move(element));
+			children.push_back(MoveChecked(element));
 			ChildAddedEvent().Invoke(elementPtr);
 			return elementPtr;
 		}
@@ -54,7 +55,7 @@ export namespace PGUI::UI
 				};
 			}
 
-			children.push_back(std::move(element));
+			children.push_back(MoveChecked(element));
 			ChildAddedEvent().Invoke(elementPtr);
 			return elementPtr;
 		}

@@ -89,12 +89,16 @@ export namespace std
 
 export namespace PGUI
 {
-	class ErrorCategory : public std::error_category
+	class ErrorCategory final : public std::error_category
 	{
+		// ReSharper disable once CppOverrideWithDifferentVisibility
+
 		[[nodiscard]] auto name() const noexcept -> const char* override
 		{
 			return "PGUI Error Category";
 		}
+		// ReSharper disable once CppOverrideWithDifferentVisibility
+
 		[[nodiscard]] auto message(int ev) const -> std::string override
 		{
 			switch (static_cast<ErrorCode>(ev))
@@ -123,18 +127,24 @@ export namespace PGUI
 					return "Invalid cast";
 				case ErrorCode::AllocationFailure:
 					return "Allocation failure";
+				case ErrorCode::InvalidFormat:
+					return "Invalid format";
 				default:
 					return "Unknown general error";
 			}
 		}
 	};
 
-	class SystemCategory : public std::error_category
+	class SystemCategory final : public std::error_category
 	{
+		// ReSharper disable once CppOverrideWithDifferentVisibility
+
 		[[nodiscard]] auto name() const noexcept -> const char* override
 		{
 			return "PGUI System Error Category";
 		}
+		// ReSharper disable once CppOverrideWithDifferentVisibility
+
 		[[nodiscard]] auto message(int ev) const -> std::string override
 		{
 			switch (static_cast<SystemErrorCode>(ev))

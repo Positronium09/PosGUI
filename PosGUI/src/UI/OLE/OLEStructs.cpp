@@ -74,7 +74,7 @@ namespace PGUI::UI::OLE
 		{
 			return Unexpected{ holderCopyResult.error() };
 		}
-		result.storage = std::move(holderCopyResult.value());
+		result.storage = MoveChecked(holderCopyResult.value());
 		result.unknown = ComPtr{ medium.pUnkForRelease };
 		result.dataOwned = true;
 
@@ -198,8 +198,8 @@ namespace PGUI::UI::OLE
 
 	StorageMedium::StorageMedium(StorageMedium&& other) noexcept :
 		type{ std::exchange(other.type, StorageMediumType::Null) },
-		storage{ std::move(other.storage) },
-		unknown{ std::move(other.unknown) },
+		storage{ MoveChecked(other.storage) },
+		unknown{ MoveChecked(other.unknown) },
 		dataOwned{ std::exchange(other.dataOwned, false) }
 	{ }
 
@@ -208,7 +208,7 @@ namespace PGUI::UI::OLE
 		if (this != &other)
 		{
 			type = std::exchange(other.type, StorageMediumType::Null);
-			storage = std::move(other.storage);
+			storage = MoveChecked(other.storage);
 			unknown.swap(other.unknown);
 			dataOwned = std::exchange(other.dataOwned, false);
 		}
@@ -461,7 +461,7 @@ namespace PGUI::UI::OLE
 		
 		StorageMedium copy;
 		copy.type = type;
-		copy.storage = std::move(holderCopyResult.value());
+		copy.storage = MoveChecked(holderCopyResult.value());
 		copy.unknown = unknown;
 		copy.dataOwned = true;
 		return copy;

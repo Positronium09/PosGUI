@@ -20,13 +20,13 @@ export namespace PGUI::UI::Animation
 
 		AnimationManager();
 
-		auto AbandonAllStoryboards() noexcept -> Result<void>;
+		[[nodiscard]] auto AbandonAllStoryboards() noexcept -> Result<void>;
 
-		auto Pause() const noexcept -> Result<void>;
+		[[nodiscard]] auto Pause() const noexcept -> Result<void>;
 
-		auto Resume() const noexcept -> Result<void>;
+		[[nodiscard]] auto Resume() const noexcept -> Result<void>;
 
-		auto Shutdown() const noexcept -> Result<void>;
+		[[nodiscard]] auto Shutdown() const noexcept -> Result<void>;
 
 		[[nodiscard]] auto Update(Seconds timeNow) const noexcept -> Result<AnimationUpdateResult>;
 
@@ -40,23 +40,23 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto EstimateNextEventTime() const noexcept -> Result<Seconds>;
 
-		auto SetAnimationMode(AnimationMode mode) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetAnimationMode(AnimationMode mode) const noexcept -> Result<void>;
 
-		auto SetDefaultLongestAcceptableDelay(Seconds delay) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetDefaultLongestAcceptableDelay(Seconds delay) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetStoryboardFromTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<Storyboard>;
 
 		[[nodiscard]] auto GetAnimationVariableFromTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<AnimationVariable>;
 
-		auto ScheduleTransition(
+		[[nodiscard]] auto ScheduleTransition(
 			const AnimationVariable& variable,
 			const AnimationTransition& transition, double currentTime) const noexcept -> Result<void>;
 
-		auto SetManagerEventHandler(
+		[[nodiscard]] auto SetManagerEventHandler(
 			AnimationManagerEventHandler& eventHandler,
 			bool registerForNext = false) const noexcept -> Result<void>;
 
-		auto ClearManagerEventHandler(bool registerForNext = false) const noexcept -> Result<void>;
+		[[nodiscard]] auto ClearManagerEventHandler(bool registerForNext = false) const noexcept -> Result<void>;
 
 		//TODO SetCancelPriorityComparison
 		//TODO SetCompressPriorityComparison 

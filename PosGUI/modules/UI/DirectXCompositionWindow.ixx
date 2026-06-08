@@ -15,6 +15,7 @@ import PGUI.WindowClass;
 import PGUI.ComPtr;
 import PGUI.UI.Clip;
 import PGUI.UI.Graphics;
+import PGUI.UI.DComp;
 import PGUI.ErrorHandling;
 
 export namespace PGUI::UI
@@ -32,7 +33,7 @@ export namespace PGUI::UI
 
 	class DirectXCompositionWindow :
 		public Window,
-		protected ComPtrHolder<IDXGISwapChain1, IDCompositionTarget, ID2D1DeviceContext7, IDCompositionVisual3>
+		protected ComPtrHolder<IDXGISwapChain1, ID2D1DeviceContext7>
 	{
 		public:
 		~DirectXCompositionWindow() override = default;
@@ -51,14 +52,10 @@ export namespace PGUI::UI
 			deviceCreationID.fetch_add(1, std::memory_order_relaxed);
 		}
 
-		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
-		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return Get<IDCompositionTarget>(); }
-		[[nodiscard]] const auto& GetSwapChain() const noexcept { return Get<IDXGISwapChain1>(); }
-		[[nodiscard]] const auto& GetDCompositionVisual() const noexcept { return Get<IDCompositionVisual3>(); }
-		[[nodiscard]] auto& GetD2D1DeviceContext() noexcept { return Get<ID2D1DeviceContext7>(); }
-		[[nodiscard]] auto& GetDCompositionTarget() noexcept { return Get<IDCompositionTarget>(); }
-		[[nodiscard]] auto& GetSwapChain() noexcept { return Get<IDXGISwapChain1>(); }
-		[[nodiscard]] auto& GetDCompositionVisual() noexcept { return Get<IDCompositionVisual3>(); }
+		[[nodiscard]] static auto GetDeviceCreationID() noexcept
+		{
+			return deviceCreationID.load(std::memory_order_relaxed);
+		}
 
 		[[nodiscard]] static auto& D3D11Device() noexcept { return d3d11Device; }
 		[[nodiscard]] static auto& DXGIDevice() noexcept { return dxgiDevice; }
@@ -66,17 +63,21 @@ export namespace PGUI::UI
 		[[nodiscard]] static auto& DCompositionSurfaceFactory() noexcept { return dCompositionSurfaceFactory; }
 		[[nodiscard]] static auto& D2D1Device() noexcept { return d2d1Device; }
 
+		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
+		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return target; }
+		[[nodiscard]] const auto& GetSwapChain() const noexcept { return Get<IDXGISwapChain1>(); }
+		[[nodiscard]] const auto& GetDCompositionVisual() const noexcept { return visual; }
+		[[nodiscard]] auto& GetD2D1DeviceContext() noexcept { return Get<ID2D1DeviceContext7>(); }
+		[[nodiscard]] auto& GetDCompositionTarget() noexcept { return target; }
+		[[nodiscard]] auto& GetSwapChain() noexcept { return Get<IDXGISwapChain1>(); }
+		[[nodiscard]] auto& GetDCompositionVisual() noexcept { return visual; }
+
 		[[nodiscard]] auto GetGraphics() const noexcept
 		{
 			Graphics graphics{ GetD2D1DeviceContext() };
 			const auto dpi = GetDpi();
 			graphics.SetDpi(dpi);
 			return graphics;
-		}
-
-		[[nodiscard]] static auto GetDeviceCreationID() noexcept
-		{
-			return deviceCreationID.load(std::memory_order_relaxed);
 		}
 
 		virtual auto BeginDraw() -> void;
@@ -104,15 +105,17 @@ export namespace PGUI::UI
 		auto OnSizeChanged(SizeL newSize) -> void override;
 
 		private:
-		inline static ComPtr<ID3D11Device2> d3d11Device;
-		inline static ComPtr<IDXGIDevice4> dxgiDevice;
-		inline static ComPtr<IDCompositionDevice5> dCompositionDevice;
-		inline static ComPtr<IDCompositionSurfaceFactory> dCompositionSurfaceFactory;
-		inline static ComPtr<ID2D1Device7> d2d1Device;
+		static inline ComPtr<ID3D11Device2> d3d11Device;
+		static inline ComPtr<IDXGIDevice4> dxgiDevice;
+		static inline DComp::Device dCompositionDevice;
+		static inline DComp::SurfaceFactory dCompositionSurfaceFactory;
+		static inline ComPtr<ID2D1Device7> d2d1Device;
+		static inline DComp::Target target;
+		static inline DComp::Visual visual;
 
+		static inline std::atomic_uint64_t deviceCreationID{ 0 };
 		HMONITOR currentMonitor = nullptr;
 		PAINTSTRUCT paintStruct{ };
-		static inline std::atomic_uint64_t deviceCreationID{ 0 };
 
 		auto InitSwapChain() -> void;
 
@@ -131,9 +134,9 @@ export namespace PGUI::UI
 		{
 			d3d11Device.reset();
 			dxgiDevice.reset();
-			dCompositionDevice.reset();
+			dCompositionDevice.Reset();
 			d2d1Device.reset();
-			dCompositionSurfaceFactory.reset();
+			dCompositionSurfaceFactory.Reset();
 			InitDevices();
 		}
 

@@ -1,4 +1,4 @@
-﻿module;
+module;
 #include <Windows.h>
 
 export module PGUI.UI.Layout.GridLayout;
@@ -168,8 +168,8 @@ export namespace PGUI::UI::Layout
 			RearrangeItems();
 		}
 
-		auto RemoveColumnDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
-		auto RemoveRowDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
+		[[nodiscard]] auto RemoveColumnDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
+		[[nodiscard]] auto RemoveRowDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
 
 		auto SetGrowToFit(const bool grow) noexcept -> void
 		{
@@ -191,7 +191,7 @@ export namespace PGUI::UI::Layout
 			return padding;
 		}
 
-		auto SetAutoCellSize(const GridCellDefinition size) noexcept -> Result<void>
+		[[nodiscard]] auto SetAutoCellSize(const GridCellDefinition size) noexcept -> Result<void>
 		{
 			autoCellSize = size;
 			RearrangeItems();
@@ -213,7 +213,7 @@ export namespace PGUI::UI::Layout
 			return placementType;
 		}
 
-		auto InsertBlankCell(const long row, const long column) noexcept -> Result<void>
+		[[nodiscard]] auto InsertBlankCell(const long row, const long column) noexcept -> Result<void>
 		{
 			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
 			{
@@ -224,7 +224,7 @@ export namespace PGUI::UI::Layout
 
 			return EmptyResult;
 		}
-		auto RemoveBlankCell(const long row, const long column) noexcept -> Result<void>
+		[[nodiscard]] auto RemoveBlankCell(const long row, const long column) noexcept -> Result<void>
 		{
 			if (row <= AUTO_PLACE || column <= AUTO_PLACE)
 			{

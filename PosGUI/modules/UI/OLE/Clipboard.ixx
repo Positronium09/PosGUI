@@ -15,7 +15,7 @@ import std;
 export namespace PGUI::UI::OLE
 {
 	template <DataObjectHandler H, bool B>
-	auto SetClipboard(const ComPtr<DataObject<H, B>>& dataObject) noexcept -> Result<void>
+	[[nodiscard]] auto SetClipboard(const ComPtr<DataObject<H, B>>& dataObject) noexcept -> Result<void>
 	{
 		if (Error error{ OleSetClipboard(dataObject.get()) };
 			error.IsFailure())
@@ -25,7 +25,7 @@ export namespace PGUI::UI::OLE
 		return EmptyResult;
 	}
 
-	auto SetClipboard(const ComPtr<IDataObject>& dataObject) noexcept -> Result<void>
+	[[nodiscard]] auto SetClipboard(const ComPtr<IDataObject>& dataObject) noexcept -> Result<void>
 	{
 		if (Error error{ OleSetClipboard(dataObject.get()) };
 			error.IsFailure())
@@ -35,7 +35,7 @@ export namespace PGUI::UI::OLE
 		return EmptyResult;
 	}
 
-	auto ClearClipboard() noexcept -> Result<void>
+	[[nodiscard]] auto ClearClipboard() noexcept -> Result<void>
 	{
 		if (Error error{ OleSetClipboard(nullptr) };
 			error.IsFailure())
@@ -54,7 +54,7 @@ export namespace PGUI::UI::OLE
 			return Unexpected{ error };
 		}
 
-		return DataObjectReadWrite{ std::move(dataObject) };
+		return DataObjectReadWrite{ MoveChecked(dataObject) };
 	}
 
 	[[nodiscard]] auto IsClipboardEmpty() noexcept -> bool

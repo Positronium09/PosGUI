@@ -17,7 +17,7 @@ export namespace PGUI::UI
 		}
 		~VisualStateGroup() noexcept = default;
 
-		auto AllowTransition(const StateT from, StateT to) noexcept -> Result<void>
+		[[nodiscard]] auto AllowTransition(const StateT from, StateT to) noexcept -> Result<void>
 		{
 			try
 			{
@@ -31,7 +31,7 @@ export namespace PGUI::UI
 					StringToWString(e.what())) };
 			}
 		}
-		auto DisallowTransition(const StateT from, StateT to) noexcept -> Result<void>
+		[[nodiscard]] auto DisallowTransition(const StateT from, StateT to) noexcept -> Result<void>
 		{
 			try
 			{

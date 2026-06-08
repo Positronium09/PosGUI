@@ -27,7 +27,7 @@ export namespace PGUI::UI::OLE
 					{
 						throw Exception{ copyResult.error() };
 					}
-					formats.emplace_back(std::move(copyResult).value());
+					formats.emplace_back(MoveChecked(copyResult).value());
 				}
 			}
 			catch (const std::exception& e)
@@ -68,7 +68,7 @@ export namespace PGUI::UI::OLE
 					newEnumFormatData->Release();
 					return copyResult.error().HResult();
 				}
-				newEnumFormatData->formats.emplace_back(std::move(copyResult).value());
+				newEnumFormatData->formats.emplace_back(MoveChecked(copyResult).value());
 			}
 
 			newEnumFormatData->currentIndex = currentIndex;

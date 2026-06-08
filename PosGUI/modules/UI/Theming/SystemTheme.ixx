@@ -106,6 +106,6 @@ export namespace PGUI::UI::Theming
 
 		[[nodiscard]] static auto GetUISettings() noexcept -> winrt::Windows::UI::ViewManagement::UISettings&;
 
-		inline static Event<> colorValuesChangedEvent;
+		static inline Event<> colorValuesChangedEvent;
 	};
 }

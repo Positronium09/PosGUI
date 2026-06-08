@@ -23,7 +23,7 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto GetSegmentCount() const noexcept -> Result<UINT32>;
 
 		[[nodiscard]] auto Open() const noexcept -> Result<GeometrySink>;
-		auto Stream(const GeometrySink& sink) const noexcept -> Result<void>;
+		[[nodiscard]] auto Stream(const GeometrySink& sink) const noexcept -> Result<void>;
 
 		[[nodiscard]] static auto CreateRoundRectWithPathGeometry(
 			RectF rect,

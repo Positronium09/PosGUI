@@ -34,7 +34,7 @@ export namespace PGUI::UI::D2D
 		public:
 		RenderTarget() noexcept = default;
 
-		explicit(false) RenderTarget(ComPtr<Interface> renderTarget) noexcept :
+		explicit(false) RenderTarget(const ComPtr<Interface>& renderTarget) noexcept :
 			ComPtrHolder<Interface>{ renderTarget }
 		{ }
 

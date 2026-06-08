@@ -87,7 +87,7 @@ export namespace PGUI::DataBinding
 						return;
 					}
 				}
-				value = std::move(newValue);
+				value = MoveChecked(newValue);
 			}
 			valueChangedEvent.Invoke(Get());
 		}
@@ -95,7 +95,7 @@ export namespace PGUI::DataBinding
 		auto MoveValue() noexcept(std::is_nothrow_move_constructible_v<T>) -> T
 		{
 			std::scoped_lock lock{ mutex };
-			return std::move(value);
+			return MoveChecked(value);
 		}
 
 		auto AddObserver(CallbackType<const AccessorProxyType&> auto callback) noexcept
@@ -121,7 +121,7 @@ export namespace PGUI::DataBinding
 
 		virtual auto operator=(T&& val) noexcept(std::is_nothrow_move_assignable_v<T>) -> Property&
 		{
-			Set(std::move(val));
+			Set(MoveChecked(val));
 			return *this;
 		}
 

@@ -123,18 +123,18 @@ namespace PGUI::UI
 
 	auto DirectXCompositionWindow::InitDCompDevice() -> void
 	{
-		if (dCompositionDevice)
+		if (dCompositionDevice.IsInitialized())
 		{
 			Logger::Info(
 				L"DirectXCompositionWindow::InitDCompDevice called, but DirectComposition device already initialized");
 			return;
 		}
 
-		ComPtr<IDCompositionDevice> dcompDevice;
-		auto hr = DCompositionCreateDevice3(
+		ComPtr<IDCompositionDevice4> dCompDevice;
+		const auto hr = DCompositionCreateDevice3(
 			dxgiDevice.get(),
-			GetIID(dcompDevice),
-			dcompDevice.put_void());
+			GetIID(dCompDevice),
+			dCompDevice.put_void());
 		if (FAILED(hr))
 		{
 			throw Exception{
@@ -143,8 +143,8 @@ namespace PGUI::UI
 			};
 		}
 
-		dCompositionDevice = dcompDevice.try_query<IDCompositionDevice5>();
-		if (dCompositionDevice.get() == nullptr)
+		dCompositionDevice = DComp::Device{ dCompDevice.try_query<IDCompositionDevice5>() };
+		if (!dCompositionDevice.IsInitialized() || !dCompositionDevice.IsInitialized<IDCompositionDesktopDevice>())
 		{
 			throw Exception{
 				Error{ E_NOINTERFACE },
@@ -152,14 +152,16 @@ namespace PGUI::UI
 			};
 		}
 
-		hr = dCompositionDevice->CreateSurfaceFactory(dxgiDevice.get(), dCompositionSurfaceFactory.put());
-		if (FAILED(hr))
+		auto surfaceFactoryResult = dCompositionDevice.CreateSurfaceFactory(dxgiDevice);
+		if (!surfaceFactoryResult.has_value())
 		{
 			throw Exception{
-				Error{ hr },
+				surfaceFactoryResult.error(),
 				L"Cannot create DirectComposition surface factory"
 			};
 		}
+
+		dCompositionSurfaceFactory = MoveChecked(surfaceFactoryResult.value());
 	}
 
 	auto DirectXCompositionWindow::InitD2D1Device() -> void
@@ -218,7 +220,7 @@ namespace PGUI::UI
 
 			return std::make_pair(tag1, tag2);
 		}
-		else if (FAILED(hr))
+		if (FAILED(hr))
 		{
 			throw Exception{
 				Error{ hr },
@@ -366,10 +368,8 @@ namespace PGUI::UI
 	auto DirectXCompositionWindow::InitDirectComposition() -> void
 	{
 		const auto& swapChain = GetSwapChain();
-		auto& dcompTarget = GetDCompositionTarget();
-		auto& visual = GetDCompositionVisual();
 
-		const auto desktopDevice = dCompositionDevice.try_query<IDCompositionDesktopDevice>();
+		const auto desktopDevice = dCompositionDevice.GetAs<IDCompositionDesktopDevice>();
 		if (desktopDevice.get() == nullptr)
 		{
 			throw Exception{
@@ -378,58 +378,49 @@ namespace PGUI::UI
 			};
 		}
 
-		auto hr = desktopDevice->CreateTargetForHwnd(
-			Hwnd(), false,
-			&dcompTarget);
-		if (FAILED(hr))
+		auto targetResult = dCompositionDevice.CreateTargetForHwnd(Hwnd(), false);
+		if (!targetResult.has_value())
 		{
 			throw Exception{
-				Error{ hr },
+				targetResult.error(),
 				L"Cannot create DComposition target for window"
 			};
 		}
+		target = MoveChecked(targetResult.value());
 
-		ComPtr<IDCompositionVisual2> visualBase;
-		hr = dCompositionDevice->CreateVisual(&visualBase);
-		if (FAILED(hr))
+		auto visualResult = dCompositionDevice.CreateVisual();
+		if (!visualResult.has_value())
 		{
 			throw Exception{
-				Error{ hr },
+				visualResult.error(),
 				L"Cannot create DComposition visual"
 			};
 		}
-		visual = visualBase.try_query<IDCompositionVisual3>();
-		if (visual.get() == nullptr)
-		{
-			throw Exception{
-				Error{ E_NOINTERFACE },
-				L"Cannot query IDCompositionVisual3 interface"
-			};
-		}
+		visual = MoveChecked(visualResult.value());
 
-		hr = visual->SetContent(swapChain.get());
-		if (FAILED(hr))
+		if (const auto result = visual.SetContent(swapChain);
+			!result.has_value())
 		{
 			throw Exception{
-				Error{ hr },
+				result.error(),
 				L"Cannot set content for DComposition visual"
 			};
 		}
 
-		hr = dcompTarget->SetRoot(visual.get());
-		if (FAILED(hr))
+		if (const auto result = target.SetRoot(visual);
+			!result.has_value())
 		{
 			throw Exception{
-				Error{ hr },
+				result.error(),
 				L"Cannot set root for DComposition target"
 			};
 		}
 
-		hr = dCompositionDevice->Commit();
-		if (FAILED(hr))
+		if (const auto result = dCompositionDevice.Commit();
+			!result.has_value())
 		{
 			throw Exception{
-				Error{ hr },
+				result.error(),
 				L"Cannot commit DComposition device"
 			};
 		}

@@ -41,7 +41,7 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapSource() noexcept = default;
 
-		explicit(false) BitmapSource(ComPtr<Interface> bitmapSource) noexcept :
+		explicit(false) BitmapSource(const ComPtr<Interface>& bitmapSource) noexcept :
 			ComPtrHolder<Interface>{ bitmapSource }
 		{ }
 

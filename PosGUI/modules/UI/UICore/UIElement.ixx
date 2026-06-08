@@ -66,11 +66,6 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto GetZIndex() const noexcept { return zIndex.Get(); }
 
-		[[nodiscard]] auto IsComposed() const noexcept
-		{
-			return compositionVisual.get() != nullptr && compositionSurface.get() != nullptr;
-		}
-
 		template <typename Self>
 		[[nodiscard]] auto&& IsEnabledEvent(this Self&& self) noexcept
 		{
@@ -159,15 +154,6 @@ export namespace PGUI::UI
 			return std::forward_like<Self>(self.redrawRequestedEvent);
 		}
 
-		auto EnableComposition() noexcept -> Result<void>
-		{
-			return CompositionModeChanged(true);
-		}
-		auto DisableComposition() noexcept -> Result<void>
-		{
-			return CompositionModeChanged(false);
-		}
-
 		private:
 		RectF rect;
 		bool isTabStop = false;
@@ -178,9 +164,5 @@ export namespace PGUI::UI
 		DataBinding::PropertyNM<bool> hasFocus{ false };
 		RawUIElementPtr<> parent = nullptr;
 		RawUIHostPtr<> host = nullptr;
-		ComPtr<IDCompositionVisual3> compositionVisual = nullptr;
-		ComPtr<IDCompositionVirtualSurface> compositionSurface = nullptr;
-
-		auto CompositionModeChanged(bool enabled) noexcept -> Result<void>;
 	};
 }

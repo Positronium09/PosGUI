@@ -1,4 +1,5 @@
 module;
+#include <dcomp.h>
 #include <UIAnimation.h>
 
 module PGUI.UI.Animation:AnimationVariable;
@@ -6,6 +7,8 @@ import :AnimationVariable;
 
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
+import PGUI.UI.DComp.Animation;
+import PGUI.UI.DComp.Device;
 import :Storyboard;
 import :AnimationVariableChangeEventHandler;
 
@@ -384,5 +387,88 @@ namespace PGUI::UI::Animation
 		}
 
 		return EmptyResult;
+	}
+
+	auto AnimationVariable::GetCurve(const DComp::Animation& animation) const noexcept -> Result<void>
+	{
+		Error error{
+			Get()->GetCurve(animation.GetRaw())
+		};
+		LogIfFailed(error, L"Failed to get curve of animation variable");
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
+	}
+
+	auto AnimationVariable::GetVectorCurve(const std::span<const DComp::Animation> animations) const noexcept -> Result<void>
+	{
+		std::vector<IDCompositionAnimation*> rawAnimations;
+		rawAnimations.reserve(animations.size());
+		for (const auto& animation : animations)
+		{
+			rawAnimations.push_back(animation.GetRaw());
+		}
+
+		Error error{
+			Get()->GetVectorCurve(
+				rawAnimations.data(),
+				static_cast<UINT>(rawAnimations.size()))
+		};
+		LogIfFailed(error, L"Failed to get vector curve of animation variable");
+		if (error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
+	}
+
+	auto AnimationVariable::GetCurve(const DComp::Device& device) const noexcept -> Result<DComp::Animation>
+	{
+		auto animationResult = device.CreateAnimation();
+		if (!animationResult.has_value())
+		{
+			return Unexpected{ animationResult.error() };
+		}
+
+		const auto& animation = animationResult.value();
+		if (auto curveResult = GetCurve(animation);
+			!curveResult.has_value())
+		{
+			return Unexpected{ curveResult.error() };
+		}
+
+		return animation;
+	}
+
+	auto AnimationVariable::GetVectorCurve(const DComp::Device& device) const noexcept -> Result<std::vector<DComp::Animation>>
+	{
+		const auto dimensionResult = GetDimension();
+		if (!dimensionResult.has_value())
+		{
+			return Unexpected{ dimensionResult.error() };
+		}
+
+		std::vector<DComp::Animation> animations;
+		animations.reserve(dimensionResult.value());
+		for (UINT i = 0; i < dimensionResult.value(); ++i)
+		{
+			auto animationResult = device.CreateAnimation();
+			if (!animationResult.has_value())
+			{
+				return Unexpected{ animationResult.error() };
+			}
+
+			animations.push_back(animationResult.value());
+		}
+
+		if (auto curveResult = GetVectorCurve(animations);
+			!curveResult.has_value())
+		{
+			return Unexpected{ curveResult.error() };
+		}
+
+		return animations;
 	}
 }

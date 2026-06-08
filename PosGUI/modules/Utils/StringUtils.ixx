@@ -143,7 +143,7 @@ export namespace PGUI
 		{
 		}
 		underlying_view underlyingView;
-		inline static CharT nullChar = CharT{ };
+		static inline CharT nullChar = CharT{ };
 	};
 
 	// ReSharper restore CppInconsistentNaming

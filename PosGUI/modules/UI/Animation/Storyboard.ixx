@@ -27,17 +27,17 @@ export namespace PGUI::UI::Animation
 
 		auto Schedule(Seconds timeNow) const noexcept -> Result<AnimationSchedulingResult>;
 
-		auto Abandon() const noexcept -> Result<void>;
+		[[nodiscard]] auto Abandon() const noexcept -> Result<void>;
 
-		auto Conclude() const noexcept -> Result<void>;
+		[[nodiscard]] auto Conclude() const noexcept -> Result<void>;
 
-		auto Finish(Seconds completionDeadline) const noexcept -> Result<void>;
+		[[nodiscard]] auto Finish(Seconds completionDeadline) const noexcept -> Result<void>;
 
-		auto SetSkipDuration(Seconds duration) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetSkipDuration(Seconds duration) const noexcept -> Result<void>;
 
-		auto SetLongestAcceptableDelay(Seconds delay) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetLongestAcceptableDelay(Seconds delay) const noexcept -> Result<void>;
 
-		auto HoldVariable(const AnimationVariable& variable) const noexcept -> Result<void>;
+		[[nodiscard]] auto HoldVariable(const AnimationVariable& variable) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto AddKeyframeAfterTransition(
 			const AnimationTransition& transition) noexcept -> Result<KeyFrame>;
@@ -46,19 +46,19 @@ export namespace PGUI::UI::Animation
 			KeyFrame keyFrame, 
 			Seconds durationOffset) noexcept -> Result<KeyFrame>;
 
-		auto AddTransition(
+		[[nodiscard]] auto AddTransition(
 			const AnimationVariable& variable, 
 			const AnimationTransition& transition) const noexcept -> Result<void>;
 
-		auto AddTransitionAtKeyframe(
+		[[nodiscard]] auto AddTransitionAtKeyframe(
 			const AnimationVariable& variable, const AnimationTransition& transition,
 			KeyFrame keyFrame) const noexcept -> Result<void>;
 
-		auto AddTransitionBetweenKeyframes(
+		[[nodiscard]] auto AddTransitionBetweenKeyframes(
 			const AnimationVariable& variable, const AnimationTransition& transition,
 			KeyFrame startKeyFrame, KeyFrame endKeyFrame) const noexcept -> Result<void>;
 
-		auto RepeatBetweenKeyframes(
+		[[nodiscard]] auto RepeatBetweenKeyframes(
 			KeyFrame startKeyFrame, KeyFrame endKeyFrame,
 			double iterationCount, AnimationRepeatMode repeatMode,
 			/* iterationChangeHandler, id */ bool registerForNext = false) const noexcept -> Result<void>;
@@ -67,10 +67,10 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto GetElapsedTime() const noexcept -> Result<Seconds>;
 
-		auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTag(const ComPtr<IUnknown>& obj, UINT32 id) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetTag() const noexcept -> Result<std::pair<ComPtr<IUnknown>, UINT32>>;
 
-		auto SetStoryboardEventHandler(AnimationStoryboardEventHandler& eventHandler) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetStoryboardEventHandler(AnimationStoryboardEventHandler& eventHandler) const noexcept -> Result<void>;
 	};
 }

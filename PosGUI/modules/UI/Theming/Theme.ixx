@@ -19,7 +19,7 @@ export namespace PGUI::UI::Theming
 		std::unordered_map<std::type_index, std::any> customStyles{ };
 
 		template <typename T>
-		auto AddCustomStyle(const T& style) noexcept -> Result<void>
+		[[nodiscard]] auto AddCustomStyle(const T& style) noexcept -> Result<void>
 		{
 			try
 			{
@@ -183,14 +183,14 @@ export namespace PGUI::UI::Theming
 		static auto OnSystemThemeChanged() noexcept -> void;
 
 		private:
-		inline static Theme DarkTheme;
-		inline static Theme LightTheme;
-		inline static std::atomic_bool respondToSystemThemeChange{ true };
-		inline static Theme currentTheme{ };
-		inline static Event<const AccessorProxy<Theme, Mutex::SRWMutex>&> themeChangedEvent;
-		inline static Mutex::SRWMutex currentThemeMutex{ };
-		inline static Mutex::SRWMutex darkThemeMutex{ };
-		inline static Mutex::SRWMutex lightThemeMutex{ };
+		static inline Theme DarkTheme;
+		static inline Theme LightTheme;
+		static inline std::atomic_bool respondToSystemThemeChange{ true };
+		static inline Theme currentTheme{ };
+		static inline Event<const AccessorProxy<Theme, Mutex::SRWMutex>&> themeChangedEvent;
+		static inline Mutex::SRWMutex currentThemeMutex{ };
+		static inline Mutex::SRWMutex darkThemeMutex{ };
+		static inline Mutex::SRWMutex lightThemeMutex{ };
 
 		static auto RefreshThemes() noexcept -> void;
 

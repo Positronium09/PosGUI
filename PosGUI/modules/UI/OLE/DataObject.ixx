@@ -47,7 +47,7 @@ export namespace PGUI::UI::OLE
 		using FormatStoragePair = std::pair<FormatData, StorageMedium>;
 		using StorageVector = std::vector<FormatStoragePair>;
 
-		auto AddData(const StoredType& data, const FormatData& formatData) noexcept -> Result<void>
+		[[nodiscard]] auto AddData(const StoredType& data, const FormatData& formatData) noexcept -> Result<void>
 		{
 			const FormatDataView formatDataView{ formatData };
 
@@ -78,7 +78,7 @@ export namespace PGUI::UI::OLE
 				{
 					throw Exception{ copyResult.error() };
 				}
-				formatStoragePairs.emplace_back(std::move(copyResult).value(), std::move(storageResult).value());
+				formatStoragePairs.emplace_back(MoveChecked(copyResult).value(), MoveChecked(storageResult).value());
 			}
 			catch (const std::exception& e)
 			{
@@ -90,7 +90,7 @@ export namespace PGUI::UI::OLE
 			return EmptyResult;
 		}
 
-		auto AddData(const StoredType& data) noexcept -> Result<void>
+		[[nodiscard]] auto AddData(const StoredType& data) noexcept -> Result<void>
 		{
 			const auto initialSize = formatStoragePairs.size();
 			for (const auto& formatData : Handler::SupportedFormats())
@@ -219,13 +219,13 @@ export namespace PGUI::UI::OLE
 					continue;
 				}
 
-				const auto dupResult = storage.CopyToSTGMEDIUM();
+				auto dupResult = storage.CopyToSTGMEDIUM();
 				if (!dupResult.has_value())
 				{
 					return dupResult.error().HResult();
 				}
 
-				mediumRef = std::move(dupResult).value();
+				mediumRef = MoveChecked(dupResult).value();
 
 				return S_OK;
 			}
@@ -284,7 +284,7 @@ export namespace PGUI::UI::OLE
 			}
 
 			auto mediumResult = release ? 
-				Result<StorageMedium>{ StorageMedium::MoveFrom(std::move(*medium)) } :
+				Result<StorageMedium>{ StorageMedium::MoveFrom(MoveChecked(*medium)) } :
 				StorageMedium::CopyFrom(*medium);
 
 			if (!mediumResult.has_value())
@@ -298,7 +298,7 @@ export namespace PGUI::UI::OLE
 			});
 			if (it != formatStoragePairs.end())
 			{
-				it->second = std::move(mediumResult).value();
+				it->second = MoveChecked(mediumResult).value();
 				return S_OK;
 			}
 
@@ -314,9 +314,9 @@ export namespace PGUI::UI::OLE
 					formatData.format,
 					formatData.aspect,
 					formatData.storageMediumType,
-					std::move(targetCopy.value()),
+					MoveChecked(targetCopy.value()),
 					formatData.index
-				}, std::move(mediumResult).value());
+				}, MoveChecked(mediumResult).value());
 			}
 			catch (const std::exception& e)
 			{
@@ -387,12 +387,12 @@ export namespace PGUI::UI::OLE
 					return canonicalFormatResult.error().HResult();
 				}
 
-				auto toFormatResult = std::move(canonicalFormatResult).value().ToFORMATETC();
+				auto toFormatResult = MoveChecked(canonicalFormatResult).value().ToFORMATETC();
 				if (!toFormatResult.has_value())
 				{
 					return toFormatResult.error().HResult();
 				}
-				*pformatetcOut = std::move(toFormatResult).value();
+				*pformatetcOut = MoveChecked(toFormatResult).value();
 
 				if (input == *pformatetcOut)
 				{
@@ -545,10 +545,10 @@ export namespace PGUI::UI::OLE
 			: ComPtrHolder{ dataObject }
 		{ }
 		explicit DataObjectReadWrite(ComPtr<IDataObject>&& dataObject) noexcept
-			: ComPtrHolder{ std::move(dataObject) }
+			: ComPtrHolder{ MoveChecked(dataObject) }
 		{}
 
-		auto SetData(const FormatData& formatData, const StorageMedium& storageMedium) const noexcept -> Result<void>
+		[[nodiscard]] auto SetData(const FormatData& formatData, const StorageMedium& storageMedium) const noexcept -> Result<void>
 		{
 			auto formatEtcResult = formatData.ToFORMATETC();
 			if (!formatEtcResult.has_value())
@@ -593,7 +593,7 @@ export namespace PGUI::UI::OLE
 				return Unexpected{ error };
 			}
 
-			return StorageMedium::MoveFrom(std::move(medium));
+			return StorageMedium::MoveFrom(MoveChecked(medium));
 		}
 
 		template <DataObjectHandler H>
@@ -613,7 +613,7 @@ export namespace PGUI::UI::OLE
 			{
 				return Unexpected{ error };
 			}
-			auto storageMedium = StorageMedium::MoveFrom(std::move(medium));
+			auto storageMedium = StorageMedium::MoveFrom(MoveChecked(medium));
 			
 			return H::FromMedium(FormatDataView{ formatData }, storageMedium);
 		}

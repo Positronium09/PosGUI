@@ -24,53 +24,53 @@ export namespace PGUI::UI
 
 		TextLayout(wzstring_view text, const TextFormat& textFormat, SizeF maxSize) noexcept;
 
-		auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
 
-		auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>;
 
-		auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Result<void>;
 
-		auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Result<void>;
 
-		auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Result<void>;
 
-		auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Result<void>;
 
-		auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>;
 
-		auto SetMaxWidth(float maxWidth) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetMaxWidth(float maxWidth) const noexcept -> Result<void>;
 
-		auto SetMaxHeight(float maxHeight) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetMaxHeight(float maxHeight) const noexcept -> Result<void>;
 
-		auto SetMaxSize(SizeF maxSize) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetMaxSize(SizeF maxSize) const noexcept -> Result<void>;
 
-		auto SetFontCollection(const FontCollection& fontCollection, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFontCollection(const FontCollection& fontCollection, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontFamilyName(wzstring_view fontFamilyName, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFontFamilyName(wzstring_view fontFamilyName, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontWeight(FontWeight fontWeight, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFontWeight(FontWeight fontWeight, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontStyle(FontStyle fontStyle, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFontStyle(FontStyle fontStyle, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontStretch(FontStretch fontStretch, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFontStretch(FontStretch fontStretch, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetFontSize(float fontSize, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetFontSize(float fontSize, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetUnderline(bool hasUnderline, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetUnderline(bool hasUnderline, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetStrikethrough(bool hasStrikethrough, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetStrikethrough(bool hasStrikethrough, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetDrawingEffect(const ComPtr<IUnknown>& drawingEffect, TextRange textRange) const noexcept -> Result<void>;
 
 		//? Maybe write a wrapper for IDWriteInlineObject
-		auto SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetInlineObject(const ComPtr<IDWriteInlineObject>& inlineObject, TextRange textRange) const noexcept -> Result<void>;
 
 		//? Maybe write a wrapper for IDWriteTypography
-		auto SetTypography(const ComPtr<IDWriteTypography>& typography, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTypography(const ComPtr<IDWriteTypography>& typography, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetLocaleName(wzstring_view localeName, TextRange textRange) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetLocaleName(wzstring_view localeName, TextRange textRange) const noexcept -> Result<void>;
 
-		auto SetTrimming(const Trimming& trimming) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTrimming(const Trimming& trimming) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetTrimming() const noexcept -> Result<Trimming>;
 

@@ -24,7 +24,7 @@ export namespace PGUI::UI::D2D
 		public:
 		SimplifiedGeometrySink() noexcept = default;
 
-		explicit(false) SimplifiedGeometrySink(ComPtr<Interface> ptr) noexcept :
+		explicit(false) SimplifiedGeometrySink(const ComPtr<Interface>& ptr) noexcept :
 			ComPtrHolder<Interface>{ ptr }
 		{ }
 
@@ -40,7 +40,7 @@ export namespace PGUI::UI::D2D
 			return *this;
 		}
 
-		auto Close() const noexcept -> Result<void>
+		[[nodiscard]] auto Close() const noexcept -> Result<void>
 		{
 			Error error{ this->Get()->Close() };
 			LogIfFailed(error, L"Failed to close the sink");

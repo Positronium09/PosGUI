@@ -18,8 +18,8 @@ namespace PGUI::UI::OLE::DragDrop
 {
 	DropSource::DropSource(GiveFeedbackCallback giveFeedbackCallback,
 	                       QueryContinueDragCallback queryContinueDragCallback) noexcept :
-		giveFeedbackCallback{ std::move(giveFeedbackCallback) },
-		queryContinueDragCallback{ std::move(queryContinueDragCallback) }
+		giveFeedbackCallback{ MoveChecked(giveFeedbackCallback) },
+		queryContinueDragCallback{ MoveChecked(queryContinueDragCallback) }
 	{ }
 
 	auto DropSource::GiveFeedback(DWORD effect) -> HRESULT

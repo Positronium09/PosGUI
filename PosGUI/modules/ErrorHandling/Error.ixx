@@ -202,7 +202,7 @@ export namespace PGUI
 		std::error_code code;
 		std::source_location sourceLocation;
 		std::chrono::system_clock::time_point timeStamp;
-		std::unordered_map<std::wstring, std::wstring> details{ };
+		std::flat_map<std::wstring, std::wstring> details{ };
 		std::optional<std::wstring> customMessage;
 		std::vector<std::wstring> fixSuggestions;
 	};

@@ -359,7 +359,7 @@ namespace PGUI
 			if (const auto it = window->timerMap.find(timerId);
 				it != window->timerMap.end())
 			{
-				const auto& callback = it->second;
+				const auto callback = it->second;
 				callback(timerId);
 				return 0;
 			}

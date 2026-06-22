@@ -92,6 +92,15 @@ export namespace PGUI
 		return ptr;
 	}
 
+	template <typename T>
+	[[nodiscard]] auto MakeWinrtPtr(ComPtr<T>&& wil) noexcept -> winrt::com_ptr<T>
+	{
+		winrt::com_ptr<T> rtPtr;
+		rtPtr.attach(wil.detach());
+
+		return rtPtr;
+	}
+
 	template <ComInterface... Interfaces>
 	class ComPtrHolder
 	{

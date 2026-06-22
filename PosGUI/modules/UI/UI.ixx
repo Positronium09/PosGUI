@@ -21,3 +21,4 @@ export import PGUI.UI.Input;
 export import PGUI.UI.OLE;
 export import PGUI.UI.VisualState;
 export import PGUI.UI.UICore;
+export import PGUI.UI.DXDevices;

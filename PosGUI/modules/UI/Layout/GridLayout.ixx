@@ -247,7 +247,7 @@ export namespace PGUI::UI::Layout
 		bool growToFit = false;
 		GridCellPlacementType placementType = GridCellPlacementType::Packed;
 		GridLayoutPadding padding{ 0, 0, 0, 0 };
-		std::set<std::pair<long, long>> blankCells;
+		std::flat_set<std::pair<long, long>> blankCells;
 
 		std::vector<GridCellDefinition> columnDefinitions{
 			GridCellDefinition{ 1.0F }

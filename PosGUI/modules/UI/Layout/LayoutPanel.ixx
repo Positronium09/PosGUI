@@ -1,8 +1,6 @@
 module;
 #include <Windows.h>
 
-#undef GetObject
-
 export module PGUI.UI.Layout.LayoutPanel;
 
 import std;
@@ -11,127 +9,99 @@ import PGUI.Window;
 import PGUI.Shape2D;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
-import TypeErasure;
 
 namespace PGUI::UI::Layout::Detail
 {
-	struct LayoutItemFeature
+	template <typename T>
+	concept LayoutItemLike = requires (T & t)
 	{
-		template <typename T>
-		struct Validator
-		{
-			static constexpr auto value =
-				requires (T& t)
-			{
-				t.MoveAndResize(RectF{ });
-				t.MoveAndResize(PointF{ }, SizeF{ });
-				t.Move(PointF{ });
-				t.Resize(SizeF{ });
-				{ t.GetRect() } -> std::same_as<RectF>;
-				{ t.GetSize() } -> std::same_as<SizeF>;
-				{ t.GetPosition() } -> std::same_as<PointF>;
-			};
-		};
-
-		template <typename V>
-		struct VTable : virtual V
-		{
-			virtual auto MoveAndResize(RectF) noexcept -> void = 0;
-			virtual auto MoveAndResize(PointF, SizeF) noexcept -> void = 0;
-			virtual auto Move(PointF) noexcept -> void = 0;
-			virtual auto Resize(SizeF) noexcept -> void = 0;
-			virtual auto GetRect() const noexcept -> RectF = 0;
-			virtual auto GetSize() const noexcept -> SizeF = 0;
-			virtual auto GetPosition() const noexcept -> PointF = 0;
-		};
-
-		template <typename M>
-		struct Model : M
-		{
-			using M::M;
-			auto MoveAndResize(const RectF rect) noexcept -> void override
-			{
-				this->GetObject().MoveAndResize(rect);
-			}
-			auto MoveAndResize(const PointF point, const SizeF size) noexcept -> void override
-			{
-				this->GetObject().MoveAndResize(point, size);
-			}
-			auto Move(const PointF point) noexcept -> void override
-			{
-				this->GetObject().Move(point);
-			}
-			auto Resize(const SizeF size) noexcept -> void override
-			{
-				this->GetObject().Resize(size);
-			}
-			auto GetRect() const noexcept -> RectF override
-			{
-				return this->GetObject().GetRect();
-			}
-			auto GetSize() const noexcept -> SizeF override
-			{
-				return this->GetObject().GetSize();
-			}
-			auto GetPosition() const noexcept -> PointF override
-			{
-				return this->GetObject().GetPosition();
-			}
-		};
-
-		template <typename I>
-		struct Interface : I
-		{
-			auto MoveAndResize(const RectF rect) noexcept -> void
-			{
-				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->MoveAndResize(rect);
-			}
-			auto MoveAndResize(const PointF point, const SizeF size) noexcept -> void
-			{
-				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->MoveAndResize(point, size);
-			}
-			auto Move(const PointF point) noexcept -> void
-			{
-				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->Move(point);
-			}
-			auto Resize(const SizeF size) noexcept -> void
-			{
-				dynamic_cast<VTable<TypeErasure::VTableBase>*>(this->GetVTable())->Resize(size);
-			}
-			auto GetRect() const noexcept -> RectF
-			{
-				return dynamic_cast<const VTable<TypeErasure::VTableBase>*>(this->GetVTable())->GetRect();
-			}
-			auto GetSize() const noexcept -> SizeF
-			{
-				return dynamic_cast<const VTable<TypeErasure::VTableBase>*>(this->GetVTable())->GetSize();
-			}
-			auto GetPosition() const noexcept -> PointF
-			{
-				return dynamic_cast<const VTable<TypeErasure::VTableBase>*>(this->GetVTable())->GetPosition();
-			}
-			auto operator==(const Interface& other) const noexcept
-			{
-				return this->GetVTable() == other.GetVTable();
-			}
-		};
-	};
-	static_assert(TypeErasure::FeatureType<LayoutItemFeature>);
+		t.MoveAndResize(RectF{ });
+		t.MoveAndResize(PointF{ }, SizeF{ });
+		t.Move(PointF{ });
+		t.Resize(SizeF{ });
+		{ t.GetRect() } -> std::same_as<RectF>;
+		{ t.GetSize() } -> std::same_as<SizeF>;
+		{ t.GetPosition() } -> std::same_as<PointF>;
+	};;
 }
 
 export namespace PGUI::UI::Layout
 {
-	using LayoutItemFeatures = TypeErasure::FeatureComposer<Detail::LayoutItemFeature, TypeErasure::Features::EqualityComparable>;
-	//using LayoutItemFeatures = TypeErasure::FeatureComposer<Detail::LayoutItemFeature>;
-	using LayoutItem = TypeErasure::Any<LayoutItemFeatures>;
-
-	template <typename T>
-	auto MakeLayoutItem(T& item) noexcept
+	class LayoutItem
 	{
-		return TypeErasure::MakeAnyRef<LayoutItemFeatures>(item);
-	}
+		struct VTable
+		{
+			void (*moveAndResize)(void*, RectF) noexcept;
+			void (*moveAndResizeSplit)(void*, PointF, SizeF) noexcept;
+			void (*move)(void*, PointF) noexcept;
+			void (*resize)(void*, SizeF) noexcept;
+			RectF (*getRect)(const void*) noexcept;
+			SizeF (*getSize)(const void*) noexcept;
+			PointF (*getPosition)(const void*) noexcept;
+		};
 
-	class LayoutPanel;
+		template <typename T>
+		static constexpr VTable vtableFor{
+			[](void* obj, const RectF rect) noexcept { static_cast<T*>(obj)->MoveAndResize(rect); },
+			[](void* obj, const PointF point, const SizeF size) noexcept { static_cast<T*>(obj)->MoveAndResize(point, size); },
+			[](void* obj, const PointF point) noexcept { static_cast<T*>(obj)->Move(point); },
+			[](void* obj, const SizeF size) noexcept { static_cast<T*>(obj)->Resize(size); },
+			[](const void* obj) noexcept -> RectF { return static_cast<const T*>(obj)->GetRect(); },
+			[](const void* obj) noexcept -> SizeF { return static_cast<const T*>(obj)->GetSize(); },
+			[](const void* obj) noexcept -> PointF { return static_cast<const T*>(obj)->GetPosition(); }
+		};
+
+		public:
+		template <Detail::LayoutItemLike T>
+		explicit LayoutItem(T& item) noexcept :
+			obj{ std::addressof(item) },
+			vtable{ &vtableFor<T> }
+		{
+		}
+
+		auto MoveAndResize(const RectF rect) const noexcept -> void
+		{
+			vtable->moveAndResize(obj, rect);
+		}
+		auto MoveAndResize(const PointF point, const SizeF size) const noexcept -> void
+		{
+			vtable->moveAndResizeSplit(obj, point, size);
+		}
+		auto Move(const PointF point) const noexcept -> void
+		{
+			vtable->move(obj, point);
+		}
+		auto Resize(const SizeF size) const noexcept -> void
+		{
+			vtable->resize(obj, size);
+		}
+		[[nodiscard]] auto GetRect() const noexcept -> RectF
+		{
+			return vtable->getRect(obj);
+		}
+		[[nodiscard]] auto GetSize() const noexcept -> SizeF
+		{
+			return vtable->getSize(obj);
+		}
+		[[nodiscard]] auto GetPosition() const noexcept -> PointF
+		{
+			return vtable->getPosition(obj);
+		}
+
+		[[nodiscard]] auto operator==(const LayoutItem& other) const noexcept -> bool
+		{
+			return obj == other.obj;
+		}
+
+		private:
+		void* obj;
+		const VTable* vtable;
+	};
+
+	[[nodiscard]] auto MakeLayoutItem(Detail::LayoutItemLike auto& item) noexcept -> LayoutItem
+	{
+		return LayoutItem{ item };
+	}
 
 	class LayoutPanel
 	{
@@ -144,10 +114,10 @@ export namespace PGUI::UI::Layout
 
 		virtual auto RearrangeItems() noexcept -> void = 0;
 
-		template <typename T> requires Detail::LayoutItemFeature::Validator<T>::value
+		template <typename T> requires Detail::LayoutItemLike<T>
 		auto AddItem(T& item) noexcept -> void
 		{
-			managedItems.push_back(TypeErasure::MakeAnyRef<LayoutItemFeatures>(item));
+			managedItems.push_back(MakeLayoutItem(item));
 			OnItemAdded(managedItems.back());
 		}
 
@@ -313,23 +283,23 @@ export namespace PGUI::UI::Layout
 				Error{ ErrorCode::InvalidArgument }.SuggestFix(L"Given item not found in managed items")
 			};
 		}
-		auto ArrangeItem(LayoutItem& item, const RectF assignedBounds) const noexcept -> void
+		auto ArrangeItem(const LayoutItem& item, const RectF assignedBounds) const noexcept -> void
 		{
 			auto converted = assignedBounds;
 			converted.Shift(rect.TopLeft());
 			item.MoveAndResize(converted);
 		}
-		auto MoveItem(LayoutItem& item, const PointF point) const noexcept -> void
+		auto MoveItem(const LayoutItem& item, const PointF point) const noexcept -> void
 		{
 			auto converted = point;
 			converted.Shift(rect.TopLeft());
 			item.Move(converted);
 		}
-		static auto ResizeItem(LayoutItem& item, const SizeF size) noexcept -> void
+		static auto ResizeItem(const LayoutItem& item, const SizeF size) noexcept -> void
 		{
 			item.Resize(size);
 		}
-		[[nodiscard]] auto ArrangeItem(const std::size_t index, const RectF assignedBounds) noexcept -> Result<void>
+		[[nodiscard]] auto ArrangeItem(const std::size_t index, const RectF assignedBounds) const noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
@@ -338,7 +308,7 @@ export namespace PGUI::UI::Layout
 			ArrangeItem(managedItems.at(index), assignedBounds);
 			return EmptyResult;
 		}
-		[[nodiscard]] auto MoveItem(const std::size_t index, const PointF point) noexcept -> Result<void>
+		[[nodiscard]] auto MoveItem(const std::size_t index, const PointF point) const noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{
@@ -347,7 +317,7 @@ export namespace PGUI::UI::Layout
 			MoveItem(managedItems.at(index), point);
 			return EmptyResult;
 		}
-		[[nodiscard]] auto ResizeItem(const std::size_t index, const SizeF size) noexcept -> Result<void>
+		[[nodiscard]] auto ResizeItem(const std::size_t index, const SizeF size) const noexcept -> Result<void>
 		{
 			if (index >= managedItems.size())
 			{

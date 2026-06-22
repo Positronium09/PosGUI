@@ -14,6 +14,15 @@ import PGUI.Factories;
 
 namespace PGUI::UI::DXDevices
 {
+	// ReSharper disable CppInconsistentNaming
+
+	ComPtr<ID3D11Device2> d3d11Device;
+	ComPtr<IDXGIDevice4> dxgiDevice;
+	ComPtr<ID2D1Device7> d2d1Device;
+	std::atomic_uint64_t deviceCreationID{ 0 };
+
+	// ReSharper restore CppInconsistentNaming
+
 	auto InitD3D11Device() -> void
 	{
 		if (d3d11Device)
@@ -82,7 +91,7 @@ namespace PGUI::UI::DXDevices
 					D3D_DRIVER_TYPE_UNKNOWN, nullptr,
 					createDeviceFlags,
 					featureLevels.data(),
-					featureLevels.size(),
+					static_cast<UINT>(featureLevels.size()),
 					D3D11_SDK_VERSION,
 					device.put(), nullptr, nullptr)
 			};
@@ -124,4 +133,27 @@ namespace PGUI::UI::DXDevices
 			throw Exception{ error, L"Cannot create D2D1 device" };
 		}
 	}
+
+	auto InitDevices() -> void
+	{
+		InitD3D11Device();
+		InitD2D1Device();
+		deviceCreationID.fetch_add(1, std::memory_order_relaxed);
+	}
+
+	auto ResetDevices() noexcept -> void
+	{
+		d3d11Device.reset();
+		dxgiDevice.reset();
+		d2d1Device.reset();
+	}
+
+	auto GetDeviceCreationID() noexcept -> std::uint64_t
+	{
+		return deviceCreationID.load(std::memory_order_relaxed);
+	}
+
+	auto D3D11Device() noexcept -> ComPtr<ID3D11Device2>& { return d3d11Device; }
+	auto DXGIDevice() noexcept -> ComPtr<IDXGIDevice4>& { return dxgiDevice; }
+	auto D2D1Device() noexcept -> ComPtr<ID2D1Device7>& { return d2d1Device; }
 }

@@ -23,42 +23,18 @@ namespace PGUI::UI::DXDevices
 	};
 
 	consteval auto MakeEnumFlag(BatteryFlag) noexcept -> void { }
-
-	// ReSharper disable CppInconsistentNaming
-	
-	inline ComPtr<ID3D11Device2> d3d11Device;
-	inline ComPtr<IDXGIDevice4> dxgiDevice;
-	inline ComPtr<ID2D1Device7> d2d1Device;
-	inline std::atomic_uint64_t deviceCreationID{ 0 };
-
-	// ReSharper restore CppInconsistentNaming
 }
 
 export namespace PGUI::UI::DXDevices
 {
 	auto InitD3D11Device() -> void;
 	auto InitD2D1Device() -> void;
+	auto InitDevices() -> void;
+	auto ResetDevices() noexcept -> void;
 
-	inline auto InitDevices() -> void
-	{
-		InitD3D11Device();
-		InitD2D1Device();
-		deviceCreationID.fetch_add(1, std::memory_order_relaxed);
-	}
+	[[nodiscard]] auto GetDeviceCreationID() noexcept -> std::uint64_t;
 
-	inline auto ResetDevices() noexcept -> void
-	{
-		d3d11Device.reset();
-		dxgiDevice.reset();
-		d2d1Device.reset();
-	}
-
-	[[nodiscard]] inline auto GetDeviceCreationID() noexcept
-	{
-		return deviceCreationID.load(std::memory_order_relaxed);
-	}
-
-	[[nodiscard]] inline auto& D3D11Device() noexcept { return d3d11Device; }
-	[[nodiscard]] inline auto& DXGIDevice() noexcept { return dxgiDevice; }
-	[[nodiscard]] inline auto& D2D1Device() noexcept { return d2d1Device; }
+	[[nodiscard]] auto D3D11Device() noexcept -> ComPtr<ID3D11Device2>&;
+	[[nodiscard]] auto DXGIDevice() noexcept -> ComPtr<IDXGIDevice4>&;
+	[[nodiscard]] auto D2D1Device() noexcept -> ComPtr<ID2D1Device7>&;
 }

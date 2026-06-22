@@ -22,7 +22,7 @@ namespace PGUI::UI
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 		const auto textFormatPtr = textFormat.GetAs<IDWriteTextFormat>();
-		auto textLayoutPtr = GetAs<IDWriteTextLayout>();
+		ComPtr<IDWriteTextLayout> textLayoutPtr{ nullptr };
 		const auto hr = factory->CreateTextLayout(
 			text.data(), static_cast<UINT32>(text.size()),
 			textFormatPtr.get(),

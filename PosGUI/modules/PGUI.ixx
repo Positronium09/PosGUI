@@ -15,7 +15,6 @@ export import PGUI.Factories;
 export import PGUI.Shape2D;
 export import PGUI.Utils;
 export import PGUI.UI;
-export import TypeErasure;
 
 export namespace PGUI
 {

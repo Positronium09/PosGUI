@@ -30,7 +30,7 @@ export namespace PGUI
 
 	using TimerId = UINT_PTR;
 	using TimerCallback = std::function<void(TimerId)>;
-	using TimerMap = std::unordered_map<TimerId, TimerCallback>;
+	using TimerMap = std::flat_map<TimerId, TimerCallback>;
 
 	enum class WindowFlashFlags : DWORD
 	{

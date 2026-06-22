@@ -241,11 +241,6 @@
     <ClCompile Include="src\WinResource.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TypeErasure\TypeErasure\TypeErasure.vcxproj">
-      <Project>{196f60d8-de87-46b9-8a7e-6a07e98818a9}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

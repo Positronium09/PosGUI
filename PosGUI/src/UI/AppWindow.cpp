@@ -250,7 +250,7 @@ namespace PGUI::UI
 
 		ApplyCurrentTheme();
 
-		return { 1, MessageHandlerReturnFlags::PassToDefProc };
+		return { 1, MessageHandlerFlags::PassToDefProc };
 	}
 
 	auto AppWindow::OnSetText(UINT /*unused*/, Argument1 /*unused*/,
@@ -258,7 +258,7 @@ namespace PGUI::UI
 	{
 		titleText = std::bit_cast<wchar_t*>(arg2);
 
-		return { 1, MessageHandlerReturnFlags::PassToDefProc };
+		return { 1, MessageHandlerFlags::PassToDefProc };
 	}
 
 	auto AppWindow::OnGetText(UINT /*unused*/, const Argument1 arg1,

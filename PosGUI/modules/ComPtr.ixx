@@ -158,6 +158,14 @@ export namespace PGUI
 			std::get<ComPtr<T>>(interfaces).reset();
 		}
 
+		constexpr auto ResetAll() noexcept -> void
+		{
+			std::apply([](auto&... ptr)
+			{
+				(ptr.reset(), ...);
+			}, interfaces);
+		}
+
 		template <IsInTypeList<Interfaces...> T = FirstType>
 		[[nodiscard]] constexpr auto& Get() noexcept
 		{
@@ -267,6 +275,14 @@ export namespace PGUI
 		[[nodiscard]] constexpr auto IsInitialized() const noexcept -> bool
 		{
 			return Get<T>().get() != nullptr;
+		}
+
+		[[nodiscard]] constexpr auto AreAllInitialized() const noexcept -> bool
+		{
+			return std::apply([](const auto&... ptr)
+			{
+				return ((ptr.get() != nullptr) && ...);
+			}, interfaces);
 		}
 
 		template <IsInTypeList<Interfaces...> T = FirstType>

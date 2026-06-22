@@ -14,14 +14,14 @@ namespace PGUI::UI
 	{ }
 
 	Dialog::Dialog(const WindowClassPtr& wndClass) noexcept :
-		DirectXCompositionWindow{ wndClass }
+		DCompWindow{ wndClass }
 	{
 		RegisterHandler(WM_INITDIALOG, &Dialog::OnInitDialog);
 	}
 
 	auto Dialog::OnInitDialog(UINT, Argument1, Argument2) noexcept -> MessageHandlerResult
 	{
-		return { NULL, MessageHandlerReturnFlags::ForceThisResult };
+		return { NULL, MessageHandlerFlags::ForceThisResult };
 	}
 
 	ModalDialog::ModalDialog() noexcept :

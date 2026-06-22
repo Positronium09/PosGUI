@@ -2,7 +2,7 @@ module;
 #include <d2d1.h>
 #include <wincodec.h>
 #include <Windows.h>
-#include <winrt/windows.ui.viewmanagement.h>
+#include <winrt/windows.ui.h>
 
 #undef RGB
 #undef CMYK

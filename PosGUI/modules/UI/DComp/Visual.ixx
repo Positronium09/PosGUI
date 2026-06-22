@@ -13,6 +13,10 @@ import PGUI.UI.Color;
 import PGUI.UI.Graphics;
 import PGUI.UI.DComp.DCompEnums;
 import PGUI.UI.DComp.Surface;
+import PGUI.UI.DComp.Effect;
+import PGUI.UI.DComp.Clip;
+import PGUI.UI.DComp.Transform2D;
+import PGUI.UI.DComp.Transform3D;
 import PGUI.UI.DComp.Animation;
 import PGUI.UI.D2D.D2DStructs;
 import PGUI.ErrorHandling;
@@ -36,8 +40,8 @@ export namespace PGUI::UI::DComp
 		[[nodiscard]] auto SetBitmapInterpolationMode(BitmapInterpolationMode interpolationMode) const noexcept -> Result<void>;
 		[[nodiscard]] auto SetBorderMode(BorderMode borderMode) const noexcept -> Result<void>;
 
-		//TODO SetClip with IDCompositionClip
 		[[nodiscard]] auto SetClip(const RectF& rc) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetClip(const Clip<>& clip) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto SetCompositeMode(CompositeMode compositeMode) const noexcept -> Result<void>;
 
@@ -46,7 +50,7 @@ export namespace PGUI::UI::DComp
 		[[nodiscard]] auto SetContent(const ComPtr<IDXGISwapChain1>& content) const noexcept -> Result<void>;
 		[[nodiscard]] auto SetContent(const Surface<>& content) const noexcept -> Result<void>;
 
-		// TODO SetEffect with IDCompositionEffect
+		[[nodiscard]] auto SetEffect(const Effect<>& effect) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto SetOffset(const PointF& offset) const noexcept -> Result<void>;
 		[[nodiscard]] auto SetOffset(const Animation& animationX, const Animation& animationY) const noexcept -> Result<void>;
@@ -61,11 +65,13 @@ export namespace PGUI::UI::DComp
 
 		[[nodiscard]] auto SetVisible(bool isVisible) const noexcept -> Result<void>;
 
-		//TODO SetTransform with IDCompositionTransform
+		[[nodiscard]] auto SetTransform(const Transform3D<>& transform) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTransform(const Transform<>& transform) const noexcept -> Result<void>
+		{
+			return SetTransform(static_cast<Transform3D<>>(transform));
+		}
 		[[nodiscard]] auto SetTransform(const D2D::Matrix3x2& transform) const noexcept -> Result<void>;
-		//TODO SetTransform with IDCompositionTransform3D
-		//TODO Write 4x4 matrix struct for D2D and DComp
-		[[nodiscard]] auto SetTransform(const D2D1_MATRIX_4X4_F& transform) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTransform(const D2D::Matrix4x4& transform) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto SetTransformParent(const Visual& parent) const noexcept -> Result<void>;
 

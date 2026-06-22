@@ -12,7 +12,7 @@ import PGUI.Factories;
 import PGUI.ErrorHandling;
 import PGUI.UI.Theming.SystemTheme;
 import PGUI.UI.Theming.Theme;
-import PGUI.UI.DirectXCompositionWindow;
+import PGUI.UI.DCompWindow;
 import PGUI.UI.Animation;
 
 extern "C" extern __declspec(selectany) void (__stdcall*winrt_throw_hresult_handler)
@@ -219,6 +219,6 @@ namespace PGUI
 			SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 		}
 
-		UI::DirectXCompositionWindow::InitDevices();
+		UI::DCompWindow::InitDevices();
 	}
 }

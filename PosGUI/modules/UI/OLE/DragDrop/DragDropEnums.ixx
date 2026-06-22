@@ -5,6 +5,8 @@ module;
 
 export module PGUI.UI.OLE.DragDrop.DragDropEnums;
 
+import PGUI.Utils;
+
 export namespace PGUI::UI::OLE::DragDrop
 {
 	enum class DropEffect : DWORD
@@ -15,7 +17,7 @@ export namespace PGUI::UI::OLE::DragDrop
 		Link = DROPEFFECT_LINK,
 		Scroll = DROPEFFECT_SCROLL
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(DropEffect);
+	consteval auto MakeEnumFlag(DropEffect) noexcept -> void { }
 
 	enum class ContinueDragResult
 	{

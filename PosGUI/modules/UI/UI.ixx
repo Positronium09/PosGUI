@@ -2,7 +2,7 @@ export module PGUI.UI;
 
 export import PGUI.UI.Color;
 export import PGUI.UI.Colors;
-export import PGUI.UI.DirectXCompositionWindow;
+export import PGUI.UI.DCompWindow;
 export import PGUI.UI.Gradient;
 export import PGUI.UI.Brush;
 export import PGUI.UI.Clip;

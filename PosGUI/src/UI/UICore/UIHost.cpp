@@ -12,7 +12,7 @@ import std;
 
 import PGUI.Utils;
 import PGUI.WindowClass;
-import PGUI.UI.DirectXCompositionWindow;
+import PGUI.UI.DCompWindow;
 
 namespace PGUI::UI
 {
@@ -21,7 +21,7 @@ namespace PGUI::UI
 	{ }
 
 	UIHost::UIHost(const WindowClassPtr& windowClass) :
-		DirectXCompositionWindow{ windowClass }
+		DCompWindow{ windowClass }
 	{
 		redrawRequestedEvent.AddCallback(
 			std::bind_front(&UIHost::RedrawRequested, this)
@@ -64,13 +64,13 @@ namespace PGUI::UI
 
 	auto UIHost::CreateDeviceResources() -> void
 	{
-		DirectXCompositionWindow::CreateDeviceResources();
+		DCompWindow::CreateDeviceResources();
 		rootContainer->CreateDeviceResources();
 	}
 
 	auto UIHost::DiscardDeviceResources() -> void
 	{
-		DirectXCompositionWindow::DiscardDeviceResources();
+		DCompWindow::DiscardDeviceResources();
 		if (rootContainer)
 		{
 			rootContainer->DiscardDeviceResources();

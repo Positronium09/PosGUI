@@ -10,6 +10,7 @@ import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import PGUI.UI.DComp.Effect;
 import PGUI.UI.DComp.Animation;
+import PGUI.UI.D2D.D2DStructs;
 
 export namespace PGUI::UI::DComp
 {
@@ -392,7 +393,6 @@ export namespace PGUI::UI::DComp
 		}
 	};
 
-	//TODO Write 4x4 matrix struct for D2D and DComp
 	class MatrixTransform3D : public Transform3D<IDCompositionMatrixTransform3D>
 	{
 		public:
@@ -401,7 +401,7 @@ export namespace PGUI::UI::DComp
 			Transform3D{ ptr }
 		{ }
 
-		[[nodiscard]] auto SetMatrix(const D2D1_MATRIX_4X4_F& matrix) const noexcept -> Result<void>
+		[[nodiscard]] auto SetMatrix(const D2D::Matrix4x4& matrix) const noexcept -> Result<void>
 		{
 			if (const auto error = Error{ Get()->SetMatrix(std::bit_cast<D3DMATRIX>(matrix)) };
 				error.IsFailure())

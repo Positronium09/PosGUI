@@ -18,7 +18,7 @@ export namespace PGUI::UI
 		XButton1 = 8,
 		XButton2 = 16
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(MouseButton);
+	consteval auto MakeEnumFlag(MouseButton) noexcept -> void {}
 
 	enum class KeyFlags
 	{
@@ -29,7 +29,7 @@ export namespace PGUI::UI
 		Repeat = KF_REPEAT,
 		Up = KF_UP
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(KeyFlags);
+	consteval auto MakeEnumFlag(KeyFlags) noexcept -> void {}
 
 	constexpr auto MOUSEWHEEL_DELTA = WHEEL_DELTA;
 

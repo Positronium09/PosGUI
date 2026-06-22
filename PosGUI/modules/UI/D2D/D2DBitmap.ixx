@@ -22,7 +22,7 @@ export namespace PGUI::UI::D2D
 		Write = D2D1_MAP_OPTIONS_WRITE,
 		Discard = D2D1_MAP_OPTIONS_DISCARD
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(MapOptions)
+	consteval auto MakeEnumFlag(MapOptions) noexcept -> void { }
 
 	class D2DBitmap : public D2DImage<ID2D1Bitmap1>
 	{

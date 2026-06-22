@@ -3,7 +3,7 @@ export module PGUI.UI.UICore:UIHost;
 import :Interface;
 import :UIElement;
 import :UIContainer;
-import PGUI.UI.DirectXCompositionWindow;
+import PGUI.UI.DCompWindow;
 import PGUI.Shape2D;
 import PGUI.Window;
 import PGUI.WindowClass;
@@ -12,7 +12,7 @@ import PGUI.Event;
 export namespace PGUI::UI
 {
 	//TODO Rewrite as MessageHooker
-	class UIHost : public DirectXCompositionWindow
+	class UIHost : public DCompWindow
 	{
 		public:
 		UIHost();

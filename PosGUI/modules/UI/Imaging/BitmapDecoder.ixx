@@ -5,6 +5,7 @@ export module PGUI.UI.Imaging.BitmapDecoder;
 
 import std;
 
+import PGUI.Utils;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.ContainerFormats;
@@ -27,7 +28,7 @@ export namespace PGUI::UI::Imaging
 		Write = GENERIC_WRITE,
 		ReadWrite = GENERIC_READ | GENERIC_WRITE
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(DesiredAccess);
+	consteval auto MakeEnumFlag(DesiredAccess) noexcept -> void { }
 
 	class BitmapDecoder : public ComPtrHolder<IWICBitmapDecoder>
 	{

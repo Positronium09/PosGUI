@@ -99,10 +99,10 @@
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\DirectXCompositionWindow.ixx">
+    <ClCompile Include="modules\UI\DCompWindow.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\DirectXCompositionWindow.cpp">
+    <ClCompile Include="src\UI\DCompWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\D2D\RenderTarget.ixx">
@@ -658,6 +658,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\DComp\DCompAnimation.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\VL.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DComp\DCompClip.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\DXDevices.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\DXDevices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

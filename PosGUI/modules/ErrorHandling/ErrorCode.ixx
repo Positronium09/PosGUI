@@ -20,7 +20,8 @@ export namespace PGUI
 		NotInitialized,
 		InvalidCast,
 		AllocationFailure,
-		InvalidFormat
+		InvalidFormat,
+		DuplicateEntry
 	};
 
 	enum class SystemErrorCode : int
@@ -129,6 +130,8 @@ export namespace PGUI
 					return "Allocation failure";
 				case ErrorCode::InvalidFormat:
 					return "Invalid format";
+				case ErrorCode::DuplicateEntry:
+					return "Duplicate entry";
 				default:
 					return "Unknown general error";
 			}

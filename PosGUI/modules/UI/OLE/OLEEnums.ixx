@@ -3,6 +3,8 @@ module;
 
 export module PGUI.UI.OLE.OLEEnums;
 
+import PGUI.Utils;
+
 export namespace PGUI::UI::OLE
 {
 	enum class ClipboardFormat : CLIPFORMAT
@@ -57,7 +59,7 @@ export namespace PGUI::UI::OLE
 		EnhancedMetaFile = TYMED_ENHMF,
 		Null = TYMED_NULL
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(StorageMediumType);
+	consteval auto MakeEnumFlag(StorageMediumType) noexcept -> void { }
 
 	enum class DataDirection
 	{

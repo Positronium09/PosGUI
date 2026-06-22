@@ -1,67 +1,51 @@
 module;
 #include <d2d1.h>
 #include <d2d1_3.h>
-#include <d3d11_4.h>
 #include <dcomp.h>
 #include <dxgi1_2.h>
 #include <Windows.h>
 
-export module PGUI.UI.DirectXCompositionWindow;
+export module PGUI.UI.DCompWindow;
 
 import std;
 
 import PGUI.Window;
 import PGUI.WindowClass;
+import PGUI.Utils;
 import PGUI.ComPtr;
 import PGUI.UI.Clip;
 import PGUI.UI.Graphics;
 import PGUI.UI.DComp;
+import PGUI.UI.DXDevices;
 import PGUI.ErrorHandling;
 
 export namespace PGUI::UI
 {
-	enum class BatteryFlag : BYTE
-	{
-		High = BATTERY_FLAG_HIGH,
-		Low = BATTERY_FLAG_LOW,
-		Critical = BATTERY_FLAG_CRITICAL,
-		Charging = BATTERY_FLAG_CHARGING,
-		NoBattery = BATTERY_FLAG_NO_BATTERY,
-		Unknown = BATTERY_FLAG_UNKNOWN
-	};
-	DEFINE_ENUM_FLAG_OPERATORS(BatteryFlag);
-
-	class DirectXCompositionWindow :
+	class DCompWindow :
 		public Window,
 		protected ComPtrHolder<IDXGISwapChain1, ID2D1DeviceContext7>
 	{
 		public:
-		~DirectXCompositionWindow() override = default;
-
-		static auto InitD3D11Device() -> void;
+		~DCompWindow() override = default;
 
 		static auto InitDCompDevice() -> void;
 
-		static auto InitD2D1Device() -> void;
-
 		static auto InitDevices() -> void
 		{
-			InitD3D11Device();
+			DXDevices::InitDevices();
 			InitDCompDevice();
-			InitD2D1Device();
-			deviceCreationID.fetch_add(1, std::memory_order_relaxed);
 		}
 
 		[[nodiscard]] static auto GetDeviceCreationID() noexcept
 		{
-			return deviceCreationID.load(std::memory_order_relaxed);
+			return DXDevices::GetDeviceCreationID();
 		}
 
-		[[nodiscard]] static auto& D3D11Device() noexcept { return d3d11Device; }
-		[[nodiscard]] static auto& DXGIDevice() noexcept { return dxgiDevice; }
+		[[nodiscard]] static auto& D3D11Device() noexcept { return DXDevices::D3D11Device(); }
+		[[nodiscard]] static auto& DXGIDevice() noexcept { return DXDevices::DXGIDevice(); }
+		[[nodiscard]] static auto& D2D1Device() noexcept { return DXDevices::D2D1Device(); }
 		[[nodiscard]] static auto& DCompositionDevice() noexcept { return dCompositionDevice; }
 		[[nodiscard]] static auto& DCompositionSurfaceFactory() noexcept { return dCompositionSurfaceFactory; }
-		[[nodiscard]] static auto& D2D1Device() noexcept { return d2d1Device; }
 
 		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
 		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return target; }
@@ -100,20 +84,16 @@ export namespace PGUI::UI
 		}
 
 		protected:
-		explicit DirectXCompositionWindow(const WindowClassPtr& wndClass) noexcept;
+		explicit DCompWindow(const WindowClassPtr& wndClass) noexcept;
 
 		auto OnSizeChanged(SizeL newSize) -> void override;
 
 		private:
-		static inline ComPtr<ID3D11Device2> d3d11Device;
-		static inline ComPtr<IDXGIDevice4> dxgiDevice;
 		static inline DComp::Device dCompositionDevice;
 		static inline DComp::SurfaceFactory dCompositionSurfaceFactory;
-		static inline ComPtr<ID2D1Device7> d2d1Device;
-		static inline DComp::Target target;
-		static inline DComp::Visual visual;
+		DComp::Target target;
+		DComp::Visual visual;
 
-		static inline std::atomic_uint64_t deviceCreationID{ 0 };
 		HMONITOR currentMonitor = nullptr;
 		PAINTSTRUCT paintStruct{ };
 
@@ -132,18 +112,16 @@ export namespace PGUI::UI
 
 		static auto HandleDeviceLoss()
 		{
-			d3d11Device.reset();
-			dxgiDevice.reset();
-			dCompositionDevice.Reset();
-			d2d1Device.reset();
+			dCompositionDevice.ResetAll();
 			dCompositionSurfaceFactory.Reset();
+			DXDevices::ResetDevices();
 			InitDevices();
 		}
 
-		auto OnNCCreate(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
+		auto OnNCCreate(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 
 		auto OnWindowPosChanged(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 
-		auto OnPaint(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
+		auto OnPaint(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 	};
 }

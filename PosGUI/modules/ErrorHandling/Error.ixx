@@ -30,6 +30,15 @@ export namespace PGUI
 		{
 		}
 
+		explicit Error(
+			const std::exception& exception,
+			const std::source_location& sourceLocation = std::source_location::current(),
+			const std::chrono::system_clock::time_point& timeStamp = std::chrono::system_clock::now()) noexcept :
+			code{ std::make_error_code(SystemErrorCode::STLFailure) }, sourceLocation{ sourceLocation }, timeStamp{ timeStamp }
+		{
+			SetCustomMessage(StringToWString(exception.what()));
+		}
+
 		template <PGUIErrorCodeEnum ErrorType>
 		explicit Error(
 			const ErrorType error,

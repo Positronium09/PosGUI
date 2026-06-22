@@ -9,7 +9,7 @@ import PGUI.Window;
 import PGUI.WindowClass;
 import PGUI.ErrorHandling;
 import PGUI.Shape2D;
-import PGUI.UI.DirectXCompositionWindow;
+import PGUI.UI.DCompWindow;
 
 export namespace PGUI::UI
 {
@@ -28,7 +28,7 @@ export namespace PGUI::UI
 	template <typename T>
 	concept DialogType = std::derived_from<T, Dialog>;
 
-	class Dialog : public DirectXCompositionWindow
+	class Dialog : public DCompWindow
 	{
 		public:
 		template <DialogType T, typename... Args>

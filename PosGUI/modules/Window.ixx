@@ -26,45 +26,6 @@ export namespace PGUI
 
 	constexpr auto WindowPointerOffset = 0uz;
 
-	//TODO Write enum class for window styles and extended styles
-
-	enum class MessageHandlerReturnFlags
-	{
-		None,
-		PassToDefProc = 1,
-		ForceThisResult = 2,
-		NoFurtherHandling = 4
-	};
-	DEFINE_ENUM_FLAG_OPERATORS(MessageHandlerReturnFlags);
-
-	struct MessageHandlerResult
-	{
-		LRESULT result;
-		MessageHandlerReturnFlags flags;
-
-		explicit(false) MessageHandlerResult(const LRESULT result, 
-			const MessageHandlerReturnFlags flags = MessageHandlerReturnFlags::None) :
-			result{ result }, flags{ flags }
-		{
-		}
-
-		explicit(false) operator LRESULT() const noexcept { return result; }
-	};
-
-	using HandlerHWND = std::function<MessageHandlerResult(HWND, MessageID, Argument1, Argument2)>;
-	using Handler = std::function<MessageHandlerResult(MessageID, Argument1, Argument2)>;
-	template <typename T>
-	using HandlerHWNDMember = MessageHandlerResult(T::*)(HWND, MessageID, Argument1, Argument2);
-	template <typename T>
-	using HandlerMember = MessageHandlerResult(T::*)(MessageID, Argument1, Argument2);
-	template <typename T>
-	using HandlerHWNDCMember = MessageHandlerResult(T::*)(HWND, MessageID, Argument1, Argument2) const;
-	template <typename T>
-	using HandlerCMember = MessageHandlerResult(T::*)(MessageID, Argument1, Argument2) const;
-	using MessageHandler = std::variant<HandlerHWND, Handler>;
-
-	using MessageHandlerMap = std::unordered_map<UINT, std::vector<MessageHandler>>;
-
 	using ChildWindowList = std::vector<WindowPtr<>>;
 
 	using TimerId = UINT_PTR;
@@ -80,7 +41,7 @@ export namespace PGUI
 		TimerNoFG = FLASHW_TIMERNOFG,
 		Tray = FLASHW_TRAY
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(WindowFlashFlags);
+	consteval auto MakeEnumFlag(WindowFlashFlags) noexcept -> void { }
 
 	enum class WindowLongPtrIndex : int
 	{
@@ -139,7 +100,7 @@ export namespace PGUI
 		NoClientMove = SWP_NOCLIENTMOVE,
 		StateChanged = SWP_STATECHANGED
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(PositionFlags);
+	consteval auto MakeEnumFlag(PositionFlags) noexcept -> void { }
 
 	enum class RedrawFlags
 	{
@@ -156,7 +117,7 @@ export namespace PGUI
 		AllChildren = RDW_ALLCHILDREN,
 		NoChildren = RDW_NOCHILDREN,
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(RedrawFlags);
+	consteval auto MakeEnumFlag(RedrawFlags) noexcept -> void { }
 
 	enum class WindowPlacementFlags
 	{
@@ -164,7 +125,7 @@ export namespace PGUI
 		RestoreToMaximized = WPF_RESTORETOMAXIMIZED,
 		AsyncWindowPlacement = WPF_ASYNCWINDOWPLACEMENT
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(WindowPlacementFlags);
+	consteval auto MakeEnumFlag(WindowPlacementFlags) noexcept -> void { }
 
 	namespace InsertAfter
 	{
@@ -237,77 +198,170 @@ export namespace PGUI
 		return std::bit_cast<RawWindowPtr<>>(GetWindowLongPtrW(hWnd, WindowPointerOffset));
 	}
 
-	class MessageHooker
+	enum class MessageHandlerFlags
 	{
-		public:
-		virtual ~MessageHooker() noexcept = default;
+		None = 0,
+		NoFurtherHandling = 1,
+		ForceThisResult = 2,
+		PassToDefProc = 4,
+		ForceDefProcResult = 8
+	};
+	consteval auto MakeEnumFlag(MessageHandlerFlags) noexcept -> void { }
 
-		[[nodiscard]] const auto& GetHandlers() const noexcept { return messageHandlerMap; }
-		auto HookToWindow(const RawWindowPtr<> window) noexcept -> void
-		{
-			if (hookedWindow != nullptr)
-			{
-				Logger::Error(Error{ ErrorCode::InvalidArgument }, L"MessageHooker is already hooked to a window");
-			}
-			hookedWindow = window;
-		}
-		auto UnhookFromWindow() noexcept -> void
-		{
-			hookedWindow = nullptr;
-		}
-		[[nodiscard]] auto HookedWindow() const noexcept
-		{
-			return hookedWindow;
-		}
-		protected:
-		auto RegisterHandler(const MessageID msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
-		auto RegisterHandler(const MessageID msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
+	struct MessageHandlerResult
+	{
+		LRESULT result;
+		MessageHandlerFlags flags;
 
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerHWNDMember<T> func) -> void
+		explicit(false) constexpr MessageHandlerResult(
+			const LRESULT result, 
+			const MessageHandlerFlags flags = MessageHandlerFlags::None) noexcept :
+			result{ result }, flags{ flags }
 		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
 		}
 
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerMember<T> func) -> void
+		explicit(false) constexpr operator LRESULT() const noexcept
 		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
+			return result;
 		}
-
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerHWNDCMember<T> func) -> void
-		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
-		}
-
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerCMember<T> func) -> void
-		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
-		}
-
-		const auto& GetHookedWindow() const noexcept { return hookedWindow; }
-
-		private:
-		RawWindowPtr<> hookedWindow = nullptr;
-		MessageHandlerMap messageHandlerMap{ };
-
-		// ReSharper disable CppInconsistentNaming
-		auto _RegisterHandler(const MessageID msg, const HandlerHWND& handler) -> void
-		{
-			messageHandlerMap[msg].push_back(handler);
-		}
-
-		auto _RegisterHandler(const MessageID msg, const Handler& handler) -> void
-		{
-			messageHandlerMap[msg].push_back(handler);
-		}
-
-		// ReSharper restore CppInconsistentNaming
 	};
 
-	using MessageHookers = std::vector<std::reference_wrapper<MessageHooker>>;
+	template <typename T>
+	concept HandlerSignature =
+		std::is_nothrow_invocable_r_v<MessageHandlerResult, T, MessageID, Argument1, Argument2> ||
+		std::is_nothrow_invocable_r_v<MessageHandlerResult, T, HWND, MessageID, Argument1, Argument2>;
+
+	using HandlerType = std::move_only_function<MessageHandlerResult(MessageID, Argument1, Argument2) const noexcept>;
+	using HandlerHWNDType = std::move_only_function<MessageHandlerResult(HWND, MessageID, Argument1, Argument2) const noexcept>;
+	
+	template <typename T>
+	using HandlerHWNDMember = MessageHandlerResult(T::*)(HWND, MessageID, Argument1, Argument2) noexcept;
+	template <typename T>
+	using HandlerMember = MessageHandlerResult(T::*)(MessageID, Argument1, Argument2) noexcept;
+	template <typename T>
+	using HandlerHWNDCMember = MessageHandlerResult(T::*)(HWND, MessageID, Argument1, Argument2) const noexcept;
+	template <typename T>
+	using HandlerCMember = MessageHandlerResult(T::*)(MessageID, Argument1, Argument2) const noexcept;
+
+	template <typename T, typename U = MemberFunctionClass<T>>
+	concept HandlerOfNonConstMemberType = std::same_as<T, HandlerMember<U>> || std::same_as<T, HandlerHWNDMember<U>>;
+
+	template <typename T, typename U = MemberFunctionClass<T>>
+	concept HandlerOfConstMemberType = std::same_as<T, HandlerCMember<U>> || std::same_as<T, HandlerHWNDCMember<U>>;
+
+	template <typename T>
+	concept HandlerNonConstMemberType = 
+		std::same_as<T, HandlerMember<MemberFunctionClass<T>>> || 
+		std::same_as<T, HandlerHWNDMember<MemberFunctionClass<T>>>;
+
+	template <typename T>
+	concept HandlerConstMemberType =
+		std::same_as<T, HandlerCMember<MemberFunctionClass<T>>> ||
+		std::same_as<T, HandlerHWNDCMember<MemberFunctionClass<T>>>;
+
+	template <typename T, typename U>
+	concept HandlerOfMemberType = HandlerOfNonConstMemberType<T, U> || HandlerOfConstMemberType<T, U>;
+
+	template <typename T>
+	concept HandlerMemberType = HandlerNonConstMemberType<T> || HandlerConstMemberType<T>;
+
+	using MessageHandler = std::variant<HandlerType, HandlerHWNDType>;
+
+	using MessageMap = std::flat_map<MessageID, std::vector<MessageHandler>>;
+
+	enum class HandlerOrder : bool
+	{
+		Before,
+		After
+	};
+
+	class MessageInterceptor
+	{
+		public:
+		MessageInterceptor() noexcept = default;
+		MessageInterceptor(const MessageInterceptor&) = delete;
+		MessageInterceptor(MessageInterceptor&&) = delete;
+		auto operator=(const MessageInterceptor&) -> MessageInterceptor& = delete;
+		auto operator=(MessageInterceptor&&) -> MessageInterceptor& = delete;
+
+		virtual ~MessageInterceptor() noexcept = default;
+
+		template <HandlerSignature Handler>
+		auto RegisterHandler(const MessageID msg, Handler&& handler) noexcept -> void
+		{
+			messageMap[msg].emplace_back(std::forward<Handler>(handler));
+		}
+
+		template <NonConstMemberFunction Handler, typename T> requires HandlerOfMemberType<Handler, T>
+		auto RegisterHandler(const MessageID msg, const Handler& func, T* obj) noexcept -> void
+		{
+			RegisterHandler(msg, std::bind_front(func, obj));
+		}
+
+		template <ConstMemberFunction Handler, typename T> requires HandlerOfMemberType<Handler, T>
+		auto RegisterHandler(const MessageID msg, const Handler& func, const T* obj) noexcept -> void
+		{
+			RegisterHandler(msg, std::bind_front(func, obj));
+		}
+
+		[[nodiscard]] auto HasHandlersFor(const MessageID msg) const noexcept
+		{
+			if (!messageMap.contains(msg))
+			{
+				return false;
+			}
+
+			return !messageMap.at(msg).empty();
+		}
+
+		[[nodiscard]] auto HandlersFor(
+			const MessageID msg) const noexcept -> Result<std::span<const MessageHandler>>
+		{
+			if (!HasHandlersFor(msg))
+			{
+				return Unexpected{ Error{ ErrorCode::NotFound } };
+			}
+
+			return messageMap.at(msg);
+		}
+
+		protected:
+		template <HandlerNonConstMemberType Handler>
+		auto RegisterHandler(const MessageID msg, const Handler& func) noexcept -> void
+		{
+			using T = MemberFunctionClass<Handler>;
+			RegisterHandler(msg, std::bind_front(func, static_cast<T*>(this)));
+		}
+
+		template <HandlerConstMemberType Handler>
+		auto RegisterHandler(const MessageID msg, const Handler& func) noexcept -> void
+		{
+			using T = MemberFunctionClass<Handler>;
+			RegisterHandler(msg, std::bind_front(func, static_cast<T*>(this)));
+		}
+
+		private:
+		MessageMap messageMap;
+	};
+
+	class MessageHandlerHost final : public MessageInterceptor
+	{
+		public:
+		[[nodiscard]] auto Attach(MessageInterceptor& interceptor, HandlerOrder order) noexcept -> Result<void>;
+
+		[[nodiscard]] auto Detach(MessageInterceptor& interceptor) noexcept -> Result<void>;
+
+		[[nodiscard]] auto HandleMessage(HWND hWnd, MessageID msg,
+			Argument1 arg1, Argument2 arg2) const noexcept -> std::optional<MessageHandlerResult>;
+
+		private:
+		std::vector<std::reference_wrapper<MessageInterceptor>> beforeInterceptors;
+		std::vector<std::reference_wrapper<MessageInterceptor>> afterInterceptors;
+
+		[[nodiscard]] static auto Run(const MessageInterceptor& interceptor, HWND hWnd, MessageID msg,
+			Argument1 arg1, Argument2 arg2, 
+			bool& handled, bool& forced, bool& defProcHandled, MessageHandlerResult& result) noexcept -> bool;
+	};
 
 	class Window
 	{
@@ -409,44 +463,42 @@ export namespace PGUI
 			return dynamic_cast<RawWindowPtr<T>>(GetWindowPtrFromHWND(parentHwnd));
 		}
 
-		auto RegisterHandler(const MessageID msg, const HandlerHWND& handler) -> void { _RegisterHandler(msg, handler); }
-		auto RegisterHandler(const MessageID msg, const Handler& handler) -> void { _RegisterHandler(msg, handler); }
-
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerHWNDMember<T> func) -> void
+		template <HandlerSignature Handler> requires !HandlerMemberType<Handler>
+		auto RegisterHandler(const MessageID msg, Handler&& handler) noexcept -> void
 		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
+			messageHandlerHost.RegisterHandler(msg, std::forward<Handler>(handler));
 		}
 
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerMember<T> func) -> void
+		template <HandlerConstMemberType Handler>
+		auto RegisterHandler(const MessageID msg, const Handler& handler) noexcept -> void
 		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<T*>(this)));
+			using T = MemberFunctionClass<Handler>;
+			messageHandlerHost.RegisterHandler(msg, handler, static_cast<const T*>(this));
+		}
+		template <HandlerNonConstMemberType Handler>
+		auto RegisterHandler(const MessageID msg, const Handler& handler) noexcept -> void
+		{
+			using T = MemberFunctionClass<Handler>;
+			messageHandlerHost.RegisterHandler(msg, handler, static_cast<T*>(this));
 		}
 
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerHWNDCMember<T> func) -> void
+		[[nodiscard]] auto AttachInterceptor(MessageInterceptor& interceptor, const HandlerOrder order) noexcept -> Result<void>
 		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
+			return messageHandlerHost.Attach(interceptor, order);
+		}
+		[[nodiscard]] auto AttachInterceptorBefore(MessageInterceptor& interceptor) noexcept -> Result<void>
+		{
+			return AttachInterceptor(interceptor, HandlerOrder::Before);
+		}
+		[[nodiscard]] auto AttachInterceptorAfter(MessageInterceptor& interceptor) noexcept -> Result<void>
+		{
+			return AttachInterceptor(interceptor, HandlerOrder::After);
 		}
 
-		template <typename T>
-		auto RegisterHandler(MessageID msg, HandlerCMember<T> func) -> void
+		[[nodiscard]] auto DetachInterceptor(MessageInterceptor& interceptor) noexcept -> Result<void>
 		{
-			_RegisterHandler(msg, std::bind_front(func, std::bit_cast<const T*>(this)));
+			return messageHandlerHost.Detach(interceptor);
 		}
-
-		auto Hook(MessageHooker& hooker) noexcept -> void;
-
-		auto HookBefore(MessageHooker& hooker) noexcept -> void;
-
-		auto HookAfter(MessageHooker& hooker) noexcept -> void;
-
-		auto UnHook(MessageHooker& hooker) noexcept -> void;
-
-		auto UnHookBefore(MessageHooker& hooker) noexcept -> void;
-
-		auto UnHookAfter(MessageHooker& hooker) noexcept -> void;
 
 		auto AddTimer(TimerId id, std::chrono::milliseconds delay,
 			const std::optional<TimerCallback>& callback = std::nullopt) noexcept -> TimerId;
@@ -675,22 +727,17 @@ export namespace PGUI
 
 		private:
 		// ReSharper disable CppInconsistentNaming
-		auto _RegisterHandler(MessageID msg, const HandlerHWND& handler) -> void;
 
-		auto _RegisterHandler(MessageID msg, const Handler& handler) -> void;
-
-		auto _OnDpiChanged(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
-		auto _OnWindowPosChanged(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
-		auto _OnSize(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
-		auto _OnMove(MessageID msg, Argument1 arg1, Argument2 arg2) -> MessageHandlerResult;
+		auto _OnDpiChanged(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
+		auto _OnWindowPosChanged(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
+		auto _OnSize(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
+		auto _OnMove(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
 
 		// ReSharper restore CppInconsistentNaming
 
-		MessageHandlerMap messageHandlerMap;
+		MessageHandlerHost messageHandlerHost;
 		ChildWindowList childWindows;
 		TimerMap timerMap;
-		MessageHookers beforeHookers;
-		MessageHookers afterHookers;
 		WindowClassPtr windowClass;
 		HWND hWnd = nullptr;
 		HWND parentHwnd = nullptr;

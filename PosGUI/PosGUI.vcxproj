@@ -49,6 +49,7 @@
     <ClCompile Include="modules\UI\Animation\AnimationTimeTypes.ixx" />
     <ClCompile Include="modules\UI\DComp\DCompAnimation.ixx" />
     <ClCompile Include="modules\UI\DComp\DComp.ixx" />
+    <ClCompile Include="modules\UI\DComp\DCompClip.ixx" />
     <ClCompile Include="modules\UI\DComp\DCompEnums.ixx" />
     <ClCompile Include="modules\UI\DComp\DCompStructs.ixx" />
     <ClCompile Include="modules\UI\DComp\Device.ixx" />
@@ -60,6 +61,7 @@
     <ClCompile Include="modules\UI\DComp\Transform2D.ixx" />
     <ClCompile Include="modules\UI\DComp\Transform3D.ixx" />
     <ClCompile Include="modules\UI\DComp\Visual.ixx" />
+    <ClCompile Include="modules\UI\DXDevices.ixx" />
     <ClCompile Include="modules\UI\OLE\Clipboard.ixx" />
     <ClCompile Include="modules\UI\OLE\DataObject.ixx" />
     <ClCompile Include="modules\UI\OLE\DragDrop\DragDrop.ixx" />
@@ -89,6 +91,7 @@
     <ClCompile Include="modules\UI\VisualState\VisualState.ixx" />
     <ClCompile Include="modules\UI\VisualState\VisualStateGroup.ixx" />
     <ClCompile Include="modules\UI\VisualState\VisualStateManager.ixx" />
+    <ClCompile Include="modules\UI\VL\VL.ixx" />
     <ClCompile Include="modules\Utils\EnumUtils.ixx" />
     <ClCompile Include="modules\Utils\HashUtils.ixx" />
     <ClCompile Include="modules\Utils\MetaUtils.ixx" />
@@ -136,7 +139,7 @@
     <ClCompile Include="modules\UI\D2D\Geometry\GeometrySink.ixx" />
     <ClCompile Include="modules\UI\D2D\Geometry\SimplifiedGeometrySink.ixx" />
     <ClCompile Include="modules\UI\Dialog.ixx" />
-    <ClCompile Include="modules\UI\DirectXCompositionWindow.ixx" />
+    <ClCompile Include="modules\UI\DCompWindow.ixx" />
     <ClCompile Include="modules\UI\Font\Font.ixx" />
     <ClCompile Include="modules\UI\Font\FontCollection.ixx" />
     <ClCompile Include="modules\UI\Font\FontEnums.ixx" />
@@ -201,7 +204,8 @@
     <ClCompile Include="src\UI\D2D\Geometry\D2DPathGeometry.cpp" />
     <ClCompile Include="src\UI\DComp\Visual.cpp" />
     <ClCompile Include="src\UI\Dialog.cpp" />
-    <ClCompile Include="src\UI\DirectXCompositionWindow.cpp" />
+    <ClCompile Include="src\UI\DCompWindow.cpp" />
+    <ClCompile Include="src\UI\DXDevices.cpp" />
     <ClCompile Include="src\UI\OLE\DropSource.cpp" />
     <ClCompile Include="src\UI\OLE\DropTarget.cpp" />
     <ClCompile Include="src\UI\OLE\OLEStructs.cpp" />
@@ -336,7 +340,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)include;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -367,7 +371,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)include;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -398,7 +402,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)include;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>
@@ -429,7 +433,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalModuleDependencies>C:\Users\orcun\Downloads\PosGUI\PosGUI\modules;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
+      <AdditionalModuleDependencies>$(ProjectDir)include;C:\Users\orcun\Downloads\PosGUI\TypeErasure\TypeErasure;%(AdditionalModuleDependencies)</AdditionalModuleDependencies>
       <DisableSpecificWarnings>4063</DisableSpecificWarnings>
       <EnableModules>true</EnableModules>
       <BuildStlModules>true</BuildStlModules>

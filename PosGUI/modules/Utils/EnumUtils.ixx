@@ -8,20 +8,68 @@ export namespace PGUI
 	concept Enumeration = std::is_enum_v<T>;
 
 	template <typename T>
-	concept EnumFlag = Enumeration<T> && requires(T a, T b)
+	concept EnumFlag = Enumeration<T> && requires(T t)
 	{
-		{ ~a } -> std::same_as<T>;
-		{ a | b } -> std::same_as<T>;
-		{ a & b } -> std::same_as<T>;
-		{ a ^ b } -> std::same_as<T>;
-		{ a |= b } -> std::same_as<T&>;
-		{ a &= b } -> std::same_as<T&>;
-		{ a ^= b } -> std::same_as<T&>;
+		MakeEnumFlag(t);
 	};
 
 	template <Enumeration T>
 	using UnderlyingType = std::underlying_type_t<T>;
+}
 
+export
+{
+	template <PGUI::EnumFlag T>
+	[[nodiscard]] constexpr auto operator|(T lhs, T rhs) noexcept -> T
+	{
+		return static_cast<T>(std::to_underlying(lhs) | std::to_underlying(rhs));
+	}
+
+	template <PGUI::EnumFlag T>
+	[[nodiscard]] constexpr auto operator&(T lhs, T rhs) noexcept -> T
+	{
+		return static_cast<T>(std::to_underlying(lhs) & std::to_underlying(rhs));
+	}
+
+	template <PGUI::EnumFlag T>
+	[[nodiscard]] constexpr auto operator^(T lhs, T rhs) noexcept -> T
+	{
+		return static_cast<T>(std::to_underlying(lhs) ^ std::to_underlying(rhs));
+	}
+
+	template <PGUI::EnumFlag T>
+	[[nodiscard]] constexpr auto operator~(T value) noexcept -> T
+	{
+		return static_cast<T>(~std::to_underlying(value));
+	}
+
+	template <PGUI::EnumFlag T>
+	constexpr auto operator|=(T& lhs, T rhs) noexcept -> T&
+	{
+		lhs = lhs | rhs;
+
+		return lhs;
+	}
+
+	template <PGUI::EnumFlag T>
+	constexpr auto operator&=(T& lhs, T rhs) noexcept -> T&
+	{
+		lhs = lhs & rhs;
+
+		return lhs;
+	}
+
+	template <PGUI::EnumFlag T>
+	constexpr auto operator^=(T& lhs, T rhs) noexcept -> T&
+	{
+		lhs = lhs ^ rhs;
+
+		return lhs;
+	}
+}
+
+export namespace PGUI
+{
 	template <EnumFlag T>
 	[[nodiscard]] constexpr auto ZeroFlag() noexcept
 	{

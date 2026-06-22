@@ -92,6 +92,19 @@ namespace PGUI::UI::DComp
 		return EmptyResult;
 	}
 
+	auto Visual::SetClip(const Clip<>& clip) const noexcept -> Result<void>
+	{
+		if (const auto error = Error{
+				Get()->SetClip(clip.GetRaw())
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+
+		return EmptyResult;
+	}
+
 	auto Visual::SetCompositeMode(const CompositeMode compositeMode) const noexcept -> Result<void>
 	{
 		if (const auto error = Error{
@@ -148,6 +161,19 @@ namespace PGUI::UI::DComp
 	{
 		if (const auto error = Error{
 				Get()->SetContent(content.GetRaw())
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+
+		return EmptyResult;
+	}
+
+	auto Visual::SetEffect(const Effect<>& effect) const noexcept -> Result<void>
+	{
+		if (const auto error = Error{
+				Get()->SetEffect(effect.GetRaw())
 			};
 			error.IsFailure())
 		{
@@ -316,6 +342,18 @@ namespace PGUI::UI::DComp
 		return EmptyResult;
 	}
 
+	auto Visual::SetTransform(const Transform3D<>& transform) const noexcept -> Result<void>
+	{
+		if (const auto error = Error{
+				Get()->SetTransform(transform.GetRaw())
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+		return EmptyResult;
+	}
+
 	auto Visual::SetTransform(const D2D::Matrix3x2& transform) const noexcept -> Result<void>
 	{
 		if (const auto error = Error{
@@ -329,7 +367,7 @@ namespace PGUI::UI::DComp
 		return EmptyResult;
 	}
 
-	auto Visual::SetTransform(const D2D1_MATRIX_4X4_F& transform) const noexcept -> Result<void>
+	auto Visual::SetTransform(const D2D::Matrix4x4& transform) const noexcept -> Result<void>
 	{
 		if (const auto error = Error{
 				Get()->SetTransform(transform)

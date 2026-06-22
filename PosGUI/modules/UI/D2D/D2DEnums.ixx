@@ -3,6 +3,8 @@ module;
 
 export module PGUI.UI.D2D.D2DEnums;
 
+import PGUI.Utils;
+
 export namespace PGUI::UI::D2D
 {
 	enum class DrawTextOptions
@@ -13,7 +15,7 @@ export namespace PGUI::UI::D2D
 		EnableColorFont = D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT,
 		DisableColorBitmapSnapping = D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(DrawTextOptions);
+	consteval auto MakeEnumFlag(DrawTextOptions) noexcept -> void { }
 
 	enum class AntiAliasingMode
 	{
@@ -37,7 +39,7 @@ export namespace PGUI::UI::D2D
 		CpuRead = D2D1_BITMAP_OPTIONS_CPU_READ,
 		GdiCompatible = D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(BitmapOptions);
+	consteval auto MakeEnumFlag(BitmapOptions) noexcept -> void { }
 
 	enum class BitmapInterpolationMode
 	{

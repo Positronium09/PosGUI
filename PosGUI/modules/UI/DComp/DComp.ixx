@@ -11,4 +11,5 @@ export import PGUI.UI.DComp.Transform2D;
 export import PGUI.UI.DComp.Transform3D;
 export import PGUI.UI.DComp.FilterEffects;
 export import PGUI.UI.DComp.Animation;
+export import PGUI.UI.DComp.Clip;
 export import PGUI.UI.DComp.Device;

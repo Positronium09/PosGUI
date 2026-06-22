@@ -6,6 +6,8 @@ export module PGUI.PropVariant;
 
 import std;
 
+import PGUI.Utils;
+
 export namespace PGUI
 {
 	enum class PropVariantType
@@ -50,7 +52,7 @@ export namespace PGUI
 		Variant = 12,
 		TypeMask = 0xfff
 	};
-	DEFINE_ENUM_FLAG_OPERATORS(PropVariantType);
+	consteval auto MakeEnumFlag(PropVariantType) noexcept -> void { }
 
 	using PropVariantValue =
 	std::variant<

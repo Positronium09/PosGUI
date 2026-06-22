@@ -11,6 +11,7 @@ import PGUI.UI.D2D.D2DEnums;
 export namespace PGUI::UI::D2D
 {
 	using Matrix3x2 = D2D1::Matrix3x2F;
+	using Matrix4x4 = D2D1::Matrix4x4F;
 
 	[[nodiscard]] auto D2D1MatrixToMatrix3x2(const D2D1_MATRIX_3X2_F& matrix) noexcept
 	{
@@ -21,6 +22,28 @@ export namespace PGUI::UI::D2D
 			matrix.m[1][1],
 			matrix.m[2][0],
 			matrix.m[2][1]
+		};
+	}
+
+	[[nodiscard]] auto D2D1MatrixToMatrix4x4(const D2D1_MATRIX_4X4_F& matrix) noexcept
+	{
+		return Matrix4x4{
+			matrix.m[0][0],
+			matrix.m[0][1],
+			matrix.m[0][2],
+			matrix.m[0][3],
+			matrix.m[1][0],
+			matrix.m[1][1],
+			matrix.m[1][2],
+			matrix.m[1][3],
+			matrix.m[2][0],
+			matrix.m[2][1],
+			matrix.m[2][2],
+			matrix.m[2][3],
+			matrix.m[3][0],
+			matrix.m[3][1],
+			matrix.m[3][2],
+			matrix.m[3][3]
 		};
 	}
 

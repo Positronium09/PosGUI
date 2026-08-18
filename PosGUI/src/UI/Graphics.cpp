@@ -14,7 +14,7 @@ namespace PGUI::UI
 		transformStack.reserve(8);
 	}
 
-	auto Graphics::PushTransform(const D2D::Matrix3x2& transform) const -> void
+	auto Graphics::PushTransform(const Matrix3x2& transform) const -> void
 	{
 		const auto currentTransform = GetTransform();
 		transformStack.push_back(currentTransform);

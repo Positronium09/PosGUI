@@ -20,95 +20,102 @@ namespace PGUI::UI
 		ComPtrHolder{ textFormat }
 	{ }
 
-	TextFormat::TextFormat(
+	auto TextFormat::Create(
 		const wzstring_view fontFamilyName, const float fontSize,
-		const FontWeight fontWeight, const FontStyle fontStyle, const FontStretch fontStretch,
+		const std::span<const FontAxisValue> fontAxisValues,
 		const FontCollection& fontCollection,
-		const wzstring_view localeName) noexcept
+		const wzstring_view localeName) noexcept -> Result<TextFormat>
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 
-		FontCollection collection = fontCollection;
-
-		if (!fontCollection.IsInitialized())
+		const auto collectionResult = std::invoke([&] -> Result<FontCollection>
 		{
-			auto fontCollectionResult = FontCollection::GetSystemFontCollection();
-			if (!fontCollectionResult.has_value())
+			if (fontCollection.IsInitialized())
 			{
-				Logger::Error(Error{ fontCollectionResult.error() });
-				return;
+				return fontCollection;
 			}
-			collection = fontCollectionResult.value();
+			return FontCollection::GetSystemFontCollection();
+		});
+		if (!collectionResult.has_value())
+		{
+			return Unexpected{ collectionResult.error() };
 		}
+		const auto& collection = collectionResult.value();
+
+		const auto collectionPtr = collection.GetAs<IDWriteFontCollection>();
+		ComPtr<IDWriteTextFormat3> textFormat;
+		if (Error error{
+				factory->CreateTextFormat(
+					fontFamilyName.data(),
+					collectionPtr.get(),
+					fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
+					fontSize, localeName.data(), textFormat.put())
+			};
+			error.IsFailure())
+		{
+			error.AddDetail(L"fontFamilyName", fontFamilyName)
+			     .AddDetail(L"fontSize", std::to_wstring(fontSize))
+			     .AddDetail(L"fontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
+			     .AddDetail(L"localeName", localeName);
+			return Unexpected{ error };
+		}
+
+		return TextFormat{ textFormat };
+	}
+
+	auto TextFormat::Create(
+		const wzstring_view fontFamilyName, const float fontSize,
+		const FontWeight fontWeight, const FontStyle fontStyle, const FontStretch fontStretch,
+		const FontCollection& fontCollection,
+		const wzstring_view localeName) noexcept -> Result<TextFormat>
+	{
+		const auto& factory = Factories::DWriteFactory::GetFactory();
+
+		const auto collectionResult = std::invoke([&] -> Result<FontCollection>
+		{
+			if (fontCollection.IsInitialized())
+			{
+				return fontCollection;
+			}
+			return FontCollection::GetSystemFontCollection();
+		});
+		if (!collectionResult.has_value())
+		{
+			return Unexpected{ collectionResult.error() };
+		}
+		const auto& collection = collectionResult.value();
 
 		const auto fontSetResult = collection.GetFontSet();
 		if (!fontSetResult.has_value())
 		{
-			Logger::Error(Error{ fontSetResult.error() });
-			return;
+			return Unexpected{ fontSetResult.error() };
 		}
 		const auto& fontSet = fontSetResult.value();
 		const auto fontAxisValues =
 			fontSet.ConvertWeightStretchStyleToFontAxisValues(fontWeight, fontStretch, fontStyle, fontSize);
 
 		const auto collectionPtr = collection.GetAs<IDWriteFontCollection>();
-		const auto hr = factory->CreateTextFormat(
-			fontFamilyName.data(),
-			collectionPtr.get(),
-			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
-			fontSize, localeName.data(), Put());
-
-		if (Error error{ hr };
+		ComPtr<IDWriteTextFormat3> textFormat;
+		if (Error error{
+				factory->CreateTextFormat(
+					fontFamilyName.data(),
+					collectionPtr.get(),
+					fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
+					fontSize, localeName.data(), textFormat.put())
+			};
 			error.IsFailure())
 		{
-			error.AddDetail(L"FontFamilyName", fontFamilyName)
-			     .AddDetail(L"FontSize", std::to_wstring(fontSize))
-			     .AddDetail(L"FontWeight", std::to_wstring(fontWeight))
-			     .AddDetail(L"FontStyle", std::to_wstring(fontStyle))
-			     .AddDetail(L"FontStretch", std::to_wstring(fontStretch))
-			     .AddDetail(L"FontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
-			     .AddDetail(L"LocaleName", localeName);
-			Logger::Error(error, L"Failed to create text format");
-		}
-	}
-
-	TextFormat::TextFormat(
-		const wzstring_view fontFamilyName, const float fontSize,
-		const std::span<const FontAxisValue> fontAxisValues,
-		const FontCollection& fontCollection,
-		const wzstring_view localeName) noexcept
-	{
-		const auto& factory = Factories::DWriteFactory::GetFactory();
-
-		FontCollection collection = fontCollection;
-
-		if (!fontCollection.IsInitialized())
-		{
-			auto fontCollectionResult = FontCollection::GetSystemFontCollection();
-			if (!fontCollectionResult.has_value())
-			{
-				Logger::Error(Error{ fontCollectionResult.error() });
-				return;
-			}
-			collection = fontCollectionResult.value();
+			error.AddDetail(L"fontFamilyName", fontFamilyName)
+			     .AddDetail(L"fontSize", std::to_wstring(fontSize))
+			     .AddDetail(L"fontWeight", std::to_wstring(fontWeight))
+			     .AddDetail(L"fontStyle", std::to_wstring(fontStyle))
+			     .AddDetail(L"fontStretch", std::to_wstring(fontStretch))
+			     .AddDetail(L"fontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
+			     .AddDetail(L"localeName", localeName);
+			return Unexpected{ error };
 		}
 
-		const auto collectionPtr = collection.GetAs<IDWriteFontCollection>();
-		const auto hr = factory->CreateTextFormat(
-			fontFamilyName.data(),
-			collectionPtr.get(),
-			fontAxisValues.data(), static_cast<UINT32>(fontAxisValues.size()),
-			fontSize, localeName.data(), Put());
-
-		if (Error error{ hr };
-			error.IsFailure())
-		{
-			error.AddDetail(L"FontFamilyName", fontFamilyName)
-			     .AddDetail(L"FontSize", std::to_wstring(fontSize))
-			     .AddDetail(L"FontCollection", std::format(L"{:p}", static_cast<void*>(fontCollection.GetRaw())))
-			     .AddDetail(L"LocaleName", localeName);
-			Logger::Error(error, L"Failed to create text format");
-		}
+		return TextFormat{ textFormat };
 	}
 
 	auto TextFormat::SetFlowDirection(const FlowDirection flowDirection) const noexcept -> Result<void>

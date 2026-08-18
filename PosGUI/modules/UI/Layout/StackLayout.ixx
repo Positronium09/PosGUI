@@ -36,26 +36,26 @@ export namespace PGUI::UI::Layout
 
 		auto RearrangeItems() noexcept -> void override;
 
-		auto SetOrientation(LayoutOrientation newOrientation) noexcept -> void;
 		[[nodiscard]] auto GetOrientation() const noexcept { return orientation; }
+		auto SetOrientation(LayoutOrientation newOrientation) noexcept -> void;
 
-		auto SetMainAxisAlignment(MainAxisAlignment alignment) noexcept -> void;
 		[[nodiscard]] auto GetMainAxisAlignment() const noexcept { return mainAxisAlignment; }
+		auto SetMainAxisAlignment(MainAxisAlignment alignment) noexcept -> void;
 
-		auto SetCrossAxisAlignment(CrossAxisAlignment alignment) noexcept -> void;
 		[[nodiscard]] auto GetCrossAxisAlignment() const noexcept { return crossAxisAlignment; }
+		auto SetCrossAxisAlignment(CrossAxisAlignment alignment) noexcept -> void;
 
-		auto SetMainAxisGap(float gap) noexcept -> void;
 		[[nodiscard]] auto GetMainAxisGap() const noexcept { return mainAxisGap; }
+		auto SetMainAxisGap(float gap) noexcept -> void;
 
-		auto SetCrossAxisGap(float crossGap) noexcept -> void;
 		[[nodiscard]] auto GetCrossAxisGap() const noexcept { return crossAxisGap; }
+		auto SetCrossAxisGap(float crossGap) noexcept -> void;
 
-		auto SetPadding(StackLayoutPadding newPadding) noexcept -> void;
 		[[nodiscard]] auto GetPadding() const noexcept { return padding; }
+		auto SetPadding(StackLayoutPadding newPadding) noexcept -> void;
 
-		auto SetWrapMode(WrapMode mode) noexcept -> void;
 		[[nodiscard]] auto GetWrapMode() const noexcept { return wrapMode; }
+		auto SetWrapMode(WrapMode mode) noexcept -> void;
 
 		auto SetAlignment(MainAxisAlignment mainAxis, CrossAxisAlignment crossAxis) noexcept -> void;
 		auto SetGaps(float mainAxis, float crossAxis) noexcept -> void;

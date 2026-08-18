@@ -14,27 +14,37 @@ import :AnimationManagerEventHandler;
 
 namespace PGUI::UI::Animation
 {
-	auto AnimationManager::GetGlobalInstance() -> const AnimationManager&
+	AnimationManager::AnimationManager(const ComPtr<IUIAnimationManager2>& ptr) noexcept :
+		ComPtrHolder{ ptr }
+	{ }
+
+	auto AnimationManager::Create() noexcept -> Result<AnimationManager>
 	{
-		static AnimationManager instance{ };
-		return instance;
+		ComPtr<IUIAnimationManager2> manager;
+		if (Error error{
+				CoCreateInstance(
+					CLSID_UIAnimationManager2,
+					nullptr,
+					CLSCTX_INPROC_SERVER,
+					GetIID(manager),
+					manager.put_void())
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+
+		return AnimationManager{ manager };
 	}
 
-	AnimationManager::AnimationManager()
+	auto AnimationManager::GetGlobalInstance() noexcept -> Result<std::reference_wrapper<const AnimationManager>>
 	{
-		if (const auto hr = CoCreateInstance(
-				CLSID_UIAnimationManager2,
-				nullptr,
-				CLSCTX_INPROC_SERVER,
-				__uuidof(IUIAnimationManager2),
-				PutVoid());
-			FAILED(hr))
+		static const auto instance = Create();
+		if (!instance.has_value())
 		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create animation manager"
-			};
+			return Unexpected{ instance.error() };
 		}
+		return std::cref(instance.value());
 	}
 
 	auto AnimationManager::AbandonAllStoryboards() noexcept -> Result<void>
@@ -240,13 +250,13 @@ namespace PGUI::UI::Animation
 
 	auto AnimationManager::ScheduleTransition(
 		const AnimationVariable& variable,
-		const AnimationTransition& transition, const double currentTime) const noexcept -> Result<void>
+		const AnimationTransition& transition, const Seconds currentTime) const noexcept -> Result<void>
 	{
 		Error error{
 			Get()->ScheduleTransition(
 				variable.GetRaw(),
 				transition.GetRaw(),
-				currentTime)
+				ToWAM(currentTime))
 		};
 		LogIfFailed(error, L"ScheduleTransition failed");
 		if (error.IsFailure())

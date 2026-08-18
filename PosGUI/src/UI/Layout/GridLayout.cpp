@@ -8,7 +8,7 @@ import PGUI.UI.Layout.LayoutPanel;
 
 namespace PGUI::UI::Layout
 {
-	auto OccupySet(std::flat_set<std::pair<long, long>>& set,
+	auto OccupySet(std::set<std::pair<long, long>>& set,
 	               const long row, const long column,
 	               const long rowSpan, const long columnSpan) noexcept -> void
 	{
@@ -21,7 +21,7 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto IsOccupied(const std::flat_set<std::pair<long, long>>& set,
+	auto IsOccupied(const std::set<std::pair<long, long>>& set,
 	                const long row, const long column,
 	                const long rowSpan, const long columnSpan) noexcept
 	{
@@ -39,7 +39,7 @@ namespace PGUI::UI::Layout
 		return false;
 	}
 
-	auto IsUnoccupied(const std::flat_set<std::pair<long, long>>& set,
+	auto IsUnoccupied(const std::set<std::pair<long, long>>& set,
 	                  const long row, const long column,
 	                  const long rowSpan, const long columnSpan) noexcept
 	{
@@ -189,7 +189,7 @@ namespace PGUI::UI::Layout
 		maxDefinedColumn = std::max(maxDefinedColumn, static_cast<long>(columnDefinitions.size()));
 		maxDefinedColumn += maxColumnSpan - 1;
 
-		std::flat_set<std::pair<long, long>> occupiedPositions = blankCells;
+		std::set<std::pair<long, long>> occupiedPositions = blankCells;
 		std::vector<std::pair<std::size_t, std::tuple<long, long, long, long>>> itemPositions;
 
 		long maxPlacedRow = 0;

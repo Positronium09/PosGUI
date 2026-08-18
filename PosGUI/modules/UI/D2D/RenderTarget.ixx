@@ -9,7 +9,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Utils;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.Brush;
 import PGUI.UI.Color;
 import PGUI.ErrorHandling;
@@ -25,12 +25,9 @@ import PGUI.UI.Imaging.BitmapSource;
 
 export namespace PGUI::UI::D2D
 {
-	template <typename Interface = ID2D1RenderTarget>
+	template <std::derived_from<ID2D1RenderTarget> Interface = ID2D1RenderTarget>
 	class RenderTarget : public ComPtrHolder<Interface>
 	{
-		static_assert(std::derived_from<Interface, ID2D1RenderTarget>,
-		              "Interface must be derived from ID2D1RenderTarget");
-
 		public:
 		RenderTarget() noexcept = default;
 

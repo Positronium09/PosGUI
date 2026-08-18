@@ -11,7 +11,7 @@ export module PGUI.WinResource;
 import std;
 
 import PGUI.Utils;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 

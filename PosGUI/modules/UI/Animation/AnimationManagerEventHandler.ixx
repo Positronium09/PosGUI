@@ -49,8 +49,8 @@ export namespace PGUI::UI::Animation
 			AnimationManagerStatus newStatus,
 			AnimationManagerStatus previousStatus) -> void = 0;
 
-		[[nodiscard]] auto& GetRouter() noexcept { return router; }
-		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
+		template <typename Self>
+		[[nodiscard]] auto&& GetRouter(this Self&& self) noexcept { return std::forward_like<Self>(self.router); }
 
 		private:
 		ComPtr<AnimationManagerEventHandlerRouter> router;

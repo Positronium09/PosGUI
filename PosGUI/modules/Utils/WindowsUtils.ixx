@@ -6,7 +6,7 @@ export module PGUI.Utils:WindowsUtils;
 import std;
 
 import :StringUtils;
-import PGUI.Shape2D;
+import PGUI.Shape;
 
 export
 {

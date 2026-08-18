@@ -44,6 +44,6 @@ export namespace PGUI
 		ATOM classAtom{ INVALID_ATOM };
 
 		static inline Mutex::CSMutex mutex;
-		static inline std::flat_map<ATOM, WindowClassWeakPtr> registeredClasses;
+		static inline std::map<ATOM, WindowClassWeakPtr> registeredClasses;
 	};
 }

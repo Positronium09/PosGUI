@@ -4,7 +4,7 @@ module;
 export module PGUI.UI.D2D.D2DLayer;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.Brush;
 import PGUI.UI.D2D.D2DEnums;
 import PGUI.UI.D2D.D2DStructs;

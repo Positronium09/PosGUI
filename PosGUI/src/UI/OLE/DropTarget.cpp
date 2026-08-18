@@ -8,7 +8,7 @@ module PGUI.UI.OLE.DragDrop.DropTarget;
 import PGUI.ErrorHandling;
 import PGUI.ComPtr;
 import PGUI.Utils;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.OLE.DataObject;
 import PGUI.UI.OLE.DragDrop.DragDropEnums;
 import PGUI.UI.OLE.DragDrop.DragDropStructs;

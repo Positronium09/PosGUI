@@ -7,7 +7,7 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.Utils;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import :AnimationTimeTypes;
 import :AnimationInterface;
@@ -160,7 +160,7 @@ export namespace PGUI::UI::Animation
 	class AnimationTransitionLibrary : public ComPtrHolder<IUIAnimationTransitionLibrary2>
 	{
 		public:
-		[[nodiscard]] static auto GetInstance() -> const AnimationTransitionLibrary&;
+		[[nodiscard]] static auto GetInstance() noexcept -> Result<std::reference_wrapper<const AnimationTransitionLibrary>>;
 
 		[[nodiscard]] static auto TransitionFromParameters(const TransitionParameters& parameters) noexcept -> Result<AnimationTransition>;
 
@@ -271,7 +271,9 @@ export namespace PGUI::UI::Animation
 			const SmoothStopTransitionParameters& parameters) noexcept -> Result<AnimationTransition>;
 
 		private:
-		AnimationTransitionLibrary();
+		explicit(false) AnimationTransitionLibrary(const ComPtr<IUIAnimationTransitionLibrary2>& ptr) noexcept;
+
+		[[nodiscard]] static auto Create() noexcept -> Result<AnimationTransitionLibrary>;
 	};
 
 	[[nodiscard]] auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, double finalValue) noexcept -> Result<void>;

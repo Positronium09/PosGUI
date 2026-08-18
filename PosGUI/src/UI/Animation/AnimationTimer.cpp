@@ -10,32 +10,38 @@ import PGUI.ErrorHandling;
 
 namespace PGUI::UI::Animation
 {
-	auto AnimationTimer::GetGlobalInstance() -> const AnimationTimer&
-	{
-		static AnimationTimer instance;
-		return instance;
-	}
-
-	AnimationTimer::AnimationTimer()
-	{
-		if (const auto hr = CoCreateInstance(
-			CLSID_UIAnimationTimer,
-			nullptr,
-			CLSCTX_INPROC_SERVER,
-			__uuidof(IUIAnimationTimer),
-			PutVoid());
-			FAILED(hr))
-		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create animation timer"
-			};
-		}
-	}
-
 	AnimationTimer::AnimationTimer(const ComPtr<IUIAnimationTimer>& ptr) noexcept :
 		ComPtrHolder{ ptr }
 	{ }
+
+	auto AnimationTimer::Create() noexcept -> Result<AnimationTimer>
+	{
+		ComPtr<IUIAnimationTimer> timer;
+		if (Error error{
+				CoCreateInstance(
+					CLSID_UIAnimationTimer,
+					nullptr,
+					CLSCTX_INPROC_SERVER,
+					GetIID(timer),
+					timer.put_void())
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+
+		return AnimationTimer{ timer };
+	}
+
+	auto AnimationTimer::GetGlobalInstance() noexcept -> Result<std::reference_wrapper<const AnimationTimer>>
+	{
+		static const auto instance = Create();
+		if (!instance.has_value())
+		{
+			return Unexpected{ instance.error() };
+		}
+		return std::cref(instance.value());
+	}
 
 	auto AnimationTimer::Enable() const noexcept -> Result<void>
 	{

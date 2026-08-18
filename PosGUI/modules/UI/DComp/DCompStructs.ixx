@@ -5,7 +5,7 @@ export module PGUI.UI.DComp.DCompStructs;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.Color;
 
 export namespace PGUI::UI::DComp
@@ -28,14 +28,14 @@ export namespace PGUI::UI::DComp
 			D2D1_VECTOR_2F{ .x = point.x, .y = point.y }
 		{ }
 
-		[[nodiscard]] constexpr auto operator==(const Vector2F& other) const noexcept -> bool
-		{
-			return x == other.x && y == other.y;
-		}
-
 		explicit(false) constexpr operator PointF() const noexcept
 		{
 			return PointF{ x, y };
+		}
+
+		[[nodiscard]] constexpr auto operator==(const Vector2F& other) const noexcept -> bool
+		{
+			return x == other.x && y == other.y;
 		}
 	};
 
@@ -57,14 +57,14 @@ export namespace PGUI::UI::DComp
 			D2D1_VECTOR_4F{ .x = color.r, .y = color.g, .z = color.b, .w = color.a }
 		{ }
 
-		[[nodiscard]] constexpr auto operator==(const Vector4F& other) const noexcept -> bool
-		{
-			return x == other.x && y == other.y && z == other.z && w == other.w;
-		}
-
 		explicit(false) constexpr operator RGBA() const noexcept
 		{
 			return RGBA{ x, y, z, w };
+		}
+
+		[[nodiscard]] constexpr auto operator==(const Vector4F& other) const noexcept -> bool
+		{
+			return x == other.x && y == other.y && z == other.z && w == other.w;
 		}
 	};
 }

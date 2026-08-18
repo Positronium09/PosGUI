@@ -7,7 +7,7 @@ import std;
 
 import PGUI.Utils;
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Factories;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DGeometry;

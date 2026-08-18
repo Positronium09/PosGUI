@@ -3,6 +3,8 @@ module;
 
 export module PGUI.UI.Animation:AnimationTimer;
 
+import std;
+
 import :AnimationTimeTypes;
 import :AnimationTimerEventHandler;
 import PGUI.ComPtr;
@@ -13,11 +15,11 @@ export namespace PGUI::UI::Animation
 	class AnimationTimer : public ComPtrHolder<IUIAnimationTimer>
 	{
 		public:
-		[[nodiscard]] static auto GetGlobalInstance() -> const AnimationTimer&;
-
-		AnimationTimer();
-
 		explicit(false) AnimationTimer(const ComPtr<IUIAnimationTimer>& ptr) noexcept;
+
+		[[nodiscard]] static auto Create() noexcept -> Result<AnimationTimer>;
+
+		[[nodiscard]] static auto GetGlobalInstance() noexcept -> Result<std::reference_wrapper<const AnimationTimer>>;
 
 		[[nodiscard]] auto Enable() const noexcept -> Result<void>;
 

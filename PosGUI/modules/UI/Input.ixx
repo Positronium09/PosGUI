@@ -4,7 +4,7 @@ module;
 
 export module PGUI.UI.Input;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 
 export namespace PGUI::UI

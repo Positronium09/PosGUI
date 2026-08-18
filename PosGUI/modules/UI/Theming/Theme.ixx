@@ -16,7 +16,7 @@ export namespace PGUI::UI::Theming
 	{
 		ColorContext colorContext;
 		AppWindowStyle appWindowStyle{ };
-		std::flat_map<std::type_index, std::any> customStyles{ };
+		std::map<std::type_index, std::any> customStyles{ };
 
 		template <typename T>
 		[[nodiscard]] auto AddCustomStyle(const T& style) noexcept -> Result<void>

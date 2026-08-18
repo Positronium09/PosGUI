@@ -75,14 +75,14 @@ export namespace PGUI
 	template <typename... Types>
 	constexpr auto TypeCount = sizeof...(Types);
 
-	template <typename... Operands>
-	constexpr auto LogicalOr = std::disjunction_v<Operands...>;
+	template <bool... Operands>
+	constexpr auto LogicalOr = (Operands || ...);
 
-	template <typename... Operands>
-	constexpr auto LogicalAnd = std::conjunction_v<Operands...>;
+	template <bool... Operands>
+	constexpr auto LogicalAnd = (Operands && ...);
 
-	template <typename Operand>
-	constexpr auto LogicalNot = std::negation_v<Operand>;
+	template <bool Operand>
+	constexpr auto LogicalNot = !Operand;
 
 	template <typename T, typename U>
 	concept NotSameAs = !std::same_as<T, U>;

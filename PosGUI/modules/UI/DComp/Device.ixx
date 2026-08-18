@@ -6,7 +6,7 @@ export module PGUI.UI.DComp.Device;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.UI.DComp.Target;
 import PGUI.UI.DComp.Visual;

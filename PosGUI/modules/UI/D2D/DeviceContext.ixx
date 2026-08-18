@@ -7,7 +7,7 @@ export module PGUI.UI.D2D.DeviceContext;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ComPtr;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
@@ -19,12 +19,9 @@ import PGUI.UI.D2D.D2DImage;
 
 export namespace PGUI::UI::D2D
 {
-	template <typename Interface = ID2D1DeviceContext>
+	template <std::derived_from<ID2D1DeviceContext> Interface = ID2D1DeviceContext>
 	class DeviceContext : public RenderTarget<Interface>
 	{
-		static_assert(std::derived_from<Interface, ID2D1DeviceContext>,
-		              "Interface must be derived from ID2D1DeviceContext");
-
 		public:
 		DeviceContext() noexcept = default;
 
@@ -67,8 +64,8 @@ export namespace PGUI::UI::D2D
 			}
 
 			this->Get()->DrawImage(image.GetRaw(), offset, imgRect,
-			                       ToUnderlying(interpolationMode),
-			                       ToUnderlying(compositeMode));
+			                       ToUnderlying<D2D1_INTERPOLATION_MODE >(interpolationMode),
+			                       ToUnderlying<D2D1_COMPOSITE_MODE >(compositeMode));
 		}
 
 		auto DrawImage(Effect effect,
@@ -90,8 +87,8 @@ export namespace PGUI::UI::D2D
 			}
 
 			this->Get()->DrawImage(effect.GetRaw(), offset, imgRect,
-			                       ToUnderlying(interpolationMode),
-			                       ToUnderlying(compositeMode));
+			                       ToUnderlying<D2D1_INTERPOLATION_MODE >(interpolationMode),
+			                       ToUnderlying<D2D1_COMPOSITE_MODE>(compositeMode));
 		}
 	};
 }

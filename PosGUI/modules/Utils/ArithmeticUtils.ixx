@@ -5,12 +5,25 @@ export module PGUI.Utils:ArithmeticUtils;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 
 export namespace PGUI
 {
-	template <std::integral T>
-	[[nodiscard]] constexpr auto sign(T x) noexcept
+	namespace Detail
+	{
+		template <std::floating_point T>
+		using FloatBits = std::conditional_t<sizeof(T) == sizeof(std::uint32_t), std::uint32_t, std::uint64_t>;
+
+		template <std::floating_point T>
+		[[nodiscard]] constexpr auto FloatSignMask() noexcept -> FloatBits<T>
+		{
+			static_assert(sizeof(T) == sizeof(FloatBits<T>));
+			return FloatBits<T>{ 1 } << (std::numeric_limits<FloatBits<T>>::digits - 1);
+		}
+	}
+
+	template <std::signed_integral T>
+	[[nodiscard]] constexpr auto Sign(T x) noexcept -> std::int32_t
 	{
 		if (x == 0)
 		{
@@ -19,14 +32,48 @@ export namespace PGUI
 		return x > 0 ? 1 : -1;
 	}
 
-	template <std::floating_point T>
-	[[nodiscard]] constexpr auto sign(T x) noexcept
+	template <std::unsigned_integral T>
+	[[nodiscard]] constexpr auto Sign(T x) noexcept -> std::int32_t
 	{
 		if (x == 0)
 		{
 			return 0;
 		}
-		return std::signbit(x) ? -1 : 1;
+		return 1;
+	}
+
+	template <std::floating_point T>
+	[[nodiscard]] constexpr auto Sign(T x) noexcept -> std::int32_t
+	{
+		if (x == 0)
+		{
+			return 0;
+		}
+		return (std::bit_cast<Detail::FloatBits<T>>(x) & Detail::FloatSignMask<T>()) != 0 ? -1 : 1;
+	}
+
+	template <std::signed_integral T>
+	[[nodiscard]] constexpr auto Abs(T x) noexcept -> T
+	{
+		if (x < 0)
+		{
+			return -x;
+		}
+
+		return x;
+	}
+
+	template <std::unsigned_integral T>
+	[[nodiscard]] constexpr auto Abs(T x) noexcept -> T
+	{
+		return x;
+	}
+
+	template <std::floating_point T>
+	[[nodiscard]] constexpr auto Abs(T x) noexcept -> T
+	{
+		return std::bit_cast<T>(
+			static_cast<Detail::FloatBits<T>>(std::bit_cast<Detail::FloatBits<T>>(x) & ~Detail::FloatSignMask<T>()));
 	}
 
 	template <std::floating_point T>

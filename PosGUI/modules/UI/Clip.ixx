@@ -5,7 +5,7 @@ export module PGUI.UI.Clip;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ComPtr;
 import PGUI.UI.D2D.D2DGeometry;
 import PGUI.UI.D2D.D2DPathGeometry;
@@ -142,8 +142,8 @@ export namespace PGUI::UI
 
 		auto Clear() noexcept -> void;
 
-		[[nodiscard]] const auto& GetParameters() const noexcept { return parameters; }
-		[[nodiscard]] auto& GetParameters() noexcept { return parameters; }
+		template <typename Self>
+		[[nodiscard]] auto&& GetParameters(this Self&& self) noexcept { return std::forward_like<Self>(self.parameters); }
 
 		auto SetParameters(const ClipParameters& parameters) noexcept -> void;
 

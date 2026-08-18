@@ -105,22 +105,22 @@ export namespace PGUI::UI::Layout
 		public:
 		using LayoutPanel::LayoutPanel;
 
-		auto SetRowGap(FixedSize gap) noexcept -> void;
 		[[nodiscard]] auto GetRowGap() const noexcept
 		{
 			return rowGap;
 		}
-		auto SetColumnGap(FixedSize gap) noexcept -> void;
+		auto SetRowGap(FixedSize gap) noexcept -> void;
 		[[nodiscard]] auto GetColumnGap() const noexcept
 		{
 			return columnGap;
 		}
+		auto SetColumnGap(FixedSize gap) noexcept -> void;
 
-		auto SetGap(FixedSize gap) noexcept -> void;
 		[[nodiscard]] auto GetGaps() const noexcept
 		{
 			return std::make_pair(rowGap, columnGap);
 		}
+		auto SetGap(FixedSize gap) noexcept -> void;
 
 		template <typename T>
 		auto AddItem(const T& item, const GridItemProperties& properties) noexcept -> void
@@ -129,38 +129,38 @@ export namespace PGUI::UI::Layout
 			LayoutPanel::AddItem(item);
 		}
 
-		auto SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void;
-
 		[[nodiscard]] auto GetItemProperty(const LayoutItem& item) const noexcept -> Result<GridItemProperties>;
 
-		auto SetMinCellSize(FixedSize size) noexcept -> void;
+		auto SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void;
+
 		[[nodiscard]] auto GetMinCellSize() const noexcept
 		{
 			return minCellSize;
 		}
+		auto SetMinCellSize(FixedSize size) noexcept -> void;
 
+		[[nodiscard]] auto GetColumnDefinitions() const noexcept
+		{
+			return columnDefinitions;
+		}
 		auto SetColumnDefinitions(const std::vector<GridCellDefinition>& definitions) noexcept -> void
 		{
 			columnDefinitions = definitions;
 			RearrangeItems();
-		}
-		[[nodiscard]] auto GetColumnDefinitions() const noexcept
-		{
-			return columnDefinitions;
 		}
 		auto AddColumnDefinition(const GridCellDefinition& definition) noexcept
 		{
 			columnDefinitions.push_back(definition);
 			RearrangeItems();
 		}
+		[[nodiscard]] auto GetRowDefinitions() const noexcept
+		{
+			return rowDefinitions;
+		}
 		auto SetRowDefinitions(const std::vector<GridCellDefinition>& definitions) noexcept -> void
 		{
 			rowDefinitions = definitions;
 			RearrangeItems();
-		}
-		[[nodiscard]] auto GetRowDefinitions() const noexcept
-		{
-			return rowDefinitions;
 		}
 		auto AddRowDefinition(const GridCellDefinition& definition) noexcept
 		{
@@ -171,26 +171,30 @@ export namespace PGUI::UI::Layout
 		[[nodiscard]] auto RemoveColumnDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
 		[[nodiscard]] auto RemoveRowDefinitionAtIndex(std::size_t index) noexcept -> Result<void>;
 
+		[[nodiscard]] auto GetGrowToFit() const noexcept
+		{
+			return growToFit;
+		}
 		auto SetGrowToFit(const bool grow) noexcept -> void
 		{
 			growToFit = grow;
 			RearrangeItems();
 		}
-		[[nodiscard]] auto GetGrowToFit() const noexcept
-		{
-			return growToFit;
-		}
 
+		[[nodiscard]] auto GetPadding() const noexcept
+		{
+			return padding;
+		}
 		auto SetPadding(const GridLayoutPadding& newPadding) noexcept -> void
 		{
 			padding = newPadding;
 			RearrangeItems();
 		}
-		[[nodiscard]] auto GetPadding() const noexcept
-		{
-			return padding;
-		}
 
+		[[nodiscard]] auto GetAutoCellSize() const noexcept
+		{
+			return autoCellSize;
+		}
 		[[nodiscard]] auto SetAutoCellSize(const GridCellDefinition size) noexcept -> Result<void>
 		{
 			autoCellSize = size;
@@ -198,19 +202,15 @@ export namespace PGUI::UI::Layout
 
 			return EmptyResult;
 		}
-		[[nodiscard]] auto GetAutoCellSize() const noexcept
-		{
-			return autoCellSize;
-		}
 
+		[[nodiscard]] auto GetPlacementType() const noexcept
+		{
+			return placementType;
+		}
 		auto SetPlacementType(const GridCellPlacementType type) noexcept -> void
 		{
 			placementType = type;
 			RearrangeItems();
-		}
-		[[nodiscard]] auto GetPlacementType() const noexcept
-		{
-			return placementType;
 		}
 
 		[[nodiscard]] auto InsertBlankCell(const long row, const long column) noexcept -> Result<void>
@@ -247,7 +247,7 @@ export namespace PGUI::UI::Layout
 		bool growToFit = false;
 		GridCellPlacementType placementType = GridCellPlacementType::Packed;
 		GridLayoutPadding padding{ 0, 0, 0, 0 };
-		std::flat_set<std::pair<long, long>> blankCells;
+		std::set<std::pair<long, long>> blankCells;
 
 		std::vector<GridCellDefinition> columnDefinitions{
 			GridCellDefinition{ 1.0F }

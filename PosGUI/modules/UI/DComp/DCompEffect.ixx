@@ -11,11 +11,9 @@ import PGUI.UI.DComp.Animation;
 
 export namespace PGUI::UI::DComp
 {
-	template <typename Interface = IDCompositionEffect>
+	template <std::derived_from<IDCompositionEffect> Interface = IDCompositionEffect>
 	class Effect : public ComPtrHolder<Interface>
 	{
-		static_assert(std::derived_from<Interface, IDCompositionEffect>);
-
 		public:
 		Effect() noexcept = default;
 		explicit(false) Effect(const ComPtr<Interface>& ptr) noexcept :
@@ -28,10 +26,9 @@ export namespace PGUI::UI::DComp
 		}
 	};
 
-	template <typename Interface = IDCompositionTransform3D>
+	template <std::derived_from<IDCompositionTransform3D> Interface = IDCompositionTransform3D>
 	class Transform3D : public Effect<Interface>
 	{
-		static_assert(std::derived_from<Interface, IDCompositionTransform3D>);
 		public:
 		Transform3D() noexcept = default;
 		explicit(false) Transform3D(const ComPtr<Interface>& ptr) noexcept :
@@ -44,11 +41,9 @@ export namespace PGUI::UI::DComp
 		}
 	};
 
-	template <typename Interface = IDCompositionEffectGroup>
+	template <std::derived_from<IDCompositionEffectGroup> Interface = IDCompositionEffectGroup>
 	class EffectGroup : public Effect<Interface>
 	{
-		static_assert(std::derived_from<Interface, IDCompositionEffectGroup>);
-
 		public:
 		EffectGroup() noexcept = default;
 		explicit(false) EffectGroup(const ComPtr<Interface>& ptr) noexcept :
@@ -94,11 +89,9 @@ export namespace PGUI::UI::DComp
 		}
 	};
 
-	template <typename Interface = IDCompositionFilterEffect>
+	template <std::derived_from<IDCompositionFilterEffect> Interface = IDCompositionFilterEffect>
 	class FilterEffect : public Effect<Interface>
 	{
-		static_assert(std::derived_from<Interface, IDCompositionFilterEffect>);
-
 		public:
 		FilterEffect() noexcept = default;
 		explicit(false) FilterEffect(const ComPtr<Interface>& ptr) noexcept :

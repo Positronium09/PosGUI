@@ -6,7 +6,7 @@ export module PGUI.UI.D2D.SimplifiedGeometrySink;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.Factories;
 import PGUI.UI.D2D.D2DEnums;
@@ -14,13 +14,9 @@ import PGUI.UI.D2D.D2DStructs;
 
 export namespace PGUI::UI::D2D
 {
-	template <typename Interface = ID2D1SimplifiedGeometrySink>
+	template <std::derived_from<ID2D1SimplifiedGeometrySink> Interface = ID2D1SimplifiedGeometrySink>
 	class SimplifiedGeometrySink : public ComPtrHolder<Interface>
 	{
-		static_assert(
-			std::is_same_v<Interface, ID2D1SimplifiedGeometrySink> || std::derived_from<Interface, ID2D1SimplifiedGeometrySink>,
-			"Interface must be ID2D1SimplifiedGeometrySink or ID2D1GeometrySink");
-
 		public:
 		SimplifiedGeometrySink() noexcept = default;
 

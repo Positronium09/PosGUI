@@ -27,25 +27,25 @@
     <ClCompile Include="src\WindowClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\Shape2D.ixx">
+    <ClCompile Include="modules\Shape\Shape.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\Rect.ixx">
+    <ClCompile Include="modules\Shape\Rect.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\Point.ixx">
+    <ClCompile Include="modules\Shape\Point2.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\RoundedRect.ixx">
+    <ClCompile Include="modules\Shape\RoundedRect.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\Size.ixx">
+    <ClCompile Include="modules\Shape\Size.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\Ellipse.ixx">
+    <ClCompile Include="modules\Shape\Ellipse.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\Color.ixx">
@@ -117,7 +117,7 @@
     <ClCompile Include="src\UI\Gradient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\Brush.ixx">
+    <ClCompile Include="modules\UI\D2DBrush.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\UI\Brush.cpp">
@@ -189,10 +189,10 @@
     <ClCompile Include="src\UI\Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\LineSegment.ixx">
+    <ClCompile Include="modules\Shape\LineSegment.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\Shape2D\Line.ixx">
+    <ClCompile Include="modules\Shape\Line.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\Factories\WICFactory.ixx">
@@ -471,9 +471,6 @@
     <ClCompile Include="modules\ErrorHandling\Logger.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ErrorHandling\Error.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ErrorHandling\ErrorCode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -624,10 +621,10 @@
     <ClCompile Include="src\UI\OLE\DropSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\DComp\Visual.ixx">
+    <ClCompile Include="modules\UI\DComp\DCompVisual.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\DComp\Visual.cpp">
+    <ClCompile Include="src\UI\DComp\DCompVisual.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\DComp\DCompEnums.ixx">
@@ -670,6 +667,60 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\UI\DXDevices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VLWindow.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Compositor.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\VL\Compositor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\DesktopWindowTarget.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\VL\DesktopWindowTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\ProjectionHolder.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\CompositionObject.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Visual.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Shape\Point3.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\VLEnums.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Shape\Matrix4x4.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Shape\Matrix3x2.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\VLWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\ErrorHandling\Error.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Wrapper.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\Shape\Quaternion.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\ContainerVisual.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\VisualCollection.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

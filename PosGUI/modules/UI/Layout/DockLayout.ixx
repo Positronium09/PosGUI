@@ -63,9 +63,9 @@ export namespace PGUI::UI::Layout
 		}
 
 		private:
-		std::flat_map<std::size_t, DockPosition> dockPositions;
-		std::flat_map<DockPosition, float> maxDockSizes;
-		std::flat_map<DockPosition, DockPriority> dockPriorities;
+		std::map<std::size_t, DockPosition> dockPositions;
+		std::map<DockPosition, float> maxDockSizes;
+		std::map<DockPosition, DockPriority> dockPriorities;
 
 		auto RearrangeItems() noexcept -> void override;
 

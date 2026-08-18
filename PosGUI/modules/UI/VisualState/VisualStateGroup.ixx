@@ -97,8 +97,8 @@ export namespace PGUI::UI
 		}
 
 		private:
-		std::flat_map<StateT, std::vector<StateT>> allowedTransitions;
-		std::flat_map<StateT, std::vector<StateT>> disallowedTransitions;
+		std::map<StateT, std::vector<StateT>> allowedTransitions;
+		std::map<StateT, std::vector<StateT>> disallowedTransitions;
 		StateT state;
 	};
 }

@@ -2,11 +2,11 @@ module;
 #include <d2d1_1.h>
 #include <Windows.h>
 
-export module PGUI.Shape2D:RoundedRect;
+export module PGUI.Shape:RoundedRect;
 
 import std;
 
-import :Point;
+import :Point2;
 import :Size;
 import :Rect;
 
@@ -62,12 +62,12 @@ export namespace PGUI
 			bottom = rect.bottom;
 		}
 
-		[[nodiscard]] constexpr auto operator==(const RoundedRect& other) const noexcept -> bool = default;
-
 		explicit(false) constexpr operator D2D1_ROUNDED_RECT() const noexcept
 		{
 			return D2D1_ROUNDED_RECT{ static_cast<D2D1_RECT_F>(*this), xRadius, yRadius };
 		}
+
+		[[nodiscard]] constexpr auto operator==(const RoundedRect& other) const noexcept -> bool = default;
 	};
 }
 

@@ -321,7 +321,7 @@ namespace PGUI
 	{
 		DebugTimer timer{
 			#ifdef _DEBUG
-			std::format(L"MSG {}", WindowMsgToText(msg))
+			std::format(L"MSG {}", WindowMsgToText(msg)),
 			#endif
 		};
 
@@ -747,12 +747,22 @@ namespace PGUI
 		SetPosition(centeredClientRect, PositionFlags::NoZOrder);
 	}
 
+	auto Window::SetStyle(const DWORD style) const noexcept -> void
+	{
+		SetWindowLongPtrW(Hwnd(), GWL_STYLE, style);
+	}
+
 	auto Window::ModifyStyle(const DWORD add, const DWORD remove) const noexcept -> void
 	{
 		auto style = GetStyle();
 		style |= add;
 		style &= ~remove;
 		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
+	}
+
+	auto Window::SetExStyle(const DWORD style) const noexcept -> void
+	{
+		SetWindowLongPtrW(hWnd, GWL_EXSTYLE, style);
 	}
 
 	auto Window::ModifyExStyle(const DWORD add, const DWORD remove) const noexcept -> void
@@ -786,6 +796,19 @@ namespace PGUI
 			.dwTimeout = 0
 		};
 		FlashWindowEx(&flashInfo);
+	}
+
+	auto Window::AdjustRectForDpi(RectL rect) const noexcept -> RectL
+	{
+		AdjustWindowRectExForDpi(
+			reinterpret_cast<PRECT>(&rect),
+			GetStyle(),
+			FALSE,
+			GetExStyle(),
+			static_cast<UINT>(GetDpi())
+		);
+
+		return rect;
 	}
 
 	auto Window::SetPosition(const PointF position, const SizeF size,
@@ -830,6 +853,11 @@ namespace PGUI
 	{
 		SetPosition(PointF{ }, newSize,
 		            PositionFlags::NoMove | PositionFlags::NoZOrder | PositionFlags::NoActivate);
+	}
+
+	auto Window::ResizeForClient(SizeF newSize) noexcept -> void
+	{
+		Resize(AdjustRectForDpi({ { 0, 0 }, newSize }).Size());
 	}
 
 	auto Window::MoveAndResize(const RectF newRect) noexcept -> void

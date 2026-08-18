@@ -67,6 +67,8 @@ export namespace PGUI
 
 	struct NullTimer
 	{
+		constexpr NullTimer() noexcept { }
+
 		static auto SetTimeThreshold(
 			[[maybe_unused]] const std::chrono::nanoseconds threshold) noexcept -> void
 		{

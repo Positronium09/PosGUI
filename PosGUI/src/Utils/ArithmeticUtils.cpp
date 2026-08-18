@@ -5,7 +5,7 @@ module PGUI.Utils:ArithmeticUtils;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 
 namespace PGUI
 {

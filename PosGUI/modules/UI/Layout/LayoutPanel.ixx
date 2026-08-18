@@ -6,7 +6,7 @@ export module PGUI.UI.Layout.LayoutPanel;
 import std;
 
 import PGUI.Window;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
 
@@ -133,13 +133,10 @@ export namespace PGUI::UI::Layout
 
 			return EmptyResult;
 		}
-		[[nodiscard]] const auto& GetItems() const noexcept
+		template <typename Self>
+		[[nodiscard]] auto&& GetItems(this Self&& self) noexcept
 		{
-			return managedItems;
-		}
-		[[nodiscard]] auto& GetItems() noexcept
-		{
-			return managedItems;
+			return std::forward_like<Self>(self.managedItems);
 		}
 		[[nodiscard]] auto GetItem(const std::size_t index) const noexcept -> Result<std::reference_wrapper<const LayoutItem>>
 		{

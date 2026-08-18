@@ -7,6 +7,7 @@ export module PGUI.UI.DComp.FilterEffects;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
 import PGUI.UI.Color;
@@ -1068,7 +1069,7 @@ export namespace PGUI::UI::DComp
 			return EmptyResult;
 		}
 
-		[[nodiscard]] auto SetTransformMatrix(const D2D::Matrix3x2& transformMatrix) const noexcept -> Result<void>
+		[[nodiscard]] auto SetTransformMatrix(const Matrix3x2& transformMatrix) const noexcept -> Result<void>
 		{
 			if (const auto error = Error{ Get()->SetTransformMatrix(transformMatrix) };
 				error.IsFailure())

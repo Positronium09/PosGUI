@@ -1,9 +1,24 @@
-export module PGUI.Shape2D:Line;
+export module PGUI.Shape:Line;
 
 import std;
 
-import :Point;
+import :Point2;
 import :LineSegment;
+
+namespace
+{
+	template <std::floating_point T>
+	using FloatBits = std::conditional_t<sizeof(T) == sizeof(std::uint32_t), std::uint32_t, std::uint64_t>;
+
+	template <std::floating_point T>
+	[[nodiscard]] constexpr auto Abs(const T x) noexcept -> T
+	{
+		static_assert(sizeof(T) == sizeof(FloatBits<T>));
+		constexpr auto signMask = FloatBits<T>{ 1 } << (std::numeric_limits<FloatBits<T>>::digits - 1);
+
+		return std::bit_cast<T>(static_cast<FloatBits<T>>(std::bit_cast<FloatBits<T>>(x) & ~signMask));
+	}
+}
 
 export namespace PGUI
 {
@@ -21,12 +36,12 @@ export namespace PGUI
 
 		Line(T a, T b, T c) noexcept
 		{
-			if (std::abs(b) < std::numeric_limits<T>::epsilon())
+			if (Abs(b) < std::numeric_limits<T>::epsilon())
 			{
 				m = std::numeric_limits<T>::infinity();
 				c = -c / a;
 			}
-			else if (std::abs(a) < std::numeric_limits<T>::epsilon())
+			else if (Abs(a) < std::numeric_limits<T>::epsilon())
 			{
 				m = static_cast<T>(0);
 				c = -c / b;
@@ -35,12 +50,12 @@ export namespace PGUI
 
 		Line(Point<T> p1, Point<T> p2) noexcept
 		{
-			if (std::abs(p2.x - p1.x) < std::numeric_limits<T>::epsilon())
+			if (Abs(p2.x - p1.x) < std::numeric_limits<T>::epsilon())
 			{
 				m = std::numeric_limits<T>::infinity();
 				c = -p1.x;
 			}
-			else if (std::abs(p2.y - p1.y) < std::numeric_limits<T>::epsilon())
+			else if (Abs(p2.y - p1.y) < std::numeric_limits<T>::epsilon())
 			{
 				m = static_cast<T>(0);
 				c = p1.y;
@@ -77,7 +92,7 @@ export namespace PGUI
 
 		[[nodiscard]] auto IsHorizontal() const noexcept
 		{
-			return std::abs(m) < std::numeric_limits<T>::epsilon();
+			return Abs(m) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] auto IsParallel(const Line& other) const noexcept
@@ -86,12 +101,12 @@ export namespace PGUI
 			{
 				return true;
 			}
-			return std::abs(m - other.m) < std::numeric_limits<T>::epsilon();
+			return Abs(m - other.m) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] auto IsPerpendicular(const Line& other) const noexcept
 		{
-			return std::abs(m * other.m + 1) < std::numeric_limits<T>::epsilon();
+			return Abs(m * other.m + 1) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] auto Intersection(const Line& other) const noexcept -> std::optional<Point<T>>

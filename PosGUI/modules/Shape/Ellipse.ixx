@@ -1,11 +1,11 @@
 module;
 #include <d2d1_1.h>
 
-export module PGUI.Shape2D:Ellipse;
+export module PGUI.Shape:Ellipse;
 
 import std;
 
-import :Point;
+import :Point2;
 
 export namespace PGUI
 {
@@ -30,14 +30,30 @@ export namespace PGUI
 			center{ ellipse.point }, xRadius{ ellipse.radiusX }, yRadius{ ellipse.radiusY }
 		{ }
 
-		[[nodiscard]] constexpr auto operator==(const Ellipse&) const noexcept -> bool = default;
+		explicit(false) constexpr operator D2D1_ELLIPSE() const noexcept
+		{
+			return D2D1_ELLIPSE{ center, xRadius, yRadius };
+		}
 
+		[[nodiscard]] constexpr auto operator*(const float scale) const noexcept -> Ellipse
+		{
+			return Ellipse{ center * scale, xRadius * scale, yRadius * scale };
+		}
 		constexpr auto& operator*=(const float scale) noexcept
 		{
 			center *= scale;
 			xRadius *= scale;
 			yRadius *= scale;
 			return *this;
+		}
+		[[nodiscard]] friend constexpr auto operator*(const float scale, const Ellipse& ellipse) noexcept -> Ellipse
+		{
+			return ellipse * scale;
+		}
+
+		[[nodiscard]] constexpr auto operator/(const float scale) const noexcept -> Ellipse
+		{
+			return Ellipse{ center / scale, xRadius / scale, yRadius / scale };
 		}
 		constexpr auto& operator/=(const float scale) noexcept
 		{
@@ -47,25 +63,8 @@ export namespace PGUI
 			return *this;
 		}
 
-		[[nodiscard]] constexpr auto operator*(const float scale) const noexcept -> Ellipse
-		{
-			return Ellipse{ center * scale, xRadius * scale, yRadius * scale };
-		}
-		[[nodiscard]] constexpr auto operator/(const float scale) const noexcept -> Ellipse
-		{
-			return Ellipse{ center / scale, xRadius / scale, yRadius / scale };
-		}
-
-		explicit(false) constexpr operator D2D1_ELLIPSE() const noexcept
-		{
-			return D2D1_ELLIPSE{ center, xRadius, yRadius };
-		}
+		[[nodiscard]] constexpr auto operator==(const Ellipse&) const noexcept -> bool = default;
 	};
-
-	constexpr auto operator*(const float scale, const Ellipse& ellipse) noexcept -> Ellipse
-	{
-		return ellipse * scale;
-	}
 }
 
 template <typename Char>

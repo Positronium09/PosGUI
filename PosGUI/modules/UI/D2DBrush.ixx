@@ -6,7 +6,7 @@ export module PGUI.UI.Brush;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.Color;
 import PGUI.UI.Gradient;
 import PGUI.UI.D2D.D2DBitmap;

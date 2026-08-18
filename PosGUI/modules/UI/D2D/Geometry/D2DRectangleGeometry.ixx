@@ -6,7 +6,7 @@ export module PGUI.UI.D2D.D2DRectangleGeometry;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Factories;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DGeometry;

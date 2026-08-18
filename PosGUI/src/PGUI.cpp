@@ -3,8 +3,13 @@ module;
 #include <Windows.h>
 #include <wil/result_macros.h>
 #include <winrt/base.h>
-// ReSharper disable once CppUnusedIncludeDirective
-#include <winrt/windows.foundation.h>
+
+// ReSharper disable CppUnusedIncludeDirective
+
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.UI.Composition.h>
+
+// ReSharper restore CppUnusedIncludeDirective
 
 module PGUI;
 
@@ -14,6 +19,7 @@ import PGUI.UI.Theming.SystemTheme;
 import PGUI.UI.Theming.Theme;
 import PGUI.UI.DCompWindow;
 import PGUI.UI.Animation;
+import PGUI.UI.VL;
 
 extern "C" extern __declspec(selectany) void (__stdcall*winrt_throw_hresult_handler)
 	(uint32_t lineNumber,
@@ -183,18 +189,15 @@ namespace PGUI
 				&val, sizeof(val));
 			res == 0)
 		{
-			if (Logger::IsLoggerPresent())
-			{
-				Logger::Error(Error{ GetLastError() });
-			}
+			Logger::Error(Error{ GetLastError() });
 		}
 
-		(void)Factories::D2DFactory::GetFactory();
-		(void)Factories::DXGIFactory::GetFactory();
-		(void)Factories::DWriteFactory::GetFactory();
-		(void)Factories::WICFactory::GetFactory();
-		(void)UI::Animation::AnimationManager::GetGlobalInstance();
-		(void)UI::Animation::AnimationTransitionLibrary::GetInstance();
+		Unused(Factories::D2DFactory::GetFactory());
+		Unused(Factories::DXGIFactory::GetFactory());
+		Unused(Factories::DWriteFactory::GetFactory());
+		Unused(Factories::WICFactory::GetFactory());
+		Unused(UI::Animation::AnimationManager::GetGlobalInstance());
+		Unused(UI::Animation::AnimationTransitionLibrary::GetInstance());
 
 		UI::Theming::SystemTheme::RegisterSystemEventChanges();
 		UI::Theming::ThemeContext::InitializeThemes();
@@ -220,5 +223,7 @@ namespace PGUI
 		}
 
 		UI::DCompWindow::InitDevices();
+		UI::VL::Compositor::InitDispatcherQueueController();
+		Unused(UI::VL::Compositor::GetCompositor());
 	}
 }

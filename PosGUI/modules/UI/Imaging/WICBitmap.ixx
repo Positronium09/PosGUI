@@ -3,7 +3,7 @@ module;
 
 export module PGUI.UI.Imaging.WICBitmap;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.Palette;

@@ -8,7 +8,7 @@ import std;
 import PGUI.Window;
 import PGUI.WindowClass;
 import PGUI.ErrorHandling;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.DCompWindow;
 
 export namespace PGUI::UI

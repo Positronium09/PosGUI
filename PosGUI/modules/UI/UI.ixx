@@ -22,3 +22,5 @@ export import PGUI.UI.OLE;
 export import PGUI.UI.VisualState;
 export import PGUI.UI.UICore;
 export import PGUI.UI.DXDevices;
+export import PGUI.UI.VL;
+export import PGUI.UI.VLWindow;

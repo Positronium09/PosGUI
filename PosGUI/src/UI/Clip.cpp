@@ -10,7 +10,7 @@ import PGUI.Window;
 import PGUI.Factories;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.D2D.D2DPathGeometry;
 
 namespace PGUI::UI

@@ -113,21 +113,21 @@ namespace PGUI::UI
 		b = bPrime + m;
 	}
 
-	RGBA::RGBA(sRGB srgb) noexcept :
+	RGBA::RGBA(LinearRGB linRgb) noexcept :
 		a{ 1.0F }
 	{
 		auto convertChannel = [](const float channel) noexcept -> float
 		{
-			if (channel <= 0.04045F)
+			if (channel <= 0.0031308F)
 			{
-				return channel / 12.92F;
+				return channel * 12.92F;
 			}
-			return std::powf((channel + 0.055F) / 1.055F, 2.4F);
+			return 1.055F * std::powf(channel, 1 / 2.4F) - 0.055F;
 		};
 
-		r = convertChannel(srgb.r);
-		g = convertChannel(srgb.g);
-		b = convertChannel(srgb.b);
+		r = convertChannel(linRgb.r);
+		g = convertChannel(linRgb.g);
+		b = convertChannel(linRgb.b);
 	}
 
 	RGBA::RGBA(const CMYK cmyk) noexcept :
@@ -140,27 +140,22 @@ namespace PGUI::UI
 
 	#pragma endregion
 
-	#pragma region sRGB
+	#pragma region LinearRGB
 
-	sRGB::sRGB(const RGBA& rgb) noexcept
+	LinearRGB::LinearRGB(const RGBA& rgb) noexcept
 	{
 		auto convertChannel = [](const float channel) noexcept -> float
 		{
-			if (channel <= 0.0031308F)
+			if (channel <= 0.04045F)
 			{
-				return channel * 12.92F;
+				return channel / 12.92F;
 			}
-			return 1.055F * std::powf(channel, 1 / 2.4F) - 0.055F;
+			return std::powf((channel + 0.055F) / 1.055F, 2.4F);
 		};
 
 		r = convertChannel(rgb.r);
 		g = convertChannel(rgb.g);
 		b = convertChannel(rgb.b);
-	}
-
-	sRGB::operator RGBA() const noexcept
-	{
-		return RGBA{ *this };
 	}
 
 	#pragma endregion
@@ -200,12 +195,12 @@ namespace PGUI::UI
 		{
 			h = (rgb.r - rgb.g) / delta + 4;
 		}
-		h *= 60.0F;
-	}
 
-	HSL::operator RGBA() const noexcept
-	{
-		return RGBA{ *this };
+		if (h < 0.0F)
+		{
+			h += 6.0F;
+		}
+		h *= 60.0F;
 	}
 
 	#pragma endregion
@@ -237,6 +232,11 @@ namespace PGUI::UI
 		{
 			h = (rgb.r - rgb.g) / delta + 4;
 		}
+
+		if (h < 0.0F)
+		{
+			h += 6.0F;
+		}
 		h *= 60.0F;
 
 		if (cMax == 0)
@@ -247,11 +247,6 @@ namespace PGUI::UI
 		{
 			s = delta / cMax;
 		}
-	}
-
-	HSV::operator RGBA() const noexcept
-	{
-		return RGBA{ *this };
 	}
 
 	#pragma endregion

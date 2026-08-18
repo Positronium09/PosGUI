@@ -58,8 +58,8 @@ export namespace PGUI::UI::Animation
 
 		virtual ~AnimationStoryboardEventHandler() noexcept;
 
-		[[nodiscard]] auto& GetRouter() noexcept { return router; }
-		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
+		template <typename Self>
+		[[nodiscard]] auto&& GetRouter(this Self&& self) noexcept { return std::forward_like<Self>(self.router); }
 
 		virtual auto OnStoryBoardStatusChanged(
 			const Storyboard& storyboard,

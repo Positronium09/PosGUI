@@ -16,9 +16,11 @@ export namespace PGUI::UI::Animation
 	class AnimationManager : public ComPtrHolder<IUIAnimationManager2>
 	{
 		public:
-		[[nodiscard]] static auto GetGlobalInstance() -> const AnimationManager&;
+		explicit(false) AnimationManager(const ComPtr<IUIAnimationManager2>& ptr) noexcept;
 
-		AnimationManager();
+		[[nodiscard]] static auto Create() noexcept -> Result<AnimationManager>;
+
+		[[nodiscard]] static auto GetGlobalInstance() noexcept -> Result<std::reference_wrapper<const AnimationManager>>;
 
 		[[nodiscard]] auto AbandonAllStoryboards() noexcept -> Result<void>;
 
@@ -50,7 +52,7 @@ export namespace PGUI::UI::Animation
 
 		[[nodiscard]] auto ScheduleTransition(
 			const AnimationVariable& variable,
-			const AnimationTransition& transition, double currentTime) const noexcept -> Result<void>;
+			const AnimationTransition& transition, Seconds currentTime) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto SetManagerEventHandler(
 			AnimationManagerEventHandler& eventHandler,

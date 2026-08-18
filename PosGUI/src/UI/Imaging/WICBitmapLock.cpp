@@ -5,7 +5,7 @@ module PGUI.UI.Imaging.WICBitmapLock;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import PGUI.UI.Imaging.BitmapSource;

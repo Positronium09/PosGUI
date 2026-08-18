@@ -16,7 +16,7 @@ import std;
 import PGUI.ErrorHandling;
 import PGUI.Utils;
 import PGUI.UI.Color;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.DComp.Animation;
 import PGUI.UI.DComp.Device;
 
@@ -81,17 +81,17 @@ export namespace PGUI::UI::Animation
 			}
 		};
 
-		struct sRGBConverter
+		struct LinearRGBConverter
 		{
-			static auto ConvertToValue(const std::span<const double, 3>& values) -> sRGB
+			static auto ConvertToValue(const std::span<const double, 3>& values) -> LinearRGB
 			{
-				return sRGB{
+				return LinearRGB{
 					static_cast<float>(values[0]),
 					static_cast<float>(values[1]),
 					static_cast<float>(values[2])
 				};
 			}
-			static auto ConvertFromValue(const sRGB& color) -> std::array<double, 3>
+			static auto ConvertFromValue(const LinearRGB& color) -> std::array<double, 3>
 			{
 				return std::array{
 					static_cast<double>(color.r),
@@ -217,7 +217,13 @@ export namespace PGUI::UI::Animation
 			const std::optional<AnimationManager>& manager = std::nullopt) noexcept
 			: currentManager{ manager }
 		{
-			const auto& animationManager = GetAnimationManager();
+			const auto managerResult = GetAnimationManager();
+			if (!managerResult.has_value())
+			{
+				Logger::Error(managerResult.error(), L"Failed to get animation manager");
+				return;
+			}
+			const auto& animationManager = managerResult.value().get();
 
 			if (const auto result = animationManager.CreateAnimationVariable(static_cast<double>(initialValue)); 
 				result.has_value())
@@ -268,8 +274,21 @@ export namespace PGUI::UI::Animation
 			}
 
 			const auto& transition = transitionResult.value();
-			const auto& animationManager = GetAnimationManager();
-			const auto& timer = AnimationTimer::GetGlobalInstance();
+
+			const auto managerResult = GetAnimationManager();
+			if (!managerResult.has_value())
+			{
+				return Unexpected{ managerResult.error() };
+			}
+			const auto& animationManager = managerResult.value().get();
+
+			const auto timerResult = AnimationTimer::GetGlobalInstance();
+			if (!timerResult.has_value())
+			{
+				return Unexpected{ timerResult.error() };
+			}
+			const auto& timer = timerResult.value().get();
+
 			auto nowResult = timer.GetTime();
 			if (!nowResult.has_value())
 			{
@@ -294,12 +313,18 @@ export namespace PGUI::UI::Animation
 			}
 
 			const auto& transition = transitionResult.value();
-			const auto& animationManager = GetAnimationManager();
+
+			const auto managerResult = GetAnimationManager();
+			if (!managerResult.has_value())
+			{
+				return Unexpected{ managerResult.error() };
+			}
+			const auto& animationManager = managerResult.value().get();
 
 			const auto storyboardResult = animationManager.CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
-				return storyboardResult.error();
+				return Unexpected{ storyboardResult.error() };
 			}
 			const auto& storyboard = storyboardResult.value();
 			if (auto addResult = storyboard.AddTransition(variable, transition);
@@ -308,14 +333,20 @@ export namespace PGUI::UI::Animation
 				return Unexpected{ addResult.error() };
 			}
 
-			const auto& timer = AnimationTimer::GetGlobalInstance();
-			auto nowResult = timer.GetTime();
+			const auto timerResult = AnimationTimer::GetGlobalInstance();
+			if (!timerResult.has_value())
+			{
+				return Unexpected{ timerResult.error() };
+			}
+			const auto& timer = timerResult.value().get();
+
+			const auto nowResult = timer.GetTime();
 			if (!nowResult.has_value())
 			{
 				return Unexpected{ nowResult.error() };
 			}
 
-			auto schedulingResult = storyboard.Schedule(nowResult.value());
+			const auto schedulingResult = storyboard.Schedule(nowResult.value());
 			if (!schedulingResult.has_value())
 			{
 				return Unexpected{ schedulingResult.error() };
@@ -507,11 +538,12 @@ export namespace PGUI::UI::Animation
 			return result.value();
 		}
 
-		[[nodiscard]] const auto& GetAnimationManager() const noexcept
+		[[nodiscard]] auto GetAnimationManager() const noexcept
+			-> Result<std::reference_wrapper<const AnimationManager>>
 		{
 			if (currentManager.has_value())
 			{
-				return currentManager.value();
+				return std::cref(currentManager.value());
 			}
 
 			return AnimationManager::GetGlobalInstance();
@@ -543,7 +575,14 @@ export namespace PGUI::UI::Animation
 		explicit Animated(const T& initialValue, const std::optional<AnimationManager>& manager = std::nullopt) noexcept
 			: currentManager{ manager }
 		{
-			const auto& animationManager = GetAnimationManager();
+			const auto managerResult = GetAnimationManager();
+			if (!managerResult.has_value())
+			{
+				Logger::Error(managerResult.error(), L"Failed to get animation manager");
+				return;
+			}
+			const auto& animationManager = managerResult.value().get();
+
 			const auto initialArray = Converter::ConvertFromValue(initialValue);
 			if (const auto result = animationManager.CreateAnimationVariable(initialArray);
 				result.has_value())
@@ -586,8 +625,20 @@ export namespace PGUI::UI::Animation
 			}
 
 			const auto& transition = transitionResult.value();
-			const auto& animationManager = GetAnimationManager();
-			const auto& timer = AnimationTimer::GetGlobalInstance();
+
+			const auto managerResult = GetAnimationManager();
+			if (!managerResult.has_value())
+			{
+				return Unexpected{ managerResult.error() };
+			}
+			const auto& animationManager = managerResult.value().get();
+
+			const auto timerResult = AnimationTimer::GetGlobalInstance();
+			if (!timerResult.has_value())
+			{
+				return Unexpected{ timerResult.error() };
+			}
+			const auto& timer = timerResult.value().get();
 
 			auto nowResult = timer.GetTime();
 			if (!nowResult.has_value())
@@ -614,7 +665,14 @@ export namespace PGUI::UI::Animation
 			}
 
 			const auto& transition = transitionResult.value();
-			const auto& animationManager = GetAnimationManager();
+
+			const auto managerResult = GetAnimationManager();
+			if (!managerResult.has_value())
+			{
+				return Unexpected{ managerResult.error() };
+			}
+			const auto& animationManager = managerResult.value().get();
+
 			const auto storyboardResult = animationManager.CreateStoryboard();
 			if (!storyboardResult.has_value())
 			{
@@ -628,7 +686,12 @@ export namespace PGUI::UI::Animation
 				return Unexpected{ addResult.error() };
 			}
 
-			const auto& timer = AnimationTimer::GetGlobalInstance();
+			const auto timerResult = AnimationTimer::GetGlobalInstance();
+			if (!timerResult.has_value())
+			{
+				return Unexpected{ timerResult.error() };
+			}
+			const auto& timer = timerResult.value().get();
 
 			auto nowResult = timer.GetTime();
 			if (!nowResult.has_value())
@@ -786,11 +849,12 @@ export namespace PGUI::UI::Animation
 			return SetUpperBound(upperBound);
 		}
 
-		[[nodiscard]] const auto& GetAnimationManager() const noexcept
+		[[nodiscard]] auto GetAnimationManager() const noexcept
+			-> Result<std::reference_wrapper<const AnimationManager>>
 		{
 			if (currentManager.has_value())
 			{
-				return currentManager.value();
+				return std::cref(currentManager.value());
 			}
 
 			return AnimationManager::GetGlobalInstance();
@@ -832,9 +896,7 @@ export namespace PGUI::UI::Animation
 
 	using AnimatedULLong = Animated<unsigned long long, 1>;
 	using AnimatedRGBA = Animated<RGBA, 4, Converters::RGBAConverter>;
-	// ReSharper disable once IdentifierTypo
-
-	using AnimatedsRGB = Animated<sRGB, 3, Converters::sRGBConverter>;
+	using AnimatedLinearRGB = Animated<LinearRGB, 3, Converters::LinearRGBConverter>;
 	using AnimatedHSL = Animated<HSL, 3, Converters::HSLConverter>;
 	using AnimatedHSV = Animated<HSV, 3, Converters::HSVConverter>;
 	using AnimatedPointF = Animated<PointF, 2, Converters::PointFConverter>;

@@ -47,14 +47,14 @@ export namespace PGUI::UI
 		[[nodiscard]] static auto& DCompositionDevice() noexcept { return dCompositionDevice; }
 		[[nodiscard]] static auto& DCompositionSurfaceFactory() noexcept { return dCompositionSurfaceFactory; }
 
-		[[nodiscard]] const auto& GetD2D1DeviceContext() const noexcept { return Get<ID2D1DeviceContext7>(); }
-		[[nodiscard]] const auto& GetDCompositionTarget() const noexcept { return target; }
-		[[nodiscard]] const auto& GetSwapChain() const noexcept { return Get<IDXGISwapChain1>(); }
-		[[nodiscard]] const auto& GetDCompositionVisual() const noexcept { return visual; }
-		[[nodiscard]] auto& GetD2D1DeviceContext() noexcept { return Get<ID2D1DeviceContext7>(); }
-		[[nodiscard]] auto& GetDCompositionTarget() noexcept { return target; }
-		[[nodiscard]] auto& GetSwapChain() noexcept { return Get<IDXGISwapChain1>(); }
-		[[nodiscard]] auto& GetDCompositionVisual() noexcept { return visual; }
+		template <typename Self>
+		[[nodiscard]] auto&& GetD2D1DeviceContext(this Self&& self) noexcept { return std::forward_like<Self>(self.template Get<ID2D1DeviceContext7>()); }
+		template <typename Self>
+		[[nodiscard]] auto&& GetDCompositionTarget(this Self&& self) noexcept { return std::forward_like<Self>(self.target); }
+		template <typename Self>
+		[[nodiscard]] auto&& GetSwapChain(this Self&& self) noexcept { return std::forward_like<Self>(self.template Get<IDXGISwapChain1>()); }
+		template <typename Self>
+		[[nodiscard]] auto&& GetDCompositionVisual(this Self&& self) noexcept { return std::forward_like<Self>(self.visual); }
 
 		[[nodiscard]] auto GetGraphics() const noexcept
 		{

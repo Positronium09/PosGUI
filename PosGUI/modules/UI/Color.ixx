@@ -18,7 +18,7 @@ export namespace PGUI::UI
 	struct CMYK;
 	// ReSharper disable once CppInconsistentNaming
 
-	struct sRGB;
+	struct LinearRGB;
 
 	struct RGBA
 	{
@@ -73,9 +73,7 @@ export namespace PGUI::UI
 
 		explicit(false) RGBA(HSV hsv) noexcept;
 
-		// ReSharper disable once IdentifierTypo
-		
-		explicit(false) RGBA(sRGB srgb) noexcept;
+		explicit(false) RGBA(LinearRGB linRgb) noexcept;
 
 		explicit(false) RGBA(CMYK cmyk) noexcept;
 
@@ -179,26 +177,23 @@ export namespace PGUI::UI
 			};
 		}
 	};
-	// ReSharper disable once CppInconsistentNaming
-
-	struct sRGB
+	struct LinearRGB
 	{
 		float r = 0.0F;
 		float g = 0.0F;
 		float b = 0.0F;
 
-		constexpr sRGB() noexcept = default;
+		constexpr LinearRGB() noexcept = default;
 
-		constexpr sRGB(const float r, const float g, const float b) noexcept :
+		constexpr LinearRGB(const float r, const float g, const float b) noexcept :
 			r{ r }, g{ g }, b{ b }
 		{ }
 
-		explicit(false) sRGB(const RGBA& rgb) noexcept;
+		explicit(false) LinearRGB(const RGBA& rgb) noexcept;
 
-		explicit(false) operator RGBA() const noexcept;
+		[[nodiscard]] constexpr auto operator==(const LinearRGB& other) const noexcept -> bool = default;
 
-		[[nodiscard]] constexpr auto operator==(const sRGB& other) const noexcept -> bool = default;
-
+		//TODO: verify RelativeLuminance is computed on linear channels (WCAG expects linearized RGB)
 		[[nodiscard]] constexpr auto RelativeLuminance() const noexcept
 		{
 			return 0.2126F * r + 0.7152F * g + 0.0722F * b;
@@ -219,8 +214,6 @@ export namespace PGUI::UI
 
 		explicit(false) HSL(const RGBA& rgb) noexcept;
 
-		explicit(false) operator RGBA() const noexcept;
-
 		[[nodiscard]] constexpr auto operator==(const HSL& other) const noexcept -> bool = default;
 	};
 
@@ -237,8 +230,6 @@ export namespace PGUI::UI
 		{ }
 
 		explicit(false) HSV(const RGBA& rgb) noexcept;
-
-		explicit(false) operator RGBA() const noexcept;
 
 		[[nodiscard]] constexpr auto operator==(const HSV& other) const noexcept -> bool = default;
 	};
@@ -274,11 +265,6 @@ export namespace PGUI::UI
 			y = (1 - rgb.b - k) / (1 - k);
 		}
 
-		explicit(false) operator RGBA() const noexcept
-		{
-			return RGBA{ *this };
-		}
-
 		[[nodiscard]] constexpr auto operator==(const CMYK& other) const noexcept -> bool = default;
 	};
 
@@ -311,7 +297,7 @@ export namespace PGUI::UI
 
 	[[nodiscard]] constexpr auto RelativeLuminance(const ColorType auto& color) noexcept
 	{
-		return sRGB{ static_cast<RGBA>(color) }.RelativeLuminance();
+		return LinearRGB{ static_cast<RGBA>(color) }.RelativeLuminance();
 	}
 
 	[[nodiscard]] constexpr auto ContrastRatio(

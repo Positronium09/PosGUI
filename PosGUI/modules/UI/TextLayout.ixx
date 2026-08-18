@@ -8,7 +8,7 @@ import std;
 import PGUI.UI.TextFormat;
 import PGUI.ComPtr;
 import PGUI.Utils;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.Font.FontCollection;
 import PGUI.UI.Font.FontEnums;
 import PGUI.UI.Font.FontStructs;
@@ -20,9 +20,12 @@ export namespace PGUI::UI
 	class TextLayout : public ComPtrHolder<IDWriteTextLayout4>
 	{
 		public:
+		TextLayout() noexcept = default;
+
 		explicit(false) TextLayout(const ComPtr<IDWriteTextLayout4>& textLayout) noexcept;
 
-		TextLayout(wzstring_view text, const TextFormat& textFormat, SizeF maxSize) noexcept;
+		[[nodiscard]] static auto Create(
+			wzstring_view text, const TextFormat& textFormat, SizeF maxSize) noexcept -> Result<TextLayout>;
 
 		[[nodiscard]] auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
 

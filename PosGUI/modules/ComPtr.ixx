@@ -10,17 +10,126 @@ import std;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
 
-
 export namespace PGUI
 {
 	template <typename T>
+	concept ComInterface = std::derived_from<T, IUnknown>;
+
+	template <typename T>
+	concept WinrtProjection = std::derived_from<T, winrt::Windows::Foundation::IUnknown>;
+
+	template <typename T>
+	concept SmartPtrType =
+		IsSpecialization<std::remove_cvref_t<T>, wil::com_ptr_t> ||
+		IsSpecialization<std::remove_cvref_t<T>, winrt::com_ptr>;
+
+	template <typename T>
 	using ComPtr = wil::com_ptr_nothrow<T>;
+
+	template <typename T, typename I>
+	concept SmartPtrOf =
+		std::same_as<std::remove_cvref_t<T>, ComPtr<I>> ||
+		std::same_as<std::remove_cvref_t<T>, winrt::com_ptr<I>>;
 
 	template <typename T>
 	concept HasUUID = requires { __uuidof(T); };
+}
 
-	template <typename T>
-	concept ComInterface = std::is_base_of_v<IUnknown, T>;
+namespace PGUI::Detail
+{
+	template <typename Derived, ComInterface... Interfaces> 
+	struct ImplementsRawCom : Interfaces...
+	{
+		virtual ~ImplementsRawCom() noexcept = default;
+
+		auto __stdcall QueryInterface(
+			const IID& iid,
+			_COM_Outptr_ void** obj) -> HRESULT final
+		{
+			if (obj == nullptr)
+			{
+				return E_POINTER;
+			}
+			if (iid == IID_IUnknown)
+			{
+				*obj = static_cast<IUnknown*>(static_cast<FirstTypeOf<Interfaces...>*>(this));
+				AddRef();
+				return S_OK;
+			}
+			if ((CheckAssign<Interfaces>(iid, obj) || ...))
+			{
+				AddRef();
+				return S_OK;
+			}
+
+			*obj = nullptr;
+			return E_NOINTERFACE;
+		}
+
+		auto __stdcall AddRef() -> ULONG final
+		{
+			return refCount.fetch_add(1, std::memory_order_relaxed) + 1;
+		}
+
+		auto __stdcall Release() -> ULONG final
+		{
+			const auto count = refCount.fetch_sub(1, std::memory_order_acq_rel) - 1;
+			if (count == 0)
+			{
+				delete static_cast<Derived*>(this);
+			}
+			return count;
+		}
+
+		private:
+
+		template <typename T>
+		auto CheckAssign(const IID& iid, void** obj) -> bool
+		{
+			if (iid == __uuidof(T))
+			{
+				*obj = static_cast<T*>(this);
+				return true;
+			}
+			return false;
+		}
+
+		std::atomic_long refCount{ 1 };
+	};
+
+	template <bool, typename Derived, typename... Interfaces>
+	struct ImplementsSelector
+	{
+		using Type = winrt::implements<Derived, Interfaces...>;
+	};
+
+	template <typename Derived, typename... Interfaces>
+	struct ImplementsSelector<true, Derived, Interfaces...>
+	{
+		using Type = ImplementsRawCom<Derived, Interfaces...>;
+	};
+
+	[[nodiscard]] consteval auto GuidsEqual(const winrt::guid& left, const winrt::guid& right) noexcept -> bool
+	{
+		return left.Data1 == right.Data1 &&
+			left.Data2 == right.Data2 &&
+			left.Data3 == right.Data3 &&
+			std::ranges::equal(left.Data4, right.Data4);
+	}
+
+	template <typename T, typename I>
+	concept ComPtrHolderArg = 
+		SmartPtrOf<T, I> ||
+		std::convertible_to<std::remove_cvref_t<T>, I*>;
+}
+
+export namespace PGUI
+{
+	template <typename T, typename P>
+	concept DefaultInterfaceOf =
+		ComInterface<T> &&
+		WinrtProjection<P> &&
+		Detail::GuidsEqual(winrt::guid_of<P>(), winrt::guid{ __uuidof(T) });
 
 	template <typename T, typename... Policies>
 	[[nodiscard]] consteval auto GetIID(const wil::com_ptr_t<T, Policies...>&) noexcept
@@ -28,53 +137,28 @@ export namespace PGUI
 		return __uuidof(T);
 	}
 
-	template <typename T>
+	template <HasUUID T>
+	[[nodiscard]] consteval auto GetIID(const winrt::com_ptr<T>&) noexcept
+	{
+		return __uuidof(T);
+	}
+
+	template <HasUUID T>
 	[[nodiscard]] consteval auto GetIID() noexcept
 	{
 		return __uuidof(T);
 	}
 
-	template <typename T>
+	template <HasUUID T>
 	[[nodiscard]] consteval auto GetIID(const T&) noexcept
 	{
 		return __uuidof(T);
 	}
 
-	template <typename T>
+	template <HasUUID T>
 	[[nodiscard]] consteval auto GetIID(const T* const) noexcept
 	{
 		return __uuidof(T);
-	}
-
-	// ReSharper disable once CppInconsistentNaming
-	template <typename T, typename... Args>
-	[[nodiscard]] auto make_self_wil(Args&&... args) noexcept -> ComPtr<T>
-	{
-		try
-		{
-			auto rtPtr = winrt::make_self<T>(std::forward<Args>(args)...);
-
-			ComPtr<T> wilPtr;
-			wilPtr.attach(rtPtr.detach());
-
-			return wilPtr;
-		}
-		catch (const winrt::hresult_error& e)
-		{
-			Logger::Error(Error{ 
-					static_cast<HRESULT>(e.code().value)
-				}, 
-				std::format(L"Failed to create instance of {}", StringToWString(typeid(T).name())));
-
-			return nullptr;
-		}
-		catch (const std::bad_alloc& e)
-		{
-			Logger::Error(Error{ ErrorCode::AllocationFailure },
-				std::format(L"Failed to create instance of {}", StringToWString(typeid(T).name())));
-			
-			return nullptr;
-		}
 	}
 
 	template <typename T, typename... Args>
@@ -89,16 +173,123 @@ export namespace PGUI
 
 		ComPtr<T> ptr;
 		ptr.attach(raw);
+
 		return ptr;
 	}
 
-	template <typename T>
-	[[nodiscard]] auto MakeWinrtPtr(ComPtr<T>&& wil) noexcept -> winrt::com_ptr<T>
+	template <ComInterface T>
+	[[nodiscard]] auto ComPtrToWinrt(const ComPtr<T>& wil) noexcept -> winrt::com_ptr<T>
 	{
-		winrt::com_ptr<T> rtPtr;
-		rtPtr.attach(wil.detach());
+		winrt::com_ptr<T> ptr;
+		ptr.copy_from(wil.get());
 
-		return rtPtr;
+		return ptr;
+	}
+
+	template <ComInterface T>
+	[[nodiscard]] auto ComPtrToWinrt(ComPtr<T>&& wil) noexcept -> winrt::com_ptr<T>
+	{
+		winrt::com_ptr<T> ptr;
+		ptr.attach(wil.detach());
+
+		return ptr;
+	}
+
+	template <ComInterface T>
+	[[nodiscard]] auto WinrtToComPtr(const winrt::com_ptr<T>& wrt) noexcept -> ComPtr<T>
+	{
+		return ComPtr<T>{ wrt.get() };
+	}
+
+	template <ComInterface T>
+	[[nodiscard]] auto WinrtToComPtr(winrt::com_ptr<T>&& wrt) noexcept -> ComPtr<T>
+	{
+		ComPtr<T> ptr;
+		ptr.attach(wrt.detach());
+
+		return ptr;
+	}
+
+	template <ComInterface AbiInterface, WinrtProjection P> requires
+		DefaultInterfaceOf<AbiInterface, P>
+	[[nodiscard]] auto ProjectionToComPtr(const P& projection) noexcept -> ComPtr<AbiInterface>
+	{
+		return ComPtr<AbiInterface>{
+			static_cast<AbiInterface*>(winrt::get_abi(projection))
+		};
+	}
+
+	template <ComInterface AbiInterface, WinrtProjection P> requires
+		DefaultInterfaceOf<AbiInterface, P>
+	[[nodiscard]] auto ProjectionToComPtr(P&& projection) noexcept -> ComPtr<AbiInterface>
+	{
+		ComPtr<AbiInterface> ptr;
+		ptr.attach(static_cast<AbiInterface*>(winrt::detach_abi(projection)));
+
+		return ptr;
+	}
+
+	template <WinrtProjection P>
+	[[nodiscard]] auto ProjectionToUnknown(const P& projection) noexcept -> ComPtr<IUnknown>
+	{
+		return ComPtr<IUnknown>{ winrt::get_unknown(projection) };
+	}
+
+	template <WinrtProjection P, ComInterface T> requires
+		DefaultInterfaceOf<T, P>
+	[[nodiscard]] auto ComPtrToProjection(const ComPtr<T>& ptr) noexcept -> P
+	{
+		P projection{ nullptr };
+		winrt::copy_from_abi(projection, ptr.get());
+
+		return projection;
+	}
+
+	template <WinrtProjection P, ComInterface T> requires
+		DefaultInterfaceOf<T, P>
+	[[nodiscard]] auto ComPtrToProjection(ComPtr<T>&& ptr) noexcept -> P
+	{
+		P projection{ nullptr };
+		winrt::attach_abi(projection, ptr.detach());
+
+		return projection;
+	}
+
+	template <ComInterface AbiInterface, WinrtProjection P> requires
+		DefaultInterfaceOf<AbiInterface, P>
+	[[nodiscard]] auto ProjectionPut(P& projection) noexcept -> AbiInterface**
+	{
+		return reinterpret_cast<AbiInterface**>(winrt::put_abi(projection));
+	}
+
+	template <typename T>
+	[[nodiscard]] auto NormalizeSmartPtr(T&& ptr) noexcept
+	{
+		if constexpr (IsSpecialization<std::remove_cvref_t<T>, winrt::com_ptr>)
+		{
+			return WinrtToComPtr(std::forward<T>(ptr));
+		}
+		else
+		{
+			return std::forward<T>(ptr);
+		}
+	}
+
+	template <typename T, typename... Args>
+	[[nodiscard]] auto MakeSelf(Args&&... args) noexcept -> Result<winrt::com_ptr<T>>
+	{
+		try
+		{
+			return winrt::make_self<T>(std::forward<Args>(args)...);
+		}
+		catch (const winrt::hresult_error& e)
+		{
+			return Unexpected{ Error{ static_cast<HRESULT>(e.code()) } };
+		}
+		catch (const std::exception& e)
+		{
+			return Unexpected{ Error{ e } };
+		}
 	}
 
 	template <ComInterface... Interfaces>
@@ -111,12 +302,8 @@ export namespace PGUI
 		public:
 		constexpr ComPtrHolder() noexcept = default;
 
-		explicit(false) ComPtrHolder(const ComPtr<Interfaces>&... args) noexcept :
-			interfaces{ std::make_tuple(args...) }
-		{ }
-
-		explicit(false) ComPtrHolder(ComPtr<Interfaces>&&... args) noexcept :
-			interfaces{ std::make_tuple(std::forward<ComPtr<Interfaces>>(args)...) }
+		explicit(false) ComPtrHolder(Detail::ComPtrHolderArg<Interfaces> auto&&... args) noexcept :
+			interfaces{ std::make_tuple(std::forward<ComPtr<Interfaces>>(NormalizeSmartPtr(args))...) }
 		{ }
 
 		explicit(false) ComPtrHolder(std::nullptr_t) noexcept
@@ -310,65 +497,11 @@ export namespace PGUI
 		std::tuple<ComPtr<Interfaces>...> interfaces{ };
 	};
 
-	template <typename Derived, HasUUID... Interfaces>
-	struct Implements : Interfaces...
-	{
-		virtual ~Implements() noexcept = default;
-
-		auto __stdcall QueryInterface(
-			const IID& iid,
-			_COM_Outptr_ void** obj) -> HRESULT final
-		{
-			if (obj == nullptr)
-			{
-				return E_POINTER;
-			}
-			if (iid == IID_IUnknown)
-			{
-				*obj = static_cast<IUnknown*>(static_cast<FirstTypeOf<Interfaces...>*>(this));
-				AddRef();
-				return S_OK;
-			}
-			if ((CheckAssign<Interfaces>(iid, obj) || ...))
-			{
-				AddRef();
-				return S_OK;
-			}
-
-			*obj = nullptr;
-			return E_NOINTERFACE;
-		}
-
-		auto __stdcall AddRef() -> ULONG final
-		{
-			return refCount.fetch_add(1, std::memory_order_relaxed) + 1;
-		}
-
-		auto __stdcall Release() -> ULONG final
-		{
-			const auto count = refCount.fetch_sub(1, std::memory_order_acq_rel) - 1;
-			if (count == 0)
-			{
-				delete static_cast<Derived*>(this);
-			}
-			return count;
-		}
-
-		private:
-
-		template <typename T>
-		auto CheckAssign(const IID& iid, void** obj) -> bool
-		{
-			if (iid == __uuidof(T))
-			{
-				*obj = static_cast<T*>(this);
-				return true;
-			}
-			return false;
-		}
-
-		std::atomic_long refCount{ 1 };
-	};
+	template <typename Derived, typename ...Interfaces>
+	using Implements = Detail::ImplementsSelector<
+		LogicalAnd<ComInterface<Interfaces>...>,
+		Derived,
+		Interfaces...>::Type;
 }
 
 template <typename Char>
@@ -396,7 +529,6 @@ struct std::formatter<IID, Char>
 			iid.Data4[2], iid.Data4[3], iid.Data4[4], iid.Data4[5], iid.Data4[6], iid.Data4[7]);
 	}
 };
-
 
 template <typename T, typename Char, typename... Policies>
 struct std::formatter<wil::com_ptr_t<T, Policies...>, Char>
@@ -434,5 +566,15 @@ struct std::formatter<wil::com_ptr_t<T, Policies...>, Char>
 			name,
 			std::bit_cast<std::uintptr_t>(ptr.get()),
 			width);
+	}
+};
+
+template <std::derived_from<IUnknown> T, typename Char>
+struct std::formatter<T*, Char> : std::formatter<const void*, Char>
+{
+	template <typename FormatContext>
+	auto format(T* ptr, FormatContext& ctx) const
+	{
+		return std::formatter<const void*, Char>::format(static_cast<const void*>(ptr), ctx);
 	}
 };

@@ -4,7 +4,7 @@ module;
 export module PGUI.UI.DComp.SurfaceFactory;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.DComp.Surface;
 import PGUI.ErrorHandling;
 

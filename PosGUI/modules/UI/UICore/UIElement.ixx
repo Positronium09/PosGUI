@@ -11,7 +11,7 @@ import :UIEvent;
 import PGUI.ComPtr;
 import PGUI.DataBinding;
 import PGUI.ErrorHandling;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Event;
 import PGUI.UI.Graphics;
 

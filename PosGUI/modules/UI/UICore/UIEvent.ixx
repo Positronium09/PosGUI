@@ -2,7 +2,7 @@ export module PGUI.UI.UICore:UIEvent;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.UI.Input;
 import PGUI.ErrorHandling;

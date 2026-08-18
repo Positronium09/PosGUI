@@ -7,16 +7,14 @@ import std;
 
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.DComp.Animation;
 
 export namespace PGUI::UI::DComp
 {
-	template <typename Interface = IDCompositionClip>
+	template <std::derived_from<IDCompositionClip> Interface = IDCompositionClip>
 	class Clip : public ComPtrHolder<Interface>
 	{
-		static_assert(std::derived_from<Interface, IDCompositionClip>);
-
 		public:
 		Clip() noexcept = default;
 		explicit(false) Clip(const ComPtr<Interface>& ptr) noexcept :

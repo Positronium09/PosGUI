@@ -1,8 +1,23 @@
-export module PGUI.Shape2D:LineSegment;
+export module PGUI.Shape:LineSegment;
 
 import std;
 
-import :Point;
+import :Point2;
+
+namespace
+{
+	template <std::floating_point T>
+	using FloatBits = std::conditional_t<sizeof(T) == sizeof(std::uint32_t), std::uint32_t, std::uint64_t>;
+
+	template <std::floating_point T>
+	[[nodiscard]] constexpr auto Abs(const T x) noexcept -> T
+	{
+		static_assert(sizeof(T) == sizeof(FloatBits<T>));
+		constexpr auto signMask = FloatBits<T>{ 1 } << (std::numeric_limits<FloatBits<T>>::digits - 1);
+
+		return std::bit_cast<T>(static_cast<FloatBits<T>>(std::bit_cast<FloatBits<T>>(x) & ~signMask));
+	}
+}
 
 export namespace PGUI
 {
@@ -17,8 +32,6 @@ export namespace PGUI
 		constexpr LineSegment(const Point<T>& start, const Point<T>& end) noexcept :
 			start{ start }, end{ end }
 		{ }
-
-		[[nodiscard]] constexpr auto operator==(const LineSegment& other) const noexcept -> bool = default;
 
 		[[nodiscard]] auto Length() const noexcept
 		{
@@ -57,7 +70,7 @@ export namespace PGUI
 
 		[[nodiscard]] auto IsHorizontal() const noexcept
 		{
-			return std::abs(Slope()) < std::numeric_limits<T>::epsilon();
+			return Abs(Slope()) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] constexpr auto Midpoint() const noexcept
@@ -76,7 +89,7 @@ export namespace PGUI
 			{
 				return true;
 			}
-			return std::abs(Slope() - lineSegment.Slope()) < std::numeric_limits<T>::epsilon();
+			return Abs(Slope() - lineSegment.Slope()) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] auto IsPerpendicular(const LineSegment& lineSegment) const noexcept
@@ -86,7 +99,7 @@ export namespace PGUI
 			{
 				return true;
 			}
-			return std::abs(Slope() * lineSegment.Slope() + 1) < std::numeric_limits<T>::epsilon();
+			return Abs(Slope() * lineSegment.Slope() + 1) < std::numeric_limits<T>::epsilon();
 		}
 
 		[[nodiscard]] constexpr auto IsOnLineSegment(Point<T> p) const noexcept
@@ -130,6 +143,11 @@ export namespace PGUI
 			return std::unexpected{ std::monostate{ } };
 		}
 
+		[[nodiscard]] constexpr auto operator-() const noexcept
+		{
+			return LineSegment{ -start, -end };
+		}
+
 		[[nodiscard]] constexpr auto operator+(const Point<T>& point) const noexcept
 		{
 			return LineSegment{ start + point, end + point };
@@ -150,10 +168,7 @@ export namespace PGUI
 			return LineSegment{ start / factor, end / factor };
 		}
 
-		[[nodiscard]] constexpr auto operator-() const noexcept
-		{
-			return LineSegment{ -start, -end };
-		}
+		[[nodiscard]] constexpr auto operator==(const LineSegment& other) const noexcept -> bool = default;
 	};
 
 	using LineSegmentF = LineSegment<float>;

@@ -1,5 +1,4 @@
 module;
-#include <d2d1_1.h>
 #include <dcomp.h>
 
 export module PGUI.UI.DComp.Transform3D;
@@ -7,6 +6,7 @@ export module PGUI.UI.DComp.Transform3D;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.UI.DComp.Effect;
 import PGUI.UI.DComp.Animation;
@@ -401,7 +401,7 @@ export namespace PGUI::UI::DComp
 			Transform3D{ ptr }
 		{ }
 
-		[[nodiscard]] auto SetMatrix(const D2D::Matrix4x4& matrix) const noexcept -> Result<void>
+		[[nodiscard]] auto SetMatrix(const Matrix4x4& matrix) const noexcept -> Result<void>
 		{
 			if (const auto error = Error{ Get()->SetMatrix(std::bit_cast<D3DMATRIX>(matrix)) };
 				error.IsFailure())

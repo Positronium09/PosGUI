@@ -4,7 +4,7 @@ module;
 export module PGUI.UI.D2D.D2DPathGeometry;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DGeometry;
 import PGUI.UI.D2D.GeometrySink;

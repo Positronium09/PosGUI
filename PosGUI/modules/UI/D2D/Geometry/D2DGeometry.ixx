@@ -6,7 +6,7 @@ export module PGUI.UI.D2D.D2DGeometry;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DEnums;
 import PGUI.UI.D2D.D2DStructs;
@@ -21,11 +21,9 @@ export namespace PGUI::UI::D2D
 		PointF unitTangentVector{ };
 	};
 
-	template <typename Interface = ID2D1Geometry>
+	template <std::derived_from<ID2D1Geometry> Interface = ID2D1Geometry>
 	class D2DGeometry : public ComPtrHolder<Interface>
 	{
-		static_assert(std::derived_from<Interface, ID2D1Geometry>, "Interface must be derived from ID2D1Geometry");
-
 		public:
 		constexpr D2DGeometry() noexcept = default;
 

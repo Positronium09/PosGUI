@@ -6,6 +6,7 @@ export module PGUI.UI.DComp.Transform2D;
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DStructs;
 import PGUI.UI.DComp.Effect;
@@ -13,11 +14,9 @@ import PGUI.UI.DComp.Animation;
 
 export namespace PGUI::UI::DComp
 {
-	template <typename Interface = IDCompositionTransform>
+	template <std::derived_from<IDCompositionTransform> Interface = IDCompositionTransform>
 	class Transform : public Transform3D<Interface>
 	{
-		static_assert(std::derived_from<Interface, IDCompositionTransform>);
-
 		public:
 		Transform() noexcept = default;
 		explicit(false) Transform(const ComPtr<Interface>& ptr) noexcept :
@@ -360,7 +359,7 @@ export namespace PGUI::UI::DComp
 			Transform{ ptr }
 		{ }
 
-		[[nodiscard]] auto SetMatrix(const D2D::Matrix3x2& matrix) const noexcept -> Result<void>
+		[[nodiscard]] auto SetMatrix(const Matrix3x2& matrix) const noexcept -> Result<void>
 		{
 			if (const auto error = Error{ Get()->SetMatrix(matrix) };
 				error.IsFailure())

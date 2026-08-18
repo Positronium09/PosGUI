@@ -4,7 +4,7 @@ import :Interface;
 import :UIElement;
 import :UIContainer;
 import PGUI.UI.DCompWindow;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Window;
 import PGUI.WindowClass;
 import PGUI.Event;

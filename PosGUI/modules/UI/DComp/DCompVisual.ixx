@@ -7,7 +7,7 @@ export module PGUI.UI.DComp.Visual;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.UI.Color;
 import PGUI.UI.Graphics;
@@ -70,8 +70,8 @@ export namespace PGUI::UI::DComp
 		{
 			return SetTransform(static_cast<Transform3D<>>(transform));
 		}
-		[[nodiscard]] auto SetTransform(const D2D::Matrix3x2& transform) const noexcept -> Result<void>;
-		[[nodiscard]] auto SetTransform(const D2D::Matrix4x4& transform) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTransform(const Matrix3x2& transform) const noexcept -> Result<void>;
+		[[nodiscard]] auto SetTransform(const Matrix4x4& transform) const noexcept -> Result<void>;
 
 		[[nodiscard]] auto SetTransformParent(const Visual& parent) const noexcept -> Result<void>;
 

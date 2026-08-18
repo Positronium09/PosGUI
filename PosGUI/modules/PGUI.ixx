@@ -12,8 +12,9 @@ export import PGUI.ScopedTimer;
 export import PGUI.WinResource;
 export import PGUI.DataBinding;
 export import PGUI.Factories;
-export import PGUI.Shape2D;
+export import PGUI.Shape;
 export import PGUI.Utils;
+export import PGUI.DpiScaled;
 export import PGUI.UI;
 
 export namespace PGUI

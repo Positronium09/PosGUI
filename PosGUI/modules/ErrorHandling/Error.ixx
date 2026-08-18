@@ -1,5 +1,6 @@
 module;
 #include <Windows.h>
+#include <winrt/base.h>
 
 export module PGUI.ErrorHandling:Error;
 
@@ -37,6 +38,16 @@ export namespace PGUI
 			code{ std::make_error_code(SystemErrorCode::STLFailure) }, sourceLocation{ sourceLocation }, timeStamp{ timeStamp }
 		{
 			SetCustomMessage(StringToWString(exception.what()));
+		}
+
+		explicit Error(
+			const winrt::hresult_error& exception,
+			const std::source_location& sourceLocation = std::source_location::current(),
+			const std::chrono::system_clock::time_point& timeStamp = std::chrono::system_clock::now()) noexcept :
+			code{ std::error_code{ static_cast<HRESULT>(exception.code()), std::system_category() } }, 
+			sourceLocation{ sourceLocation }, timeStamp{ timeStamp }
+		{
+			SetCustomMessage(exception.message());
 		}
 
 		template <PGUIErrorCodeEnum ErrorType>
@@ -202,7 +213,7 @@ export namespace PGUI
 		std::error_code code;
 		std::source_location sourceLocation;
 		std::chrono::system_clock::time_point timeStamp;
-		std::flat_map<std::wstring, std::wstring> details{ };
+		std::map<std::wstring, std::wstring> details{ };
 		std::optional<std::wstring> customMessage;
 		std::vector<std::wstring> fixSuggestions;
 	};

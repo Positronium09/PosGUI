@@ -9,16 +9,19 @@ import PGUI.ComPtr;
 
 export namespace PGUI::UI::D2D
 {
-	template <typename Interface = ID2D1Image>
+	template <std::derived_from<ID2D1Image> Interface = ID2D1Image>
 	class D2DImage : public ComPtrHolder<Interface>
 	{
-		static_assert(std::derived_from<Interface, ID2D1Image>, "Interface must be derived from ID2D1Image");
-
 		public:
 		D2DImage() noexcept = default;
 
 		explicit(false) D2DImage(ComPtr<Interface> ptr) :
 			ComPtrHolder<Interface>{ ptr }
 		{ }
+
+		explicit(false) operator D2DImage<>() const noexcept
+		{
+			return D2DImage<>{ this->Get() };
+		}
 	};
 }

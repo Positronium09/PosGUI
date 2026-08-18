@@ -5,7 +5,7 @@ export module PGUI.UI.AppWindow;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.Window;
 import PGUI.UI.UICore;

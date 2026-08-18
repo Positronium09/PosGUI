@@ -6,11 +6,11 @@ module;
 #undef min
 #undef max
 
-export module PGUI.Shape2D:Rect;
+export module PGUI.Shape:Rect;
 
 import std;
 
-import :Point;
+import :Point2;
 import :Size;
 
 export namespace PGUI
@@ -56,41 +56,12 @@ export namespace PGUI
 			Rect{ { }, { width, height } }
 		{ }
 
-		constexpr Rect(Point<T> position, Size<T> size) noexcept :
+		constexpr Rect(Point<T> position, PGUI::Size<T> size) noexcept :
 			left{ position.x }, top{ position.y },
 			right{ position.x + size.cx }, bottom{ position.y + size.cy }
 		{ }
 
 		~Rect() noexcept = default;
-
-		[[nodiscard]] constexpr auto operator==(const Rect& other) const noexcept -> bool = default;
-
-		[[nodiscard]] constexpr auto operator*(const T factor) const noexcept
-		{
-			return Rect{ left * factor, top * factor, right * factor, bottom * factor };
-		}
-
-		[[nodiscard]] constexpr auto operator/(const T factor) const noexcept
-		{
-			return Rect{ left / factor, top / factor, right / factor, bottom / factor };
-		}
-
-		constexpr auto& operator*=(const T factor) noexcept
-		{
-			left *= factor;
-			top *= factor;
-			right *= factor;
-			bottom *= factor;
-			return *this;
-		}
-		constexpr auto& operator/=(const T factor) noexcept
-		{
-			left /= factor;
-			top /= factor;
-			right /= factor;
-			bottom /= factor;
-			return *this;
-		}
 
 		[[nodiscard]] constexpr auto TopLeft() const noexcept
 		{
@@ -435,6 +406,38 @@ export namespace PGUI
 				static_cast<INT>(size.cy)
 			};
 		}
+
+		[[nodiscard]] constexpr auto operator*(const T factor) const noexcept
+		{
+			return Rect{ left * factor, top * factor, right * factor, bottom * factor };
+		}
+		constexpr auto& operator*=(const T factor) noexcept
+		{
+			left *= factor;
+			top *= factor;
+			right *= factor;
+			bottom *= factor;
+			return *this;
+		}
+		[[nodiscard]] friend constexpr auto operator*(const T factor, const Rect& v) noexcept
+		{
+			return v * factor;
+		}
+
+		[[nodiscard]] constexpr auto operator/(const T factor) const noexcept
+		{
+			return Rect{ left / factor, top / factor, right / factor, bottom / factor };
+		}
+		constexpr auto& operator/=(const T factor) noexcept
+		{
+			left /= factor;
+			top /= factor;
+			right /= factor;
+			bottom /= factor;
+			return *this;
+		}
+
+		[[nodiscard]] constexpr auto operator==(const Rect& other) const noexcept -> bool = default;
 	};
 
 	template <std::floating_point T>
@@ -447,18 +450,6 @@ export namespace PGUI
 			infinity,
 			infinity
 		};
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator*(const Rect<T>& v, T factor) noexcept
-	{
-		return Rect{ v.left * factor, v.top * factor, v.right * factor, v.bottom * factor };
-	}
-
-	template <typename T> requires std::is_arithmetic_v<T>
-	[[nodiscard]] constexpr auto operator/(const Rect<T>& v, T factor) noexcept
-	{
-		return Rect{ v.left / factor, v.top / factor, v.right / factor, v.bottom / factor };
 	}
 
 	using RectF = Rect<float>;

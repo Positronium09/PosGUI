@@ -230,13 +230,11 @@ export namespace PGUI
 		auto operator==(const T& other) const noexcept -> bool
 			requires std::equality_comparable<T>
 		{
-			static_assert(std::equality_comparable<T>);
 			return logicalValue == other;
 		}
 		auto operator<=>(const T& other) const noexcept -> auto
 			requires std::three_way_comparable<T>
 		{
-			static_assert(std::three_way_comparable<T>);
 			return logicalValue <=> other;
 		}
 

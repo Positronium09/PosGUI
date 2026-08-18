@@ -7,17 +7,22 @@ import :AnimationTransitionLibrary;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
 import :AnimationTransition;
 
 namespace PGUI::UI::Animation
 {
-	auto AnimationTransitionLibrary::GetInstance() -> const AnimationTransitionLibrary&
+	auto AnimationTransitionLibrary::GetInstance() noexcept
+		-> Result<std::reference_wrapper<const AnimationTransitionLibrary>>
 	{
-		static AnimationTransitionLibrary instance;
-		return instance;
+		static const auto instance = Create();
+		if (!instance.has_value())
+		{
+			return Unexpected{ instance.error() };
+		}
+		return std::cref(instance.value());
 	}
 
 	auto AnimationTransitionLibrary::TransitionFromParameters(
@@ -108,7 +113,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateAccelerateDecelerateTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateAccelerateDecelerateTransition(
 				ToWAM(duration), finalValue,
 				accelerationRatio, decelerationRatio,
 				transition.Put());
@@ -131,7 +143,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateConstantTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateConstantTransition(
 				ToWAM(duration),
 				transition.Put());
 			FAILED(hr))
@@ -158,7 +177,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateCubicBezierLinearTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateCubicBezierLinearTransition(
 				ToWAM(duration), finalValue,
 				p1.x, p1.y, p2.x, p2.y,
 				transition.Put());
@@ -184,7 +210,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateCubicBezierLinearVectorTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateCubicBezierLinearVectorTransition(
 				ToWAM(duration), finalValues.data(),
 				static_cast<UINT>(finalValues.size()),
 				p1.x, p1.y, p2.x, p2.y,
@@ -228,7 +261,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateCubicTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateCubicTransition(
 				ToWAM(duration),
 				finalValue, finalVelocity,
 				transition.Put());
@@ -253,7 +293,7 @@ namespace PGUI::UI::Animation
 	{
 		if (finalValues.size() != finalVelocities.size())
 		{
-			Error error{ std::errc::invalid_argument };
+			Error error{ ErrorCode::InvalidArgument };
 			error
 				.SuggestFix(L"finalValues and finalVelocities must have the same number of elements");
 			Logger::Error(error, L"Failed to create CubicTransition: finalValues and finalVelocities size mismatch");
@@ -262,7 +302,14 @@ namespace PGUI::UI::Animation
 
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateCubicVectorTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateCubicVectorTransition(
 				ToWAM(duration),
 				finalValues.data(), finalVelocities.data(),
 				static_cast<UINT>(finalValues.size()),
@@ -317,7 +364,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateDiscreteTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateDiscreteTransition(
 				ToWAM(duration),
 				finalValue, hold,
 				transition.Put());
@@ -341,7 +395,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateDiscreteVectorTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateDiscreteVectorTransition(
 				ToWAM(duration),
 				finalValues.data(),
 				static_cast<UINT>(finalValues.size()),
@@ -383,7 +444,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateInstantaneousTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateInstantaneousTransition(
 				finalValue,
 				transition.Put());
 			FAILED(hr))
@@ -403,7 +471,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateInstantaneousVectorTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateInstantaneousVectorTransition(
 				finalValues.data(), static_cast<UINT>(finalValues.size()),
 				transition.Put());
 			FAILED(hr))
@@ -434,7 +509,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateLinearTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateLinearTransition(
 				ToWAM(duration),
 				finalValue,
 				transition.Put());
@@ -457,7 +539,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateLinearVectorTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateLinearVectorTransition(
 				ToWAM(duration),
 				finalValues.data(),
 				static_cast<UINT>(finalValues.size()),
@@ -496,7 +585,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateLinearTransitionFromSpeed(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateLinearTransitionFromSpeed(
 				speed,
 				finalValue,
 				transition.Put());
@@ -519,7 +615,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateLinearVectorTransitionFromSpeed(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateLinearVectorTransitionFromSpeed(
 				speed,
 				finalValues.data(),
 				static_cast<UINT>(finalValues.size()),
@@ -558,7 +661,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateParabolicTransitionFromAcceleration(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateParabolicTransitionFromAcceleration(
 				finalValue,
 				finalVelocity,
 				acceleration,
@@ -588,7 +698,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateReversalTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateReversalTransition(
 				ToWAM(duration),
 				transition.Put());
 			FAILED(hr))
@@ -615,7 +732,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateSinusoidalTransitionFromRange(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateSinusoidalTransitionFromRange(
 				ToWAM(duration), minimumValue, maximumValue,
 				period, static_cast<UI_ANIMATION_SLOPE>(slope),
 				transition.Put());
@@ -648,7 +772,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateSinusoidalTransitionFromVelocity(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateSinusoidalTransitionFromVelocity(
 				ToWAM(duration), period,
 				transition.Put());
 			FAILED(hr))
@@ -676,7 +807,14 @@ namespace PGUI::UI::Animation
 	{
 		AnimationTransition transition{ };
 
-		if (const auto hr = GetInstance().Get()->CreateSmoothStopTransition(
+		const auto instanceResult = GetInstance();
+		if (!instanceResult.has_value())
+		{
+			return Unexpected{ instanceResult.error() };
+		}
+		const auto& instance = instanceResult.value().get();
+
+		if (const auto hr = instance.Get()->CreateSmoothStopTransition(
 				ToWAM(maximumDuration), finalValue,
 				transition.Put());
 			FAILED(hr))
@@ -699,21 +837,28 @@ namespace PGUI::UI::Animation
 			parameters.maximumDuration, parameters.finalValue);
 	}
 
-	AnimationTransitionLibrary::AnimationTransitionLibrary()
+	AnimationTransitionLibrary::AnimationTransitionLibrary(
+		const ComPtr<IUIAnimationTransitionLibrary2>& ptr) noexcept :
+		ComPtrHolder{ ptr }
+	{ }
+
+	auto AnimationTransitionLibrary::Create() noexcept -> Result<AnimationTransitionLibrary>
 	{
-		if (const auto hr = CoCreateInstance(
-				CLSID_UIAnimationTransitionLibrary2,
-				nullptr,
-				CLSCTX_INPROC_SERVER,
-				__uuidof(IUIAnimationTransitionLibrary2),
-				PutVoid());
-			FAILED(hr))
-		{
-			throw Exception{
-				Error{ hr },
-				L"Cannot create animation transition library"
+		ComPtr<IUIAnimationTransitionLibrary2> library;
+		if (Error error{
+				CoCreateInstance(
+					CLSID_UIAnimationTransitionLibrary2,
+					nullptr,
+					CLSCTX_INPROC_SERVER,
+					GetIID(library),
+					library.put_void())
 			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
 		}
+
+		return AnimationTransitionLibrary{ library };
 	}
 
 	auto SetFinalValueToTransitionParameters(TransitionParameters& parameters, double finalValue) noexcept -> Result<void>

@@ -7,7 +7,7 @@ module PGUI.UI.DComp.Visual;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.UI.Graphics;
 import PGUI.UI.DComp.Animation;
@@ -354,7 +354,7 @@ namespace PGUI::UI::DComp
 		return EmptyResult;
 	}
 
-	auto Visual::SetTransform(const D2D::Matrix3x2& transform) const noexcept -> Result<void>
+	auto Visual::SetTransform(const Matrix3x2& transform) const noexcept -> Result<void>
 	{
 		if (const auto error = Error{
 				GetUpCast<IDCompositionVisual>()->SetTransform(transform)
@@ -367,7 +367,7 @@ namespace PGUI::UI::DComp
 		return EmptyResult;
 	}
 
-	auto Visual::SetTransform(const D2D::Matrix4x4& transform) const noexcept -> Result<void>
+	auto Visual::SetTransform(const Matrix4x4& transform) const noexcept -> Result<void>
 	{
 		if (const auto error = Error{
 				Get()->SetTransform(transform)

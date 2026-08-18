@@ -6,7 +6,7 @@ export module PGUI.UI.Imaging.BitmapSource;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Factories;
 import PGUI.ErrorHandling;
 
@@ -32,12 +32,9 @@ export namespace PGUI::UI::Imaging
 		Rotate270 = WICBitmapTransformRotate270
 	};
 
-	template <typename Interface = IWICBitmapSource>
+	template <std::derived_from<IWICBitmapSource> Interface = IWICBitmapSource>
 	class BitmapSource : public ComPtrHolder<Interface>
 	{
-		static_assert(std::derived_from<Interface, IWICBitmapSource>,
-			"Interface must be derived from IWICBitmapSource");
-
 		public:
 		BitmapSource() noexcept = default;
 
@@ -147,7 +144,7 @@ export namespace PGUI::UI::Imaging
 			return buffer;
 		}
 
-		operator BitmapSource<>() const noexcept
+		explicit(false) operator BitmapSource<>() const noexcept
 		{
 			return BitmapSource<>{ this->Get() };
 		}

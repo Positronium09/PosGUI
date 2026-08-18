@@ -77,10 +77,10 @@ export namespace PGUI::UI::Animation
 
 		virtual ~AnimationVariableChangeEventHandler() noexcept;
 
-		[[nodiscard]] auto& GetRouter() noexcept { return router; }
-		[[nodiscard]] const auto& GetRouter() const noexcept { return router; }
-		[[nodiscard]] auto& GetIntegerRouter() noexcept { return integerRouter; }
-		[[nodiscard]] const auto& GetIntegerRouter() const noexcept { return integerRouter; }
+		template <typename Self>
+		[[nodiscard]] auto&& GetRouter(this Self&& self) noexcept { return std::forward_like<Self>(self.router); }
+		template <typename Self>
+		[[nodiscard]] auto&& GetIntegerRouter(this Self&& self) noexcept { return std::forward_like<Self>(self.integerRouter); }
 
 		virtual auto OnVariableChanged(
 			const Storyboard& storyboard, const AnimationVariable& variable,

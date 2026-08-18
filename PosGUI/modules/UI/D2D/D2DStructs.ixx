@@ -5,13 +5,13 @@ export module PGUI.UI.D2D.D2DStructs;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.D2D.D2DEnums;
 
 export namespace PGUI::UI::D2D
 {
-	using Matrix3x2 = D2D1::Matrix3x2F;
-	using Matrix4x4 = D2D1::Matrix4x4F;
+	using PGUI::Matrix3x2;
+	using PGUI::Matrix4x4;
 
 	[[nodiscard]] auto D2D1MatrixToMatrix3x2(const D2D1_MATRIX_3X2_F& matrix) noexcept
 	{

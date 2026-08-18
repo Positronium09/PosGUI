@@ -16,53 +16,32 @@ export namespace PGUI::UI
 		static constexpr auto StateCount = sizeof...(States);
 
 		explicit VisualStateManager(const States... initialStates) noexcept :
-		stateGroups{ VisualStateGroup<States>{ initialStates }... }
-		{
-		}
+			stateGroups{ VisualStateGroup<States>{ initialStates }... }
+		{ }
 
 		~VisualStateManager() noexcept = default;
 
-		template <std::size_t Index>
-		[[nodiscard]] auto& GetStateGroup() noexcept
+		template <std::size_t Index, typename Self>
+		[[nodiscard]] auto&& GetStateGroup(this Self&& self) noexcept
 		{
-			return std::get<Index>(stateGroups);
-		}
-		template <std::size_t Index>
-		[[nodiscard]] const auto& GetStateGroup() const noexcept
-		{
-			return std::get<Index>(stateGroups);
-		}
-		
-		template <std::size_t Index>
-		[[nodiscard]] auto& GetStateChangedEvent() noexcept
-		{
-			return std::get<Index>(stateChangedEvents);
-		}
-		template <std::size_t Index>
-		[[nodiscard]] const auto& GetStateChangedEvent() const noexcept
-		{
-			return std::get<Index>(stateChangedEvents);
+			return std::forward_like<Self>(std::get<Index>(self.stateGroups));
 		}
 
-		template <IsInTypeList<States...> State>
-		[[nodiscard]] auto& GetStateGroup() noexcept
+		template <std::size_t Index, typename Self>
+		[[nodiscard]] auto&& GetStateChangedEvent(this Self&& self) noexcept
 		{
-			return std::get<VisualStateGroup<State>>(stateGroups);
+			return std::forward_like<Self>(std::get<Index>(self.stateChangedEvents));
 		}
-		template <IsInTypeList<States...> State>
-		[[nodiscard]] const auto& GetStateGroup() const noexcept
+
+		template <IsInTypeList<States...> State, typename Self>
+		[[nodiscard]] auto&& GetStateGroup(this Self&& self) noexcept
 		{
-			return std::get<VisualStateGroup<State>>(stateGroups);
+			return std::forward_like<Self>(std::get<VisualStateGroup<State>>(self.stateGroups));
 		}
-		template <IsInTypeList<States...> State>
-		[[nodiscard]] auto& GetStateChangedEvent() noexcept
+		template <IsInTypeList<States...> State, typename Self>
+		[[nodiscard]] auto&& GetStateChangedEvent(this Self&& self) noexcept
 		{
-			return std::get<EventSRWM<State>>(stateChangedEvents);
-		}
-		template <IsInTypeList<States...> State>
-		[[nodiscard]] const auto& GetStateChangedEvent() const noexcept
-		{
-			return std::get<EventSRWM<State>>(stateChangedEvents);
+			return std::forward_like<Self>(std::get<EventSRWM<State>>(self.stateChangedEvents));
 		}
 
 		template <IsInTypeList<States...> State>
@@ -76,7 +55,7 @@ export namespace PGUI::UI
 		{
 			auto& stateGroup = GetStateGroup<State>();
 			const auto oldState = stateGroup.GetState();
-			
+
 			if (oldState == newState)
 			{
 				return;

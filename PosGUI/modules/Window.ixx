@@ -7,7 +7,7 @@ import std;
 
 import PGUI.Utils;
 import PGUI.WindowClass;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.DpiScaled;
 
@@ -30,7 +30,7 @@ export namespace PGUI
 
 	using TimerId = UINT_PTR;
 	using TimerCallback = std::function<void(TimerId)>;
-	using TimerMap = std::flat_map<TimerId, TimerCallback>;
+	using TimerMap = std::map<TimerId, TimerCallback>;
 
 	enum class WindowFlashFlags : DWORD
 	{
@@ -135,17 +135,21 @@ export namespace PGUI
 		inline const auto NoTopMost = HWND_NOTOPMOST;
 	}
 
+	constexpr auto DefaultWindowPosition = PointL{ CW_USEDEFAULT, CW_USEDEFAULT };
+	constexpr auto DefaultWindowSize = SizeL{ CW_USEDEFAULT, CW_USEDEFAULT };
+
 	struct WindowCreateInfo
 	{
 		std::wstring title;
-		PointI position{ };
-		SizeI size{ };
+		PointI position;
+		SizeI size;
 		DWORD style;
 		DWORD exStyle;
 
-		constexpr WindowCreateInfo(
+		explicit constexpr WindowCreateInfo(
 			const std::wstring_view title,
-			const PointI position, const SizeI size,
+			const PointI position = DefaultWindowPosition, 
+			const SizeI size = DefaultWindowSize,
 			const DWORD style = NULL, const DWORD exStyle = NULL) noexcept :
 			title{ title },
 			position{ position }, size{ size },
@@ -267,7 +271,7 @@ export namespace PGUI
 
 	using MessageHandler = std::variant<HandlerType, HandlerHWNDType>;
 
-	using MessageMap = std::flat_map<MessageID, std::vector<MessageHandler>>;
+	using MessageMap = std::map<MessageID, std::vector<MessageHandler>>;
 
 	enum class HandlerOrder : bool
 	{
@@ -607,8 +611,9 @@ export namespace PGUI
 			return GetWindowLongPtrW(hWnd, static_cast<UINT>(index));
 		}
 
+		auto SetStyle(DWORD style) const noexcept -> void;
 		auto ModifyStyle(DWORD add, DWORD remove) const noexcept -> void;
-
+		auto SetExStyle(DWORD style) const noexcept -> void;
 		auto ModifyExStyle(DWORD add, DWORD remove) const noexcept -> void;
 
 		auto AddStyle(const DWORD style) const noexcept -> void { ModifyStyle(style, NULL); }
@@ -623,7 +628,6 @@ export namespace PGUI
 		{
 			ShowWindow(hWnd, ToUnderlying(show));
 		}
-
 		auto Hide() const noexcept -> void { Show(ShowWindowCommand::Hide); }
 		auto Minimize() const noexcept -> void { Show(ShowWindowCommand::Minimize); }
 		auto Maximize() const noexcept -> void { Show(ShowWindowCommand::Maximize); }
@@ -659,11 +663,14 @@ export namespace PGUI
 		// ReSharper disable once CppMemberFunctionMayBeStatic
 		auto ReleaseCapture() const noexcept -> void { ::ReleaseCapture(); }
 
+		[[nodiscard]] auto AdjustRectForDpi(RectL rect) const noexcept -> RectL;
+
 		auto SetPosition(PointF position, SizeF size, PositionFlags flags,
 			HWND insertAfter = nullptr) noexcept -> void;
 		auto SetPosition(RectF rect, PositionFlags flags, HWND insertAfter = nullptr) noexcept -> void;
 		auto Move(PointF newPos) noexcept -> void;
 		auto Resize(SizeF newSize) noexcept -> void;
+		auto ResizeForClient(SizeF newSize) noexcept -> void;
 		auto MoveAndResize(RectF newRect) noexcept -> void;
 		auto MoveAndResize(PointF newPos, SizeF newSize) noexcept -> void;
 

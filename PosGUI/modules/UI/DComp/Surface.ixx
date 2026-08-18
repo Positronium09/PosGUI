@@ -7,25 +7,23 @@ export module PGUI.UI.DComp.Surface;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.UI.Graphics;
 import PGUI.ErrorHandling;
 
 export namespace PGUI::UI::DComp
 {
-	template <typename Interface = IDCompositionSurface>
+	template <std::derived_from<IDCompositionSurface> Interface = IDCompositionSurface>
 	class Surface : public ComPtrHolder<Interface>
 	{
-		static_assert(std::derived_from<Interface, IDCompositionSurface>);
-
 		public:
 		Surface() noexcept = default;
 		explicit(false) Surface(const ComPtr<Interface>& ptr) noexcept :
 			ComPtrHolder<Interface>{ ptr }
 		{ }
 
-		[[nodiscard]] auto BeginDraw(std::optional<RectL> updateRect = std::nullopt) const noexcept -> Result<UI::Graphics>
+		[[nodiscard]] auto BeginDraw(std::optional<RectL> updateRect = std::nullopt) const noexcept -> Result<Graphics>
 		{
 			const RECT* rect = nullptr;
 			if (updateRect.has_value())
@@ -41,7 +39,7 @@ export namespace PGUI::UI::DComp
 				return Unexpected{ error };
 			}
 
-			UI::Graphics graphics{ dc };
+			Graphics graphics{ dc };
 			graphics.PushTranslation(PointL{ updateOffset });
 
 			return graphics;

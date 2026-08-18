@@ -18,25 +18,37 @@ namespace PGUI::UI
 		ComPtrHolder{ textLayout }
 	{ }
 
-	TextLayout::TextLayout(const wzstring_view text, const TextFormat& textFormat, const SizeF maxSize) noexcept
+	auto TextLayout::Create(
+		const wzstring_view text, const TextFormat& textFormat, const SizeF maxSize) noexcept -> Result<TextLayout>
 	{
 		const auto& factory = Factories::DWriteFactory::GetFactory();
 		const auto textFormatPtr = textFormat.GetAs<IDWriteTextFormat>();
-		ComPtr<IDWriteTextLayout> textLayoutPtr{ nullptr };
-		const auto hr = factory->CreateTextLayout(
-			text.data(), static_cast<UINT32>(text.size()),
-			textFormatPtr.get(),
-			maxSize.cx, maxSize.cy,
-			textLayoutPtr.put());
-		Set(textLayoutPtr.try_query<IDWriteTextLayout4>());
-
-		if (Error error{ hr };
+		ComPtr<IDWriteTextLayout> textLayoutPtr;
+		if (Error error{
+				factory->CreateTextLayout(
+					text.data(), static_cast<UINT32>(text.size()),
+					textFormatPtr.get(),
+					maxSize.cx, maxSize.cy,
+					textLayoutPtr.put())
+			};
 			error.IsFailure())
 		{
-			error.AddDetail(L"Text", text)
-			     .AddDetail(L"MaxSize", std::format(L"{}", maxSize));
-			Logger::Error(error, L"Cannot create text layout");
+			error.AddDetail(L"text", text)
+			     .AddDetail(L"maxSize", std::format(L"{}", maxSize));
+			return Unexpected{ error };
 		}
+
+		const auto textLayout = textLayoutPtr.try_query<IDWriteTextLayout4>();
+		if (!textLayout)
+		{
+			return Unexpected{
+				Error{ SystemErrorCode::InterfaceNotSupported }
+				.AddDetail(L"text", text)
+				.AddDetail(L"requestedInterface", L"IDWriteTextLayout4")
+			};
+		}
+
+		return TextLayout{ textLayout };
 	}
 
 	auto TextLayout::SetTextAlignment(const TextAlignment textAlignment) const noexcept -> Result<void>

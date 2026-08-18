@@ -6,7 +6,7 @@ module PGUI.UI.D2D.D2DBitmap;
 import std;
 
 import PGUI.ComPtr;
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DImage;
 import PGUI.UI.D2D.RenderTarget;

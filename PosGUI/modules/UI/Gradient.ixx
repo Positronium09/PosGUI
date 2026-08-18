@@ -5,7 +5,7 @@ export module PGUI.UI.Gradient;
 
 import std;
 
-import PGUI.Shape2D;
+import PGUI.Shape;
 import PGUI.UI.Color;
 import PGUI.Utils;
 

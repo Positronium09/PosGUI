@@ -19,36 +19,22 @@ export namespace PGUI::UI
 	class TextFormat : public ComPtrHolder<IDWriteTextFormat3>
 	{
 		public:
+		TextFormat() noexcept = default;
+
 		explicit(false) TextFormat(const ComPtr<IDWriteTextFormat3>& textFormat) noexcept;
 
-		TextFormat(
+		[[nodiscard]] static auto Create(
+			wzstring_view fontFamilyName, float fontSize,
+			std::span<const FontAxisValue> fontAxisValues,
+			const FontCollection& fontCollection = FontCollection{ nullptr },
+			wzstring_view localeName = GetUserLocaleName()) noexcept -> Result<TextFormat>;
+		[[nodiscard]] static auto Create(
 			wzstring_view fontFamilyName, float fontSize,
 			FontWeight fontWeight = FontWeights::Normal,
 			FontStyle fontStyle = FontStyles::Normal,
 			FontStretch fontStretch = FontStretches::Normal,
 			const FontCollection& fontCollection = FontCollection{ nullptr },
-			wzstring_view localeName = GetUserLocaleName()) noexcept;
-
-		TextFormat(wzstring_view fontFamilyName, float fontSize,
-		           std::span<const FontAxisValue> fontAxisValues,
-					const FontCollection& fontCollection = FontCollection{ nullptr },
-		           wzstring_view localeName = GetUserLocaleName()) noexcept;
-
-		[[nodiscard]] auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Result<void>;
-
-		[[nodiscard]] auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Result<void>;
-
-		[[nodiscard]] auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>;
-
-		[[nodiscard]] auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Result<void>;
-
-		[[nodiscard]] auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
-
-		[[nodiscard]] auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Result<void>;
-
-		[[nodiscard]] auto SetTrimming(const Trimming& trimming) const noexcept -> Result<void>;
-
-		[[nodiscard]] auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>;
+			wzstring_view localeName = GetUserLocaleName()) noexcept -> Result<TextFormat>;
 
 		[[nodiscard]] auto GetFlowDirection() const noexcept -> FlowDirection;
 
@@ -79,5 +65,21 @@ export namespace PGUI::UI
 		[[nodiscard]] auto GetTrimming() const noexcept -> Result<Trimming>;
 
 		[[nodiscard]] auto GetLineSpacing() const noexcept -> Result<LineSpacing>;
+
+		[[nodiscard]] auto SetFlowDirection(FlowDirection flowDirection) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto SetIncrementalTabStop(float incrementalTabStop) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto SetParagraphAlignment(ParagraphAlignment paragraphAlignment) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto SetReadingDirection(ReadingDirection readingDirection) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto SetTextAlignment(TextAlignment textAlignment) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto SetWordWrapping(WordWrapping wordWrapping) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto SetTrimming(const Trimming& trimming) const noexcept -> Result<void>;
+
+		[[nodiscard]] auto SetLineSpacing(const LineSpacing& lineSpacing) const noexcept -> Result<void>;
 	};
 }

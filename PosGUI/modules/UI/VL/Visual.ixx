@@ -31,7 +31,7 @@ export namespace PGUI::UI::VL
 				return Point2F{ this->Get().AnchorPoint() };
 			});
 		}
-		auto SetAnchorPoint(const Point2F& point) const noexcept -> Result<void>
+		[[nodiscard]] auto SetAnchorPoint(const Point2F& point) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &point]
 			{
@@ -46,7 +46,7 @@ export namespace PGUI::UI::VL
 				return this->Get().BackfaceVisibility();
 			});
 		}
-		auto SetBackfaceVisibility(const BackfaceVisibility visibility) const noexcept -> Result<void>
+		[[nodiscard]] auto SetBackfaceVisibility(const BackfaceVisibility visibility) const noexcept -> Result<void>
 		{
 			return CallProjected([this, visibility]
 			{
@@ -61,7 +61,7 @@ export namespace PGUI::UI::VL
 				return this->Get().BorderMode();
 			});
 		}
-		auto SetBorderMode(const BorderMode mode) const noexcept -> Result<void>
+		[[nodiscard]] auto SetBorderMode(const BorderMode mode) const noexcept -> Result<void>
 		{
 			return CallProjected([this, mode]
 			{
@@ -76,7 +76,7 @@ export namespace PGUI::UI::VL
 				return Point3F{ this->Get().CenterPoint() };
 			});
 		}
-		auto SetCenterPoint(const Point3F& point) const noexcept -> Result<void>
+		[[nodiscard]] auto SetCenterPoint(const Point3F& point) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &point]
 			{
@@ -93,7 +93,7 @@ export namespace PGUI::UI::VL
 				return this->Get().CompositeMode();
 			});
 		}
-		auto SetCompositeMode(const CompositeMode mode) const noexcept -> Result<void>
+		[[nodiscard]] auto SetCompositeMode(const CompositeMode mode) const noexcept -> Result<void>
 		{
 			return CallProjected([this, mode]
 			{
@@ -101,14 +101,14 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto EnableHitTestVisible(const bool enabled = true) const noexcept -> Result<void>
+		[[nodiscard]] auto EnableHitTestVisible(const bool enabled = true) const noexcept -> Result<void>
 		{
 			return CallProjected([this, enabled]
 			{
 				this->Get().IsHitTestVisible(enabled);
 			});
 		}
-		auto DisableHitTestVisible() const noexcept -> Result<void> { return EnableHitTestVisible(false); }
+		[[nodiscard]] auto DisableHitTestVisible() const noexcept -> Result<void> { return EnableHitTestVisible(false); }
 		[[nodiscard]] auto IsHitTestVisible() const noexcept -> Result<bool>
 		{
 			return CallProjected([this]
@@ -117,14 +117,14 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto EnablePixelSnapping(const bool enabled = true) const noexcept -> Result<void>
+		[[nodiscard]] auto EnablePixelSnapping(const bool enabled = true) const noexcept -> Result<void>
 		{
 			return CallProjected([this, enabled]
 			{
 				this->Get().IsPixelSnappingEnabled(enabled);
 			});
 		}
-		auto DisablePixelSnapping() const noexcept -> Result<void> { return EnablePixelSnapping(false); }
+		[[nodiscard]] auto DisablePixelSnapping() const noexcept -> Result<void> { return EnablePixelSnapping(false); }
 		[[nodiscard]] auto IsPixelSnappingEnabled() const noexcept -> Result<bool>
 		{
 			return CallProjected([this]
@@ -133,14 +133,14 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto EnableVisibility(const bool enabled = true) const noexcept -> Result<void>
+		[[nodiscard]] auto EnableVisibility(const bool enabled = true) const noexcept -> Result<void>
 		{
 			return CallProjected([this, enabled]
 			{
 				this->Get().IsVisible(enabled);
 			});
 		}
-		auto DisableVisibility() const noexcept -> Result<void> { return EnableVisibility(false); }
+		[[nodiscard]] auto DisableVisibility() const noexcept -> Result<void> { return EnableVisibility(false); }
 		[[nodiscard]] auto IsVisible() const noexcept -> Result<bool>
 		{
 			return CallProjected([this]
@@ -156,12 +156,20 @@ export namespace PGUI::UI::VL
 				return Point3F{ this->Get().Offset() };
 			});
 		}
-		auto SetOffset(const Point3F& offset) const noexcept -> Result<void>
+		[[nodiscard]] auto SetOffset(const Point3F& offset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &offset]
 			{
 				this->Get().Offset(offset);
 			});
+		}
+		[[nodiscard]] auto GetPosition() const noexcept
+		{
+			return GetOffset();
+		}
+		[[nodiscard]] auto SetPosition(const Point3F& position) const noexcept -> Result<void>
+		{
+			return SetOffset(position);
 		}
 
 		[[nodiscard]] auto GetOpacity() const noexcept -> Result<float>
@@ -171,7 +179,7 @@ export namespace PGUI::UI::VL
 				return this->Get().Opacity();
 			});
 		}
-		auto SetOpacity(const float opacity) const noexcept -> Result<void>
+		[[nodiscard]] auto SetOpacity(const float opacity) const noexcept -> Result<void>
 		{
 			return CallProjected([this, opacity]
 			{
@@ -186,7 +194,7 @@ export namespace PGUI::UI::VL
 				return this->Get().Orientation();
 			});
 		}
-		auto SetOrientation(const Quaternion& quaternion) const noexcept -> Result<void>
+		[[nodiscard]] auto SetOrientation(const Quaternion& quaternion) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &quaternion]
 			{
@@ -201,7 +209,7 @@ export namespace PGUI::UI::VL
 				return Point3F{ this->Get().RelativeOffsetAdjustment() };
 			});
 		}
-		auto SetRelativeOffsetAdjustment(const Point3F& adjustment) const noexcept -> Result<void>
+		[[nodiscard]] auto SetRelativeOffsetAdjustment(const Point3F& adjustment) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &adjustment]
 			{
@@ -216,7 +224,7 @@ export namespace PGUI::UI::VL
 				return SizeF{ this->Get().RelativeSizeAdjustment() };
 			});
 		}
-		auto SetRelativeSizeAdjustment(const SizeF& adjustment) const noexcept -> Result<void>
+		[[nodiscard]] auto SetRelativeSizeAdjustment(const SizeF& adjustment) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &adjustment]
 			{
@@ -231,7 +239,7 @@ export namespace PGUI::UI::VL
 				return this->Get().RotationAngle();
 			});
 		}
-		auto SetRotationAngle(const float angle) const noexcept -> Result<void>
+		[[nodiscard]] auto SetRotationAngle(const float angle) const noexcept -> Result<void>
 		{
 			return CallProjected([this, angle]
 			{
@@ -246,7 +254,7 @@ export namespace PGUI::UI::VL
 				return this->Get().RotationAngleInDegrees();
 			});
 		}
-		auto SetRotationAngleInDegrees(const float angle) const noexcept -> Result<void>
+		[[nodiscard]] auto SetRotationAngleInDegrees(const float angle) const noexcept -> Result<void>
 		{
 			return CallProjected([this, angle]
 			{
@@ -261,7 +269,7 @@ export namespace PGUI::UI::VL
 				return Point3F{ this->Get().RotationAxis() };
 			});
 		}
-		auto SetRotationAxis(const Point3F& axis) const noexcept -> Result<void>
+		[[nodiscard]] auto SetRotationAxis(const Point3F& axis) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &axis]
 			{
@@ -276,7 +284,7 @@ export namespace PGUI::UI::VL
 				return Point3F{ this->Get().Scale() };
 			});
 		}
-		auto SetScale(const Point3F& scale) const noexcept -> Result<void>
+		[[nodiscard]] auto SetScale(const Point3F& scale) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &scale]
 			{
@@ -291,7 +299,7 @@ export namespace PGUI::UI::VL
 				return SizeF{ this->Get().Size() };
 			});
 		}
-		auto SetSize(const SizeF& size) const noexcept -> Result<void>
+		[[nodiscard]] auto SetSize(const SizeF& size) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &size]
 			{
@@ -306,7 +314,7 @@ export namespace PGUI::UI::VL
 				return Matrix4x4{ this->Get().TransformMatrix() };
 			});
 		}
-		auto SetTransformMatrix(const Matrix4x4& matrix) const noexcept -> Result<void>
+		[[nodiscard]] auto SetTransformMatrix(const Matrix4x4& matrix) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &matrix]
 			{
@@ -325,7 +333,7 @@ export namespace PGUI::UI::VL
 		});
 	}
 	template <HandleDerivedFrom<WUC::Visual> Projected>
-	auto SetParentForTransformOf(const VisualT<Projected>& visual, const Visual& parentForTransform) noexcept -> Result<void>
+	[[nodiscard]] auto SetParentForTransformOf(const VisualT<Projected>& visual, const Visual& parentForTransform) noexcept -> Result<void>
 	{
 		return CallProjected([&visual, &parentForTransform]
 		{

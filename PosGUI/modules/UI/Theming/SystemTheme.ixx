@@ -11,6 +11,12 @@ import PGUI.Event;
 
 export namespace PGUI::UI::Theming
 {
+	enum class ThemeMode : bool
+	{
+		Dark,
+		Light
+	};
+
 	enum class ColorType
 	{
 		Background = static_cast<int>(winrt::Windows::UI::ViewManagement::UIColorType::Background),
@@ -31,9 +37,21 @@ export namespace PGUI::UI::Theming
 
 		[[nodiscard]] static auto& ColorValuesChanged() noexcept { return colorValuesChangedEvent; }
 
-		[[nodiscard]] static auto IsDarkMode() noexcept -> bool;
+		[[nodiscard]] static auto IsDarkMode() noexcept -> Result<ThemeMode>;
 
-		[[nodiscard]] static auto IsLightMode() noexcept { return !IsDarkMode(); }
+		[[nodiscard]] static auto IsLightMode() noexcept
+		{
+			return IsDarkMode().transform(
+				[](const auto& val)
+				{
+					if (val == ThemeMode::Dark)
+					{
+						return ThemeMode::Light;
+					}
+					return ThemeMode::Dark;
+				}
+			);
+		}
 
 		[[nodiscard]] static auto GetColor(ColorType colorType) noexcept -> Result<RGBA>;
 

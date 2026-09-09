@@ -19,31 +19,11 @@ export namespace PGUI::UI
 
 		[[nodiscard]] auto AllowTransition(const StateT from, StateT to) noexcept -> Result<void>
 		{
-			try
-			{
-				allowedTransitions[from].emplace_back(to);
-				return EmptyResult;
-			}
-			catch (const std::exception& e)
-			{
-				return Unexpected{ Error{ SystemErrorCode::STLFailure }
-				.SetCustomMessage(
-					StringToWString(e.what())) };
-			}
+			return WrapThrowing([&] { allowedTransitions[from].emplace_back(to); });
 		}
 		[[nodiscard]] auto DisallowTransition(const StateT from, StateT to) noexcept -> Result<void>
 		{
-			try
-			{
-				disallowedTransitions[from].emplace_back(to);
-				return EmptyResult;
-			}
-			catch (const std::exception& e)
-			{
-				return Unexpected{ Error{ SystemErrorCode::STLFailure }
-				.SetCustomMessage(
-					StringToWString(e.what())) };
-			}
+			return WrapThrowing([&] { disallowedTransitions[from].emplace_back(to); });
 		}
 
 		[[nodiscard]] auto IsTransitionAllowed(const StateT from, const StateT to) const noexcept -> bool
@@ -97,8 +77,8 @@ export namespace PGUI::UI
 		}
 
 		private:
-		std::map<StateT, std::vector<StateT>> allowedTransitions;
-		std::map<StateT, std::vector<StateT>> disallowedTransitions;
+		std::flat_map<StateT, std::vector<StateT>> allowedTransitions;
+		std::flat_map<StateT, std::vector<StateT>> disallowedTransitions;
 		StateT state;
 	};
 }

@@ -298,7 +298,7 @@ namespace PGUI::UI
 	auto Brush::CreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget) noexcept -> void
 	{
 		ReleaseBrush();
-		std::visit([&renderTarget, this]<typename T>(const T& param)
+		Match(parameters, [&renderTarget, this]<typename T>(const T& param)
 		{
 			if constexpr (std::is_same_v<T, RGBA>)
 			{
@@ -316,7 +316,7 @@ namespace PGUI::UI
 			{
 				brush = BitmapBrush{ renderTarget, param.bitmap, param.bitmapBrushProperties };
 			}
-		}, parameters);
+		});
 	}
 
 	auto Brush::ReleaseBrush() noexcept -> void
@@ -326,18 +326,18 @@ namespace PGUI::UI
 
 	auto Brush::SetGradientBrushRect(RectF rect) noexcept -> void
 	{
-		std::visit([rect]<typename T>(T& param)
+		Match(parameters, [rect]<typename T>(T& param)
 		{
 			if constexpr (GradientBrushParameters<T>)
 			{
 				param.referenceRect = rect;
 			}
-		}, parameters);
+		});
 	}
 
 	Brush::operator ID2D1Brush*() const noexcept
 	{
-		return std::visit([]<typename T>(const T& brush) -> ID2D1Brush*
+		return Match(brush, []<typename T>(const T& brush) -> ID2D1Brush*
 		{
 			if constexpr (!std::is_same_v<std::monostate, T>)
 			{
@@ -347,6 +347,6 @@ namespace PGUI::UI
 			{
 				return nullptr;
 			}
-		}, brush);
+		});
 	}
 }

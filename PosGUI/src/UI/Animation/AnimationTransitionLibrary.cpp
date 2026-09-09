@@ -28,75 +28,60 @@ namespace PGUI::UI::Animation
 	auto AnimationTransitionLibrary::TransitionFromParameters(
 		const TransitionParameters& parameters) noexcept -> Result<AnimationTransition>
 	{
-		try
-		{
-			return Match(
-				parameters,
-				[&](const AccelerateDecelerateTransitionParameters& params)
-				{
-					return AccelerateDecelerateTransition(params);
-				},
-				[&](const ConstantTransitionParameters& params)
-				{
-					return ConstantTransition(params);
-				},
-				[&](const CubicBezierLinearTransitionParameters& params)
-				{
-					return CubicBezierLinearTransition(params);
-				},
-				[&](const CubicTransitionParameters& params)
-				{
-					return CubicTransition(params);
-				},
-				[&](const DiscreteTransitionParameters& params)
-				{
-					return DiscreteTransition(params);
-				},
-				[&](const InstantaneousTransitionParameters& params)
-				{
-					return InstantaneousTransition(params);
-				},
-				[&](const LinearTransitionParameters& params)
-				{
-					return LinearTransition(params);
-				},
-				[&](const LinearTransitionFromSpeedParameters& params)
-				{
-					return LinearTransitionFromSpeed(params);
-				},
-				[&](const ParabolicTransitionFromAccelerationParameters& params)
-				{
-					return ParabolicTransitionFromAcceleration(params);
-				},
-				[&](const ReversalTransitionParameters& params)
-				{
-					return ReversalTransition(params);
-				},
-				[&](const SinusoidalTransitionFromRangeParameters& params)
-				{
-					return SinusoidalTransitionFromRange(params);
-				},
-				[&](const SinusoidalTransitionFromVelocityParameters& params)
-				{
-					return SinusoidalTransitionFromVelocity(params);
-				},
-				[&](const SmoothStopTransitionParameters& params)
-				{
-					return SmoothStopTransition(params);
-				});
-		}
-		catch (const Exception& e)
-		{
-			return Unexpected{ e.GetError() };
-		}
-		catch (const std::exception& e)
-		{
-			return Unexpected{
-				Error{
-					SystemErrorCode::STLFailure
-				}.SetCustomMessage(StringToWString(e.what()))
-			};
-		}
+		return Match(
+			parameters,
+			[&](const AccelerateDecelerateTransitionParameters& params)
+			{
+				return AccelerateDecelerateTransition(params);
+			},
+			[&](const ConstantTransitionParameters& params)
+			{
+				return ConstantTransition(params);
+			},
+			[&](const CubicBezierLinearTransitionParameters& params)
+			{
+				return CubicBezierLinearTransition(params);
+			},
+			[&](const CubicTransitionParameters& params)
+			{
+				return CubicTransition(params);
+			},
+			[&](const DiscreteTransitionParameters& params)
+			{
+				return DiscreteTransition(params);
+			},
+			[&](const InstantaneousTransitionParameters& params)
+			{
+				return InstantaneousTransition(params);
+			},
+			[&](const LinearTransitionParameters& params)
+			{
+				return LinearTransition(params);
+			},
+			[&](const LinearTransitionFromSpeedParameters& params)
+			{
+				return LinearTransitionFromSpeed(params);
+			},
+			[&](const ParabolicTransitionFromAccelerationParameters& params)
+			{
+				return ParabolicTransitionFromAcceleration(params);
+			},
+			[&](const ReversalTransitionParameters& params)
+			{
+				return ReversalTransition(params);
+			},
+			[&](const SinusoidalTransitionFromRangeParameters& params)
+			{
+				return SinusoidalTransitionFromRange(params);
+			},
+			[&](const SinusoidalTransitionFromVelocityParameters& params)
+			{
+				return SinusoidalTransitionFromVelocity(params);
+			},
+			[&](const SmoothStopTransitionParameters& params)
+			{
+				return SmoothStopTransition(params);
+			});
 	}
 
 	auto AnimationTransitionLibrary::AccelerateDecelerateTransition(

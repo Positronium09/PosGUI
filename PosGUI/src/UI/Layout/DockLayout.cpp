@@ -23,13 +23,45 @@ namespace PGUI::UI::Layout
 		dockPriorities.insert_or_assign(DockPosition::Bottom, DockPriority::Fourth);
 	}
 
-	auto DockLayout::SetDockPosition(const LayoutItem& item, const DockPosition position) -> void
+	auto DockLayout::SetDockPosition(const LayoutItem& item, const DockPosition position) -> Result<void>
 	{
-		if (const auto result = GetItemIndex(item);
-			result.has_value())
+		const auto result = GetItemIndex(item);
+		if (!result.has_value())
 		{
-			SetDockPosition(*result, position);
+			return Unexpected{ result.error() };
 		}
+
+		return SetDockPosition(*result, position);
+	}
+
+	auto DockLayout::SetDockPosition(const std::size_t id, const DockPosition position) noexcept -> Result<void>
+	{
+		if (!dockPriorities.contains(position))
+		{
+			return Unexpected{ Error{ ErrorCode::InvalidArgument }
+				.AddDetail(L"Dock Position", std::to_wstring(ToUnderlying(position)))
+				.SuggestFix(L"Position must be one of the declared DockPosition enumerators") };
+		}
+		if (!dockPositions.contains(id))
+		{
+			return Unexpected{ Error{ ErrorCode::InvalidArgument }
+				.AddDetail(L"Item Id", std::to_wstring(id))
+				.SuggestFix(L"Add the item to the layout before setting its dock position") };
+		}
+
+		dockPositions[id] = position;
+		RearrangeItems();
+
+		return EmptyResult;
+	}
+
+	auto DockLayout::GetItemPosition(const std::size_t id) const noexcept -> Result<DockPosition>
+	{
+		if (dockPositions.contains(id))
+		{
+			return dockPositions.at(id);
+		}
+		return Unexpected{ Error{ ErrorCode::InvalidArgument } };
 	}
 
 	auto DockLayout::GetDockPosition(const LayoutItem& item) const noexcept -> Result<DockPosition>
@@ -85,45 +117,61 @@ namespace PGUI::UI::Layout
 
 	auto DockLayout::SetDockPriority(
 		const DockPosition position,
-		const DockPriority priority) noexcept -> void
+		const DockPriority priority) noexcept -> Result<void>
 	{
-		if (position == DockPosition::None || position == DockPosition::Fill)
+		if (position == DockPosition::None || position == DockPosition::Fill ||
+		    priority == DockPriority::None)
 		{
-			return;
-		}
-		if (dockPriorities[position] == priority)
-		{
-			return;
+			return Unexpected{ Error{ ErrorCode::InvalidArgument }
+				.AddDetail(L"Dock Position", std::to_wstring(ToUnderlying(position)))
+				.AddDetail(L"Dock Priority", std::to_wstring(ToUnderlying(priority)))
+				.SuggestFix(L"DockPriority::None is reserved for DockPosition::None and DockPosition::Fill") };
 		}
 
-		const auto& [toSwap, samePriority] = *std::ranges::find_if(
+		const auto current = dockPriorities.find(position);
+		if (current == dockPriorities.end())
+		{
+			return Unexpected{ Error{ ErrorCode::InvalidArgument }
+				.AddDetail(L"Dock Position", std::to_wstring(ToUnderlying(position)))
+				.SuggestFix(L"Position must be one of the declared DockPosition enumerators") };
+		}
+
+		const auto previous = current->second;
+		if (previous == priority)
+		{
+			return EmptyResult;
+		}
+
+		const auto toSwap = std::ranges::find_if(
 			dockPriorities,
 			[priority](const auto& pair)
 			{
 				return pair.second == priority;
 			});
+		if (toSwap == dockPriorities.end())
+		{
+			return Unexpected{ Error{ ErrorCode::NotFound }
+				.AddDetail(L"Dock Priority", std::to_wstring(ToUnderlying(priority))) };
+		}
 
-		dockPriorities.insert_or_assign(toSwap, dockPriorities.at(position));
+		const auto swapPosition = toSwap->first;
+		dockPriorities[swapPosition] = previous;
 		dockPriorities[position] = priority;
 		RearrangeItems();
+
+		return EmptyResult;
 	}
 
-	auto DockLayout::SetDockPosition(const std::size_t id, const DockPosition position) noexcept -> void
+	auto DockLayout::GetDockPriority(const DockPosition position) const noexcept -> Result<DockPriority>
 	{
-		if (dockPositions.contains(id))
+		const auto it = dockPriorities.find(position);
+		if (it == dockPriorities.end())
 		{
-			dockPositions[id] = position;
-			RearrangeItems();
+			return Unexpected{ Error{ ErrorCode::NotFound }
+				.AddDetail(L"Dock Position", std::to_wstring(ToUnderlying(position))) };
 		}
-	}
 
-	auto DockLayout::GetItemPosition(const std::size_t id) const noexcept -> Result<DockPosition>
-	{
-		if (dockPositions.contains(id))
-		{
-			return dockPositions.at(id);
-		}
-		return Unexpected{ Error{ ErrorCode::InvalidArgument } };
+		return it->second;
 	}
 
 	auto DockLayout::RearrangeItems() noexcept -> void

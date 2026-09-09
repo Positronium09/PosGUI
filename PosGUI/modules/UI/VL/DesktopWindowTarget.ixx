@@ -6,6 +6,7 @@ export module PGUI.UI.VL.DesktopWindowTarget;
 import PGUI.Window;
 import PGUI.ProjectionHolder;
 import PGUI.ErrorHandling;
+import PGUI.UI.VL.Visual;
 
 namespace WUCD = winrt::Windows::UI::Composition::Desktop;
 
@@ -15,5 +16,20 @@ export namespace PGUI::UI::VL
 	{
 		public:
 		[[nodiscard]] static auto Create(RawWindowPtr<> wnd, bool isTopMost = false) noexcept -> Result<DesktopWindowTarget>;
+
+		[[nodiscard]] auto GetRoot() const noexcept -> Result<Visual>
+		{
+			return CallProjected([this]
+			{
+				return Visual{ Get().Root() };
+			});
+		}
+		[[nodiscard]] auto SetRoot(const Visual& root) const noexcept -> Result<void>
+		{
+			return CallProjected([this, &root]
+			{
+				Get().Root(root.Get());
+			});
+		}
 	};
 }

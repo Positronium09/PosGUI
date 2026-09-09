@@ -158,12 +158,12 @@ namespace PGUI::Detail
 	template <typename... Ts, typename... Us, typename... Rest>
 	struct ConcatTypeLists<TypeList<Ts...>, TypeList<Us...>, Rest...>
 	{
-		using Type = typename ConcatTypeLists<TypeList<Ts..., Us...>, Rest...>::Type;
+		using Type = ConcatTypeLists<TypeList<Ts..., Us...>, Rest...>::Type;
 	};
 }
 
 export namespace PGUI
 {
 	template <typename... Lists>
-	using CombineTypeLists = typename Detail::ConcatTypeLists<Lists...>::Type;
+	using CombineTypeLists = Detail::ConcatTypeLists<Lists...>::Type;
 }

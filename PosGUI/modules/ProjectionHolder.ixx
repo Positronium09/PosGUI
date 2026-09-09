@@ -74,24 +74,10 @@ export namespace PGUI
 
 	template <typename F>
 	[[nodiscard]] auto CallProjected(
-		F&& f, 
-		const std::source_location& location = std::source_location::current()) noexcept -> Result<std::invoke_result_t<F>>
+		F&& f,
+		const std::source_location& location = std::source_location::current()) noexcept
+		-> Result<std::remove_cvref_t<std::invoke_result_t<F>>>
 	{
-		try
-		{
-			if constexpr (std::is_void_v<std::invoke_result_t<F>>)
-			{
-				std::forward<F>(f)();
-				return EmptyResult;
-			}
-			else { return std::forward<F>(f)(); }
-		}
-		catch (const winrt::hresult_error& e)
-		{
-			return Unexpected{
-				Error{ std::error_code{ static_cast<int>(e.code()), std::system_category() }, location }
-				.SetCustomMessage(e.message().c_str())
-			};
-		}
+		return WrapThrowing(std::forward<F>(f), location);
 	}
 }

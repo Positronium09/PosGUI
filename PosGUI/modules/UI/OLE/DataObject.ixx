@@ -71,23 +71,16 @@ export namespace PGUI::UI::OLE
 			{
 				return Unexpected{ storageResult.error() };
 			}
-			try
+			auto copyResult = formatData.Copy();
+			if (!copyResult.has_value())
 			{
-				auto copyResult = formatData.Copy();
-				if (!copyResult.has_value())
-				{
-					throw Exception{ copyResult.error() };
-				}
-				formatStoragePairs.emplace_back(MoveChecked(copyResult).value(), MoveChecked(storageResult).value());
-			}
-			catch (const std::exception& e)
-			{
-				return Unexpected{ Error{
-					SystemErrorCode::STLFailure
-				}.SetCustomMessage(StringToWString(e.what())) };
+				return Unexpected{ copyResult.error() };
 			}
 
-			return EmptyResult;
+			return WrapThrowing([&]
+			{
+				formatStoragePairs.emplace_back(MoveChecked(copyResult).value(), MoveChecked(storageResult).value());
+			});
 		}
 
 		[[nodiscard]] auto AddData(const StoredType& data) noexcept -> Result<void>

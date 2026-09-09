@@ -359,9 +359,12 @@ namespace PGUI
 			if (const auto it = window->timerMap.find(timerId);
 				it != window->timerMap.end())
 			{
-				const auto callback = it->second;
-				callback(timerId);
-				return 0;
+				if (const auto callback = it->second;
+					callback != nullptr)
+				{
+					callback(timerId);
+					return 0;
+				}
 			}
 		}
 
@@ -451,67 +454,67 @@ namespace PGUI
 	}
 
 	auto Window::AddTimer(const TimerId id, const std::chrono::milliseconds delay,
-	                      const std::optional<TimerCallback>& callback) noexcept -> TimerId
+	                      const std::optional<TimerCallback>& callback) noexcept -> Result<TimerId>
 	{
 		if (const auto setTimerId =
 					SetTimer(hWnd, id, static_cast<UINT>(delay.count()), nullptr);
 			setTimerId == 0)
 		{
-			const auto error = GetLastError();
-
-			Logger::Error(
-				Error{ error }
-			);
-
-			return setTimerId;
+			return Unexpected{
+				Error{ GetLastError() }
+				.AddDetail(L"Timer Id", std::to_wstring(id))
+				.AddDetail(L"Delay", std::to_wstring(delay.count()))
+			};
 		}
 
-		if (callback.has_value())
+		try
 		{
-			try
+			if (callback.has_value())
 			{
 				timerMap[id] = *callback;
 			}
-			catch (const std::exception& e)
+			else
 			{
-				Logger::Error(
-					Error{ SystemErrorCode::STLFailure }
-					.AddDetail(L"Exception", StringToWString(e.what()))
-				);
-
-				KillTimer(hWnd, id);
-				return 0;
+				timerMap[id] = nullptr;
 			}
+		}
+		catch (const std::exception& e)
+		{
+			KillTimer(hWnd, id);
+
+			return Unexpected{
+				Error{ SystemErrorCode::STLFailure }
+				.AddDetail(L"Timer Id", std::to_wstring(id))
+				.AddDetail(L"Exception", StringToWString(e.what()))
+			};
 		}
 
 		return id;
 	}
 
-	auto Window::RemoveTimer(const TimerId id) noexcept -> void
+	auto Window::RemoveTimer(const TimerId id) noexcept -> Result<void>
 	{
 		if (!HasTimer(id))
 		{
-			return;
+			return Unexpected{
+				Error{ ErrorCode::NotFound }
+				.AddDetail(L"Timer Id", std::to_wstring(id))
+			};
 		}
 
-		if (const auto succeeded = KillTimer(hWnd, id);
-			succeeded == 0)
-		{
-			if (const auto error = GetLastError();
-				error != ERROR_SUCCESS)
-			{
-				Logger::Error(
-					Error{ error }
-				);
+		const auto succeeded = KillTimer(hWnd, id);
+		timerMap.erase(id);
 
-				return;
+		if (succeeded == 0)
+		{
+			if (Error error{ GetLastError() };
+				error.IsFailure())
+			{
+				return Unexpected{ error.AddDetail(L"Timer Id", std::to_wstring(id)) };
 			}
 		}
 
-		if (timerMap.contains(id))
-		{
-			timerMap.erase(id);
-		}
+		return EmptyResult;
 	}
 
 	auto Window::GetChildWindow(const HWND hwnd) const noexcept -> RawWindowPtr<Window>

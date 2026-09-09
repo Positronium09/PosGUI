@@ -48,8 +48,8 @@ export namespace PGUI::UI
 			/*  */
 		}
 
-		auto CreateDeviceResources() -> void override;
-		auto DiscardDeviceResources() -> void override;
+		auto CreateDeviceResources() noexcept -> Result<void> override;
+		auto DiscardDeviceResources() noexcept -> Result<void> override;
 
 		private:
 		auto OnNCCreate(MessageID msg, Argument1 arg1, Argument2 arg2) noexcept -> MessageHandlerResult;
@@ -69,7 +69,7 @@ export namespace PGUI::UI
 
 		auto RedrawRequested(RawUIElementPtr<> element) noexcept -> void;
 
-		auto Draw(const Graphics& graphics) noexcept -> void final;
+		auto Draw(const Graphics& graphics) noexcept -> Result<void> final;
 
 		Event<RawUIElementPtr<>> redrawRequestedEvent;
 		RawUIElementPtr<> hoveredElement;

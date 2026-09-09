@@ -134,9 +134,9 @@ export namespace PGUI::UI
 		public:
 		explicit Clip() noexcept = default;
 
-		explicit Clip(ClipParameters parameters) noexcept;
+		explicit Clip(const ClipParameters& parameters) noexcept;
 
-		auto CreateClip() noexcept -> void;
+		[[nodiscard]] auto CreateClip() noexcept -> Result<void>;
 
 		auto ReleaseClip() noexcept -> void;
 

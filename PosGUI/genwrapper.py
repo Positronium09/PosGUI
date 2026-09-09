@@ -6,14 +6,22 @@
     python genwrapper.py Visual --ixx
     python genwrapper.py Visual -o D:\\Code\\CPP\\PosGUI\\PosGUI
 
-Emits the .ixx declarations and the .cpp definitions following PGUI conventions:
-Result<T> + CallProjected, Get/Set pairs, the Enable/Disable/Is triple for booleans,
-and a //TODO line for anything whose type has no PGUI mapping yet.
+    python genwrapper.py --status
+
+Emits the .ixx following PGUI conventions: Result<T> + CallProjected, Get/Set pairs,
+the Enable/Disable/Is triple for booleans, and a //TODO line for anything whose type
+has no PGUI mapping yet. Every wrapper is a template, so there is no .cpp to emit.
+
+Which types already have wrappers is discovered by scanning modules/UI/VL rather than
+kept in a table here, matching each wrapper to its winrt type by the projected type in
+its base specifier rather than by file or class name, which drift. --status reports
+done / stub / missing for the whole namespace.
 
 Requires: pip install dnfile
 """
 import argparse
 import os
+import re
 import sys
 
 try:
@@ -40,32 +48,35 @@ TYPE_MAP = {
     "Windows.Foundation.Numerics.Matrix3x2": ("Matrix3x2", True),
     "Windows.Foundation.Numerics.Matrix4x4": ("Matrix4x4", True),
     "Windows.Foundation.TimeSpan": ("std::chrono::milliseconds", True),
+    "Windows.UI.Color": ("RGBA", True),
+    "Windows.Graphics.SizeInt32": ("SizeInt32", True),
 }
 
 # property names whose float2 means extent, not position
 SIZE_LIKE = ("Size", "SizeAdjustment")
 
-# winrt runtime classes that have a PGUI wrapper: passed as `const X&`, unwrapped with .Get()
-WRAPPER_TYPES = {
-    "Windows.UI.Composition.CompositionObject": "CompositionObject",
-    "Windows.UI.Composition.Visual": "Visual",
-    "Windows.UI.Composition.ContainerVisual": "ContainerVisual",
-    "Windows.UI.Composition.VisualCollection": "VisualCollection",
-}
-
-# winrt enums / classes already wrapped in PGUI, keyed by metadata name
-KNOWN_WRAPPERS = {
-    "Windows.UI.Composition.CompositionBackfaceVisibility": ("BackfaceVisibility", False),
-    "Windows.UI.Composition.CompositionBorderMode": ("BorderMode", False),
-    "Windows.UI.Composition.CompositionCompositeMode": ("CompositeMode", False),
-}
-
 SCALARS = {"bool", "float", "double", "std::int32_t", "std::uint32_t",
            "std::int64_t", "std::uint64_t"}
 
-# only CompositionObject is templated on the projected type; every other PGUI
-# wrapper base is a plain class. Bases that do not live in their own module:
-BASE_MODULE = {}
+# Filled by discover(); see there for the shapes each one holds.
+WRAPPER_TYPES = {}      # winrt metadata name -> PGUI class, for finished class wrappers only
+WRAPPER_MODULE = {}     # PGUI class -> module to import it from
+KNOWN_WRAPPERS = {}     # winrt metadata name -> (PGUI alias, needs explicit construction)
+STUBS = {}              # winrt metadata name -> module of a file that exists but is empty
+NAMESPACES = {}         # winrt metadata name -> module covering it as a namespace, not a class
+
+# files under modules/UI/VL that are not type wrappers and never will be
+NOT_WRAPPERS = {"VL", "VLEnums"}
+
+MODULE_RE = re.compile(r"^\s*export\s+module\s+([\w.]+)\s*;", re.M)
+ALIAS_RE = re.compile(r"^\s*namespace\s+(\w+)\s*=\s*([\w:]+)\s*;", re.M)
+NS_MODULE_RE = re.compile(r"^\s*export\s+namespace\s+PGUI::UI::VL::(\w+)", re.M)
+CLASS_RE = re.compile(
+    r"^[ \t]*(?:template[ \t]*<(?P<targs>[^\n]*)>[ \t]*\r?\n)?"
+    r"[ \t]*class[ \t]+(?P<name>\w+)[ \t]*:[ \t]*public[ \t]+"
+    r"(?P<base>[\w:]+)[ \t]*<[ \t]*(?P<arg>[\w:]+)[ \t]*>",
+    re.M)
+TARG_DEFAULT_RE = re.compile(r"=\s*([\w:]+)\s*$")
 
 ELEM = {
     0x01: "void", 0x02: "bool", 0x03: "char16", 0x04: "int8", 0x05: "uint8",
@@ -73,6 +84,125 @@ ELEM = {
     0x0A: "int64", 0x0B: "uint64", 0x0C: "float", 0x0D: "double",
     0x0E: "string", 0x1C: "object",
 }
+
+
+def name_candidates(*names):
+    """Both spellings, both directions: ColorBrush <-> CompositionColorBrush."""
+    out = set(names)
+    out |= {"Composition" + n for n in list(out)}
+    out |= {n[len("Composition"):] for n in list(out)
+            if n.startswith("Composition") and len(n) > len("Composition")}
+    return out
+
+
+def resolve_projected(qualified, aliases, namespace=DEFAULT_NAMESPACE):
+    """'WUC::SpriteVisual' -> 'Windows.UI.Composition.SpriteVisual' via the file's aliases."""
+    if "::" not in qualified:
+        return None
+    alias, _, name = qualified.rpartition("::")
+    return f"{aliases.get(alias, namespace)}.{name}"
+
+
+def wrapped_type_of(text, aliases, namespace=DEFAULT_NAMESPACE):
+    """(metadata name, PGUI name) read from the first wrapper class's base specifier.
+
+    A plain class names the projection directly - CompositionObjectT<WUC::CompositionDrawingSurface>.
+    A class template passes its own parameter down to the base, so the projection comes from
+    that parameter's default instead - 'Projected = WUC::CompositionObject'.
+    """
+    m = CLASS_RE.search(text)
+    if m is None:
+        return None, None
+
+    cls, targs = m.group("name"), m.group("targs")
+    templated = targs is not None
+    if templated:
+        default = TARG_DEFAULT_RE.search(targs)
+        projected = default.group(1) if default else None
+    else:
+        projected = m.group("arg")
+
+    pgui = cls
+    if templated:
+        alias = re.search(rf"^\s*using\s+(\w+)\s*=\s*{re.escape(cls)}\s*<\s*>\s*;", text, re.M)
+        pgui = alias.group(1) if alias else (cls[:-1] if cls.endswith("T") else cls)
+
+    if projected is None:
+        return None, pgui
+    return resolve_projected(projected, aliases, namespace), pgui
+
+
+def discover(vl_root, namespace=DEFAULT_NAMESPACE):
+    """Scan modules/UI/VL for wrappers instead of trusting a hardcoded table.
+
+    A wrapper is matched to its winrt type by the PROJECTED TYPE in its base specifier,
+    not by the file or class name - those drift, and the base is the one spelling that
+    cannot: SurfaceInterop.ixx holds a CompositionDrawingSurface, ColorBrush.ixx a
+    CompositionColorBrush. See wrapped_type_of for the two shapes it reads.
+
+    Name matching survives only as the fallback for a class whose base cannot be parsed,
+    and for a stub, which declares no class to read a base from. A file whose export
+    namespace carries a fourth segment (PGUI::UI::VL::Compositor) is namespace-style: it
+    covers its type without a class, so it is recorded apart from WRAPPER_TYPES and never
+    offered to the generator as a constructible type.
+    """
+    if not os.path.isdir(vl_root):
+        print(f"warning: no VL directory at {vl_root}; nothing discovered", file=sys.stderr)
+        return
+
+    for dirpath, _, filenames in os.walk(vl_root):
+        for fn in filenames:
+            if not fn.endswith(".ixx"):
+                continue
+            stem = fn[:-4]
+            if stem in NOT_WRAPPERS:
+                continue
+            path = os.path.join(dirpath, fn)
+            with open(path, encoding="utf-8", errors="replace") as f:
+                text = f.read()
+
+            m = MODULE_RE.search(text)
+            if m is None:
+                print(f"warning: {path} has no export module declaration", file=sys.stderr)
+                continue
+            module = m.group(1)
+            if module.rsplit(".", 1)[-1] in NOT_WRAPPERS:
+                continue
+            if not module.startswith("PGUI.UI.VL."):
+                print(f"warning: {path} exports '{module}', expected a PGUI.UI.VL.* module",
+                      file=sys.stderr)
+
+            last = module.rsplit(".", 1)[-1]
+            aliases = {a: ns.removeprefix("winrt::").replace("::", ".")
+                       for a, ns in ALIAS_RE.findall(text)}
+
+            ns_module = NS_MODULE_RE.search(text)
+            if ns_module is not None:
+                for name in name_candidates(ns_module.group(1)):
+                    NAMESPACES.setdefault(f"{namespace}.{name}", module)
+                continue
+
+            wrapped, pgui = wrapped_type_of(text, aliases, namespace)
+            if pgui is None:
+                for name in name_candidates(stem, last):
+                    STUBS.setdefault(f"{namespace}.{name}", module)
+                continue
+
+            if wrapped is not None:
+                WRAPPER_TYPES[wrapped] = pgui
+            else:
+                print(f"warning: {path} declares {pgui} but its projected type could not be "
+                      f"read from the base specifier; falling back to name matching",
+                      file=sys.stderr)
+                for name in name_candidates(stem, last, pgui):
+                    WRAPPER_TYPES[f"{namespace}.{name}"] = pgui
+            WRAPPER_MODULE[pgui] = module
+
+    enums_path = os.path.join(vl_root, "VLEnums.ixx")
+    if os.path.isfile(enums_path):
+        with open(enums_path, encoding="utf-8", errors="replace") as f:
+            for alias, winrt_name in re.findall(r"^\s*using\s+(\w+)\s*=\s*\w+::(\w+)\s*;", f.read(), re.M):
+                KNOWN_WRAPPERS[f"{namespace}.{winrt_name}"] = (alias, False)
 
 
 def decompress_uint(data, i):
@@ -312,7 +442,7 @@ def gen_free_functions(entries, indent="\t"):
         if s:
             value = arg_name(name)
             out.append(head)
-            out.append(f"{indent}auto Set{name}Of(const {owner}T<Projected>& {arg}, const {pgui}& {value}) noexcept -> Result<void>")
+            out.append(f"{indent}[[nodiscard]] auto Set{name}Of(const {owner}T<Projected>& {arg}, const {pgui}& {value}) noexcept -> Result<void>")
             out.append(f"{indent}{{")
             out.append(f"{indent}\treturn CallProjected([&{arg}, &{value}]")
             out.append(f"{indent}\t{{")
@@ -348,9 +478,9 @@ def gen_members(props, indent="\t\t", force_todo=frozenset()):
             continue
         if pgui == "bool":
             en, dis, is_ = bool_names(name)
-            block(f"auto {en}(const bool enabled = true) const noexcept -> Result<void>",
+            block(f"[[nodiscard]] auto {en}(const bool enabled = true) const noexcept -> Result<void>",
                   ("[this, enabled]", f"this->Get().{name}(enabled);"))
-            out.append(f"{indent}auto {dis}() const noexcept -> Result<void> {{ return {en}(false); }}")
+            out.append(f"{indent}[[nodiscard]] auto {dis}() const noexcept -> Result<void> {{ return {en}(false); }}")
             block(f"[[nodiscard]] auto {is_}() const noexcept -> Result<bool>",
                   ("[this]", f"return this->Get().{name}();"))
             out.append("")
@@ -364,46 +494,9 @@ def gen_members(props, indent="\t\t", force_todo=frozenset()):
             scalar = is_scalar(pgui)
             param = f"const {pgui} {a}" if scalar else f"const {pgui}& {a}"
             cap = f"[this, {a}]" if scalar else f"[this, &{a}]"
-            block(f"auto Set{name}({param}) const noexcept -> Result<void>",
+            block(f"[[nodiscard]] auto Set{name}({param}) const noexcept -> Result<void>",
                   (cap, f"this->Get().{name}({a});"))
         out.append("")
-    while out and out[-1] == "":
-        out.pop()
-    return out
-
-
-def gen_definitions(class_name, props, indent="\t"):
-    out = []
-
-    def block(sig, body):
-        out.append(f"{indent}{sig}")
-        out.append(f"{indent}{{")
-        out.extend(f"{indent}\t{line}" for line in body)
-        out.append(f"{indent}}}")
-        out.append("")
-
-    for name, wtype, g, s in props:
-        pgui, needs_wrap = map_type(wtype, name)
-        if pgui is None:
-            continue
-        if pgui == "bool":
-            en, _, is_ = bool_names(name)
-            block(f"auto {class_name}::{en}(const bool enabled) const noexcept -> Result<void>",
-                  ["return CallProjected([this, enabled]", "{", f"\tGet().{name}(enabled);", "});"])
-            block(f"auto {class_name}::{is_}() const noexcept -> Result<bool>",
-                  ["return CallProjected([this]", "{", f"\treturn Get().{name}();", "});"])
-            continue
-        if g:
-            expr = f"{pgui}{{ Get().{name}() }}" if needs_wrap else f"Get().{name}()"
-            block(f"auto {class_name}::Get{name}() const noexcept -> Result<{pgui}>",
-                  ["return CallProjected([this]", "{", f"\treturn {expr};", "});"])
-        if s:
-            a = arg_name(name)
-            scalar = pgui in SCALARS or pgui in (v[0] for v in KNOWN_WRAPPERS.values())
-            param = f"const {pgui} {a}" if scalar else f"const {pgui}& {a}"
-            cap = f"[this, {a}]" if scalar else f"[this, &{a}]"
-            block(f"auto {class_name}::Set{name}({param}) const noexcept -> Result<void>",
-                  [f"return CallProjected({cap}", "{", f"\tGet().{name}({a});", "});"])
     while out and out[-1] == "":
         out.pop()
     return out
@@ -439,7 +532,7 @@ def gen_methods(methods, indent="\t\t"):
 
         call = f"this->Get().{name}({', '.join(args)});"
         result = "void" if ret_pgui == "void" else ret_pgui
-        nodiscard = "" if ret_pgui == "void" else "[[nodiscard]] "
+        nodiscard = "[[nodiscard]] "
         if ret_pgui != "void":
             call = f"return {ret_pgui}{{ this->Get().{name}({', '.join(args)}) }};" \
                 if ret in WRAPPER_TYPES or map_type(ret, "")[1] \
@@ -458,17 +551,15 @@ def gen_methods(methods, indent="\t\t"):
     return out
 
 
-def base_spec(class_name, base_wrapper):
-    if base_wrapper in TEMPLATED_BASES:
-        return f"{base_wrapper}<WUC::{class_name}>"
-    return base_wrapper
+def module_of(pgui_name):
+    """Discovered module for a wrapper, falling back to the conventional name."""
+    return WRAPPER_MODULE.get(pgui_name, f"PGUI.UI.VL.{pgui_name}")
 
 
 def base_import(base_wrapper):
-    owner = BASE_MODULE.get(base_wrapper, base_wrapper)
     if base_wrapper == "ProjectionHolder":
         return "import PGUI.ProjectionHolder;"
-    return f"import PGUI.UI.VL.{owner};"
+    return f"import {module_of(base_wrapper)};"
 
 
 def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_todo=frozenset()):
@@ -500,7 +591,7 @@ def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_t
                 referenced.add(WRAPPER_TYPES[t])
     referenced.discard(class_name)
     referenced.discard(base_wrapper)
-    lines += [f"import PGUI.UI.VL.{w};" for w in sorted(referenced)]
+    lines += [f"import {module_of(w)};" for w in sorted(referenced)]
 
     lines += [
         "",
@@ -532,43 +623,77 @@ def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_t
     return "\n".join(lines)
 
 
-def render_cpp(class_name, base_wrapper, props):
-    lines = [
-        "module;",
-        "#include <winrt/Windows.UI.Composition.h>",
-        "",
-        f"module PGUI.UI.VL.{class_name};",
-        "",
-        "import std;",
-        "",
-        "import PGUI.ErrorHandling;",
-        "import PGUI.ProjectionHolder;",
-        "import PGUI.Shape;",
-        base_import(base_wrapper),
-        "import PGUI.UI.VL.VLEnums;",
-        "",
-        "namespace WUC = winrt::Windows::UI::Composition;",
-        "",
-        "namespace PGUI::UI::VL",
-        "{",
-    ]
-    lines += gen_definitions(class_name, props)
-    lines += ["}", ""]
-    return "\n".join(lines)
+def report_status(md, namespace=DEFAULT_NAMESPACE):
+    """done / stub / missing for every runtime class in the namespace."""
+    classes, values = [], []
+    for full_name, (_, row) in md.by_name.items():
+        if not full_name.startswith(namespace + "."):
+            continue
+        if "." in full_name[len(namespace) + 1:]:
+            continue
+        flags = getattr(row, "Flags", None)
+        if flags is not None and getattr(flags, "tdInterface", False):
+            continue
+        name = short(full_name)
+        if name.startswith("I") and name[1:2].isupper():
+            continue
+        # enums extend System.Enum, structs/delegates System.ValueType or MulticastDelegate;
+        # only runtime classes get a wrapper, the rest are aliased in VLEnums or used directly
+        if md.base_of(full_name) in ("System.Enum", "System.ValueType", "System.MulticastDelegate"):
+            values.append(full_name)
+        else:
+            classes.append(full_name)
+
+    done = sorted(n for n in classes if n in WRAPPER_TYPES)
+    namespaced = sorted(n for n in classes if n not in WRAPPER_TYPES and n in NAMESPACES)
+    stub = sorted(n for n in classes
+                  if n not in WRAPPER_TYPES and n not in NAMESPACES and n in STUBS)
+    missing = sorted(set(classes) - set(done) - set(namespaced) - set(stub))
+    aliased = sorted(n for n in values if n in KNOWN_WRAPPERS)
+    unaliased = sorted(set(values) - set(aliased))
+
+    print(f"{namespace}  -  {len(classes)} runtime classes, {len(values)} enums/structs\n")
+    for label, group in (("done", done), ("namespace, not a class", namespaced),
+                         ("stub", stub), ("aliased in VLEnums", aliased)):
+        if not group:
+            continue
+        print(f"{label} ({len(group)}):")
+        for n in group:
+            extra = (WRAPPER_TYPES.get(n) or NAMESPACES.get(n)
+                     or KNOWN_WRAPPERS.get(n, (None,))[0] or STUBS.get(n, ""))
+            print(f"    {short(n):<44} {extra}")
+        print()
+    print(f"classes with no wrapper ({len(missing)}):")
+    for n in missing:
+        print(f"    {short(n)}")
+    print(f"\nenums/structs not aliased ({len(unaliased)}) - only needed once something uses them")
 
 
 def main():
+    here = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser(description="Generate a PGUI wrapper from WinRT metadata.")
-    ap.add_argument("type", help="projected type, e.g. Visual or Windows.UI.Composition.Visual")
+    ap.add_argument("type", nargs="?", help="projected type, e.g. Visual or Windows.UI.Composition.Visual")
     ap.add_argument("--winmd", default=DEFAULT_WINMD)
     ap.add_argument("--base", default=None, help="PGUI base wrapper (default: inferred)")
-    ap.add_argument("--ixx", action="store_true", help="emit only the .ixx")
-    ap.add_argument("--cpp", action="store_true", help="emit only the .cpp")
+    ap.add_argument("--root", default=here,
+                    help="project root holding modules/UI/VL (default: this script's directory)")
+    ap.add_argument("--status", action="store_true",
+                    help="report which types in the namespace are done, stubbed or missing, then exit")
     ap.add_argument("-o", "--outdir", default=None,
-                    help="write modules/UI/VL/<T>.ixx and src/UI/VL/<T>.cpp under this project root")
+                    help="write modules/UI/VL/<T>.ixx under this project root instead of stdout")
     args = ap.parse_args()
 
+    if not args.status and args.type is None:
+        ap.error("a type is required unless --status is given")
+
+    discover(os.path.join(args.root, "modules", "UI", "VL"))
+
     md = Winmd(args.winmd)
+
+    if args.status:
+        report_status(md)
+        return
+
     full_name = md.resolve_name(args.type)
     class_name = short(full_name)
     props = md.class_properties(full_name)

@@ -11,6 +11,7 @@ import PGUI.Factories;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 import PGUI.Shape;
+import PGUI.Utils;
 import PGUI.UI.D2D.D2DPathGeometry;
 
 namespace PGUI::UI
@@ -84,30 +85,34 @@ namespace PGUI::UI
 		PathClip{ geometry }
 	{ }
 
-	Clip::Clip(ClipParameters parameters) noexcept :
+	Clip::Clip(const ClipParameters& parameters) noexcept :
 		parameters{ parameters }
 	{ }
 
-	auto Clip::CreateClip() noexcept -> void
+	auto Clip::CreateClip() noexcept -> Result<void>
 	{
 		ReleaseClip();
-		std::visit([this]<typename T>(const T& parameters)
+		return Match(parameters, [this]<typename T>(const T& parameters) -> Result<void>
 		{
 			if constexpr (std::is_same_v<T, RectangleClipParameters>)
 			{
 				clip = RectangleClip{ parameters.rect };
+				return EmptyResult;
 			}
 			else if constexpr (std::is_same_v<T, RoundedRectangleClipParameters>)
 			{
 				clip = RoundedRectangleClip{ parameters.rect };
+				return EmptyResult;
 			}
 			else if constexpr (std::is_same_v<T, EllipseClipParameters>)
 			{
 				clip = EllipseClip{ parameters.ellipse };
+				return EmptyResult;
 			}
 			else if constexpr (std::is_same_v<T, PathClipParameters>)
 			{
 				clip = PathClip{ parameters.path };
+				return EmptyResult;
 			}
 			else if constexpr (std::is_same_v<T, RoundCornerClipParameters>)
 			{
@@ -118,14 +123,17 @@ namespace PGUI::UI
 				if (pathResult.has_value())
 				{
 					clip = RoundCornerClip{ pathResult.value() };
+					return EmptyResult;
 				}
-				else
-				{
-					Logger::Error(pathResult.error(), L"Failed to create round corner clip geometry");
-					clip = EmptyClip{ };
-				}
+				clip = EmptyClip{ };
+				return Unexpected{ pathResult.error() };
 			}
-		}, parameters);
+			else
+			{
+				clip = EmptyClip{ };
+				return Unexpected{ Error{ ErrorCode::Failure } };
+			}
+		});
 	}
 
 	auto Clip::ReleaseClip() noexcept -> void
@@ -182,7 +190,7 @@ namespace PGUI::UI
 
 	auto Clip::GetGeometry() const noexcept -> D2D::D2DGeometry<>
 	{
-		return std::visit([]<typename T>(const T& clip) -> D2D::D2DGeometry<>
+		return Match(clip, []<typename T>(const T& clip) -> D2D::D2DGeometry<>
 		{
 			if constexpr (!std::is_same_v<EmptyClip, T>)
 			{
@@ -192,7 +200,7 @@ namespace PGUI::UI
 			{
 				return D2D::D2DGeometry<>{ nullptr };
 			}
-		}, clip);
+		});
 	}
 
 	Clip::operator ID2D1Geometry*() const noexcept

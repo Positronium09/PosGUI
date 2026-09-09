@@ -40,8 +40,8 @@ export namespace PGUI::UI::Layout
 			dockPositions.insert_or_assign(GetItemCount() - 1, position);
 		}
 
-		auto SetDockPosition(const LayoutItem& item, DockPosition position) -> void;
-		auto SetDockPosition(std::size_t id, DockPosition position) noexcept -> void;
+		[[nodiscard]] auto SetDockPosition(const LayoutItem& item, DockPosition position) -> Result<void>;
+		[[nodiscard]] auto SetDockPosition(std::size_t id, DockPosition position) noexcept -> Result<void>;
 
 		[[nodiscard]] auto GetItemPosition(std::size_t id) const noexcept -> Result<DockPosition>;
 		[[nodiscard]] auto GetDockPosition(const LayoutItem& item) const noexcept -> Result<DockPosition>;
@@ -49,23 +49,13 @@ export namespace PGUI::UI::Layout
 		[[nodiscard]] auto SetMaxDockSize(DockPosition position, float size) noexcept -> Result<void>;
 		auto ClearMaxDockSize(DockPosition position) noexcept -> void;
 
-		auto SetDockPriority(DockPosition position, DockPriority priority) noexcept -> void;
-		[[nodiscard]] auto GetDockPriority(const DockPosition position) const noexcept -> DockPriority
-		{
-			try
-			{
-				return dockPriorities.at(position);
-			}
-			catch (...)
-			{
-				std::unreachable();
-			}
-		}
+		[[nodiscard]] auto SetDockPriority(DockPosition position, DockPriority priority) noexcept -> Result<void>;
+		[[nodiscard]] auto GetDockPriority(DockPosition position) const noexcept -> Result<DockPriority>;
 
 		private:
-		std::map<std::size_t, DockPosition> dockPositions;
-		std::map<DockPosition, float> maxDockSizes;
-		std::map<DockPosition, DockPriority> dockPriorities;
+		std::flat_map<std::size_t, DockPosition> dockPositions;
+		std::flat_map<DockPosition, float> maxDockSizes;
+		std::flat_map<DockPosition, DockPriority> dockPriorities;
 
 		auto RearrangeItems() noexcept -> void override;
 

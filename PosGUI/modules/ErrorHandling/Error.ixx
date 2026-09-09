@@ -156,7 +156,7 @@ export namespace PGUI
 			return details.at(key);
 		}
 
-		auto& SetCustomMessage(std::wstring_view message) noexcept
+		auto SetCustomMessage(std::wstring_view message) noexcept -> Error&
 		{
 			customMessage = message;
 			return *this;

@@ -10,4 +10,7 @@ export namespace PGUI::UI::VL
 	using BackfaceVisibility = WUC::CompositionBackfaceVisibility;
 	using BorderMode = WUC::CompositionBorderMode;
 	using CompositeMode = WUC::CompositionCompositeMode;
+	using Stretch = WUC::CompositionStretch;
+	using BitmapInterpolationMode = WUC::CompositionBitmapInterpolationMode;
+
 }

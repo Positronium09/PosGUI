@@ -1,16 +1,18 @@
 module;
 #include <winrt/Windows.UI.Composition.h>
 
+#include <winrt/Windows.Foundation.Collections.h>
+
 export module PGUI.UI.VL.VisualCollection;
 
 import std;
 
 import PGUI.ErrorHandling;
 import PGUI.ProjectionHolder;
-import PGUI.Shape;
+import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.Wrapper;
 import PGUI.UI.VL.CompositionObject;
-import PGUI.UI.VL.VLEnums;
 import PGUI.UI.VL.Visual;
 
 namespace WUC = winrt::Windows::UI::Composition;
@@ -31,7 +33,7 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto InsertAbove(const Visual& newChild, const Visual& sibling) const noexcept -> Result<void>
+		[[nodiscard]] auto InsertAbove(const Visual& newChild, const Visual& sibling) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &newChild, &sibling]
 			{
@@ -39,7 +41,7 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto InsertAtBottom(const Visual& newChild) const noexcept -> Result<void>
+		[[nodiscard]] auto InsertAtBottom(const Visual& newChild) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &newChild]
 			{
@@ -47,7 +49,7 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto InsertAtTop(const Visual& newChild) const noexcept -> Result<void>
+		[[nodiscard]] auto InsertAtTop(const Visual& newChild) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &newChild]
 			{
@@ -55,7 +57,7 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto InsertBelow(const Visual& newChild, const Visual& sibling) const noexcept -> Result<void>
+		[[nodiscard]] auto InsertBelow(const Visual& newChild, const Visual& sibling) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &newChild, &sibling]
 			{
@@ -63,7 +65,7 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto Remove(const Visual& child) const noexcept -> Result<void>
+		[[nodiscard]] auto Remove(const Visual& child) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &child]
 			{
@@ -71,12 +73,50 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		auto RemoveAll() const noexcept -> Result<void>
+		[[nodiscard]] auto RemoveAll() const noexcept -> Result<void>
 		{
 			return CallProjected([this]
 			{
 				Get().RemoveAll();
 			});
+		}
+
+		[[nodiscard]] auto ToVector() const noexcept -> Result<std::vector<Visual>>
+		{
+			return CallProjected([this]
+			{
+				auto visuals = std::vector<Visual>{ };
+				visuals.reserve(static_cast<std::size_t>(Get().Count()));
+
+				for (const auto& v : Get())
+				{
+					visuals.emplace_back(v);
+				}
+
+				return visuals;
+			});
+		}
+
+		template <Callable<Result<void>(Visual)> F>
+		[[nodiscard]] auto ForEach(F&& f) const noexcept -> Result<void> 
+		{
+			return CallProjected([this, &f] -> Result<void>
+			{
+				for (const auto& [i, v] : Get() | std::views::enumerate)
+				{
+					if (auto res = std::invoke(f, Visual{ v });
+						!res.has_value())
+					{
+						return Unexpected{ 
+							res.error()
+							.AddDetail(L"Iteration", std::to_wstring(i))
+							.AddDetail(L"Visual", std::format(L"{}", winrt::get_unknown(v)))
+						};
+					}
+				}
+
+				return EmptyResult;
+			}).and_then(std::identity{ });
 		}
 	};
 }

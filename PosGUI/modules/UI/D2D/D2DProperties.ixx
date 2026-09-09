@@ -65,50 +65,48 @@ export namespace PGUI::UI::D2D
 		[[nodiscard]] auto GetSubProperty(UINT32 index) const noexcept -> Result<D2DProperties>;
 
 		template <std::size_t Extent = std::dynamic_extent>
-		[[nodiscard]] auto GetProperty(UINT32 index, std::span<BYTE, Extent> bytes) const noexcept -> bool
+		[[nodiscard]] auto GetProperty(const UINT32 index, std::span<BYTE, Extent> bytes) const noexcept -> Result<void>
 		{
 			if constexpr (Extent == std::dynamic_extent)
 			{
 				const auto size = GetValueSize(index);
 				if (size > bytes.size())
 				{
-					Logger::Error(
-						Error{ ErrorCode::InvalidArgument }
+					Error error{ ErrorCode::InvalidArgument };
+					error
 						.AddDetail(L"Index", std::to_wstring(index))
 						.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
-						.AddDetail(L"Value Size", std::to_wstring(size)),
-						L"Value size is bigger than the given span");
-					return false;
+						.AddDetail(L"Value Size", std::to_wstring(size));
+					return Unexpected{ error };
 				}
 
-				const auto hr = Get()->GetValue(index, bytes.data(), size);
-
-				if (FAILED(hr))
+				if (const auto hr = Get()->GetValue(index, bytes.data(), size);
+					FAILED(hr))
 				{
 					Error error{ hr };
 					error
 						.AddDetail(L"Index", std::to_wstring(index))
-						.AddDetail(L"Span Size", std::to_wstring(bytes.size()));
-					Logger::Error(error, L"Failed to get property value");
-					return false;
+						.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
+						.AddDetail(L"Value Size", std::to_wstring(size));
+					return Unexpected{ error };
 				}
 
-				return hr == S_OK;
+				return EmptyResult;
 			}
 			else
 			{
-				auto hr = Get()->GetValue(index, bytes.data(), static_cast<UINT32>(bytes.size()));
-				if (FAILED(hr))
+				if (const auto hr = Get()->GetValue(index, bytes.data(), static_cast<UINT32>(bytes.size()));
+					FAILED(hr))
 				{
 					Error error{ hr };
 					error
 						.AddDetail(L"Index", std::to_wstring(index))
-						.AddDetail(L"Span Size", std::to_wstring(bytes.size()));
-					Logger::Error(error, L"Failed to get property value");
-					return false;
+						.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
+						.AddDetail(L"Value Size", std::to_wstring(GetValueSize(index)));
+					return Unexpected{ error };
 				}
 
-				return hr == S_OK;
+				return EmptyResult;
 			}
 		}
 	};

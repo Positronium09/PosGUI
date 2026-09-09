@@ -21,16 +21,7 @@ export namespace PGUI::UI::Theming
 		template <typename T>
 		[[nodiscard]] auto AddCustomStyle(const T& style) noexcept -> Result<void>
 		{
-			try
-			{
-				customStyles.insert_or_assign(typeid(T), style);
-			}
-			catch (const std::exception& e)
-			{
-				return Unexpected{ Error{ SystemErrorCode::STLFailure  }.SetCustomMessage(StringToWString(e.what())) };
-			}
-
-			return EmptyResult;
+			return WrapThrowing([&] { customStyles.insert_or_assign(typeid(T), style); });
 		}
 
 		template <typename T>

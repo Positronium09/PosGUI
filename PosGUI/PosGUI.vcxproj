@@ -97,10 +97,17 @@
     <ClCompile Include="modules\UI\VisualState\VisualStateGroup.ixx" />
     <ClCompile Include="modules\UI\VisualState\VisualStateManager.ixx" />
     <ClCompile Include="modules\UI\VLWindow.ixx" />
+    <ClCompile Include="modules\UI\VL\Brush\Brush.ixx" />
+    <ClCompile Include="modules\UI\VL\Brush\ColorBrush.ixx" />
+    <ClCompile Include="modules\UI\VL\Brush\SurfaceBrush.ixx" />
+    <ClCompile Include="modules\UI\VL\CompositionGraphicsDevice.ixx" />
     <ClCompile Include="modules\UI\VL\CompositionObject.ixx" />
+    <ClCompile Include="modules\UI\VL\CompositionSurface.ixx" />
     <ClCompile Include="modules\UI\VL\Compositor.ixx" />
     <ClCompile Include="modules\UI\VL\ContainerVisual.ixx" />
     <ClCompile Include="modules\UI\VL\DesktopWindowTarget.ixx" />
+    <ClCompile Include="modules\UI\VL\SpriteVisual.ixx" />
+    <ClCompile Include="modules\UI\VL\SurfaceInterop.ixx" />
     <ClCompile Include="modules\UI\VL\Visual.ixx" />
     <ClCompile Include="modules\UI\VL\VisualCollection.ixx" />
     <ClCompile Include="modules\UI\VL\VL.ixx" />
@@ -248,6 +255,7 @@
     <ClCompile Include="src\UI\UICore\UIElement.cpp" />
     <ClCompile Include="src\UI\UICore\UIHost.cpp" />
     <ClCompile Include="src\UI\VLWindow.cpp" />
+    <ClCompile Include="src\UI\VL\CompositionGraphicsDevice.cpp" />
     <ClCompile Include="src\UI\VL\Compositor.cpp" />
     <ClCompile Include="src\UI\VL\DesktopWindowTarget.cpp" />
     <ClCompile Include="src\Utils\ArithmeticUtils.cpp" />
@@ -271,28 +279,40 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <VCToolsVersion>
+    </VCToolsVersion>
+    <MSVCPreviewEnabled>true</MSVCPreviewEnabled>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <VCToolsVersion>
+    </VCToolsVersion>
+    <MSVCPreviewEnabled>true</MSVCPreviewEnabled>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <VCToolsVersion>
+    </VCToolsVersion>
+    <MSVCPreviewEnabled>true</MSVCPreviewEnabled>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <VCToolsVersion>
+    </VCToolsVersion>
+    <MSVCPreviewEnabled>true</MSVCPreviewEnabled>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

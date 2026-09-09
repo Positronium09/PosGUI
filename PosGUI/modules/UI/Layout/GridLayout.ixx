@@ -123,15 +123,21 @@ export namespace PGUI::UI::Layout
 		auto SetGap(FixedSize gap) noexcept -> void;
 
 		template <typename T>
-		auto AddItem(const T& item, const GridItemProperties& properties) noexcept -> void
+		[[nodiscard]] auto AddItem(const T& item, const GridItemProperties& properties) noexcept -> Result<void>
 		{
-			SetItemProperty(GetItemCount(), properties);
+			if (const auto result = SetItemProperty(GetItemCount(), properties);
+				!result.has_value())
+			{
+				return Unexpected{ result.error() };
+			}
 			LayoutPanel::AddItem(item);
+
+			return EmptyResult;
 		}
 
 		[[nodiscard]] auto GetItemProperty(const LayoutItem& item) const noexcept -> Result<GridItemProperties>;
 
-		auto SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void;
+		[[nodiscard]] auto SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> Result<void>;
 
 		[[nodiscard]] auto GetMinCellSize() const noexcept
 		{
@@ -247,7 +253,7 @@ export namespace PGUI::UI::Layout
 		bool growToFit = false;
 		GridCellPlacementType placementType = GridCellPlacementType::Packed;
 		GridLayoutPadding padding{ 0, 0, 0, 0 };
-		std::set<std::pair<long, long>> blankCells;
+		std::flat_set<std::pair<long, long>> blankCells;
 
 		std::vector<GridCellDefinition> columnDefinitions{
 			GridCellDefinition{ 1.0F }
@@ -257,10 +263,10 @@ export namespace PGUI::UI::Layout
 		bool needsSorting = false;
 		std::vector<std::pair<std::size_t, GridItemProperties>> itemProperties;
 
-		auto GetItemId(const LayoutItem& item) const noexcept -> Result<std::size_t>;
-		auto SetItemProperty(std::size_t id, const GridItemProperties& properties) noexcept -> void;
-		auto GetItemProperty(std::size_t id) const noexcept -> Result<GridItemProperties>;
-		auto HasEntry(std::size_t id) const noexcept -> Result<std::size_t>
+		[[nodiscard]] auto GetItemId(const LayoutItem& item) const noexcept -> Result<std::size_t>;
+		[[nodiscard]] auto SetItemProperty(std::size_t id, const GridItemProperties& properties) noexcept -> Result<void>;
+		[[nodiscard]] auto GetItemProperty(std::size_t id) const noexcept -> Result<GridItemProperties>;
+		[[nodiscard]] auto HasEntry(std::size_t id) const noexcept -> Result<std::size_t>
 		{
 			const auto iter = std::ranges::find_if(
 				itemProperties,
@@ -278,14 +284,14 @@ export namespace PGUI::UI::Layout
 			};
 		}
 		auto SortProperties() noexcept -> void;
-		auto GetRowSizes(std::size_t rowCount) const noexcept -> std::vector<long>;
-		auto GetColumnSizes(std::size_t columnCount) const noexcept -> std::vector<long>;
+		[[nodiscard]] auto GetRowSizes(std::size_t rowCount) const noexcept -> std::vector<long>;
+		[[nodiscard]] auto GetColumnSizes(std::size_t columnCount) const noexcept -> std::vector<long>;
 
 		auto PropertyChangeHandler(const long&) noexcept
 		{
 			needsSorting = true;
 		}
-		auto ColumnSpanValidator(const long& value, const long column) const noexcept
+		[[nodiscard]] auto ColumnSpanValidator(const long& value, const long column) const noexcept
 		{
 			if (column == AUTO_PLACE)
 			{

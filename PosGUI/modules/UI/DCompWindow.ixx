@@ -64,23 +64,23 @@ export namespace PGUI::UI
 			return graphics;
 		}
 
-		virtual auto BeginDraw() -> void;
+		virtual auto BeginDraw() noexcept -> Result<void>;
 
-		virtual auto EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG>;
+		virtual auto EndDraw() noexcept -> Result<std::pair<D2D1_TAG, D2D1_TAG>>;
 
-		virtual auto CreateDeviceResources() -> void
+		virtual auto CreateDeviceResources() noexcept -> Result<void>
 		{
-			/* */
+			return EmptyResult;
 		}
 
-		virtual auto DiscardDeviceResources() -> void
+		virtual auto DiscardDeviceResources() noexcept -> Result<void>
 		{
-			/* */
+			return EmptyResult;
 		}
 
-		virtual auto Draw(const Graphics&) -> void
+		virtual auto Draw(const Graphics&) noexcept -> Result<void>
 		{
-			/* E_NOTIMPL */
+			return EmptyResult;
 		}
 
 		protected:

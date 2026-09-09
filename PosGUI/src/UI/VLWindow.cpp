@@ -17,6 +17,22 @@ namespace PGUI::UI
 		Window{ wndClass }
 	{
 		RegisterHandler(WM_CREATE, &VLWindow::OnCreate);
+		RegisterHandler(
+			WM_PAINT,
+			[](const HWND hwnd, const MessageID, const Argument1,
+			   const Argument2) noexcept -> MessageHandlerResult
+			{
+				PAINTSTRUCT ps;
+				BeginPaint(hwnd, &ps);
+				EndPaint(hwnd, &ps);
+
+				return 0;
+			});
+	}
+
+	auto VLWindow::SetRoot(const VL::Visual& visual) const noexcept -> Result<void>
+	{
+		return desktopWindowTarget.SetRoot(visual);
 	}
 
 	auto VLWindow::OnCreate(MessageID, Argument1, Argument2) noexcept -> MessageHandlerResult

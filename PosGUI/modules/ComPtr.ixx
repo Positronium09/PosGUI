@@ -278,18 +278,7 @@ export namespace PGUI
 	template <typename T, typename... Args>
 	[[nodiscard]] auto MakeSelf(Args&&... args) noexcept -> Result<winrt::com_ptr<T>>
 	{
-		try
-		{
-			return winrt::make_self<T>(std::forward<Args>(args)...);
-		}
-		catch (const winrt::hresult_error& e)
-		{
-			return Unexpected{ Error{ static_cast<HRESULT>(e.code()) } };
-		}
-		catch (const std::exception& e)
-		{
-			return Unexpected{ Error{ e } };
-		}
+		return WrapThrowing([&] { return winrt::make_self<T>(std::forward<Args>(args)...); });
 	}
 
 	template <ComInterface... Interfaces>

@@ -30,7 +30,7 @@ export namespace PGUI
 
 	using TimerId = UINT_PTR;
 	using TimerCallback = std::function<void(TimerId)>;
-	using TimerMap = std::map<TimerId, TimerCallback>;
+	using TimerMap = std::flat_map<TimerId, TimerCallback>;
 
 	enum class WindowFlashFlags : DWORD
 	{
@@ -271,7 +271,7 @@ export namespace PGUI
 
 	using MessageHandler = std::variant<HandlerType, HandlerHWNDType>;
 
-	using MessageMap = std::map<MessageID, std::vector<MessageHandler>>;
+	using MessageMap = std::flat_map<MessageID, std::vector<MessageHandler>>;
 
 	enum class HandlerOrder : bool
 	{
@@ -504,10 +504,10 @@ export namespace PGUI
 			return messageHandlerHost.Detach(interceptor);
 		}
 
-		auto AddTimer(TimerId id, std::chrono::milliseconds delay,
-			const std::optional<TimerCallback>& callback = std::nullopt) noexcept -> TimerId;
+		[[nodiscard]] auto AddTimer(TimerId id, std::chrono::milliseconds delay,
+			const std::optional<TimerCallback>& callback = std::nullopt) noexcept -> Result<TimerId>;
 
-		auto RemoveTimer(TimerId id) noexcept -> void;
+		[[nodiscard]] auto RemoveTimer(TimerId id) noexcept -> Result<void>;
 
 		[[nodiscard]] auto HasTimer(const TimerId id) const noexcept { return timerMap.contains(id); }
 

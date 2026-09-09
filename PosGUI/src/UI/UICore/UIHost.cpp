@@ -62,24 +62,47 @@ namespace PGUI::UI
 		*/
 	}
 
-	auto UIHost::CreateDeviceResources() -> void
+	auto UIHost::CreateDeviceResources() noexcept -> Result<void>
 	{
-		DCompWindow::CreateDeviceResources();
+		if (const auto result = DCompWindow::CreateDeviceResources();
+			!result.has_value())
+		{
+			return result;
+		}
 		rootContainer->CreateDeviceResources();
+
+		return EmptyResult;
 	}
 
-	auto UIHost::DiscardDeviceResources() -> void
+	auto UIHost::DiscardDeviceResources() noexcept -> Result<void>
 	{
-		DCompWindow::DiscardDeviceResources();
+		if (const auto result = DCompWindow::DiscardDeviceResources();
+			!result.has_value())
+		{
+			return result;
+		}
 		if (rootContainer)
 		{
 			rootContainer->DiscardDeviceResources();
 		}
+
+		return EmptyResult;
 	}
 
 	auto UIHost::OnNCCreate(MessageID, Argument1, Argument2) noexcept -> MessageHandlerResult
 	{
-		rootContainer = UIElement::Create<UIContainer>(GetClientRect());
+		auto containerResult = WrapThrowing([this]
+		{
+			return UIElement::Create<UIContainer>(GetClientRect());
+		});
+		if (!containerResult.has_value())
+		{
+			Logger::Critical(containerResult.error(), L"Cannot create the rootContainer");
+			return { 0, MessageHandlerFlags::ForceThisResult | MessageHandlerFlags::NoFurtherHandling };
+		}
+
+		rootContainer = MoveChecked(containerResult.value());
+
 		rootContainer->RedrawRequestedEvent().AddCallback(
 			std::bind_front(&UIHost::RedrawRequested, this)
 		);
@@ -125,9 +148,11 @@ namespace PGUI::UI
 		Invalidate(false);
 	}
 
-	auto UIHost::Draw(const Graphics& graphics) noexcept -> void
+	auto UIHost::Draw(const Graphics& graphics) noexcept -> Result<void>
 	{
 		Render(graphics);
 		rootContainer->Render(graphics);
+
+		return EmptyResult;
 	}
 }

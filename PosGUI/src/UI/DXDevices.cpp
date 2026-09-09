@@ -31,6 +31,8 @@ namespace PGUI::UI::DXDevices
 			return;
 		}
 
+		auto gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
+
 		const auto dxgiFactory = Factories::DXGIFactory::GetFactory();
 		SYSTEM_POWER_STATUS powerStatus{ };
 		if (const auto ret = GetSystemPowerStatus(&powerStatus);
@@ -40,16 +42,16 @@ namespace PGUI::UI::DXDevices
 				L"Cannot get system power status {}",
 				Error{ GetLastError() }
 			);
+			gpuPreference = DXGI_GPU_PREFERENCE_MINIMUM_POWER;
 		}
 
-		auto gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
 		const auto batteryFlags = FromUnderlying<BatteryFlag>(powerStatus.BatteryFlag);
 		const auto powerSaverOn = powerStatus.SystemStatusFlag == 1;
 		const auto lowBattery = IsAnyFlagSet(batteryFlags, BatteryFlag::Low, BatteryFlag::Critical);
 		const auto charging = powerStatus.ACLineStatus != 0 || IsFlagSet(batteryFlags, BatteryFlag::Charging);
 
 		if (const auto hasBattery = !IsFlagSet(batteryFlags, BatteryFlag::NoBattery);
-			(powerSaverOn || lowBattery) && (!charging) && hasBattery)
+			(powerSaverOn || lowBattery) && !charging && hasBattery)
 		{
 			gpuPreference = DXGI_GPU_PREFERENCE_MINIMUM_POWER;
 		}

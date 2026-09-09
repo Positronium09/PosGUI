@@ -2,12 +2,14 @@ module;
 #include <d2d1_1.h>
 #include <Windows.h>
 #include <winrt/Windows.Foundation.Numerics.h>
+#include <winrt/Windows.Graphics.h>
 
 export module PGUI.Shape:Size;
 
 import std;
 
 namespace WFN = winrt::Windows::Foundation::Numerics;
+namespace WG = winrt::Windows::Graphics;
 
 export namespace PGUI
 {
@@ -30,6 +32,10 @@ export namespace PGUI
 		explicit(false) constexpr Size(const WFN::float2& sz) noexcept :
 			cx{ static_cast<T>(sz.x) }, cy{ static_cast<T>(sz.y) }
 		{ }
+
+		explicit(false) constexpr Size(const WG::SizeInt32& sz) noexcept :
+			cx{ static_cast<T>(sz.Width) }, cy{ static_cast<T>(sz.Height) }
+		{}
 
 		explicit(false) constexpr Size(const SIZE& sz) noexcept :
 			cx{ static_cast<T>(sz.cx) }, cy{ static_cast<T>(sz.cy) }
@@ -54,19 +60,24 @@ export namespace PGUI
 			return WFN::float2{ static_cast<float>(cx), static_cast<float>(cy) };
 		}
 
+		explicit(false) constexpr operator WG::SizeInt32() const noexcept
+		{
+			return WG::SizeInt32{ .Width = static_cast<std::int32_t>(cx), .Height = static_cast<std::int32_t>(cy) };
+		}
+
 		explicit(false) constexpr operator SIZE() const noexcept
 		{
-			return SIZE{ static_cast<LONG>(cx), static_cast<LONG>(cy) };
+			return SIZE{ .cx = static_cast<LONG>(cx), .cy = static_cast<LONG>(cy) };
 		}
 
 		explicit(false) constexpr operator D2D1_SIZE_F() const noexcept
 		{
-			return D2D1_SIZE_F{ static_cast<FLOAT>(cx), static_cast<FLOAT>(cy) };
+			return D2D1_SIZE_F{ .width = static_cast<FLOAT>(cx), .height = static_cast<FLOAT>(cy) };
 		}
 
 		explicit(false) constexpr operator D2D1_SIZE_U() const noexcept
 		{
-			return D2D1_SIZE_U{ static_cast<UINT32>(cx), static_cast<UINT32>(cy) };
+			return D2D1_SIZE_U{ .width = static_cast<UINT32>(cx), .height = static_cast<UINT32>(cy) };
 		}
 
 		[[nodiscard]] constexpr auto operator-() const noexcept requires std::is_signed_v<T>

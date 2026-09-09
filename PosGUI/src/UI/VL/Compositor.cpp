@@ -2,9 +2,15 @@ module;
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.UI.Composition.h>
 
 #include <winrt/Windows.System.h>
+
+#include <windows.graphics.effects.interop.h>
+
+#include <windows.ui.composition.interop.h>
+
 
 #include <DispatcherQueue.h>
 
@@ -17,8 +23,29 @@ import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
 namespace WUC = winrt::Windows::UI::Composition;
+namespace WF = winrt::Windows::Foundation;
 namespace WSystem = winrt::Windows::System;
+namespace AWUC = ABI::Windows::UI::Composition;
+
 using IDesktopInterop = ABI::Windows::UI::Composition::Desktop::ICompositorDesktopInterop;
+
+namespace PGUI::UI::VL::Compositor::Internal
+{
+	struct CompositorThreadState
+	{
+		WUC::Compositor compositor{ nullptr };
+		WSystem::DispatcherQueueController dispatcherQueueController{ nullptr };
+
+		ComPtr<IDesktopInterop> desktopInterop{ nullptr };
+		ComPtr<AWUC::ICompositorInterop> interop{ nullptr };
+	};
+
+	[[nodiscard]] auto GetCompositorState() noexcept -> CompositorThreadState*
+	{
+		thread_local auto* state = new(std::nothrow) CompositorThreadState{ };
+		return state;
+	}
+}
 
 namespace PGUI::UI::VL::Compositor
 {
@@ -27,14 +54,15 @@ namespace PGUI::UI::VL::Compositor
 		constexpr DispatcherQueueOptions options{
 			sizeof(DispatcherQueueOptions),
 			DQTYPE_THREAD_CURRENT,
-			DQTAT_COM_STA
+			DQTAT_COM_NONE
 		};
 
 		if (const auto error = Error{
 				CreateDispatcherQueueController(
 					options,
 					ProjectionPut<
-						ABI::Windows::System::IDispatcherQueueController>(Internal::dispatcherQueueController))
+						ABI::Windows::System::IDispatcherQueueController>(
+						Internal::GetCompositorState()->dispatcherQueueController))
 			};
 			error.IsFailure())
 		{
@@ -42,14 +70,44 @@ namespace PGUI::UI::VL::Compositor
 		}
 	}
 
+	auto Shutdown() -> void
+	{
+		const auto& dispatcherQueueController = Internal::GetCompositorState()->dispatcherQueueController;
+		const auto action = dispatcherQueueController.ShutdownQueueAsync();
+		const auto dispatcherQueue = WSystem::DispatcherQueue::GetForCurrentThread();
+
+		auto done = false;
+		dispatcherQueue.ShutdownCompleted([&done](auto&&, auto&&)
+		{
+			done = true;
+		});
+
+		auto msg = MSG{ };
+		while (!done && GetMessageW(&msg, nullptr, 0, 0))
+		{
+			if (msg.message == WM_QUIT)
+			{
+				PostQuitMessage(static_cast<int>(msg.wParam));
+				break;
+			}
+
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
+		}
+	}
+
 	auto GetCompositor() noexcept -> Result<WUC::Compositor>
 	{
-		if (Internal::compositor)
+		auto& state = *Internal::GetCompositorState();
+		auto& compositor = state.compositor;
+		const auto& dispatcherQueueController = state.dispatcherQueueController;
+
+		if (compositor)
 		{
-			return Internal::compositor;
+			return compositor;
 		}
 
-		if (Internal::dispatcherQueueController == nullptr)
+		if (dispatcherQueueController == nullptr)
 		{
 			return Unexpected{
 				Error{ ErrorCode::NotInitialized }
@@ -58,22 +116,20 @@ namespace PGUI::UI::VL::Compositor
 			};
 		}
 
-		try
+		return WrapThrowing([&]
 		{
-			Internal::compositor = WUC::Compositor{ };
-			return Internal::compositor;
-		}
-		catch (const winrt::hresult_error& error)
-		{
-			return Unexpected{ Error{ static_cast<HRESULT>(error.code()) }.SetCustomMessage(error.message().c_str()) };
-		}
+			compositor = WUC::Compositor{ };
+			return compositor;
+		});
 	}
 
 	auto GetDesktopInterop() noexcept -> Result<ComPtr<IDesktopInterop>>
 	{
-		if (Internal::desktopInterop)
+		auto& desktopInterop = Internal::GetCompositorState()->desktopInterop;
+
+		if (desktopInterop)
 		{
-			return Internal::desktopInterop;
+			return desktopInterop;
 		}
 
 		const auto compositorResult = GetCompositor();
@@ -89,7 +145,32 @@ namespace PGUI::UI::VL::Compositor
 			return Unexpected{ SystemErrorCode::InterfaceNotSupported };
 		}
 
-		Internal::desktopInterop = WinrtToComPtr(ptr);
-		return Internal::desktopInterop;
+		desktopInterop = WinrtToComPtr(ptr);
+		return desktopInterop;
+	}
+
+	auto GetCompositorInterop() noexcept -> Result<ComPtr<AWUC::ICompositorInterop>>
+	{
+		auto& interop = Internal::GetCompositorState()->interop;
+		if (interop)
+		{
+			return interop;
+		}
+
+		const auto compositorResult = GetCompositor();
+		if (!compositorResult.has_value())
+		{
+			return Unexpected{ compositorResult.error() };
+		}
+		const auto& compositor = compositorResult.value();
+
+		const auto ptr = compositor.try_as<AWUC::ICompositorInterop>();
+		if (!ptr)
+		{
+			return Unexpected{ SystemErrorCode::InterfaceNotSupported };
+		}
+
+		interop = WinrtToComPtr(ptr);
+		return interop;
 	}
 }

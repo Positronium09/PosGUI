@@ -10,6 +10,7 @@ import std;
 import PGUI.Window;
 import PGUI.UI.Colors;
 import PGUI.ErrorHandling;
+import PGUI.UI.Theming.SystemTheme;
 
 namespace PGUI::UI
 {
@@ -237,7 +238,7 @@ namespace PGUI::UI
 		SetCaptionTextColor(style.captionTextColor);
 		SetCornerPreference(style.cornerPreference);
 
-		EnableDarkTitleBar(Hwnd(), style.darkMode);
+		EnableDarkTitleBar(Hwnd(), style.darkMode == Theming::ThemeMode::Dark);
 	}
 
 	auto AppWindow::OnNCCreate(UINT /*unused*/, Argument1 /*unused*/,

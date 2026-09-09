@@ -57,32 +57,51 @@ namespace PGUI::UI
 		dCompositionSurfaceFactory = MoveChecked(surfaceFactoryResult.value());
 	}
 
-	auto DCompWindow::BeginDraw() -> void
+	auto DCompWindow::BeginDraw() noexcept -> Result<void>
 	{
-		CreateDeviceResources();
+		if (const auto result = CreateDeviceResources();
+			!result.has_value())
+		{
+			return Unexpected{ result.error() };
+		}
 
 		if (const auto hdc = BeginPaint(Hwnd(), &paintStruct);
 			hdc == nullptr)
 		{
-			throw Exception{ Error{ GetLastError() }, L"BeginPaint failed" };
+			return Unexpected{ Error{ GetLastError() }.SetCustomMessage(L"BeginPaint failed") };
 		}
 
 		GetD2D1DeviceContext()->BeginDraw();
+
+		return EmptyResult;
 	}
 
-	auto DCompWindow::EndDraw() -> std::pair<D2D1_TAG, D2D1_TAG>
+	auto DCompWindow::EndDraw() noexcept -> Result<std::pair<D2D1_TAG, D2D1_TAG>>
 	{
+		ScopedDefer deferEndPaint{
+			[this] { EndPaint(Hwnd(), &paintStruct); }
+		};
+
 		D2D1_TAG tag1 = 0;
 		D2D1_TAG tag2 = 0;
 		auto hr = GetD2D1DeviceContext()->EndDraw(&tag1, &tag2);
 
 		if (hr == D2DERR_RECREATE_TARGET)
 		{
-			DiscardDeviceResources();
-			HandleDeviceLoss();
-			InitDeviceDependent();
-
-			EndPaint(Hwnd(), &paintStruct);
+			if (const auto result = DiscardDeviceResources();
+				!result.has_value())
+			{
+				return Unexpected{ result.error() };
+			}
+			if (const auto result = WrapThrowing([this]
+				{
+					HandleDeviceLoss();
+					InitDeviceDependent();
+				});
+				!result.has_value())
+			{
+				return Unexpected{ result.error() };
+			}
 
 			Invalidate();
 
@@ -90,24 +109,33 @@ namespace PGUI::UI
 		}
 		if (FAILED(hr))
 		{
-			throw Exception{ Error{ hr }, L"D2D1DeviceContext::EndDraw failed" };
+			return Unexpected{ Error{ hr }.SetCustomMessage(L"D2D1DeviceContext::EndDraw failed") };
 		}
 
 		hr = GetSwapChain()->Present(1, NULL);
 		if (hr == DXGI_ERROR_DEVICE_RESET || hr == DXGI_ERROR_DEVICE_REMOVED)
 		{
-			DiscardDeviceResources();
-			HandleDeviceLoss();
-			InitDeviceDependent();
+			if (const auto result = DiscardDeviceResources();
+				!result.has_value())
+			{
+				return Unexpected{ result.error() };
+			}
+			if (const auto result = WrapThrowing([this]
+				{
+					HandleDeviceLoss();
+					InitDeviceDependent();
+				});
+				!result.has_value())
+			{
+				return Unexpected{ result.error() };
+			}
 
 			Invalidate();
 		}
 		else if (FAILED(hr))
 		{
-			throw Exception{ Error{ hr }, L"SwapChain::Present failed" };
+			return Unexpected{ Error{ hr }.SetCustomMessage(L"SwapChain::Present failed") };
 		}
-
-		EndPaint(Hwnd(), &paintStruct);
 
 		return std::make_pair(tag1, tag2);
 	}
@@ -136,20 +164,23 @@ namespace PGUI::UI
 			size.cx = 1;
 		}
 
-		if (const auto error = Error{
+		if (auto error = Error{
 				GetSwapChain()->ResizeBuffers(
 					0, size.cx, size.cy,
 					DXGI_FORMAT_UNKNOWN, NULL)
 			};
 			error.IsFailure())
 		{
-			throw Exception{
-				Error{ error }
-				.AddDetail(L"Window Size", std::format(L"{}", size))
-			};
+			error.AddDetail(L"Window Size", std::format(L"{}", size));
+			Logger::Critical(error, L"Cannot resize swap chain");
+			return;
 		}
 
-		DiscardDeviceResources();
+		if (const auto result = DiscardDeviceResources();
+			!result.has_value())
+		{
+			Logger::Error(result.error(), L"DiscardDeviceResources failed");
+		}
 		InitD2D1DeviceContext();
 	}
 
@@ -306,11 +337,25 @@ namespace PGUI::UI
 	auto DCompWindow::OnPaint(
 		UINT, Argument1, Argument2) noexcept -> MessageHandlerResult
 	{
-		BeginDraw();
+		if (const auto result = BeginDraw();
+			!result.has_value())
+		{
+			Logger::Critical(result.error(), L"Begin draw failed");
+			return 1;
+		}
 
-		Draw(GetGraphics());
+		if (const auto result = Draw(GetGraphics());
+			!result.has_value())
+		{
+			Logger::Critical(result.error(), L"Draw failed");
+		}
 
-		EndDraw();
+		if (const auto result = EndDraw();
+			!result.has_value())
+		{
+			Logger::Critical(result.error(), L"End draw failed");
+			return 1;
+		}
 
 		return 0;
 	}

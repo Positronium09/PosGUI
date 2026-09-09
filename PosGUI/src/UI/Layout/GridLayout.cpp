@@ -8,7 +8,7 @@ import PGUI.UI.Layout.LayoutPanel;
 
 namespace PGUI::UI::Layout
 {
-	auto OccupySet(std::set<std::pair<long, long>>& set,
+	auto OccupySet(std::flat_set<std::pair<long, long>>& set,
 	               const long row, const long column,
 	               const long rowSpan, const long columnSpan) noexcept -> void
 	{
@@ -21,7 +21,7 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto IsOccupied(const std::set<std::pair<long, long>>& set,
+	auto IsOccupied(const std::flat_set<std::pair<long, long>>& set,
 	                const long row, const long column,
 	                const long rowSpan, const long columnSpan) noexcept
 	{
@@ -39,7 +39,7 @@ namespace PGUI::UI::Layout
 		return false;
 	}
 
-	auto IsUnoccupied(const std::set<std::pair<long, long>>& set,
+	auto IsUnoccupied(const std::flat_set<std::pair<long, long>>& set,
 	                  const long row, const long column,
 	                  const long rowSpan, const long columnSpan) noexcept
 	{
@@ -74,13 +74,15 @@ namespace PGUI::UI::Layout
 		}
 	}
 
-	auto GridLayout::SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> void
+	auto GridLayout::SetItemProperty(const LayoutItem& item, const GridItemProperties& properties) -> Result<void>
 	{
-		if (const auto result = GetItemId(item);
-			result.has_value())
+		const auto result = GetItemId(item);
+		if (result.has_value())
 		{
-			SetItemProperty(*result, properties);
+			return SetItemProperty(*result, properties);
 		}
+
+		return Unexpected{ result.error() };
 	}
 
 	auto GridLayout::GetItemProperty(const LayoutItem& item) const noexcept -> Result<GridItemProperties>
@@ -189,7 +191,7 @@ namespace PGUI::UI::Layout
 		maxDefinedColumn = std::max(maxDefinedColumn, static_cast<long>(columnDefinitions.size()));
 		maxDefinedColumn += maxColumnSpan - 1;
 
-		std::set<std::pair<long, long>> occupiedPositions = blankCells;
+		std::flat_set<std::pair<long, long>> occupiedPositions = blankCells;
 		std::vector<std::pair<std::size_t, std::tuple<long, long, long, long>>> itemPositions;
 
 		long maxPlacedRow = 0;
@@ -341,7 +343,7 @@ namespace PGUI::UI::Layout
 		return GetItemIndex(item);
 	}
 
-	auto GridLayout::SetItemProperty(std::size_t id, const GridItemProperties& properties) noexcept -> void
+	auto GridLayout::SetItemProperty(std::size_t id, const GridItemProperties& properties) noexcept -> Result<void>
 	{
 		const auto boundChangeHandler = std::bind_front(&GridLayout::PropertyChangeHandler, this);
 		const auto boundColumnSpanValidator = std::bind_front(&GridLayout::ColumnSpanValidator, this,
@@ -362,7 +364,7 @@ namespace PGUI::UI::Layout
 			needsSorting = true;
 			RearrangeItems();
 
-			return;
+			return Unexpected{ result.error() };
 		}
 
 		auto& prop = itemProperties.at(*result).second;
@@ -372,7 +374,7 @@ namespace PGUI::UI::Layout
 		    prop.rowSpan.Get() == properties.rowSpan.Get() &&
 		    prop.columnSpan.Get() == properties.columnSpan.Get())
 		{
-			return;
+			return EmptyResult;
 		}
 
 		prop.column.ClearObservers();
@@ -391,6 +393,8 @@ namespace PGUI::UI::Layout
 
 		needsSorting = true;
 		RearrangeItems();
+
+		return EmptyResult;
 	}
 
 	auto GridLayout::SortProperties() noexcept -> void
@@ -638,7 +642,16 @@ namespace PGUI::UI::Layout
 		LayoutPanel::OnItemAdded(layoutItem);
 		if (!HasEntry(GetItemCount() - 1).has_value())
 		{
-			SetItemProperty(GetItemCount() - 1, GridItemProperties{ });
+			if (const auto result = SetItemProperty(GetItemCount() - 1, GridItemProperties{ });
+				!result.has_value())
+			{
+				Logger::Error(result.error(), L"Failed to set item property");
+				if (const auto res = RemoveItem(GetItemCount() - 1);
+					!res.has_value())
+				{
+					Logger::Error(res.error(), L"Failed to recover from 'set item property' fail");
+				}
+			}
 		}
 	}
 

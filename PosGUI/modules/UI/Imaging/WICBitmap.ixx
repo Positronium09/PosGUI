@@ -40,17 +40,24 @@ export namespace PGUI::UI::Imaging
 
 		explicit(false) WICBitmap(const ComPtr<IWICBitmap>& bitmap) noexcept;
 
-		WICBitmap(SizeU size, 
-			const WICPixelFormatGUID& pixelFormat, 
-			CreateCacheOption cacheOption) noexcept;
+		[[nodiscard]] static auto CreateFromHIcon(HICON hIcon) noexcept -> Result<WICBitmap>;
 
-		WICBitmap(HBITMAP hBitmap, AlphaChannelOption alphaOption, HPALETTE hPalette = nullptr) noexcept;
+		[[nodiscard]] static auto CreateFromSource(
+			const BitmapSource<>& source,
+			CreateCacheOption cacheOption) noexcept -> Result<WICBitmap>;
+		[[nodiscard]] static auto CreateFromSource(
+			const BitmapSource<>& source,
+			RectU rect) noexcept -> Result<WICBitmap>;
 
-		explicit WICBitmap(HICON hIcon) noexcept;
+		[[nodiscard]] static auto Create(
+			SizeU size,
+			const WICPixelFormatGUID& pixelFormat,
+			CreateCacheOption cacheOption) noexcept -> Result<WICBitmap>;
 
-		WICBitmap(BitmapSource<> source, CreateCacheOption cacheOption) noexcept;
-
-		WICBitmap(BitmapSource<> source, RectU rect) noexcept;
+		[[nodiscard]] static auto CreateFromHBitmap(
+			HBITMAP hBitmap,
+			AlphaChannelOption alphaOption,
+			HPALETTE hPalette = nullptr) noexcept -> Result<WICBitmap>;
 
 		[[nodiscard]] auto Lock(RectI rect, LockFlags flags) const noexcept -> Result<WICBitmapLock>;
 

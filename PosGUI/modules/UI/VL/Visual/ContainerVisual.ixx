@@ -1,7 +1,7 @@
 module;
 #include <winrt/Windows.UI.Composition.h>
 
-export module PGUI.UI.VL.ContainerVisual;
+export module PGUI.UI.VL.Visual.ContainerVisual;
 
 import std;
 
@@ -10,9 +10,9 @@ import PGUI.ProjectionHolder;
 import PGUI.Shape;
 import PGUI.Wrapper;
 import PGUI.UI.VL.Compositor;
-import PGUI.UI.VL.Visual;
+import PGUI.UI.VL.Visual.Visual;
 import PGUI.UI.VL.VLEnums;
-import PGUI.UI.VL.VisualCollection;
+import PGUI.UI.VL.Visual.VisualCollection;
 
 namespace WUC = winrt::Windows::UI::Composition;
 

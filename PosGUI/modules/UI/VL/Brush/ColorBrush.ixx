@@ -1,17 +1,16 @@
 module;
 #include <winrt/Windows.UI.Composition.h>
 
-export module PGUI.UI.VL.CompositionColorBrush;
+export module PGUI.UI.VL.Brush.CompositionColorBrush;
 
 import std;
 
 import PGUI.ErrorHandling;
 import PGUI.ProjectionHolder;
 import PGUI.UI.Color;
-import PGUI.Wrapper;
 import PGUI.UI.Brush;
 import PGUI.UI.VL.Compositor;
-import PGUI.UI.VL.CompositionBrush;
+import PGUI.UI.VL.Brush.CompositionBrush;
 
 namespace WUC = winrt::Windows::UI::Composition;
 

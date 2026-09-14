@@ -1,7 +1,7 @@
 module;
 #include <winrt/Windows.UI.Composition.h>
 
-export module PGUI.UI.VL.Visual;
+export module PGUI.UI.VL.Visual.Visual;
 
 import std;
 
@@ -10,6 +10,7 @@ import PGUI.ProjectionHolder;
 import PGUI.Wrapper;
 import PGUI.Shape;
 import PGUI.UI.VL.CompositionObject;
+import PGUI.UI.VL.Clip.CompositionClip;
 import PGUI.UI.VL.VLEnums;
 
 namespace WUC = winrt::Windows::UI::Composition;
@@ -84,7 +85,20 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		//TODO Clip CompositionClip
+		[[nodiscard]] auto GetClip() const noexcept -> Result<CompositionClip>
+		{
+			return CallProjected([this]
+			{
+				return CompositionClip{ this->Get().Clip() };
+			});
+		}
+		[[nodiscard]] auto SetClip(const CompositionClip& clip) const noexcept -> Result<void>
+		{
+			return CallProjected([this, &clip]
+			{
+				this->Get().Clip(clip.Get());
+			});
+		}
 
 		[[nodiscard]] auto GetCompositeMode() const noexcept -> Result<CompositeMode>
 		{

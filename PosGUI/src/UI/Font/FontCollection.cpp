@@ -102,7 +102,7 @@ namespace PGUI::UI::Font
 		auto fontCollection3 = fontCollection.try_query<IDWriteFontCollection3>();
 		if (fontCollection3.get() == nullptr)
 		{
-			Error error{ E_NOINTERFACE };
+			Error error{ SystemErrorCode::InterfaceNotSupported };
 			error
 				.AddDetail(L"File Path", filePath.wstring());
 			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3.");
@@ -189,7 +189,7 @@ namespace PGUI::UI::Font
 		auto fontSet = fontSet1.try_query<IDWriteFontSet4>();
 		if (fontSet.get() == nullptr)
 		{
-			Error error{ E_NOINTERFACE };
+			Error error{ SystemErrorCode::InterfaceNotSupported };
 			Logger::Error(error, L"Failed to cast font set to IDWriteFontSet4.");
 			return Unexpected{ error };
 		}

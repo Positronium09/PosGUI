@@ -5,7 +5,7 @@ module;
 
 #include <d2d1_3.h>
 
-export module PGUI.UI.VL.SurfaceInterop;
+export module PGUI.UI.VL.Surface.SurfaceInterop;
 
 import std;
 
@@ -18,11 +18,10 @@ import PGUI.ProjectionHolder;
 import PGUI.UI.DXDevices;
 import PGUI.UI.VL.Compositor;
 import PGUI.UI.VL.CompositionObject;
-import PGUI.UI.VL.CompositionGraphicsDevice;
-import PGUI.UI.VL.CompositionSurface;
+import PGUI.UI.VL.Surface.CompositionGraphicsDevice;
 import PGUI.UI.Graphics;
 import PGUI.UI.VL.VLEnums;
-import PGUI.UI.VL.Visual;
+import PGUI.UI.VL.Visual.Visual;
 
 namespace WUC = winrt::Windows::UI::Composition;
 namespace AWUC = ABI::Windows::UI::Composition;
@@ -129,6 +128,14 @@ export namespace PGUI::UI::VL
 			}
 
 			return EmptyResult;
+		}
+
+		[[nodiscard]] auto GetSize() const noexcept -> Result<SizeF>
+		{
+			return CallProjected([this]
+			{
+				return Get().Size();
+			});
 		}
 
 		[[nodiscard]] auto Resize(const SizeL size) const noexcept -> Result<void>

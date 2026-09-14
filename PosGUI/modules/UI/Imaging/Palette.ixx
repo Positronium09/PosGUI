@@ -8,7 +8,6 @@ import std;
 import PGUI.ComPtr;
 import PGUI.UI.Color;
 import PGUI.ErrorHandling;
-import PGUI.Factories;
 import PGUI.UI.Imaging.BitmapSource;
 
 export namespace PGUI::UI::Imaging
@@ -34,32 +33,42 @@ export namespace PGUI::UI::Imaging
 	class Palette : public ComPtrHolder<IWICPalette>
 	{
 		public:
-		Palette() noexcept;
+		Palette() noexcept = default;
 
 		explicit(false) Palette(const ComPtr<IWICPalette>& palette) noexcept;
 
+		[[nodiscard]] static auto Create() noexcept -> Result<Palette>;
+
+		[[nodiscard]] static auto CreateFromColors(std::span<const RGBA> colors) noexcept -> Result<Palette>;
+
+		[[nodiscard]] static auto CreateFromType(
+			PaletteType paletteType,
+			bool addTransparentColor) noexcept -> Result<Palette>;
+
 		template <typename T>
-		Palette(BitmapSource<T> source, const UINT count, const bool addTransparentColor) noexcept
+		[[nodiscard]] static auto CreateFromBitmap(
+			const BitmapSource<T>& source,
+			const UINT count,
+			const bool addTransparentColor) noexcept -> Result<Palette>
 		{
-			const auto& factory = Factories::WICFactory::GetFactory();
-
-			auto hr = factory->CreatePalette(Put());
-			if (FAILED(hr))
+			auto paletteResult = Create();
+			if (!paletteResult.has_value())
 			{
-				Logger::Error(Error{ hr } , L"Failed to create palette");
-				return;
+				return Unexpected{ paletteResult.error() };
 			}
 
-			hr = Get()->InitializeFromBitmap(source.Get(), count, addTransparentColor);
-			if (FAILED(hr))
+			if (auto error = Error{
+					paletteResult.value().Get()->InitializeFromBitmap(
+						source.GetRaw(), count, addTransparentColor)
+				};
+				error.IsFailure())
 			{
-				Logger::Error(Error{ hr }, L"Failed to initialize palette from bitmap");
+				error.AddDetail(L"count", std::to_wstring(count));
+				return Unexpected{ error };
 			}
+
+			return paletteResult;
 		}
-
-		Palette(PaletteType paletteType, bool addTransparentColor) noexcept;
-
-		explicit Palette(std::span<RGBA> colors) noexcept;
 
 		[[nodiscard]] auto GetType() const noexcept -> Result<PaletteType>;
 

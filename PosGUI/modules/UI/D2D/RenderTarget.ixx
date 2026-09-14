@@ -60,9 +60,16 @@ export namespace PGUI::UI::D2D
 			this->Get()->Clear(color);
 		}
 
-		[[nodiscard]] auto CreateBrush(const BrushParameters& parameters) const noexcept
+		[[nodiscard]] auto CreateBrush(const BrushParameters& parameters) const noexcept -> Result<Brush>
 		{
-			return Brush{ this->template GetAs<ID2D1RenderTarget>(), parameters };
+			Brush brush{ parameters };
+			if (const auto result = brush.CreateBrush(this->template GetAs<ID2D1RenderTarget>());
+				!result.has_value())
+			{
+				return Unexpected{ result.error() };
+			}
+
+			return brush;
 		}
 
 		[[nodiscard]] auto CreateBitmap(SizeU size, BitmapProperties properties) const noexcept -> Result<D2DBitmap>
@@ -80,7 +87,7 @@ export namespace PGUI::UI::D2D
 			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
 			if (bitmap1.get() == nullptr)
 			{
-				Error error{ E_NOINTERFACE };
+				Error error{ SystemErrorCode::InterfaceNotSupported };
 				error.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };
@@ -107,7 +114,7 @@ export namespace PGUI::UI::D2D
 			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
 			if (bitmap1.get() == nullptr)
 			{
-				Error error{ E_NOINTERFACE };
+				Error error{ SystemErrorCode::InterfaceNotSupported };
 				error.AddDetail(L"Size", std::format(L"{}", size));
 				Logger::Error(error, L"Cannot get ID2D1Bitmap1 interface");
 				return Unexpected{ error };

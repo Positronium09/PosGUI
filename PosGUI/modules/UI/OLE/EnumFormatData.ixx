@@ -15,29 +15,35 @@ export namespace PGUI::UI::OLE
 	class EnumFormatData final : public Implements<EnumFormatData, IEnumFORMATETC>
 	{
 		public:
-		explicit EnumFormatData(const std::span<const FormatData> enumFormats)
+		[[nodiscard]] static auto Create(
+			const std::span<const FormatData> enumFormats) noexcept -> Result<ComPtr<EnumFormatData>>
 		{
-			try
+			ComPtr<EnumFormatData> enumFormatData;
+			enumFormatData.attach(new(std::nothrow) EnumFormatData{ });
+			if (!enumFormatData)
 			{
-				formats.reserve(enumFormats.size());
-				for (const auto& format : enumFormats)
+				return Unexpected{ Error{ ErrorCode::AllocationFailure } };
+			}
+
+			if (const auto result = WrapThrowing([&enumFormatData, enumFormats]
 				{
-					auto copyResult = format.Copy();
-					if (!copyResult.has_value())
+					enumFormatData->formats.reserve(enumFormats.size());
+					for (const auto& format : enumFormats)
 					{
-						throw Exception{ copyResult.error() };
+						auto copyResult = format.Copy();
+						if (!copyResult.has_value())
+						{
+							throw Exception{ copyResult.error() };
+						}
+						enumFormatData->formats.emplace_back(MoveChecked(copyResult).value());
 					}
-					formats.emplace_back(MoveChecked(copyResult).value());
-				}
-			}
-			catch (const std::exception& e)
+				});
+				!result.has_value())
 			{
-				throw Exception{ 
-					Error{
-						SystemErrorCode::STLFailure
-					}.SetCustomMessage(StringToWString(e.what()))
-				};
+				return Unexpected{ result.error() };
 			}
+
+			return enumFormatData;
 		}
 
 		EnumFormatData(const EnumFormatData&) = delete;
@@ -54,26 +60,16 @@ export namespace PGUI::UI::OLE
 				return E_POINTER;
 			}
 
-			auto* newEnumFormatData = new (std::nothrow) EnumFormatData{ };
-			if (!newEnumFormatData)
+			auto cloneResult = Create(formats);
+			if (!cloneResult.has_value())
 			{
-				return E_OUTOFMEMORY;
-			}
-			newEnumFormatData->formats.reserve(formats.size());
-			for (const auto& format : formats)
-			{
-				auto copyResult = format.Copy();
-				if (!copyResult.has_value())
-				{
-					newEnumFormatData->Release();
-					return copyResult.error().HResult();
-				}
-				newEnumFormatData->formats.emplace_back(MoveChecked(copyResult).value());
+				return cloneResult.error().HResult();
 			}
 
-			newEnumFormatData->currentIndex = currentIndex;
+			auto& clone = cloneResult.value();
+			clone->currentIndex = currentIndex;
 
-			*ppenum = newEnumFormatData;
+			*ppenum = clone.detach();
 
 			return S_OK;
 		}

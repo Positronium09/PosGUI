@@ -16,75 +16,97 @@ namespace PGUI::UI::Imaging
 		ComPtrHolder{ decoder }
 	{ }
 
-	BitmapDecoder::BitmapDecoder(
+	auto BitmapDecoder::Create(
 		const ContainerFormat& containerFormat,
-		const std::optional<GUID>& vendorGUID) noexcept
+		const std::optional<GUID>& vendorGUID) noexcept -> Result<BitmapDecoder>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreateDecoder(
-			containerFormat,
-			vendorGUID.has_value() ? &vendorGUID.value() : nullptr, Put());
-			FAILED(hr))
+		ComPtr<IWICBitmapDecoder> decoder;
+		if (const auto error = Error{
+				factory->CreateDecoder(
+					containerFormat,
+					vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
+					decoder.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create decoder");
+			return Unexpected{ error };
 		}
+
+		return BitmapDecoder{ decoder };
 	}
 
-	BitmapDecoder::BitmapDecoder(
+	auto BitmapDecoder::CreateFromFileHandle(
 		const ULONG_PTR fileHandle,
-		BitmapDecoderOptions decoderOptions,
-		const std::optional<GUID>& vendorGUID) noexcept
+		const BitmapDecoderOptions decoderOptions,
+		const std::optional<GUID>& vendorGUID) noexcept -> Result<BitmapDecoder>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-
-		if (const auto hr = factory->CreateDecoderFromFileHandle(
-			fileHandle,
-			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<WICDecodeOptions>(decoderOptions), Put());
-			FAILED(hr))
+		ComPtr<IWICBitmapDecoder> decoder;
+		if (const auto error = Error{
+				factory->CreateDecoderFromFileHandle(
+					fileHandle,
+					vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
+					static_cast<WICDecodeOptions>(decoderOptions),
+					decoder.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create decoder");
+			return Unexpected{ error };
 		}
+
+		return BitmapDecoder{ decoder };
 	}
 
-	BitmapDecoder::BitmapDecoder(
-		const std::filesystem::path& fileName, DesiredAccess desiredAccess,
-		BitmapDecoderOptions decoderOptions,
-		const std::optional<GUID>& vendorGUID) noexcept
+	auto BitmapDecoder::CreateFromStream(
+		const ComPtr<IStream>& stream,
+		const BitmapDecoderOptions decoderOptions,
+		const std::optional<GUID>& vendorGUID) noexcept -> Result<BitmapDecoder>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreateDecoderFromFilename(
-			fileName.c_str(),
-			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<DWORD>(desiredAccess),
-			static_cast<WICDecodeOptions>(decoderOptions), Put());
-			FAILED(hr))
+		ComPtr<IWICBitmapDecoder> decoder;
+		if (const auto error = Error{
+				factory->CreateDecoderFromStream(
+					stream.get(),
+					vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
+					static_cast<WICDecodeOptions>(decoderOptions),
+					decoder.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create decoder");
+			return Unexpected{ error };
 		}
+
+		return BitmapDecoder{ decoder };
 	}
 
-	BitmapDecoder::BitmapDecoder(
-		const ComPtr<IStream>& stream, BitmapDecoderOptions decoderOptions,
-		const std::optional<GUID>& vendorGUID) noexcept
+	auto BitmapDecoder::CreateFromFile(
+		const std::filesystem::path& fileName,
+		const DesiredAccess desiredAccess,
+		const BitmapDecoderOptions decoderOptions,
+		const std::optional<GUID>& vendorGUID) noexcept -> Result<BitmapDecoder>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreateDecoderFromStream(
-				stream.get(),
-			vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
-			static_cast<WICDecodeOptions>(decoderOptions), Put());
-			FAILED(hr))
+		ComPtr<IWICBitmapDecoder> decoder;
+		if (auto error = Error{
+				factory->CreateDecoderFromFilename(
+					fileName.c_str(),
+					vendorGUID.has_value() ? &vendorGUID.value() : nullptr,
+					static_cast<DWORD>(desiredAccess),
+					static_cast<WICDecodeOptions>(decoderOptions),
+					decoder.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create decoder");
+			error.AddDetail(L"fileName", fileName.wstring());
+			return Unexpected{ error };
 		}
+
+		return BitmapDecoder{ decoder };
 	}
 
 	auto BitmapDecoder::Initialize(
@@ -105,9 +127,13 @@ namespace PGUI::UI::Imaging
 
 	auto BitmapDecoder::CopyPalette() const noexcept -> Result<Palette>
 	{
-		Palette palette{ };
+		auto paletteResult = Palette::Create();
+		if (!paletteResult.has_value())
+		{
+			return Unexpected{ paletteResult.error() };
+		}
 
-		if (const auto hr = Get()->CopyPalette(palette.GetRaw());
+		if (const auto hr = Get()->CopyPalette(paletteResult.value().GetRaw());
 			FAILED(hr))
 		{
 			Error error{ hr };
@@ -115,7 +141,7 @@ namespace PGUI::UI::Imaging
 			return Unexpected{ error };
 		}
 
-		return palette;
+		return paletteResult;
 	}
 
 	auto BitmapDecoder::GetMetadataReader() const noexcept -> Result<MetadataReader>

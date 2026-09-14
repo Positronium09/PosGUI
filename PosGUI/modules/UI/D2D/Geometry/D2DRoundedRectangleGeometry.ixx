@@ -23,17 +23,20 @@ export namespace PGUI::UI::D2D
 		{
 		}
 
-		explicit D2DRoundedRectangleGeometry(const RoundedRect& roundedRect) noexcept
+		[[nodiscard]] static auto Create(
+			const RoundedRect& roundedRect) noexcept -> Result<D2DRoundedRectangleGeometry>
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			if (const auto hr = factory->CreateRoundedRectangleGeometry(roundedRect, Put());
-				FAILED(hr))
+			ComPtr<ID2D1RoundedRectangleGeometry> geometry;
+			if (auto error = Error{ factory->CreateRoundedRectangleGeometry(roundedRect, geometry.put()) };
+				error.IsFailure())
 			{
-				Logger::Error(Error{ hr }
-					.AddDetail(L"RoundedRect", std::format(L"{}", roundedRect)),
-					L"Failed to create rounded rectangle geometry");
+				error.AddDetail(L"roundedRect", std::format(L"{}", roundedRect));
+				return Unexpected{ error };
 			}
+
+			return D2DRoundedRectangleGeometry{ geometry };
 		}
 
 		[[nodiscard]] auto GetRoundedRect() const noexcept -> RoundedRect

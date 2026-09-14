@@ -19,21 +19,23 @@ export namespace PGUI::UI::Imaging
 
 		explicit(false) FormatConverter(const ComPtr<IWICFormatConverter>& converter) noexcept;
 
-		FormatConverter(
-			BitmapSource<> bitmapSource, WICPixelFormatGUID destinationFormat,
+		[[nodiscard]] static auto Create(
+			const BitmapSource<>& bitmapSource,
+			WICPixelFormatGUID destinationFormat,
 			WICBitmapDitherType ditherType = WICBitmapDitherTypeNone,
-			double alphaThresholdPercent = 0.0, std::optional<Palette> palette = std::nullopt,
-			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) noexcept;
+			double alphaThresholdPercent = 0.0,
+			const std::optional<Palette>& palette = std::nullopt,
+			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) noexcept -> Result<FormatConverter>;
 
-		[[nodiscard]] auto CanConvert(
-			WICPixelFormatGUID sourceFormat,
-			WICPixelFormatGUID destinationFormat) const noexcept -> Result<bool>;
-
-		[[nodiscard]] static auto ConvertToD2DBitmap(
+		[[nodiscard]] static auto CreateForD2DBitmap(
 			const BitmapSource<>& bitmapSource,
 			WICBitmapDitherType ditherType = WICBitmapDitherTypeNone,
 			double alphaThresholdPercent = 0.0,
 			const std::optional<Palette>& palette = std::nullopt,
 			WICBitmapPaletteType paletteType = WICBitmapPaletteTypeCustom) noexcept -> Result<FormatConverter>;
+
+		[[nodiscard]] auto CanConvert(
+			WICPixelFormatGUID sourceFormat,
+			WICPixelFormatGUID destinationFormat) const noexcept -> Result<bool>;
 	};
 }

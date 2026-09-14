@@ -242,7 +242,7 @@ namespace PGUI::UI
 		auto fontCollection3 = fontCollection.try_query<IDWriteFontCollection3>();
 		if (fontCollection3.get() == nullptr)
 		{
-			Error error{ E_NOINTERFACE };
+			Error error{ SystemErrorCode::InterfaceNotSupported };
 			Logger::Error(error, L"Failed to cast font collection to IDWriteFontCollection3");
 			return Unexpected{ error };
 		}

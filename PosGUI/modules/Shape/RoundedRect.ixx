@@ -29,29 +29,29 @@ export namespace PGUI
 		template <typename T> requires std::is_arithmetic_v<T>
 		explicit(false) constexpr RoundedRect(const Rect<T>& rc,
 			const float xRadius = 0.0F, const float yRadius = 0.0F) noexcept :
-			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
+			Rect{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
 		{ }
 
 		explicit(false) constexpr RoundedRect(const RECT& rc,
 			const float xRadius = 0.0F, const float yRadius = 0.0F) noexcept :
-			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
+			Rect{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
 		{ }
 
 		explicit(false) constexpr RoundedRect(const D2D1_RECT_F& rc,
 			const float xRadius = 0.0F, 
 			const float yRadius = 0.0F) noexcept :
-			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
+			Rect{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
 		{ }
 
 		explicit(false) constexpr RoundedRect(
 			const D2D1_RECT_U& rc,
 			const float xRadius = 0.0F,
 			const float yRadius = 0.0F) noexcept :
-			Rect<float>{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
+			Rect{ rc }, xRadius{ xRadius }, yRadius{ yRadius }
 		{ }
 
 		explicit(false) constexpr RoundedRect(const D2D1_ROUNDED_RECT& rrc) noexcept :
-			Rect<float>{ rrc.rect }, xRadius{ rrc.radiusX }, yRadius{ rrc.radiusY }
+			Rect{ rrc.rect }, xRadius{ rrc.radiusX }, yRadius{ rrc.radiusY }
 		{ }
 
 		constexpr auto SetRect(const RectF rect) noexcept -> void
@@ -62,9 +62,25 @@ export namespace PGUI
 			bottom = rect.bottom;
 		}
 
+		[[nodiscard]] constexpr auto GetRadii() const noexcept -> Point2F
+		{
+			return { xRadius, yRadius };
+		}
+		constexpr auto SetRadii(const float x, const float y) noexcept -> void
+		{
+			xRadius = x;
+			yRadius = y;
+		}
+		template <typename T>
+		constexpr auto SetRadii(const Point2<T>& radii) noexcept -> void
+		{
+			xRadius = static_cast<float>(radii.x);
+			yRadius = static_cast<float>(radii.y);
+		}
+
 		explicit(false) constexpr operator D2D1_ROUNDED_RECT() const noexcept
 		{
-			return D2D1_ROUNDED_RECT{ static_cast<D2D1_RECT_F>(*this), xRadius, yRadius };
+			return D2D1_ROUNDED_RECT{ .rect = static_cast<D2D1_RECT_F>(*this), .radiusX = xRadius, .radiusY = yRadius };
 		}
 
 		[[nodiscard]] constexpr auto operator==(const RoundedRect& other) const noexcept -> bool = default;

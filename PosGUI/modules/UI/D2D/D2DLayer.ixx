@@ -53,7 +53,7 @@ export namespace PGUI::UI::D2D
 		}
 
 		[[nodiscard]] auto GetOpacity() const noexcept { return opacity; }
-		[[nodiscard]] auto GetOpacityBrush() const noexcept { return Brush{ opacityBrush }; }
+		[[nodiscard]] auto GetOpacityBrush() const noexcept { return Brush::CreateFrom(opacityBrush); }
 
 		[[nodiscard]] auto GetLayerOptions() const noexcept
 		{

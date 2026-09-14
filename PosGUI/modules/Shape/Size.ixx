@@ -3,12 +3,14 @@ module;
 #include <Windows.h>
 #include <winrt/Windows.Foundation.Numerics.h>
 #include <winrt/Windows.Graphics.h>
+#include <winrt/Windows.Foundation.h>
 
 export module PGUI.Shape:Size;
 
 import std;
 
-namespace WFN = winrt::Windows::Foundation::Numerics;
+namespace WF = winrt::Windows::Foundation;
+namespace WFN = WF::Numerics;
 namespace WG = winrt::Windows::Graphics;
 
 export namespace PGUI
@@ -33,9 +35,13 @@ export namespace PGUI
 			cx{ static_cast<T>(sz.x) }, cy{ static_cast<T>(sz.y) }
 		{ }
 
+		explicit(false) constexpr Size(const WF::Size& sz) noexcept :
+			cx{ static_cast<T>(sz.Width) }, cy{ static_cast<T>(sz.Height) }
+		{ }
+
 		explicit(false) constexpr Size(const WG::SizeInt32& sz) noexcept :
 			cx{ static_cast<T>(sz.Width) }, cy{ static_cast<T>(sz.Height) }
-		{}
+		{ }
 
 		explicit(false) constexpr Size(const SIZE& sz) noexcept :
 			cx{ static_cast<T>(sz.cx) }, cy{ static_cast<T>(sz.cy) }
@@ -58,6 +64,11 @@ export namespace PGUI
 		explicit(false) constexpr operator WFN::float2() const noexcept
 		{
 			return WFN::float2{ static_cast<float>(cx), static_cast<float>(cy) };
+		}
+
+		explicit(false) constexpr operator WF::Size() const noexcept
+		{
+			return WF::Size{ static_cast<float>(cx), static_cast<float>(cy) };
 		}
 
 		explicit(false) constexpr operator WG::SizeInt32() const noexcept

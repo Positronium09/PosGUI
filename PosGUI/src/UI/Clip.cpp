@@ -16,55 +16,61 @@ import PGUI.UI.D2D.D2DPathGeometry;
 
 namespace PGUI::UI
 {
-	RoundedRectangleClip::RoundedRectangleClip(const ComPtr<ID2D1RoundedRectangleGeometry>& geometry) noexcept :
-		ComPtrHolder{ geometry }
-	{ }
-
-	RoundedRectangleClip::RoundedRectangleClip(const RoundedRect& rect) noexcept
-	{
-		const auto& factory = Factories::D2DFactory::GetFactory();
-
-		const auto hr = factory->CreateRoundedRectangleGeometry(rect, Put());
-		LogIfFailed(
-			Error{
-				hr
-			}
-			.AddDetail(L"rect", std::format(L"{}", rect))
-		);
-	}
-
 	RectangleClip::RectangleClip(const ComPtr<ID2D1RectangleGeometry>& geometry) noexcept :
 		ComPtrHolder{ geometry }
 	{ }
 
-	RectangleClip::RectangleClip(const RectF rect) noexcept
+	auto RectangleClip::Create(const RectF& rect) noexcept -> Result<RectangleClip>
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		const auto hr = factory->CreateRectangleGeometry(rect, Put());
-		LogIfFailed(
-			Error{
-				hr
-			}
-			.AddDetail(L"rect", std::format(L"{}", rect))
-		);
+		ComPtr<ID2D1RectangleGeometry> geometry;
+		if (auto error = Error{ factory->CreateRectangleGeometry(rect, geometry.put()) };
+			error.IsFailure())
+		{
+			error.AddDetail(L"rect", std::format(L"{}", rect));
+			return Unexpected{ error };
+		}
+
+		return RectangleClip{ geometry };
+	}
+
+	RoundedRectangleClip::RoundedRectangleClip(const ComPtr<ID2D1RoundedRectangleGeometry>& geometry) noexcept :
+		ComPtrHolder{ geometry }
+	{ }
+
+	auto RoundedRectangleClip::Create(const RoundedRect& rect) noexcept -> Result<RoundedRectangleClip>
+	{
+		const auto& factory = Factories::D2DFactory::GetFactory();
+
+		ComPtr<ID2D1RoundedRectangleGeometry> geometry;
+		if (auto error = Error{ factory->CreateRoundedRectangleGeometry(rect, geometry.put()) };
+			error.IsFailure())
+		{
+			error.AddDetail(L"rect", std::format(L"{}", rect));
+			return Unexpected{ error };
+		}
+
+		return RoundedRectangleClip{ geometry };
 	}
 
 	EllipseClip::EllipseClip(const ComPtr<ID2D1EllipseGeometry>& geometry) noexcept :
 		ComPtrHolder{ geometry }
 	{ }
 
-	EllipseClip::EllipseClip(const Ellipse ellipse) noexcept
+	auto EllipseClip::Create(const Ellipse ellipse) noexcept -> Result<EllipseClip>
 	{
 		const auto& factory = Factories::D2DFactory::GetFactory();
 
-		const auto hr = factory->CreateEllipseGeometry(ellipse, Put());
-		LogIfFailed(
-			Error{
-				hr
-			}
-			.AddDetail(L"ellipse", std::format(L"{}", ellipse))
-		);
+		ComPtr<ID2D1EllipseGeometry> geometry;
+		if (auto error = Error{ factory->CreateEllipseGeometry(ellipse, geometry.put()) };
+			error.IsFailure())
+		{
+			error.AddDetail(L"ellipse", std::format(L"{}", ellipse));
+			return Unexpected{ error };
+		}
+
+		return EllipseClip{ geometry };
 	}
 
 
@@ -94,20 +100,27 @@ namespace PGUI::UI
 		ReleaseClip();
 		return Match(parameters, [this]<typename T>(const T& parameters) -> Result<void>
 		{
+			const auto assign = [this](auto&& clipResult) -> Result<void>
+			{
+				if (!clipResult.has_value())
+				{
+					return Unexpected{ clipResult.error() };
+				}
+				clip = MoveChecked(clipResult.value());
+				return EmptyResult;
+			};
+
 			if constexpr (std::is_same_v<T, RectangleClipParameters>)
 			{
-				clip = RectangleClip{ parameters.rect };
-				return EmptyResult;
+				return assign(RectangleClip::Create(parameters.rect));
 			}
 			else if constexpr (std::is_same_v<T, RoundedRectangleClipParameters>)
 			{
-				clip = RoundedRectangleClip{ parameters.rect };
-				return EmptyResult;
+				return assign(RoundedRectangleClip::Create(parameters.rect));
 			}
 			else if constexpr (std::is_same_v<T, EllipseClipParameters>)
 			{
-				clip = EllipseClip{ parameters.ellipse };
-				return EmptyResult;
+				return assign(EllipseClip::Create(parameters.ellipse));
 			}
 			else if constexpr (std::is_same_v<T, PathClipParameters>)
 			{
@@ -116,22 +129,21 @@ namespace PGUI::UI
 			}
 			else if constexpr (std::is_same_v<T, RoundCornerClipParameters>)
 			{
-				auto pathResult = D2D::D2DPathGeometry::CreateRoundRectWithPathGeometry(
+				const auto pathResult = D2D::D2DPathGeometry::CreateRoundRectWithPathGeometry(
 					parameters.rect, parameters.topLeftRadius,
 					parameters.topRightRadius, parameters.bottomLeftRadius,
 					parameters.bottomRightRadius);
-				if (pathResult.has_value())
+				if (!pathResult.has_value())
 				{
-					clip = RoundCornerClip{ pathResult.value() };
-					return EmptyResult;
+					return Unexpected{ pathResult.error() };
 				}
-				clip = EmptyClip{ };
-				return Unexpected{ pathResult.error() };
+
+				clip = RoundCornerClip{ pathResult.value() };
+				return EmptyResult;
 			}
 			else
 			{
-				clip = EmptyClip{ };
-				return Unexpected{ Error{ ErrorCode::Failure } };
+				return EmptyResult;
 			}
 		});
 	}

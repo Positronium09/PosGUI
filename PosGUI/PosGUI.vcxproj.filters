@@ -690,7 +690,7 @@
     <ClCompile Include="modules\UI\VL\CompositionObject.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\VL\Visual.ixx">
+    <ClCompile Include="modules\UI\VL\Visual\Visual.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\Shape\Point3.ixx">
@@ -717,10 +717,10 @@
     <ClCompile Include="modules\Shape\Quaternion.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\VL\ContainerVisual.ixx">
+    <ClCompile Include="modules\UI\VL\Visual\ContainerVisual.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\VL\VisualCollection.ixx">
+    <ClCompile Include="modules\UI\VL\Visual\VisualCollection.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\UI\VL\Brush\Brush.ixx">
@@ -729,13 +729,13 @@
     <ClCompile Include="modules\UI\VL\Brush\ColorBrush.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\VL\SpriteVisual.ixx">
+    <ClCompile Include="modules\UI\VL\Visual\SpriteVisual.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\VL\CompositionGraphicsDevice.ixx">
+    <ClCompile Include="modules\UI\VL\Surface\CompositionGraphicsDevice.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\VL\SurfaceInterop.ixx">
+    <ClCompile Include="modules\UI\VL\Surface\SurfaceInterop.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\UI\VL\CompositionGraphicsDevice.cpp">
@@ -744,7 +744,58 @@
     <ClCompile Include="modules\UI\VL\Brush\SurfaceBrush.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\UI\VL\CompositionSurface.ixx">
+    <ClCompile Include="modules\UI\VL\Clip\CompositionClip.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Clip\InsetClip.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Brush\VLBrush.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Clip\VLClip.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Surface\VLSurface.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Visual\VLVisual.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Clip\RectangleClip.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Geometry\VLGeometry.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Geometry\CompositionGeometry.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Geometry\CompositionEllipseGeometry.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Geometry\CompositionLineGeometry.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Geometry\CompositionRectangleGeometry.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Geometry\CompositionRoundedRectangleGeometry.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\CompositionViewBox.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Clip\CompositionGeometricClip.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Animation\VLAnimation.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Animation\CompositionAnimation.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\UI\VL\Animation\KeyFrameAnimation.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

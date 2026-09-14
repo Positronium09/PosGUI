@@ -3,6 +3,9 @@ module;
 #include <wincodec.h>
 #include <Windows.h>
 
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Graphics.h>
+
 #undef min
 #undef max
 
@@ -12,6 +15,9 @@ import std;
 
 import :Point2;
 import :Size;
+
+namespace WF = winrt::Windows::Foundation;
+namespace WG = winrt::Windows::Graphics;
 
 export namespace PGUI
 {
@@ -46,6 +52,16 @@ export namespace PGUI
 
 		explicit(false) constexpr Rect(const WICRect& rc) noexcept :
 			Rect{ Point{ rc.X, rc.Y }, PGUI::Size{ rc.Width, rc.Height } }
+		{ }
+
+		explicit(false) constexpr Rect(const WF::Rect& rc) noexcept :
+			left{ static_cast<T>(rc.X) }, top{ static_cast<T>(rc.Y) },
+			right{ static_cast<T>(rc.X + rc.Width) }, bottom{ static_cast<T>(rc.Y + rc.Height) }
+		{ }
+
+		explicit(false) constexpr Rect(const WG::RectInt32& rc) noexcept :
+			left{ static_cast<T>(rc.X) }, top{ static_cast<T>(rc.Y) },
+			right{ static_cast<T>(rc.X + rc.Width) }, bottom{ static_cast<T>(rc.Y + rc.Height) }
 		{ }
 
 		constexpr Rect(Point<T> topLeft, Point<T> bottomRight) noexcept :
@@ -404,6 +420,26 @@ export namespace PGUI
 				static_cast<INT>(top),
 				static_cast<INT>(size.cx),
 				static_cast<INT>(size.cy)
+			};
+		}
+
+		explicit(false) constexpr operator WF::Rect() const noexcept
+		{
+			return WF::Rect{
+				static_cast<float>(left),
+				static_cast<float>(top),
+				static_cast<float>(Width()),
+				static_cast<float>(Height())
+			};
+		}
+
+		explicit(false) constexpr operator WG::RectInt32() const noexcept
+		{
+			return WG::RectInt32{
+				.X = static_cast<std::int32_t>(left),
+				.Y = static_cast<std::int32_t>(top),
+				.Width = static_cast<std::int32_t>(Width()),
+				.Height = static_cast<std::int32_t>(Height())
 			};
 		}
 

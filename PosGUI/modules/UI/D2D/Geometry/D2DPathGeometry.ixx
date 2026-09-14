@@ -14,16 +14,11 @@ export namespace PGUI::UI::D2D
 	class D2DPathGeometry : public D2DGeometry<ID2D1PathGeometry1>
 	{
 		public:
-		D2DPathGeometry() noexcept;
+		D2DPathGeometry() noexcept = default;
 
 		explicit(false) D2DPathGeometry(const ComPtr<ID2D1PathGeometry1>& ptr) noexcept;
 
-		[[nodiscard]] auto GetFigureCount() const noexcept -> Result<UINT32>;
-
-		[[nodiscard]] auto GetSegmentCount() const noexcept -> Result<UINT32>;
-
-		[[nodiscard]] auto Open() const noexcept -> Result<GeometrySink>;
-		[[nodiscard]] auto Stream(const GeometrySink& sink) const noexcept -> Result<void>;
+		[[nodiscard]] static auto Create() noexcept -> Result<D2DPathGeometry>;
 
 		[[nodiscard]] static auto CreateRoundRectWithPathGeometry(
 			RectF rect,
@@ -31,5 +26,12 @@ export namespace PGUI::UI::D2D
 			float topRight,
 			float bottomLeft,
 			float bottomRight) noexcept -> Result<D2DPathGeometry>;
+
+		[[nodiscard]] auto GetFigureCount() const noexcept -> Result<UINT32>;
+
+		[[nodiscard]] auto GetSegmentCount() const noexcept -> Result<UINT32>;
+
+		[[nodiscard]] auto Open() const noexcept -> Result<GeometrySink>;
+		[[nodiscard]] auto Stream(const GeometrySink& sink) const noexcept -> Result<void>;
 	};
 }

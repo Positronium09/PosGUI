@@ -46,7 +46,7 @@ namespace PGUI::UI::Font
 		auto fontSet = fontSet1.try_query<IDWriteFontSet4>();
 		if (fontSet.get() == nullptr)
 		{
-			Error error{ E_NOINTERFACE };
+			Error error{ SystemErrorCode::InterfaceNotSupported };
 			Logger::Error(error, L"Cannot get IDWriteFontSet4 interface");
 			return Unexpected{ error };
 		}

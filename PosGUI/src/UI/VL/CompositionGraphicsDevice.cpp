@@ -1,16 +1,20 @@
 module;
 #include <d2d1_3.h>
 
+#include <winrt/Windows.Foundation.h>
+
 #include <winrt/Windows.UI.Composition.h>
 
 #include <windows.ui.composition.interop.h>
 
-module PGUI.UI.VL.CompositionGraphicsDevice;
+module PGUI.UI.VL.Surface.CompositionGraphicsDevice;
 
 import std;
 
 import PGUI.ComPtr;
+import PGUI.Utils;
 import PGUI.ErrorHandling;
+import PGUI.ProjectionHolder;
 import PGUI.UI.DXDevices;
 import PGUI.UI.VL.Compositor;
 
@@ -28,7 +32,7 @@ namespace PGUI::UI::VL::CompositionGraphicsDevice::Internal
 		std::uint64_t deviceCreationID = 0;
 	};
 
-	[[nodiscard]] auto GetGraphicsDeviceState() noexcept -> GraphicsDeviceThreadState*
+	[[nodiscard]] auto GetGraphicsDeviceState() noexcept -> GraphicsDeviceThreadState*&
 	{
 		thread_local auto* state = new(std::nothrow) GraphicsDeviceThreadState{ };
 		return state;
@@ -55,12 +59,31 @@ namespace PGUI::UI::VL::CompositionGraphicsDevice::Internal
 
 namespace PGUI::UI::VL::CompositionGraphicsDevice
 {
+	auto Shutdown() -> void
+	{
+		if (Internal::GetGraphicsDeviceState() == nullptr)
+		{
+			return;
+		}
+
+		if (const auto& graphicsDevice = Internal::GetGraphicsDeviceState()->graphicsDevice)
+		{
+			Unused(CallProjected([&graphicsDevice]
+			{
+				graphicsDevice.Close();
+			}));
+		}
+
+		delete Internal::GetGraphicsDeviceState();
+		Internal::GetGraphicsDeviceState() = nullptr;
+	}
+
 	auto GetGraphicsDevice() noexcept -> Result<WUC::CompositionGraphicsDevice>
 	{
 		auto* statePtr = Internal::GetGraphicsDeviceState();
 		if (statePtr == nullptr)
 		{
-			return Unexpected{ Error{ ErrorCode::AllocationFailure } };
+			return Unexpected{ Error{ ErrorCode::NotInitialized } };
 		}
 		auto& state = *statePtr;
 
@@ -128,7 +151,7 @@ namespace PGUI::UI::VL::CompositionGraphicsDevice
 		auto* statePtr = Internal::GetGraphicsDeviceState();
 		if (statePtr == nullptr)
 		{
-			return Unexpected{ Error{ ErrorCode::AllocationFailure } };
+			return Unexpected{ Error{ ErrorCode::NotInitialized } };
 		}
 		auto& state = *statePtr;
 

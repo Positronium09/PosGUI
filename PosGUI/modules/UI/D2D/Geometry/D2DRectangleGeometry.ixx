@@ -23,18 +23,19 @@ export namespace PGUI::UI::D2D
 		{
 		}
 
-		explicit D2DRectangleGeometry(const RectF rect) noexcept
+		[[nodiscard]] static auto Create(const RectF rect) noexcept -> Result<D2DRectangleGeometry>
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			if (const auto hr = factory->CreateRectangleGeometry(rect, Put());
-				FAILED(hr))
+			ComPtr<ID2D1RectangleGeometry> geometry;
+			if (auto error = Error{ factory->CreateRectangleGeometry(rect, geometry.put()) };
+				error.IsFailure())
 			{
-				Logger::Error(Error{ hr }
-					.AddDetail(L"Rect", std::format(L"{}", rect)),
-					L"Failed to create rectangle geometry");
+				error.AddDetail(L"rect", std::format(L"{}", rect));
+				return Unexpected{ error };
 			}
 
+			return D2DRectangleGeometry{ geometry };
 		}
 
 		[[nodiscard]] auto GetRect() const noexcept -> RectF

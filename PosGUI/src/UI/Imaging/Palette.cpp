@@ -13,64 +13,69 @@ import PGUI.UI.Color;
 
 namespace PGUI::UI::Imaging
 {
-	Palette::Palette() noexcept
-	{
-		const auto& factory = Factories::WICFactory::GetFactory();
-
-		if (const auto hr = factory->CreatePalette(Put());
-			FAILED(hr))
-		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create palette");
-		}
-	}
-
 	Palette::Palette(const ComPtr<IWICPalette>& palette) noexcept :
 		ComPtrHolder{ palette }
 	{ }
 
-	Palette::Palette(PaletteType paletteType, const bool addTransparentColor) noexcept
+	auto Palette::Create() noexcept -> Result<Palette>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreatePalette(Put());
-			FAILED(hr))
+		ComPtr<IWICPalette> palette;
+		if (const auto error = Error{ factory->CreatePalette(palette.put()) };
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create palette");
-			return;
+			return Unexpected{ error };
 		}
 
-		if (const auto hr = Get()->InitializePredefined(
-				static_cast<WICBitmapPaletteType>(paletteType),
-				addTransparentColor);
-			FAILED(hr))
-		{
-			Logger::Error(Error{ hr },
-			              L"Failed to initialize palette from bitmap");
-		}
+		return Palette{ palette };
 	}
 
-	Palette::Palette(std::span<RGBA> colors) noexcept
+	auto Palette::CreateFromColors(const std::span<const RGBA> colors) noexcept -> Result<Palette>
 	{
-		const auto& factory = Factories::WICFactory::GetFactory();
-
-		if (const auto hr = factory->CreatePalette(Put());
-			FAILED(hr))
+		auto paletteResult = Create();
+		if (!paletteResult.has_value())
 		{
-			Logger::Error(Error{ hr }, L"Failed to create palette");
-			return;
+			return Unexpected{ paletteResult.error() };
 		}
 
 		auto wicColors = colors | std::ranges::to<std::vector<WICColor>>();
 
-		if (const auto hr = Get()->InitializeCustom(
-				wicColors.data(),
-				static_cast<UINT>(wicColors.size()));
-			FAILED(hr))
+		if (auto error = Error{
+				paletteResult.value().Get()->InitializeCustom(
+					wicColors.data(),
+					static_cast<UINT>(wicColors.size()))
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr }, L"Failed to initialize palette from colors");
+			error.AddDetail(L"colorCount", std::to_wstring(wicColors.size()));
+			return Unexpected{ error };
 		}
+
+		return paletteResult;
+	}
+
+	auto Palette::CreateFromType(
+		const PaletteType paletteType,
+		const bool addTransparentColor) noexcept -> Result<Palette>
+	{
+		auto paletteResult = Create();
+		if (!paletteResult.has_value())
+		{
+			return Unexpected{ paletteResult.error() };
+		}
+
+		if (const auto error = Error{
+				paletteResult.value().Get()->InitializePredefined(
+					ToUnderlying<WICBitmapPaletteType>(paletteType),
+					addTransparentColor)
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+
+		return paletteResult;
 	}
 
 	auto Palette::GetType() const noexcept -> Result<PaletteType>

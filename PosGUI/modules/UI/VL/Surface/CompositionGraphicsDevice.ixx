@@ -3,7 +3,7 @@ module;
 
 #include <windows.ui.composition.interop.h>
 
-export module PGUI.UI.VL.CompositionGraphicsDevice;
+export module PGUI.UI.VL.Surface.CompositionGraphicsDevice;
 
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
@@ -15,6 +15,8 @@ using IGraphicsDeviceInterop = ABI::Windows::UI::Composition::ICompositionGraphi
 
 export namespace PGUI::UI::VL::CompositionGraphicsDevice
 {
+	auto Shutdown() -> void;
+
 	[[nodiscard]] auto GetGraphicsDevice() noexcept -> Result<WUC::CompositionGraphicsDevice>;
 	[[nodiscard]] auto GetGraphicsDeviceInterop() noexcept -> Result<ComPtr<IGraphicsDeviceInterop>>;
 

@@ -18,32 +18,38 @@ namespace PGUI::UI
 		ComPtrHolder{ brush }
 	{ }
 
-	SolidBrush::SolidBrush(const ComPtr<ID2D1RenderTarget>& renderTarget, const RGBA color) noexcept
+	auto SolidBrush::Create(
+		const ComPtr<ID2D1RenderTarget>& renderTarget,
+		const RGBA& color) noexcept -> Result<SolidBrush>
 	{
-		if (const auto hr = renderTarget->CreateSolidColorBrush(color, Put());
-			FAILED(hr))
+		ComPtr<ID2D1SolidColorBrush> brush;
+		if (auto error = Error{ renderTarget->CreateSolidColorBrush(color, brush.put()) };
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr }
-			              .AddDetail(L"Color", std::format(L"{}", color)),
-			              L"Failed to create SolidColorBrush");
+			error.AddDetail(L"color", std::format(L"{}", color));
+			return Unexpected{ error };
 		}
+
+		return SolidBrush{ brush };
 	}
 
 	LinearGradientBrush::LinearGradientBrush(const ComPtr<ID2D1LinearGradientBrush>& brush) noexcept :
 		ComPtrHolder{ brush }
 	{ }
 
-	LinearGradientBrush::LinearGradientBrush(
+	auto LinearGradientBrush::Create(
 		const ComPtr<ID2D1RenderTarget>& renderTarget,
-		LinearGradient gradient, const std::optional<RectF>& referenceRect) noexcept
+		LinearGradient gradient,
+		const std::optional<RectF>& referenceRect) noexcept -> Result<LinearGradientBrush>
 	{
 		if (gradient.GetPositioningMode() == PositioningMode::Relative)
 		{
 			if (!referenceRect.has_value())
 			{
-				Logger::Error(Error{ ErrorCode::InvalidArgument },
-				              L"Reference rectangle must be provided when using Relative positioning mode");
-				return;
+				return Unexpected{
+					Error{ ErrorCode::InvalidArgument }
+					.SetCustomMessage(L"Reference rectangle must be provided when using Relative positioning mode")
+				};
 			}
 			gradient.ApplyReferenceRect(*referenceRect);
 		}
@@ -51,50 +57,52 @@ namespace PGUI::UI
 		const auto& gradientStops = gradient.GetStops();
 
 		ComPtr<ID2D1GradientStopCollection> gradientStopCollection;
-		auto hr = renderTarget->CreateGradientStopCollection(
-			gradientStops.data(), static_cast<UINT32>(gradientStops.size()),
-			D2D1_GAMMA_1_0, D2D1_EXTEND_MODE_CLAMP,
-			&gradientStopCollection);
-		if (FAILED(hr))
+		if (const auto error = Error{
+				renderTarget->CreateGradientStopCollection(
+					gradientStops.data(), static_cast<UINT32>(gradientStops.size()),
+					D2D1_GAMMA_1_0, D2D1_EXTEND_MODE_CLAMP,
+					gradientStopCollection.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create GradientStopCollection");
-			return;
+			return Unexpected{ error };
 		}
 
-		hr = renderTarget->CreateLinearGradientBrush(
-			D2D1::LinearGradientBrushProperties(gradient.Start(), gradient.End()),
-			gradientStopCollection.get(),
-			Put()
-		);
-		if (FAILED(hr))
+		ComPtr<ID2D1LinearGradientBrush> brush;
+		if (auto error = Error{
+				renderTarget->CreateLinearGradientBrush(
+					D2D1::LinearGradientBrushProperties(gradient.Start(), gradient.End()),
+					gradientStopCollection.get(),
+					brush.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr }
-			              .AddDetail(
-				              L"Start",
-				              std::format(L"{}", gradient.Start()))
-			              .AddDetail(
-				              L"End", std::format(L"{}", gradient.End())),
-			              L"Failed to create LinearGradientBrush");
-			return;
+			error
+				.AddDetail(L"start", std::format(L"{}", gradient.Start()))
+				.AddDetail(L"end", std::format(L"{}", gradient.End()));
+			return Unexpected{ error };
 		}
+
+		return LinearGradientBrush{ brush };
 	}
 
 	RadialGradientBrush::RadialGradientBrush(const ComPtr<ID2D1RadialGradientBrush>& brush) noexcept :
 		ComPtrHolder{ brush }
 	{ }
 
-	RadialGradientBrush::RadialGradientBrush(
+	auto RadialGradientBrush::Create(
 		const ComPtr<ID2D1RenderTarget>& renderTarget,
-		RadialGradient gradient, const std::optional<RectF>& referenceRect) noexcept
+		RadialGradient gradient,
+		const std::optional<RectF>& referenceRect) noexcept -> Result<RadialGradientBrush>
 	{
 		if (gradient.GetPositioningMode() == PositioningMode::Relative)
 		{
 			if (!referenceRect.has_value())
 			{
-				Logger::Error(Error{ ErrorCode::InvalidArgument },
-				              L"Reference rectangle must be provided when using Relative positioning mode");
-				return;
+				return Unexpected{
+					Error{ ErrorCode::InvalidArgument }
+					.SetCustomMessage(L"Reference rectangle must be provided when using Relative positioning mode")
+				};
 			}
 			gradient.ApplyReferenceRect(*referenceRect);
 		}
@@ -102,54 +110,58 @@ namespace PGUI::UI
 		const auto& gradientStops = gradient.GetStops();
 
 		ComPtr<ID2D1GradientStopCollection> gradientStopCollection;
-		auto hr = renderTarget->CreateGradientStopCollection(
-			gradientStops.data(), static_cast<UINT32>(gradientStops.size()),
-			D2D1_GAMMA_1_0, D2D1_EXTEND_MODE_CLAMP,
-			&gradientStopCollection);
-		if (FAILED(hr))
+		if (const auto error = Error{
+				renderTarget->CreateGradientStopCollection(
+					gradientStops.data(), static_cast<UINT32>(gradientStops.size()),
+					D2D1_GAMMA_1_0, D2D1_EXTEND_MODE_CLAMP,
+					gradientStopCollection.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create GradientStopCollection");
-			return;
+			return Unexpected{ error };
 		}
 
-		hr = renderTarget->CreateRadialGradientBrush(
-			D2D1::RadialGradientBrushProperties(
-				gradient.GetEllipse().center, gradient.Offset(),
-				gradient.GetEllipse().xRadius, gradient.GetEllipse().yRadius),
-			gradientStopCollection.get(),
-			Put()
-		);
-		if (FAILED(hr))
+		ComPtr<ID2D1RadialGradientBrush> brush;
+		if (auto error = Error{
+				renderTarget->CreateRadialGradientBrush(
+					D2D1::RadialGradientBrushProperties(
+						gradient.GetEllipse().center, gradient.Offset(),
+						gradient.GetEllipse().xRadius, gradient.GetEllipse().yRadius),
+					gradientStopCollection.get(),
+					brush.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr }
-			              .AddDetail(
-				              L"Center",
-				              std::format(L"{}", gradient.GetEllipse()))
-			              .AddDetail(
-				              L"Offset", std::format(L"{}", gradient.Offset())),
-			              L"Failed to create RadialGradientBrush");
-			return;
+			error
+				.AddDetail(L"ellipse", std::format(L"{}", gradient.GetEllipse()))
+				.AddDetail(L"offset", std::format(L"{}", gradient.Offset()));
+			return Unexpected{ error };
 		}
+
+		return RadialGradientBrush{ brush };
 	}
 
 	BitmapBrush::BitmapBrush(const ComPtr<ID2D1BitmapBrush>& brush) noexcept :
 		ComPtrHolder{ brush }
 	{ }
 
-	BitmapBrush::BitmapBrush(
+	auto BitmapBrush::Create(
 		const ComPtr<ID2D1RenderTarget>& renderTarget,
-		D2D::D2DBitmap bitmap, const D2D::BitmapBrushProperties& bitmapBrushProperties) noexcept
+		const D2D::D2DBitmap& bitmap,
+		const D2D::BitmapBrushProperties& bitmapBrushProperties) noexcept -> Result<BitmapBrush>
 	{
-		const auto hr = renderTarget->CreateBitmapBrush(
-			bitmap.GetRaw(),
-			bitmapBrushProperties, Put());
-		if (FAILED(hr))
+		ComPtr<ID2D1BitmapBrush> brush;
+		if (const auto error = Error{
+				renderTarget->CreateBitmapBrush(
+					bitmap.GetRaw(),
+					bitmapBrushProperties, brush.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create BitmapBrush");
-			return;
+			return Unexpected{ error };
 		}
+
+		return BitmapBrush{ brush };
 	}
 
 	[[nodiscard]] static auto ExtractSolidBrushParameters(const ComPtr<ID2D1SolidColorBrush>& ptr) noexcept
@@ -198,10 +210,7 @@ namespace PGUI::UI
 		const auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
 		if (bitmap1.get() == nullptr)
 		{
-			Error error{ E_NOINTERFACE };
-			Logger::Error(error,
-			              L"Failed to extract bitmap from BitmapBrush");
-			return Unexpected{ error };
+			return Unexpected{ Error{ SystemErrorCode::InterfaceNotSupported } };
 		}
 
 		const D2D::D2DBitmap bmp{ bitmap1 };
@@ -219,109 +228,94 @@ namespace PGUI::UI
 		return BitmapBrushParameters{ bmp, bitmapBrushProperties };
 	}
 
-	Brush::Brush(const ComPtr<ID2D1Brush>& ptr) noexcept
-	{
-		ComPtrHolder<
-				ID2D1Brush, ID2D1SolidColorBrush, ID2D1LinearGradientBrush,
-				ID2D1RadialGradientBrush, ID2D1BitmapBrush> holder
-			{
-			ptr.get(),
-			nullptr,
-			nullptr,
-			nullptr,
-			nullptr
-		};
-		
-		if (holder.IsInitialized<ID2D1SolidColorBrush>())
-		{
-			const auto& solidBrush = holder.Get<ID2D1SolidColorBrush>();
-			parameters = ExtractSolidBrushParameters(solidBrush);
-			brush = SolidBrush{ solidBrush };
-			return;
-		}
-
-		if (holder.IsInitialized<ID2D1LinearGradientBrush>())
-		{
-			const auto& linearGradientBrush = holder.Get<ID2D1LinearGradientBrush>();
-			parameters = ExtractLinearGradientBrushParameters(linearGradientBrush);
-			brush = LinearGradientBrush{ linearGradientBrush };
-			return;
-		}
-
-		if (holder.IsInitialized<ID2D1RadialGradientBrush>())
-		{
-			const auto& radialGradientBrush = holder.Get<ID2D1RadialGradientBrush>();
-			parameters = ExtractRadialGradientBrushParameters(radialGradientBrush);
-			brush = RadialGradientBrush{ radialGradientBrush };
-			return;
-		}
-
-		if (holder.IsInitialized<ID2D1BitmapBrush>())
-		{
-			const auto& bitmapBrush = holder.Get<ID2D1BitmapBrush>();
-			const auto result = ExtractBitmapBrushParameters(bitmapBrush);
-			if (!result.has_value())
-			{
-				Logger::Info(result.error(), L"Failed to extract BitmapBrush parameters");
-				brush = EmptyBrush{ };
-				return;
-			}
-			parameters = result.value();
-			brush = BitmapBrush{ bitmapBrush };
-
-			return;
-		}
-
-		brush = EmptyBrush{ };
-
-		Logger::Error(L"Unknown brush type. Brush is set to empty");
-	}
-
 	Brush::Brush(const BrushParameters& parameters) noexcept :
 		parameters{ parameters }
 	{ }
 
-	Brush::Brush(const ComPtr<ID2D1RenderTarget>& renderTarget, const BrushParameters& parameters) noexcept :
-		Brush{ parameters }
+	auto Brush::CreateFrom(const ComPtr<ID2D1Brush>& ptr) noexcept -> Result<Brush>
 	{
-		CreateBrush(renderTarget);
+		if (const auto solidBrush = ptr.try_query<ID2D1SolidColorBrush>())
+		{
+			Brush result{ ExtractSolidBrushParameters(solidBrush) };
+			result.brush = SolidBrush{ solidBrush };
+			return result;
+		}
+
+		if (const auto linearGradientBrush = ptr.try_query<ID2D1LinearGradientBrush>())
+		{
+			Brush result{ ExtractLinearGradientBrushParameters(linearGradientBrush) };
+			result.brush = LinearGradientBrush{ linearGradientBrush };
+			return result;
+		}
+
+		if (const auto radialGradientBrush = ptr.try_query<ID2D1RadialGradientBrush>())
+		{
+			Brush result{ ExtractRadialGradientBrushParameters(radialGradientBrush) };
+			result.brush = RadialGradientBrush{ radialGradientBrush };
+			return result;
+		}
+
+		if (const auto bitmapBrush = ptr.try_query<ID2D1BitmapBrush>())
+		{
+			const auto parametersResult = ExtractBitmapBrushParameters(bitmapBrush);
+			if (!parametersResult.has_value())
+			{
+				return Unexpected{ parametersResult.error() };
+			}
+
+			Brush result{ parametersResult.value() };
+			result.brush = BitmapBrush{ bitmapBrush };
+			return result;
+		}
+
+		return Unexpected{
+			Error{ SystemErrorCode::InterfaceNotSupported }
+			.SetCustomMessage(L"Unknown brush type")
+		};
 	}
 
-	auto Brush::SetParametersAndCreateBrush(
-		const ComPtr<ID2D1RenderTarget>& renderTarget,
-		const BrushParameters& params) noexcept -> void
-	{
-		parameters = params;
-		CreateBrush(renderTarget);
-	}
-
-	auto Brush::CreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget) noexcept -> void
+	auto Brush::CreateBrush(const ComPtr<ID2D1RenderTarget>& renderTarget) noexcept -> Result<void>
 	{
 		ReleaseBrush();
-		Match(parameters, [&renderTarget, this]<typename T>(const T& param)
+
+		return Match(parameters, [&renderTarget, this]<typename T>(const T& param) -> Result<void>
 		{
+			const auto assign = [this](auto&& brushResult) -> Result<void>
+			{
+				if (!brushResult.has_value())
+				{
+					return Unexpected{ brushResult.error() };
+				}
+				brush = MoveChecked(brushResult.value());
+				return EmptyResult;
+			};
+
 			if constexpr (std::is_same_v<T, RGBA>)
 			{
-				brush = SolidBrush{ renderTarget, param };
+				return assign(SolidBrush::Create(renderTarget, param));
 			}
 			else if constexpr (std::is_same_v<T, LinearGradientBrushParameters>)
 			{
-				brush = LinearGradientBrush{ renderTarget, param.gradient, param.referenceRect };
+				return assign(LinearGradientBrush::Create(renderTarget, param.gradient, param.referenceRect));
 			}
 			else if constexpr (std::is_same_v<T, RadialGradientBrushParameters>)
 			{
-				brush = RadialGradientBrush{ renderTarget, param.gradient, param.referenceRect };
+				return assign(RadialGradientBrush::Create(renderTarget, param.gradient, param.referenceRect));
 			}
 			else if constexpr (std::is_same_v<T, BitmapBrushParameters>)
 			{
-				brush = BitmapBrush{ renderTarget, param.bitmap, param.bitmapBrushProperties };
+				return assign(BitmapBrush::Create(renderTarget, param.bitmap, param.bitmapBrushProperties));
+			}
+			else
+			{
+				return EmptyResult;
 			}
 		});
 	}
 
 	auto Brush::ReleaseBrush() noexcept -> void
 	{
-		brush = std::monostate{ };
+		brush = EmptyBrush{ };
 	}
 
 	auto Brush::SetGradientBrushRect(RectF rect) noexcept -> void
@@ -335,11 +329,24 @@ namespace PGUI::UI
 		});
 	}
 
+	auto Brush::SetParameters(const BrushParameters& brushParameters) noexcept -> void
+	{
+		parameters = brushParameters;
+	}
+
+	auto Brush::SetParameters(const ComPtr<ID2D1RenderTarget>& renderTarget,
+	                          const BrushParameters& brushParameters) noexcept -> Result<void>
+	{
+		SetParameters(brushParameters);
+
+		return CreateBrush(renderTarget);
+	}
+
 	Brush::operator ID2D1Brush*() const noexcept
 	{
 		return Match(brush, []<typename T>(const T& brush) -> ID2D1Brush*
 		{
-			if constexpr (!std::is_same_v<std::monostate, T>)
+			if constexpr (!std::is_same_v<EmptyBrush, T>)
 			{
 				return brush;
 			}

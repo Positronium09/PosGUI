@@ -226,4 +226,13 @@ namespace PGUI
 		UI::VL::Compositor::InitDispatcherQueueController();
 		Unused(UI::VL::Compositor::GetCompositor());
 	}
+
+	auto Shutdown() -> void
+	{
+		UI::VL::CompositionGraphicsDevice::Shutdown();
+
+		UI::VL::Compositor::Shutdown();
+		
+		UI::DXDevices::ResetDevices();
+	}
 }

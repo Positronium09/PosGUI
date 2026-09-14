@@ -18,21 +18,23 @@ import PGUI.UI.D2D.D2DStructs;
 
 namespace PGUI::UI::D2D
 {
-	D2DPathGeometry::D2DPathGeometry() noexcept
-	{
-		const auto& factory = Factories::D2DFactory::GetFactory();
-
-		if (const auto hr = factory->CreatePathGeometry(Put());
-			FAILED(hr))
-		{
-			const Error error{ hr };
-			Logger::Error(error, L"Failed to create D2DPathGeometry");
-		}
-	}
-
 	D2DPathGeometry::D2DPathGeometry(const ComPtr<ID2D1PathGeometry1>& ptr) noexcept :
 		D2DGeometry{ ptr }
 	{ }
+
+	auto D2DPathGeometry::Create() noexcept -> Result<D2DPathGeometry>
+	{
+		const auto& factory = Factories::D2DFactory::GetFactory();
+
+		ComPtr<ID2D1PathGeometry1> geometry;
+		if (const auto error = Error{ factory->CreatePathGeometry(geometry.put()) };
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+
+		return D2DPathGeometry{ geometry };
+	}
 
 	auto D2DPathGeometry::GetFigureCount() const noexcept -> Result<UINT32>
 	{
@@ -95,15 +97,17 @@ namespace PGUI::UI::D2D
 		const float bottomLeft,
 		const float bottomRight) noexcept -> Result<D2DPathGeometry>
 	{
-		D2DPathGeometry pathGeometry;
-		auto sinkResult = pathGeometry.Open();
+		auto pathGeometryResult = Create();
+		if (!pathGeometryResult.has_value())
+		{
+			return Unexpected{ pathGeometryResult.error() };
+		}
+		const auto& pathGeometry = pathGeometryResult.value();
 
+		auto sinkResult = pathGeometry.Open();
 		if (!sinkResult.has_value())
 		{
-			Logger::Error(sinkResult.error(), L"Cannot open sink");
-			return Unexpected{
-				sinkResult.error()
-			};
+			return Unexpected{ sinkResult.error() };
 		}
 
 		auto& sink = sinkResult.value();
@@ -184,13 +188,12 @@ namespace PGUI::UI::D2D
 
 		Unused(sink.EndFigure(FigureEnd::Closed));
 
-		if (auto result = sink.Close();
+		if (const auto result = sink.Close();
 			!result.has_value())
 		{
-			Logger::Error(result.error(), L"Failed to close geometry sink");
 			return Unexpected{ result.error() };
 		}
 
-		return pathGeometry;
+		return pathGeometryResult;
 	}
 }

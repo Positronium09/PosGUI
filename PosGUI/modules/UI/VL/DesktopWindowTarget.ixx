@@ -6,7 +6,7 @@ export module PGUI.UI.VL.DesktopWindowTarget;
 import PGUI.Window;
 import PGUI.ProjectionHolder;
 import PGUI.ErrorHandling;
-import PGUI.UI.VL.Visual;
+import PGUI.UI.VL.Visual.Visual;
 
 namespace WUCD = winrt::Windows::UI::Composition::Desktop;
 

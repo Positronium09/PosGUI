@@ -23,99 +23,90 @@ export namespace PGUI::UI::D2D
 		{
 		}
 
-		explicit BitmapRenderTarget(RenderTarget<> renderTarget) noexcept
+		[[nodiscard]] static auto Create(
+			const RenderTarget<>& renderTarget) noexcept -> Result<BitmapRenderTarget>
 		{
 			ComPtr<ID2D1BitmapRenderTarget> bitmapRenderTarget;
-			if (const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(&bitmapRenderTarget);
-				FAILED(hr))
+			if (const auto error = Error{
+					renderTarget.Get()->CreateCompatibleRenderTarget(bitmapRenderTarget.put())
+				};
+				error.IsFailure())
 			{
-				Logger::Error(
-					Error{ hr },
-					L"Failed to create compatible render target");
-				return;
+				return Unexpected{ error };
 			}
 
-			Set(bitmapRenderTarget);
+			return BitmapRenderTarget{ bitmapRenderTarget };
 		}
 
-		BitmapRenderTarget(RenderTarget<> renderTarget, const SizeF size, const std::optional<SizeU> pixelSize = std::nullopt) noexcept
+		[[nodiscard]] static auto Create(
+			const RenderTarget<>& renderTarget,
+			const SizeF size,
+			const std::optional<SizeU> pixelSize = std::nullopt) noexcept -> Result<BitmapRenderTarget>
 		{
 			ComPtr<ID2D1BitmapRenderTarget> bitmapRenderTarget;
-
-			if (pixelSize.has_value())
+			if (auto error = Error{
+					pixelSize.has_value()
+						? renderTarget.Get()->CreateCompatibleRenderTarget(
+							size, pixelSize.value(), bitmapRenderTarget.put())
+						: renderTarget.Get()->CreateCompatibleRenderTarget(
+							size, bitmapRenderTarget.put())
+				};
+				error.IsFailure())
 			{
-				const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(
-					size, pixelSize.value(), &bitmapRenderTarget);
-
-				if (FAILED(hr))
-				{
-					Logger::Error(
-						Error{ hr }
-						.AddDetail(L"Size", std::format(L"{}", size)),
-						L"Failed to create compatible render target");
-					return;
-				}
-
-				Set(bitmapRenderTarget);
-				return;
+				error.AddDetail(L"size", std::format(L"{}", size));
+				return Unexpected{ error };
 			}
 
-
-			if (const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(size, &bitmapRenderTarget);
-				FAILED(hr))
-			{
-				Logger::Error(
-					Error{ hr },
-					L"Failed to create compatible render target");
-				return;
-			}
-
-			Set(bitmapRenderTarget);
+			return BitmapRenderTarget{ bitmapRenderTarget };
 		}
 
-		BitmapRenderTarget(RenderTarget<> renderTarget, const SizeF size, const SizeU pixelSize,
+		[[nodiscard]] static auto Create(
+			const RenderTarget<>& renderTarget,
+			const SizeF size,
+			const SizeU pixelSize,
 			const D2D1_PIXEL_FORMAT pixelFormat = {
 				.format = DXGI_FORMAT_UNKNOWN,
 				.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED
 			},
 			const D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS compatibleRenderTargetOptions =
-			D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE) noexcept
+			D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE) noexcept -> Result<BitmapRenderTarget>
 		{
 			ComPtr<ID2D1BitmapRenderTarget> bitmapRenderTarget;
-			const auto hr = renderTarget.Get()->CreateCompatibleRenderTarget(
-				size, pixelSize,
-				pixelFormat, compatibleRenderTargetOptions,
-				&bitmapRenderTarget);
-			if (FAILED(hr))
+			if (auto error = Error{
+					renderTarget.Get()->CreateCompatibleRenderTarget(
+						size, pixelSize,
+						pixelFormat, compatibleRenderTargetOptions,
+						bitmapRenderTarget.put())
+				};
+				error.IsFailure())
 			{
-				Logger::Error(
-					Error{ hr }
-					.AddDetail(L"Size", std::format(L"{}", size))
-					.AddDetail(L"PixelSize", std::format(L"{}", pixelSize)),
-					L"Failed to create compatible render target");
-				return;
+				error
+					.AddDetail(L"size", std::format(L"{}", size))
+					.AddDetail(L"pixelSize", std::format(L"{}", pixelSize));
+				return Unexpected{ error };
 			}
-			Set(bitmapRenderTarget);
+
+			return BitmapRenderTarget{ bitmapRenderTarget };
 		}
 
 		[[nodiscard]] auto GetBitmap() const noexcept -> Result<D2DBitmap>
 		{
 			ComPtr<ID2D1Bitmap> bitmap;
 			
-			if (auto hr = Get()->GetBitmap(&bitmap); 
+			if (const auto hr = Get()->GetBitmap(bitmap.put()); 
 				FAILED(hr))
 			{
-				Error error{ hr };
-				Logger::Error(error, L"Failed to get bitmap");
-				return Unexpected{ error };
+				return Unexpected{ Error{ hr } };
 			}
 
-			auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
+			const auto bitmap1 = bitmap.try_query<ID2D1Bitmap1>();
 			if (bitmap1.get() == nullptr)
 			{
-				Error error{ E_NOINTERFACE };
-				Logger::Error(error, L"Failed to cast bitmap to ID2D1Bitmap1 interface");
-				return Unexpected{ error };
+				return Unexpected{
+					Error{
+						SystemErrorCode::InterfaceNotSupported
+					}.SetCustomMessage(L"Failed to cast to ID2D1Bitmap1")
+				};
 			}
 
 			return D2DBitmap{ bitmap1 };

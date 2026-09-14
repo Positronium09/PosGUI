@@ -1,7 +1,12 @@
 module;
 #include <d2d1_1.h>
 #include <Windows.h>
+
 #include <winrt/Windows.Foundation.Numerics.h>
+
+#include <winrt/Windows.Graphics.h>
+
+#include <winrt/Windows.Foundation.h>
 
 export module PGUI.Shape:Point3;
 
@@ -9,7 +14,9 @@ import std;
 
 import :Point2;
 
-namespace WFN = winrt::Windows::Foundation::Numerics;
+namespace WF = winrt::Windows::Foundation;
+namespace WFN = WF::Numerics;
+namespace WG = winrt::Windows::Graphics;
 
 export namespace PGUI
 {
@@ -56,6 +63,14 @@ export namespace PGUI
 
 		explicit(false) constexpr Point3(const WFN::float3& p) noexcept :
 			x{ static_cast<T>(p.x) }, y{ static_cast<T>(p.y) }, z{ static_cast<T>(p.z) }
+		{ }
+
+		explicit(false) constexpr Point3(const WF::Point& p) noexcept :
+			x{ static_cast<T>(p.X) }, y{ static_cast<T>(p.Y) }, z{ static_cast<T>(0) }
+		{ }
+
+		explicit(false) constexpr Point3(const WG::PointInt32& p) noexcept :
+			x{ static_cast<T>(p.X) }, y{ static_cast<T>(p.Y) }, z{ static_cast<T>(0) }
 		{ }
 
 		explicit(false) constexpr Point3(const POINT& p) noexcept :
@@ -237,6 +252,16 @@ export namespace PGUI
 		explicit(false) constexpr operator WFN::float4() const noexcept
 		{
 			return WFN::float4{ static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), 0.0F };
+		}
+
+		explicit(false) constexpr operator WF::Point() const noexcept
+		{
+			return WF::Point{ static_cast<float>(x), static_cast<float>(y) };
+		}
+
+		explicit(false) constexpr operator WG::PointInt32() const noexcept
+		{
+			return WG::PointInt32{ .X = static_cast<std::int32_t>(x), .Y = static_cast<std::int32_t>(y) };
 		}
 
 		constexpr auto operator+() const noexcept -> Point3

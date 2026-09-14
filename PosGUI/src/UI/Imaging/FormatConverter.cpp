@@ -17,44 +17,75 @@ namespace PGUI::UI::Imaging
 		BitmapSource{ converter }
 	{ }
 
-	FormatConverter::FormatConverter(
-		BitmapSource<> bitmapSource, const WICPixelFormatGUID destinationFormat,
+	auto FormatConverter::Create(
+		const BitmapSource<>& bitmapSource, const WICPixelFormatGUID destinationFormat,
 		const WICBitmapDitherType ditherType, const double alphaThresholdPercent,
-		std::optional<Palette> palette, const WICBitmapPaletteType paletteType) noexcept
+		const std::optional<Palette>& palette,
+		const WICBitmapPaletteType paletteType) noexcept -> Result<FormatConverter>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		if (const auto hr = factory->CreateFormatConverter(Put());
-			FAILED(hr))
+
+		ComPtr<IWICFormatConverter> converter;
+		if (const auto error = Error{ factory->CreateFormatConverter(converter.put()) };
+			error.IsFailure())
 		{
-			Logger::Error(
-				Error{ hr },
-				L"Cannot create format converter"
-			);
-			return;
+			return Unexpected{ error };
 		}
 
-		if (const auto srcPixelFormat = bitmapSource.GetPixelFormat();
-			srcPixelFormat == destinationFormat)
+		if (const auto sourceFormat = bitmapSource.GetPixelFormat();
+			sourceFormat == destinationFormat)
 		{
-			Logger::Error(
-				Error{ ErrorCode::InvalidArgument },
-				L"Source and destination pixel formats are the same"
-			);
-			return;
+			return Unexpected{
+				Error{ ErrorCode::InvalidArgument }
+				.AddDetail(L"destinationFormat", std::format(L"{}", destinationFormat))
+				.SetCustomMessage(L"Source and destination pixel formats are the same")
+			};
 		}
 
-
-		if (const auto hr = Get()->Initialize(
-				bitmapSource.GetRaw(), destinationFormat,
-				ditherType, palette.has_value() ? palette->GetRaw() : nullptr,
-				alphaThresholdPercent, paletteType);
-			FAILED(hr))
+		if (auto error = Error{
+				converter->Initialize(
+					bitmapSource.GetRaw(), destinationFormat,
+					ditherType, palette.has_value() ? palette->GetRaw() : nullptr,
+					alphaThresholdPercent, paletteType)
+			};
+			error.IsFailure())
 		{
-			Logger::Error(
-				Error{ hr },
-				L"Cannot initialize format converter"
-			);
+			error.AddDetail(L"destinationFormat", std::format(L"{}", destinationFormat));
+			return Unexpected{ error };
 		}
+
+		return FormatConverter{ converter };
+	}
+
+	auto FormatConverter::CreateForD2DBitmap(
+		const BitmapSource<>& bitmapSource, const WICBitmapDitherType ditherType,
+		const double alphaThresholdPercent, const std::optional<Palette>& palette,
+		const WICBitmapPaletteType paletteType) noexcept -> Result<FormatConverter>
+	{
+		auto converterResult = Create(
+			bitmapSource,
+			GUID_WICPixelFormat32bppPBGRA,
+			ditherType,
+			alphaThresholdPercent,
+			palette,
+			paletteType);
+
+		if (!converterResult.has_value())
+		{
+			auto error = converterResult.error();
+			if (const auto sourceFormat = bitmapSource.GetPixelFormat();
+				sourceFormat.has_value())
+			{
+				error.AddDetail(L"sourceFormat", std::format(L"{}", *sourceFormat));
+			}
+			else
+			{
+				error.AddDetail(L"sourceFormat", L"Unknown");
+			}
+			return Unexpected{ error };
+		}
+
+		return converterResult;
 	}
 
 	auto FormatConverter::CanConvert(
@@ -69,45 +100,9 @@ namespace PGUI::UI::Imaging
 			error
 				.AddDetail(L"Source Format", std::format(L"{}", sourceFormat))
 				.AddDetail(L"Destination Format", std::format(L"{}", destinationFormat));
-			Logger::Error(error, L"Failed to check if conversion is possible");
 			return Unexpected{ error };
 		}
 
 		return static_cast<bool>(canConvert);
-	}
-
-	auto FormatConverter::ConvertToD2DBitmap(
-		const BitmapSource<>& bitmapSource, const WICBitmapDitherType ditherType,
-		const double alphaThresholdPercent, const std::optional<Palette>& palette,
-		const WICBitmapPaletteType paletteType) noexcept -> Result<FormatConverter>
-	{
-		FormatConverter converted{
-			bitmapSource,
-			GUID_WICPixelFormat32bppPBGRA,
-			ditherType,
-			alphaThresholdPercent,
-			palette,
-			paletteType
-		};
-
-		if (!converted.IsInitialized())
-		{
-			Error error{ ErrorCode::Failure };
-			error
-				.AddDetail(L"Destination Format", std::format(L"{}", GUID_WICPixelFormat32bppPBGRA));
-			if (const auto pixelFormat = bitmapSource.GetPixelFormat();
-				pixelFormat.has_value())
-			{
-				error.AddDetail(L"Source Format", std::format(L"{}", *pixelFormat));
-			}
-			else
-			{
-				error.AddDetail(L"Source Format", L"Unknown");
-			}
-			Logger::Error(error, L"Failed to convert bitmap source to D2D bitmap format");
-			return Unexpected{ error };
-		}
-
-		return converted;
 	}
 }

@@ -19,6 +19,7 @@ module PGUI.UI.VL.Compositor;
 import std;
 
 import PGUI.Utils;
+import PGUI.ProjectionHolder;
 import PGUI.ComPtr;
 import PGUI.ErrorHandling;
 
@@ -40,7 +41,7 @@ namespace PGUI::UI::VL::Compositor::Internal
 		ComPtr<AWUC::ICompositorInterop> interop{ nullptr };
 	};
 
-	[[nodiscard]] auto GetCompositorState() noexcept -> CompositorThreadState*
+	[[nodiscard]] auto GetCompositorState() noexcept -> CompositorThreadState*&
 	{
 		thread_local auto* state = new(std::nothrow) CompositorThreadState{ };
 		return state;
@@ -51,10 +52,15 @@ namespace PGUI::UI::VL::Compositor
 {
 	auto InitDispatcherQueueController() -> void
 	{
+		if (Internal::GetCompositorState() == nullptr)
+		{
+			throw Exception{ Error{ ErrorCode::NotInitialized } };
+		}
+
 		constexpr DispatcherQueueOptions options{
-			sizeof(DispatcherQueueOptions),
-			DQTYPE_THREAD_CURRENT,
-			DQTAT_COM_NONE
+			.dwSize = sizeof(DispatcherQueueOptions),
+			.threadType = DQTYPE_THREAD_CURRENT,
+			.apartmentType = DQTAT_COM_NONE
 		};
 
 		if (const auto error = Error{
@@ -72,18 +78,70 @@ namespace PGUI::UI::VL::Compositor
 
 	auto Shutdown() -> void
 	{
-		const auto& dispatcherQueueController = Internal::GetCompositorState()->dispatcherQueueController;
-		const auto action = dispatcherQueueController.ShutdownQueueAsync();
-		const auto dispatcherQueue = WSystem::DispatcherQueue::GetForCurrentThread();
-
-		auto done = false;
-		dispatcherQueue.ShutdownCompleted([&done](auto&&, auto&&)
+		if (Internal::GetCompositorState() == nullptr)
 		{
-			done = true;
+			return;
+		}
+
+		ScopedDefer close{
+			[]
+			{
+				if (Internal::GetCompositorState() == nullptr)
+				{
+					return;
+				}
+				if (const auto compositor = Internal::GetCompositorState()->compositor;
+					compositor)
+				{
+					Unused(CallProjected([&compositor]
+					{
+						compositor.Close();
+					}));
+				}
+				delete Internal::GetCompositorState();
+				Internal::GetCompositorState() = nullptr;
+			}
+		};
+
+		const auto& dispatcherQueueController = Internal::GetCompositorState()->dispatcherQueueController;
+		if (!dispatcherQueueController)
+		{
+			return;
+		}
+		const auto dispatcherQueueResult = CallProjected([]
+		{
+			return WSystem::DispatcherQueue::GetForCurrentThread();
 		});
+		if (!dispatcherQueueResult.has_value())
+		{
+			throw Exception{ dispatcherQueueResult.error(), L"Failed to get dispatcher queue for current thread" };
+		}
+		const auto& dispatcherQueue = dispatcherQueueResult.value();
+		auto done = false;
+
+		if (const auto result = CallProjected([&dispatcherQueue, &done]
+			{
+				return dispatcherQueue.ShutdownCompleted([&done](auto&&, auto&&)
+				{
+					done = true;
+				});
+			});
+			!result.has_value())
+		{
+			throw Exception{ result.error(), L"Failed to shutdown dispatcher queue" };
+		}
+
+		const auto actionResult = CallProjected([&dispatcherQueueController]
+		{
+			return dispatcherQueueController.ShutdownQueueAsync();
+		});
+		if (!actionResult.has_value())
+		{
+			throw Exception{ actionResult.error(), L"Failed to shutdown dispatcher queue" };
+		}
 
 		auto msg = MSG{ };
-		while (!done && GetMessageW(&msg, nullptr, 0, 0))
+		while (!done && GetMessageW(&msg, nullptr, 0, 0) > 0)
 		{
 			if (msg.message == WM_QUIT)
 			{
@@ -98,7 +156,13 @@ namespace PGUI::UI::VL::Compositor
 
 	auto GetCompositor() noexcept -> Result<WUC::Compositor>
 	{
-		auto& state = *Internal::GetCompositorState();
+		auto* statePtr = Internal::GetCompositorState();
+		if (statePtr == nullptr)
+		{
+			return Unexpected{ Error{ ErrorCode::NotInitialized } };
+		}
+		auto& state = *statePtr;
+
 		auto& compositor = state.compositor;
 		const auto& dispatcherQueueController = state.dispatcherQueueController;
 
@@ -125,7 +189,12 @@ namespace PGUI::UI::VL::Compositor
 
 	auto GetDesktopInterop() noexcept -> Result<ComPtr<IDesktopInterop>>
 	{
-		auto& desktopInterop = Internal::GetCompositorState()->desktopInterop;
+		auto* statePtr = Internal::GetCompositorState();
+		if (statePtr == nullptr)
+		{
+			return Unexpected{ Error{ ErrorCode::NotInitialized } };
+		}
+		auto& desktopInterop = statePtr->desktopInterop;
 
 		if (desktopInterop)
 		{
@@ -142,7 +211,7 @@ namespace PGUI::UI::VL::Compositor
 		const auto ptr = compositor.try_as<IDesktopInterop>();
 		if (!ptr)
 		{
-			return Unexpected{ SystemErrorCode::InterfaceNotSupported };
+			return Unexpected{ Error{ SystemErrorCode::InterfaceNotSupported } };
 		}
 
 		desktopInterop = WinrtToComPtr(ptr);
@@ -151,7 +220,13 @@ namespace PGUI::UI::VL::Compositor
 
 	auto GetCompositorInterop() noexcept -> Result<ComPtr<AWUC::ICompositorInterop>>
 	{
-		auto& interop = Internal::GetCompositorState()->interop;
+		auto* statePtr = Internal::GetCompositorState();
+		if (statePtr == nullptr)
+		{
+			return Unexpected{ Error{ ErrorCode::NotInitialized } };
+		}
+		auto& interop = statePtr->interop;
+
 		if (interop)
 		{
 			return interop;
@@ -167,7 +242,7 @@ namespace PGUI::UI::VL::Compositor
 		const auto ptr = compositor.try_as<AWUC::ICompositorInterop>();
 		if (!ptr)
 		{
-			return Unexpected{ SystemErrorCode::InterfaceNotSupported };
+			return Unexpected{ Error{ SystemErrorCode::InterfaceNotSupported } };
 		}
 
 		interop = WinrtToComPtr(ptr);

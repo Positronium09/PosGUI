@@ -44,6 +44,10 @@ export namespace PGUI
 		WrapperHandle<typename T::HandleType> &&
 		std::derived_from<T, Wrapper<typename T::HandleType>>;
 
+	template <typename T, typename Base>
+	concept WrapperDerivedFrom =
+		WrapperType<T> && HandleDerivedFrom<typename T::HandleType, Base>;
+
 	template <WrapperHandle Handle>
 	class Wrapper : public HolderFor<Handle>
 	{

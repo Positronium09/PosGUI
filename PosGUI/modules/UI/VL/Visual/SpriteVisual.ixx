@@ -1,17 +1,18 @@
 module;
 #include <winrt/Windows.UI.Composition.h>
 
-export module PGUI.UI.VL.SpriteVisual;
+export module PGUI.UI.VL.Visual.SpriteVisual;
 
 import std;
 
 import PGUI.ErrorHandling;
 import PGUI.ProjectionHolder;
 import PGUI.Wrapper;
+import PGUI.Shape;
 import PGUI.UI.VL.Compositor;
-import PGUI.UI.VL.ContainerVisual;
+import PGUI.UI.VL.Visual.ContainerVisual;
 import PGUI.UI.VL.VLEnums;
-import PGUI.UI.VL.CompositionBrush;
+import PGUI.UI.VL.Brush.CompositionBrush;
 
 namespace WUC = winrt::Windows::UI::Composition;
 
@@ -52,6 +53,10 @@ export namespace PGUI::UI::VL
 				}
 				return visual;
 			});
+		}
+		[[nodiscard]] static auto Create(const RectF& rect) noexcept -> Result<SpriteVisual>
+		{
+			return Create(rect.TopLeft(), rect.Size());
 		}
 
 		[[nodiscard]] auto GetBrush() const noexcept -> Result<CompositionBrush>

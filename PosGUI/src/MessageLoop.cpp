@@ -41,7 +41,7 @@ namespace PGUI
 	//TODO Implement
 	auto RunPeekMessageLoop() -> int
 	{
-		throw Exception{ E_NOTIMPL };
+		throw Exception{ ErrorCode::NotImplemented };
 	}
 
 	auto RunModalMessageLoop(const HWND modalDialog, const HWND parent, const std::atomic_ref<bool> shouldClose) -> int

@@ -7,6 +7,7 @@ import std;
 
 import PGUI.Shape;
 import PGUI.ComPtr;
+import PGUI.ErrorHandling;
 import PGUI.UI.D2D.D2DGeometry;
 import PGUI.UI.D2D.D2DPathGeometry;
 
@@ -16,7 +17,7 @@ export namespace PGUI::UI
 	{
 		explicit RectangleClip(const ComPtr<ID2D1RectangleGeometry>& geometry) noexcept;
 
-		explicit RectangleClip(RectF rect) noexcept;
+		[[nodiscard]] static auto Create(const RectF& rect) noexcept -> Result<RectangleClip>;
 
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};
@@ -25,7 +26,7 @@ export namespace PGUI::UI
 	{
 		explicit RoundedRectangleClip(const ComPtr<ID2D1RoundedRectangleGeometry>& geometry) noexcept;
 
-		explicit RoundedRectangleClip(const RoundedRect& rect) noexcept;
+		[[nodiscard]] static auto Create(const RoundedRect& rect) noexcept -> Result<RoundedRectangleClip>;
 
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};
@@ -34,7 +35,7 @@ export namespace PGUI::UI
 	{
 		explicit EllipseClip(const ComPtr<ID2D1EllipseGeometry>& geometry) noexcept;
 
-		explicit EllipseClip(Ellipse ellipse) noexcept;
+		[[nodiscard]] static auto Create(Ellipse ellipse) noexcept -> Result<EllipseClip>;
 
 		explicit(false) operator ID2D1Geometry*() const noexcept { return Get().get(); }
 	};

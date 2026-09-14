@@ -3,7 +3,7 @@ module;
 
 #include <winrt/Windows.Foundation.Collections.h>
 
-export module PGUI.UI.VL.VisualCollection;
+export module PGUI.UI.VL.Visual.VisualCollection;
 
 import std;
 
@@ -13,7 +13,7 @@ import PGUI.ComPtr;
 import PGUI.Utils;
 import PGUI.Wrapper;
 import PGUI.UI.VL.CompositionObject;
-import PGUI.UI.VL.Visual;
+import PGUI.UI.VL.Visual.Visual;
 
 namespace WUC = winrt::Windows::UI::Composition;
 

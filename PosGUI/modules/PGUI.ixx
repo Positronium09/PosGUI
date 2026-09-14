@@ -20,4 +20,5 @@ export import PGUI.UI;
 export namespace PGUI
 {
 	auto Init() -> void;
+	auto Shutdown() -> void;
 }

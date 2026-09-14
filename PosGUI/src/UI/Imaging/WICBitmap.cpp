@@ -16,81 +16,107 @@ namespace PGUI::UI::Imaging
 		BitmapSource{ bitmap }
 	{ }
 
-	WICBitmap::WICBitmap(
-		const SizeU size,
-		const WICPixelFormatGUID& pixelFormat,
-		CreateCacheOption cacheOption) noexcept
-	{
-		const auto& factory = Factories::WICFactory::GetFactory();
-		if (const auto hr = factory->CreateBitmap(
-			size.cx, size.cy, pixelFormat,
-			static_cast<WICBitmapCreateCacheOption>(cacheOption),
-			Put());
-			FAILED(hr))
-		{
-			Logger::Error(Error{ hr }
-			              .AddDetail(L"Size", std::format(L"{}", size)),
-			              L"Failed to create WICBitmap");
-		}
-	}
-
-	WICBitmap::WICBitmap(
-		const HBITMAP hBitmap,
-		AlphaChannelOption alphaOption,
-		const HPALETTE hPalette) noexcept
-	{
-		const auto& factory = Factories::WICFactory::GetFactory();
-		if (const auto hr = factory->CreateBitmapFromHBITMAP(
-			hBitmap, hPalette,
-			static_cast<WICBitmapAlphaChannelOption>(alphaOption),
-			Put());
-			FAILED(hr))
-		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create WICBitmap from HBITMAP");
-		}
-	}
-
-	WICBitmap::WICBitmap(const HICON hIcon) noexcept
+	auto WICBitmap::CreateFromHIcon(const HICON hIcon) noexcept -> Result<WICBitmap>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 
-		if (const auto hr = factory->CreateBitmapFromHICON(hIcon, Put());
-			FAILED(hr))
+		ComPtr<IWICBitmap> bitmap;
+		if (const auto error = Error{ factory->CreateBitmapFromHICON(hIcon, bitmap.put()) };
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create WICBitmap from HICON");
+			return Unexpected{ error };
 		}
+
+		return WICBitmap{ bitmap };
 	}
 
-	WICBitmap::WICBitmap(BitmapSource<> source, CreateCacheOption cacheOption) noexcept
+	auto WICBitmap::CreateFromSource(
+		const BitmapSource<>& source,
+		const CreateCacheOption cacheOption) noexcept -> Result<WICBitmap>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
-		if (const auto hr = factory->CreateBitmapFromSource(
-			source.GetRaw(),
-			static_cast<WICBitmapCreateCacheOption>(cacheOption),
-			Put());
-			FAILED(hr))
+
+		ComPtr<IWICBitmap> bitmap;
+		if (const auto error = Error{
+				factory->CreateBitmapFromSource(
+					source.GetRaw(),
+					static_cast<WICBitmapCreateCacheOption>(cacheOption),
+					bitmap.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create WICBitmap from BitmapSource");
+			return Unexpected{ error };
 		}
+
+		return WICBitmap{ bitmap };
 	}
 
-	WICBitmap::WICBitmap(BitmapSource<> source, const RectU rect) noexcept
+	auto WICBitmap::CreateFromSource(
+		const BitmapSource<>& source,
+		const RectU rect) noexcept -> Result<WICBitmap>
 	{
 		const auto& factory = Factories::WICFactory::GetFactory();
 		const auto size = rect.Size();
 
-		if (const auto hr = factory->CreateBitmapFromSourceRect(
-			source.GetRaw(),
-			rect.left, rect.top, size.cx, size.cy,
-			Put());
-			FAILED(hr))
+		ComPtr<IWICBitmap> bitmap;
+		if (auto error = Error{
+				factory->CreateBitmapFromSourceRect(
+					source.GetRaw(),
+					rect.left, rect.top, size.cx, size.cy,
+					bitmap.put())
+			};
+			error.IsFailure())
 		{
-			Logger::Error(Error{ hr },
-			              L"Failed to create WICBitmap from BitmapSource");
+			error.AddDetail(L"rect", std::format(L"{}", rect));
+			return Unexpected{ error };
 		}
+
+		return WICBitmap{ bitmap };
+	}
+
+	auto WICBitmap::Create(
+		const SizeU size,
+		const WICPixelFormatGUID& pixelFormat,
+		const CreateCacheOption cacheOption) noexcept -> Result<WICBitmap>
+	{
+		const auto& factory = Factories::WICFactory::GetFactory();
+
+		ComPtr<IWICBitmap> bitmap;
+		if (auto error = Error{
+				factory->CreateBitmap(
+					size.cx, size.cy, pixelFormat,
+					static_cast<WICBitmapCreateCacheOption>(cacheOption),
+					bitmap.put())
+			};
+			error.IsFailure())
+		{
+			error.AddDetail(L"size", std::format(L"{}", size));
+			return Unexpected{ error };
+		}
+
+		return WICBitmap{ bitmap };
+	}
+
+	auto WICBitmap::CreateFromHBitmap(
+		const HBITMAP hBitmap,
+		const AlphaChannelOption alphaOption,
+		const HPALETTE hPalette) noexcept -> Result<WICBitmap>
+	{
+		const auto& factory = Factories::WICFactory::GetFactory();
+
+		ComPtr<IWICBitmap> bitmap;
+		if (const auto error = Error{
+				factory->CreateBitmapFromHBITMAP(
+					hBitmap, hPalette,
+					static_cast<WICBitmapAlphaChannelOption>(alphaOption),
+					bitmap.put())
+			};
+			error.IsFailure())
+		{
+			return Unexpected{ error };
+		}
+
+		return WICBitmap{ bitmap };
 	}
 
 	auto WICBitmap::Lock(const RectI rect, LockFlags flags) const noexcept -> Result<WICBitmapLock>

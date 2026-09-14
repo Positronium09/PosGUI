@@ -4,7 +4,7 @@ import PGUI.Window;
 import PGUI.WindowClass;
 import PGUI.ProjectionHolder;
 import PGUI.UI.VL.DesktopWindowTarget;
-import PGUI.UI.VL.Visual;
+import PGUI.UI.VL.Visual.Visual;
 
 export namespace PGUI::UI
 {

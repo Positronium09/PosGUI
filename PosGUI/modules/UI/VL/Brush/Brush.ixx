@@ -1,11 +1,10 @@
 module;
 #include <winrt/Windows.UI.Composition.h>
 
-export module PGUI.UI.VL.CompositionBrush;
+export module PGUI.UI.VL.Brush.CompositionBrush;
 
 import std;
 
-import PGUI.ProjectionHolder;
 import PGUI.Wrapper;
 import PGUI.UI.VL.CompositionObject;
 
@@ -19,7 +18,6 @@ export namespace PGUI::UI::VL
 		public:
 		using Base = CompositionObjectT<Projected>;
 		using Base::Base;
-
 	};
 	using CompositionBrush = CompositionBrushT<>;
 }

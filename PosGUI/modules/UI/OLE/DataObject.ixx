@@ -335,30 +335,16 @@ export namespace PGUI::UI::OLE
 				return E_INVALIDARG;
 			}
 
-			try
-			{
-				*ppenumFormatEtc = new (std::nothrow) EnumFormatData{ Handler::SupportedFormats() };
-
-				if (*ppenumFormatEtc == nullptr)
-				{
-					return E_OUTOFMEMORY;
-				}
-
-				return S_OK;
-			}
-			catch (const Exception& e)
+			auto enumFormatDataResult = EnumFormatData::Create(Handler::SupportedFormats());
+			if (!enumFormatDataResult.has_value())
 			{
 				*ppenumFormatEtc = nullptr;
-				return e.GetError().HResult();
+				return enumFormatDataResult.error().HResult();
 			}
-			catch (const std::exception& e)
-			{
-				*ppenumFormatEtc = nullptr;
-				return Error{
-					SystemErrorCode::STLFailure
-				}.SetCustomMessage(StringToWString(e.what())).HResult();
-			}
-			
+
+			*ppenumFormatEtc = enumFormatDataResult.value().detach();
+
+			return S_OK;
 		}
 
 		// ReSharper disable IdentifierTypo
@@ -463,13 +449,13 @@ export namespace PGUI::UI::OLE
 			wil::unique_hglobal hMem{ GlobalAlloc(GMEM_MOVEABLE, bytesRequired) };
 			if (hMem.get() == nullptr)
 			{
-				return Unexpected{ Error{ E_OUTOFMEMORY } };
+				return Unexpected{ Error{ ErrorCode::AllocationFailure } };
 			}
 
 			const wil::unique_hglobal_locked lockedMem{ hMem.get() };
 			if (lockedMem.get() == nullptr)
 			{
-				return Unexpected{ Error{ E_POINTER } };
+				return Unexpected{ Error{ ErrorCode::NullPointer } };
 			}
 
 			std::memcpy(lockedMem.get(), text.c_str(), bytesRequired);
@@ -501,7 +487,7 @@ export namespace PGUI::UI::OLE
 			const auto [handle] = storageMedium.GetHolder().GetDataOfType<Handles::HGlobal>().value();
 			if (handle == nullptr)
 			{
-				return Unexpected{ Error{ E_POINTER } };
+				return Unexpected{ Error{ ErrorCode::NullPointer } };
 			}
 			const auto byteSize = GlobalSize(handle);
 			if (byteSize < sizeof(wchar_t))
@@ -512,7 +498,7 @@ export namespace PGUI::UI::OLE
 			const wil::unique_hglobal_locked lockedMem{ handle };
 			if (lockedMem.get() == nullptr)
 			{
-				return Unexpected{ Error{ E_POINTER } };
+				return Unexpected{ Error{ ErrorCode::NullPointer } };
 			}
 			const auto charCount = byteSize / sizeof(wchar_t);
 			try
@@ -522,9 +508,9 @@ export namespace PGUI::UI::OLE
 			}
 			catch (const std::exception& e)
 			{
-				return Unexpected{ 
+				return Unexpected{
 					Error{
-						E_OUTOFMEMORY 
+						ErrorCode::AllocationFailure
 					}.SetCustomMessage(StringToWString(e.what())) };
 			}
 		}

@@ -47,9 +47,23 @@ TYPE_MAP = {
     "Windows.Foundation.Numerics.Vector3": ("Point3F", True),
     "Windows.Foundation.Numerics.Matrix3x2": ("Matrix3x2", True),
     "Windows.Foundation.Numerics.Matrix4x4": ("Matrix4x4", True),
+    "Windows.Foundation.Numerics.Quaternion": ("Quaternion", True),
+    "Windows.Foundation.Point": ("Point2F", True),
+    "Windows.Foundation.Size": ("SizeF", True),
+    "Windows.Foundation.Rect": ("RectF", True),
     "Windows.Foundation.TimeSpan": ("std::chrono::milliseconds", True),
     "Windows.UI.Color": ("RGBA", True),
-    "Windows.Graphics.SizeInt32": ("SizeInt32", True),
+    "Windows.Graphics.PointInt32": ("Point2I", True),
+    "Windows.Graphics.SizeInt32": ("SizeI", True),
+    "Windows.Graphics.RectInt32": ("RectI", True),
+}
+
+# PGUI type -> the module it has to be imported from, when it is not a VL wrapper
+TYPE_MODULE = {
+    "Point2F": "PGUI.Shape", "Point2I": "PGUI.Shape", "Point3F": "PGUI.Shape",
+    "SizeF": "PGUI.Shape", "SizeI": "PGUI.Shape", "RectF": "PGUI.Shape", "RectI": "PGUI.Shape",
+    "Matrix3x2": "PGUI.Shape", "Matrix4x4": "PGUI.Shape", "Quaternion": "PGUI.Shape",
+    "RGBA": "PGUI.UI.Color",
 }
 
 # property names whose float2 means extent, not position
@@ -61,6 +75,7 @@ SCALARS = {"bool", "float", "double", "std::int32_t", "std::uint32_t",
 # Filled by discover(); see there for the shapes each one holds.
 WRAPPER_TYPES = {}      # winrt metadata name -> PGUI class, for finished class wrappers only
 WRAPPER_MODULE = {}     # PGUI class -> module to import it from
+WRAPPER_DIR = {}        # PGUI class -> directory holding it, relative to modules/UI/VL
 KNOWN_WRAPPERS = {}     # winrt metadata name -> (PGUI alias, needs explicit construction)
 STUBS = {}              # winrt metadata name -> module of a file that exists but is empty
 NAMESPACES = {}         # winrt metadata name -> module covering it as a namespace, not a class
@@ -197,12 +212,32 @@ def discover(vl_root, namespace=DEFAULT_NAMESPACE):
                 for name in name_candidates(stem, last, pgui):
                     WRAPPER_TYPES[f"{namespace}.{name}"] = pgui
             WRAPPER_MODULE[pgui] = module
+            WRAPPER_DIR[pgui] = os.path.relpath(dirpath, vl_root)
 
     enums_path = os.path.join(vl_root, "VLEnums.ixx")
     if os.path.isfile(enums_path):
         with open(enums_path, encoding="utf-8", errors="replace") as f:
             for alias, winrt_name in re.findall(r"^\s*using\s+(\w+)\s*=\s*\w+::(\w+)\s*;", f.read(), re.M):
                 KNOWN_WRAPPERS[f"{namespace}.{winrt_name}"] = (alias, False)
+
+
+def split_generic(name):
+    """'NS.IMap`2<A, NS.IKeyValuePair`2<B, C>>' -> ('NS.IMap`2', ['A', 'NS.IKeyValuePair`2<B, C>'])."""
+    lt = name.find("<")
+    if lt < 0 or not name.endswith(">"):
+        return name, []
+    args, depth, start = [], 0, lt + 1
+    for i in range(lt + 1, len(name) - 1):
+        ch = name[i]
+        if ch == "<":
+            depth += 1
+        elif ch == ">":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            args.append(name[start:i].strip())
+            start = i + 1
+    args.append(name[start:-1].strip())
+    return name[:lt], args
 
 
 def decompress_uint(data, i):
@@ -248,7 +283,8 @@ class Winmd:
             return self.full(self.t.TypeRef.rows[rid - 1])
         return f"<typespec#{rid}>"
 
-    def parse_type(self, data, i):
+    def parse_type(self, data, i, targs=()):
+        """targs substitutes VAR (0x13) - the generic parameters of the interface being read."""
         et = data[i]
         i += 1
         if et in ELEM:
@@ -256,8 +292,11 @@ class Winmd:
         if et in (0x11, 0x12):
             coded, i = decompress_uint(data, i)
             return self._coded_name(coded & 0x3, coded >> 2), i
+        if et == 0x13:
+            idx, i = decompress_uint(data, i)
+            return (targs[idx] if idx < len(targs) else f"<var {idx}>"), i
         if et == 0x1D:
-            inner, i = self.parse_type(data, i)
+            inner, i = self.parse_type(data, i, targs)
             return f"{inner}[]", i
         if et == 0x15:
             i += 1
@@ -266,12 +305,12 @@ class Winmd:
             argc, i = decompress_uint(data, i)
             args = []
             for _ in range(argc):
-                a, i = self.parse_type(data, i)
+                a, i = self.parse_type(data, i, targs)
                 args.append(a)
             return f"{base}<{', '.join(args)}>", i
         return f"<elem 0x{et:02x}>", i
 
-    def property_type(self, prop_row):
+    def property_type(self, prop_row, targs=()):
         blob = prop_row.Type
         data = bytes(getattr(blob, "value", None) or getattr(blob, "raw_data", b""))
         i = 1
@@ -279,7 +318,7 @@ class Winmd:
         while i < len(data) and data[i] in (0x1F, 0x20):
             i += 1
             _, i = decompress_uint(data, i)
-        return self.parse_type(data, i)[0]
+        return self.parse_type(data, i, targs)[0]
 
     def base_of(self, full_name):
         _, row = self.by_name[full_name]
@@ -287,6 +326,13 @@ class Winmd:
         if ext is None or ext.row is None or not hasattr(ext.row, "TypeName"):
             return None
         return self.full(ext.row)
+
+    def is_interface(self, full_name):
+        entry = self.by_name.get(full_name)
+        if entry is None:
+            return False
+        flags = getattr(entry[1], "Flags", None)
+        return bool(flags is not None and getattr(flags, "tdInterface", False))
 
     def ancestors(self, full_name):
         """Base runtime classes, nearest first, excluding System.Object."""
@@ -303,12 +349,19 @@ class Winmd:
             if ii.Class.row_index != rid:
                 continue
             r = ii.Interface.row
-            if r is not None and hasattr(r, "TypeName"):
+            if r is None:
+                continue
+            if hasattr(r, "TypeName"):
                 out.append(self.full(r))
+            elif hasattr(r, "Signature"):
+                blob = r.Signature
+                data = bytes(getattr(blob, "value", None) or getattr(blob, "raw_data", b""))
+                out.append(self.parse_type(data, 0)[0])
         return out
 
     def properties_of(self, full_name):
-        entry = self.by_name.get(full_name)
+        base, targs = split_generic(full_name)
+        entry = self.by_name.get(base)
         if entry is None:
             return []
         rid = entry[0]
@@ -330,10 +383,10 @@ class Winmd:
                 if pidx.row is None:
                     continue
                 g, s = self._sem.get(pidx.row_index, (False, False))
-                out.append((str(pidx.row.Name), self.property_type(pidx.row), g, s))
+                out.append((str(pidx.row.Name), self.property_type(pidx.row, targs), g, s))
         return out
 
-    def method_sig(self, m_row):
+    def method_sig(self, m_row, targs=()):
         blob = m_row.Signature
         data = bytes(getattr(blob, "value", None) or getattr(blob, "raw_data", b""))
         i = 0
@@ -342,19 +395,20 @@ class Winmd:
         if flags & 0x10:                      # GENERIC
             _, i = decompress_uint(data, i)
         argc, i = decompress_uint(data, i)
-        ret, i = self.parse_type(data, i)
+        ret, i = self.parse_type(data, i, targs)
         params = []
         for _ in range(argc):
             while i < len(data) and data[i] in (0x1F, 0x20):
                 i += 1
                 _, i = decompress_uint(data, i)
-            p, i = self.parse_type(data, i)
+            p, i = self.parse_type(data, i, targs)
             params.append(p)
         return ret, params
 
     def methods_of(self, full_name):
         """[(name, return_type, [(param_type, param_name)])] excluding property/event accessors."""
-        entry = self.by_name.get(full_name)
+        base, targs = split_generic(full_name)
+        entry = self.by_name.get(base)
         if entry is None:
             return []
         out = []
@@ -365,7 +419,7 @@ class Winmd:
             name = str(m.Name)
             if name.startswith(("get_", "put_", "add_", "remove_", ".")):
                 continue
-            ret, ptypes = self.method_sig(m)
+            ret, ptypes = self.method_sig(m, targs)
             names = [str(p.row.Name) for p in m.ParamList
                      if p.row is not None and p.row.Sequence != 0]
             while len(names) < len(ptypes):
@@ -377,10 +431,11 @@ class Winmd:
         seen, out = set(), []
         for iface in self.interfaces_of(full_name):
             for m in self.methods_of(iface):
-                if m[0] not in seen:
-                    seen.add(m[0])
+                key = (m[0], tuple(t for t, _ in m[2]))
+                if key not in seen:
+                    seen.add(key)
                     out.append(m)
-        return sorted(out, key=lambda m: m[0])
+        return sorted(out, key=lambda m: (m[0], len(m[2])))
 
     def class_properties(self, full_name):
         seen, out = set(), []
@@ -404,14 +459,27 @@ def map_type(winrt_type, prop_name):
 
 
 def short(winrt_type):
-    return winrt_type.rsplit(".", 1)[-1]
+    """Last name segment without the `N arity; generic arguments shortened recursively."""
+    base, targs = split_generic(winrt_type)
+    name = base.rsplit(".", 1)[-1].split("`", 1)[0]
+    return f"{name}<{', '.join(short(a) for a in targs)}>" if targs else name
 
 
 def bool_names(prop_name):
-    base = prop_name[2:] if prop_name.startswith("Is") else prop_name
-    if base.endswith("Enabled"):
-        base = base[: -len("Enabled")]
-    return f"Enable{base}", f"Disable{base}", prop_name
+    """Enable / Disable / Is triple. The reader has to read as a PREDICATE, so a
+    property that is not already an Is... name gets Is<Base>Enabled rather than the
+    bare property name: SnapToPixels -> EnableSnapToPixels, DisableSnapToPixels,
+    IsSnapToPixelsEnabled. An already-predicate name is kept verbatim so IsVisible
+    stays IsVisible instead of becoming IsVisibleEnabled.
+    """
+    if prop_name.startswith("Is"):
+        base = prop_name[2:]
+        if base.endswith("Enabled"):
+            base = base[: -len("Enabled")]
+        return f"Enable{base}", f"Disable{base}", prop_name
+
+    base = prop_name[: -len("Enabled")] if prop_name.endswith("Enabled") else prop_name
+    return f"Enable{base}", f"Disable{base}", f"Is{base}Enabled"
 
 
 def arg_name(prop_name):
@@ -502,11 +570,18 @@ def gen_members(props, indent="\t\t", force_todo=frozenset()):
     return out
 
 
-def gen_methods(methods, indent="\t\t"):
+def projected_name(winrt_type):
+    """Windows.UI.Composition.X -> WUC::X, Windows.UI.Composition.Desktop.X -> WUC::Desktop::X."""
+    return "WUC::" + winrt_type[len(DEFAULT_NAMESPACE) + 1:].replace(".", "::")
+
+
+def gen_methods(methods, indent="\t\t", deferred_params=frozenset(), deferred_returns=frozenset()):
+    """deferred_params: types taken as WrapperDerivedFrom<WUC::X> auto&, so the module never
+    imports their wrapper. deferred_returns: types a member cannot return without that import."""
     out = []
     for name, ret, params in methods:
-        mapped = [(map_type(t, "")[0], t, n) for t, n in params]
-        ret_pgui = "void" if ret == "void" else map_type(ret, "")[0]
+        mapped = [(("deferred" if t in deferred_params else map_type(t, "")[0]), t, n) for t, n in params]
+        ret_pgui = "void" if ret == "void" else (None if ret in deferred_returns else map_type(ret, "")[0])
 
         if ret_pgui is None or any(p is None for p, _, _ in mapped):
             sig = ", ".join(f"{short(t)} {n}" for _, t, n in mapped)
@@ -517,7 +592,11 @@ def gen_methods(methods, indent="\t\t"):
         decl, args, caps = [], [], ["this"]
         for pgui, wtype, n in mapped:
             arg = arg_name(n)
-            if wtype in WRAPPER_TYPES:
+            if pgui == "deferred":
+                decl.append(f"const WrapperDerivedFrom<{projected_name(wtype)}> auto& {arg}")
+                args.append(f"{arg}.Get()")
+                caps.append(f"&{arg}")
+            elif wtype in WRAPPER_TYPES:
                 decl.append(f"const {pgui}& {arg}")
                 args.append(f"{arg}.Get()")
                 caps.append(f"&{arg}")
@@ -551,6 +630,72 @@ def gen_methods(methods, indent="\t\t"):
     return out
 
 
+ITERABLE = "Windows.Foundation.Collections.IIterable`1"
+KEY_VALUE_PAIR = "Windows.Foundation.Collections.IKeyValuePair`2"
+
+
+def gen_iterable(element, indent="\t\t"):
+    """ToVector + ForEach over an IIterable<element>. A key/value element is unpacked, so
+    ForEach takes a (key, value) callable and ToVector yields pairs."""
+    def value_of(winrt_type, source):
+        pgui, needs_wrap = map_type(winrt_type, "")
+        if pgui is None:
+            return None, None
+        return pgui, (f"{pgui}{{ {source} }}" if needs_wrap else source)
+
+    base, targs = split_generic(element)
+    if base == KEY_VALUE_PAIR:
+        key, key_expr = value_of(targs[0], "element.Key()")
+        value, value_expr = value_of(targs[1], "element.Value()")
+        if key is None or value is None:
+            return [f"{indent}//TODO ToVector / ForEach over IIterable<{short(element)}>"]
+        stored = f"std::pair<{key}, {value}>"
+        signature = f"{key}, {value}"
+        emplace_args = f"{key_expr}, {value_expr}"
+        invoke_args = f"{key_expr}, {value_expr}"
+    else:
+        stored, expr = value_of(element, "element")
+        if stored is None:
+            return [f"{indent}//TODO ToVector / ForEach over IIterable<{short(element)}>"]
+        signature = stored
+        emplace_args = "element"
+        invoke_args = expr
+
+    return [
+        f"{indent}[[nodiscard]] auto ToVector() const noexcept -> Result<std::vector<{stored}>>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this]",
+        f"{indent}\t{{",
+        f"{indent}\t\tauto elements = std::vector<{stored}>{{ }};",
+        f"{indent}\t\tfor (const auto& element : this->Get())",
+        f"{indent}\t\t{{",
+        f"{indent}\t\t\telements.emplace_back({emplace_args});",
+        f"{indent}\t\t}}",
+        "",
+        f"{indent}\t\treturn elements;",
+        f"{indent}\t}});",
+        f"{indent}}}",
+        "",
+        f"{indent}template <Callable<Result<void>({signature})> F>",
+        f"{indent}[[nodiscard]] auto ForEach(F&& f) const noexcept -> Result<void>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this, &f] -> Result<void>",
+        f"{indent}\t{{",
+        f"{indent}\t\tfor (const auto& [i, element] : this->Get() | std::views::enumerate)",
+        f"{indent}\t\t{{",
+        f"{indent}\t\t\tif (auto result = std::invoke(f, {invoke_args});",
+        f"{indent}\t\t\t\t!result.has_value())",
+        f"{indent}\t\t\t{{",
+        f"{indent}\t\t\t\treturn Unexpected{{ result.error().AddDetail(L\"iteration\", std::to_wstring(i)) }};",
+        f"{indent}\t\t\t}}",
+        f"{indent}\t\t}}",
+        "",
+        f"{indent}\t\treturn EmptyResult;",
+        f"{indent}\t}}).and_then(std::identity{{ }});",
+        f"{indent}}}",
+    ]
+
+
 def module_of(pgui_name):
     """Discovered module for a wrapper, falling back to the conventional name."""
     return WRAPPER_MODULE.get(pgui_name, f"PGUI.UI.VL.{pgui_name}")
@@ -562,39 +707,39 @@ def base_import(base_wrapper):
     return f"import {module_of(base_wrapper)};"
 
 
-def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_todo=frozenset()):
+def import_rank(module):
+    """Foundation modules first, then PGUI.UI.*, then the VL siblings - the order the
+    hand-written wrappers already use."""
+    if module.startswith("PGUI.UI.VL."):
+        return 2, module
+    if module.startswith("PGUI.UI."):
+        return 1, module
+    return 0, module
+
+
+def target_module(class_name, base_wrapper):
+    """A new wrapper belongs in its base's folder, so it inherits the base's module
+    prefix: a Visual subclass whose base lives in PGUI.UI.VL.Visual.ContainerVisual
+    becomes PGUI.UI.VL.Visual.<class_name>. Falls back to the flat top-level name.
+    """
+    base_module = WRAPPER_MODULE.get(base_wrapper, "")
+    if base_module.startswith("PGUI.UI.VL.") and base_module.count(".") > 3:
+        return f"{base_module.rsplit('.', 1)[0]}.{class_name}"
+    return f"PGUI.UI.VL.{class_name}"
+
+
+def target_dir(base_wrapper):
+    """Folder for a new wrapper, relative to modules/UI/VL - its base's folder."""
+    folder = WRAPPER_DIR.get(base_wrapper, ".")
+    return "" if folder == "." else folder
+
+
+def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_todo=frozenset(),
+               deferred_params=frozenset(), deferred_returns=frozenset(), iterable=None):
     """base_wrapper is the PGUI base WITHOUT the T suffix, e.g. 'Visual'."""
     base = "Wrapper<Projected>" if base_wrapper == "ProjectionHolder" else f"{base_wrapper}T<Projected>"
-    lines = [
-        "module;",
-        "#include <winrt/Windows.UI.Composition.h>",
-        "",
-        f"export module PGUI.UI.VL.{class_name};",
-        "",
-        "import std;",
-        "",
-        "import PGUI.ErrorHandling;",
-        "import PGUI.ProjectionHolder;",
-        "import PGUI.Shape;",
-        "import PGUI.Wrapper;",
-        base_import(base_wrapper),
-        "import PGUI.UI.VL.VLEnums;",
-    ]
 
-    referenced = set()
-    for _, wtype, _, _ in props:
-        if wtype in WRAPPER_TYPES:
-            referenced.add(WRAPPER_TYPES[wtype])
-    for _, ret, params in methods:
-        for t in [ret] + [p for p, _ in params]:
-            if t in WRAPPER_TYPES:
-                referenced.add(WRAPPER_TYPES[t])
-    referenced.discard(class_name)
-    referenced.discard(base_wrapper)
-    lines += [f"import {module_of(w)};" for w in sorted(referenced)]
-
-    lines += [
-        "",
+    body = [
         "namespace WUC = winrt::Windows::UI::Composition;",
         "",
         "export namespace PGUI::UI::VL",
@@ -608,19 +753,66 @@ def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_t
         "",
     ]
     members = gen_members(props, force_todo=force_todo)
-    method_lines = gen_methods(methods)
+    method_lines = gen_methods(methods, deferred_params=deferred_params, deferred_returns=deferred_returns)
     if members and method_lines:
         members.append("")
-    lines += members + method_lines
-    lines += [
+    iterable_lines = gen_iterable(iterable) if iterable else []
+    if (members or method_lines) and iterable_lines:
+        method_lines.append("")
+    body += members + method_lines + iterable_lines
+    body += [
         "\t};",
         f"\tusing {class_name} = {class_name}T<>;",
     ]
     if free_fns:
-        lines.append("")
-        lines += gen_free_functions(free_fns)
-    lines += ["}", ""]
-    return "\n".join(lines)
+        body.append("")
+        body += gen_free_functions(free_fns)
+    body += ["}", ""]
+    text = "\n".join(body)
+
+    # Imports are derived from what the body actually names, so a wrapper that uses no
+    # Shape type does not import PGUI.Shape and one with no members does not import
+    # PGUI.ProjectionHolder. A fixed block is what left unused imports in the VL files.
+    referenced = set()
+    for _, wtype, _, _ in props:
+        if wtype in WRAPPER_TYPES:
+            referenced.add(WRAPPER_TYPES[wtype])
+    for _, ret, params in methods:
+        for t in [ret] + [p for p, _ in params]:
+            if t in WRAPPER_TYPES and t not in deferred_params and t not in deferred_returns:
+                referenced.add(WRAPPER_TYPES[t])
+    referenced.discard(class_name)
+    referenced.discard(base_wrapper)
+
+    imports = {"PGUI.ErrorHandling", "PGUI.Wrapper", base_import(base_wrapper)[len("import "):-1]}
+    if "CallProjected(" in text:
+        imports.add("PGUI.ProjectionHolder")
+    if "Callable<" in text:
+        imports.add("PGUI.Utils")
+    for pgui, module in TYPE_MODULE.items():
+        if re.search(rf"\b{re.escape(pgui)}\b", text):
+            imports.add(module)
+    if any(re.search(rf"\b{re.escape(alias)}\b", text) for alias, _ in KNOWN_WRAPPERS.values()):
+        imports.add("PGUI.UI.VL.VLEnums")
+    imports |= {module_of(w) for w in referenced}
+
+    lines = [
+        "module;",
+        "#include <winrt/Windows.UI.Composition.h>",
+        "",
+    ]
+    if iterable:
+        lines += ["#include <winrt/Windows.Foundation.Collections.h>", ""]
+    lines += [
+        f"export module {target_module(class_name, base_wrapper)};",
+        "",
+    ]
+    if "std::" in text:
+        lines += ["import std;", ""]
+    lines += [f"import {m};" for m in sorted(imports, key=import_rank)]
+    lines.append("")
+
+    return "\n".join(lines) + "\n" + text
 
 
 def report_status(md, namespace=DEFAULT_NAMESPACE):
@@ -721,10 +913,25 @@ def main():
             if WRAPPER_TYPES.get(wtype) == class_name:
                 free_fns.append((short(ancestor), name, wtype, g, s))
 
-    ixx = render_ixx(class_name, base_wrapper, props, methods, free_fns, force_todo)
+    # Method parameters of a descendant type (or an interface, which has no wrapper) are taken
+    # through the projected type instead, so this module never imports the descendant's -
+    # which imports this one. A descendant RETURN type still needs the complete wrapper.
+    def cycles_back(t):
+        return t.startswith(DEFAULT_NAMESPACE + ".") and t in md.by_name and (
+            full_name in md.ancestors(t) or md.is_interface(t))
+
+    deferred_params = {t for _, _, params in methods for t, _ in params if cycles_back(t)}
+    deferred_returns = {ret for _, ret, _ in methods if cycles_back(ret)}
+
+    iterable = next((split_generic(i)[1][0] for i in md.interfaces_of(full_name)
+                     if split_generic(i)[0] == ITERABLE), None)
+
+    ixx = render_ixx(class_name, base_wrapper, props, methods, free_fns, force_todo,
+                     deferred_params, deferred_returns, iterable)
 
     if args.outdir:
-        path = os.path.join(args.outdir, "modules", "UI", "VL", f"{class_name}.ixx")
+        path = os.path.join(args.outdir, "modules", "UI", "VL",
+                            target_dir(base_wrapper), f"{class_name}.ixx")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8", newline="\r\n") as f:
             f.write(ixx)

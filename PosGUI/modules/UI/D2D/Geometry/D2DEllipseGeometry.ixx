@@ -23,18 +23,19 @@ export namespace PGUI::UI::D2D
 		{
 		}
 
-		explicit D2DEllipseGeometry(const Ellipse ellipse) noexcept
+		[[nodiscard]] static auto Create(const Ellipse ellipse) noexcept -> Result<D2DEllipseGeometry>
 		{
 			const auto& factory = Factories::D2DFactory::GetFactory();
 
-			if (const auto hr = factory->CreateEllipseGeometry(ellipse, Put());
-				FAILED(hr))
+			ComPtr<ID2D1EllipseGeometry> geometry;
+			if (auto error = Error{ factory->CreateEllipseGeometry(ellipse, geometry.put()) };
+				error.IsFailure())
 			{
-				Logger::Error(
-					Error{ hr }
-					.AddDetail(L"Ellipse", std::format(L"{}", ellipse)),
-					L"Failed to create ellipse geometry");
+				error.AddDetail(L"ellipse", std::format(L"{}", ellipse));
+				return Unexpected{ error };
 			}
+
+			return D2DEllipseGeometry{ geometry };
 		}
 
 		[[nodiscard]] auto GetEllipse() const noexcept -> Ellipse

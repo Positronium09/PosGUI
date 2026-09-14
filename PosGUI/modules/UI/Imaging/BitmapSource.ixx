@@ -155,25 +155,36 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapSourceScaler() noexcept = default;
 
-		BitmapSourceScaler(BitmapSource<> source, const SizeU targetSize, InterpolationMode interpolationMode) noexcept
+		explicit(false) BitmapSourceScaler(const ComPtr<IWICBitmapScaler>& scaler) noexcept :
+			BitmapSource{ scaler }
+		{ }
+
+		[[nodiscard]] static auto Create(
+			const BitmapSource<>& source,
+			const SizeU targetSize,
+			const InterpolationMode interpolationMode) noexcept -> Result<BitmapSourceScaler>
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
-			auto hr = factory->CreateBitmapScaler(Put());
-			if (FAILED(hr))
+
+			ComPtr<IWICBitmapScaler> scaler;
+			if (const auto error = Error{ factory->CreateBitmapScaler(scaler.put()) };
+				error.IsFailure())
 			{
-				Error error{ hr };
-				Logger::Error(error, L"Failed to create IWICBitmapScaler");
-				return;
+				return Unexpected{ error };
 			}
 
-			hr = Get()->Initialize(
-				source.GetRaw(), targetSize.cx, targetSize.cy,
-				static_cast<WICBitmapInterpolationMode>(interpolationMode));
-			if (FAILED(hr))
+			if (auto error = Error{
+					scaler->Initialize(
+						source.GetRaw(), targetSize.cx, targetSize.cy,
+						static_cast<WICBitmapInterpolationMode>(interpolationMode))
+				};
+				error.IsFailure())
 			{
-				Error error{ hr };
-				Logger::Error(error, L"Failed to initialize IWICBitmapScaler");
+				error.AddDetail(L"targetSize", std::format(L"{}", targetSize));
+				return Unexpected{ error };
 			}
+
+			return BitmapSourceScaler{ scaler };
 		}
 	};
 
@@ -182,25 +193,32 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapSourceClipper() noexcept = default;
 
-		BitmapSourceClipper(BitmapSource<> source, const RectI clipRect) noexcept
+		explicit(false) BitmapSourceClipper(const ComPtr<IWICBitmapClipper>& clipper) noexcept :
+			BitmapSource{ clipper }
+		{ }
+
+		[[nodiscard]] static auto Create(
+			const BitmapSource<>& source,
+			const RectI clipRect) noexcept -> Result<BitmapSourceClipper>
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
-			auto hr = factory->CreateBitmapClipper(Put());
-			if (FAILED(hr))
+
+			ComPtr<IWICBitmapClipper> clipper;
+			if (const auto error = Error{ factory->CreateBitmapClipper(clipper.put()) };
+				error.IsFailure())
 			{
-				Error error{ hr };
-				Logger::Error(error, L"Failed to create IWICBitmapClipper");
-				return;
+				return Unexpected{ error };
 			}
 
 			const WICRect wicRect = clipRect;
-			hr = Get()->Initialize(source.GetRaw(), &wicRect);
-
-			if (FAILED(hr))
+			if (auto error = Error{ clipper->Initialize(source.GetRaw(), &wicRect) };
+				error.IsFailure())
 			{
-				Error error{ hr };
-				Logger::Error(error, L"Failed to initialize IWICBitmapClipper");
+				error.AddDetail(L"clipRect", std::format(L"{}", clipRect));
+				return Unexpected{ error };
 			}
+
+			return BitmapSourceClipper{ clipper };
 		}
 	};
 
@@ -209,26 +227,34 @@ export namespace PGUI::UI::Imaging
 		public:
 		BitmapSourceFlipRotator() noexcept = default;
 
-		BitmapSourceFlipRotator(BitmapSource<> source, TransformOptions transformOptions) noexcept
+		explicit(false) BitmapSourceFlipRotator(const ComPtr<IWICBitmapFlipRotator>& flipRotator) noexcept :
+			BitmapSource{ flipRotator }
+		{ }
+
+		[[nodiscard]] static auto Create(
+			const BitmapSource<>& source,
+			const TransformOptions transformOptions) noexcept -> Result<BitmapSourceFlipRotator>
 		{
 			const auto& factory = Factories::WICFactory::GetFactory();
-			auto hr = factory->CreateBitmapFlipRotator(Put());
-			if (FAILED(hr))
-			{
-				Error error{ hr };
-				Logger::Error(error, L"Failed to create IWICBitmapFlipRotator");
-				return;
-			}
-			
-			hr = Get()->Initialize(
-				source.GetRaw(),
-				static_cast<WICBitmapTransformOptions>(transformOptions));
 
-			if (FAILED(hr))
+			ComPtr<IWICBitmapFlipRotator> flipRotator;
+			if (const auto error = Error{ factory->CreateBitmapFlipRotator(flipRotator.put()) };
+				error.IsFailure())
 			{
-				Error error{ hr };
-				Logger::Error(error, L"Failed to initialize IWICBitmapFlipRotator");
+				return Unexpected{ error };
 			}
+
+			if (const auto error = Error{
+					flipRotator->Initialize(
+						source.GetRaw(),
+						static_cast<WICBitmapTransformOptions>(transformOptions))
+				};
+				error.IsFailure())
+			{
+				return Unexpected{ error };
+			}
+
+			return BitmapSourceFlipRotator{ flipRotator };
 		}
 	};
 

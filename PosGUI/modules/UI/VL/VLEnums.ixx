@@ -12,5 +12,9 @@ export namespace PGUI::UI::VL
 	using CompositeMode = WUC::CompositionCompositeMode;
 	using Stretch = WUC::CompositionStretch;
 	using BitmapInterpolationMode = WUC::CompositionBitmapInterpolationMode;
-
+	using AnimationDelayBehavior = WUC::AnimationDelayBehavior;
+	using AnimationDirection = WUC::AnimationDirection;
+	using AnimationIterationBehavior = WUC::AnimationIterationBehavior;
+	using AnimationStopBehavior = WUC::AnimationStopBehavior;
+	using ColorSpace = WUC::CompositionColorSpace;
 }

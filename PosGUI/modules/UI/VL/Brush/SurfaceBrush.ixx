@@ -1,7 +1,7 @@
 module;
 #include <winrt/Windows.UI.Composition.h>
 
-export module PGUI.UI.VL.CompositionSurfaceBrush;
+export module PGUI.UI.VL.Brush.CompositionSurfaceBrush;
 
 import std;
 
@@ -9,11 +9,9 @@ import PGUI.ErrorHandling;
 import PGUI.ProjectionHolder;
 import PGUI.Shape;
 import PGUI.Wrapper;
-import PGUI.ComPtr;
 import PGUI.UI.VL.Compositor;
-import PGUI.UI.VL.CompositionBrush;
+import PGUI.UI.VL.Brush.CompositionBrush;
 import PGUI.UI.VL.VLEnums;
-import PGUI.UI.VL.CompositionSurface;
 
 namespace WUC = winrt::Windows::UI::Composition;
 
@@ -24,7 +22,7 @@ export namespace PGUI::UI::VL
 		public:
 		using CompositionBrushT::CompositionBrushT;
 
-		[[nodiscard]] static auto Create(const CompositionSurface& surface) noexcept -> Result<CompositionSurfaceBrush>
+		[[nodiscard]] static auto Create(const WrapperDerivedFrom<WUC::ICompositionSurface> auto& surface) noexcept -> Result<CompositionSurfaceBrush>
 		{
 			const auto result = Compositor::GetCompositor();
 			if (!result.has_value())
@@ -63,7 +61,7 @@ export namespace PGUI::UI::VL
 		}
 		[[nodiscard]] auto SetBitmapInterpolationMode(const BitmapInterpolationMode bitmapInterpolationMode) const noexcept -> Result<void>
 		{
-			return CallProjected([this, &bitmapInterpolationMode]
+			return CallProjected([this, bitmapInterpolationMode]
 			{
 				this->Get().BitmapInterpolationMode(bitmapInterpolationMode);
 			});
@@ -167,7 +165,7 @@ export namespace PGUI::UI::VL
 			});
 		}
 		[[nodiscard]] auto DisableSnapToPixels() const noexcept -> Result<void> { return EnableSnapToPixels(false); }
-		[[nodiscard]] auto SnapToPixels() const noexcept -> Result<bool>
+		[[nodiscard]] auto IsSnapToPixelsEnabled() const noexcept -> Result<bool>
 		{
 			return CallProjected([this]
 			{

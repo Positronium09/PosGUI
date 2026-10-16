@@ -7,7 +7,7 @@ import PGUI.ErrorHandling;
 import PGUI.ProjectionHolder;
 import PGUI.Utils;
 
-namespace PGUI::Detail
+namespace PGUI::WrapperDetail
 {
 	template <bool, typename Handle>
 	struct HolderSelector
@@ -33,7 +33,7 @@ export namespace PGUI
 		(std::derived_from<Handle, Base> || DerivedFromProjected<Handle, Base>);
 
 	template <WrapperHandle Handle>
-	using HolderFor = Detail::HolderSelector<ComInterface<Handle>, Handle>::Type;
+	using HolderFor = WrapperDetail::HolderSelector<ComInterface<Handle>, Handle>::Type;
 
 	template <WrapperHandle Handle>
 	class Wrapper;
@@ -89,4 +89,26 @@ export namespace PGUI
 			}
 		}
 	};
+
+	template <WinrtProjection P, WrapperDerivedFrom<P> W>
+	[[nodiscard]] auto ProjectRangeUnchecked(const std::span<const W> range) -> std::vector<P>
+	{
+		std::vector<P> projected{ };
+		projected.reserve(range.size());
+
+		for (const auto& element : range)
+		{
+			projected.emplace_back(element.Get());
+		}
+
+		return projected;
+	}
+	template <WinrtProjection P, WrapperDerivedFrom<P> W>
+	[[nodiscard]] auto ProjectRange(const std::span<const W> range) noexcept -> Result<std::vector<P>>
+	{
+		return WrapThrowing([&range]
+		{
+			return ProjectRangeUnchecked<P, W>(range);
+		});
+	}
 }

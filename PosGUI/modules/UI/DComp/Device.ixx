@@ -44,7 +44,7 @@ export namespace PGUI::UI::DComp
 			if (!IsInitialized<IDCompositionDesktopDevice>())
 			{
 				const auto error = Error{ SystemErrorCode::InterfaceNotSupported }
-					.AddDetail(L"Interface", L"IDCompositionDesktopDevice")
+					.AddDetail(L"interfaceName", L"IDCompositionDesktopDevice")
 					.SuggestFix(L"If IDCompositionDevice5 is set with ComPtrHolder::Set also set the IDCompositionDesktopDevice interface");;
 				
 				return Unexpected{ error };

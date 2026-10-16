@@ -20,9 +20,9 @@ export namespace PGUI
 		false;
 		#endif
 
-	template <typename T> requires !std::is_same_v<T, void>
+	template <typename T> requires (!std::is_same_v<T, void>)
 	using RawPtr = T*;
-	template <typename T> requires !std::is_same_v<T, void>
+	template <typename T> requires (!std::is_same_v<T, void>)
 	using ConstRawPtr = const T*;
 	
 	enum class PositioningMode

@@ -46,14 +46,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().End() };
+				return Point2F{ Get().End() };
 			});
 		}
 		[[nodiscard]] auto SetEnd(const Point2F& end) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &end]
 			{
-				this->Get().End(end);
+				Get().End(end);
 			});
 		}
 
@@ -61,14 +61,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Start() };
+				return Point2F{ Get().Start() };
 			});
 		}
 		[[nodiscard]] auto SetStart(const Point2F& start) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &start]
 			{
-				this->Get().Start(start);
+				Get().Start(start);
 			});
 		}
 	};

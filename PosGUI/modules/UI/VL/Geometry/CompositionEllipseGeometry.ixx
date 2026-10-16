@@ -54,14 +54,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Center() };
+				return Point2F{ Get().Center() };
 			});
 		}
 		[[nodiscard]] auto SetCenter(const Point2F& center) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &center]
 			{
-				this->Get().Center(center);
+				Get().Center(center);
 			});
 		}
 
@@ -69,14 +69,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Radius() };
+				return Point2F{ Get().Radius() };
 			});
 		}
 		[[nodiscard]] auto SetRadius(const Point2F& radius) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &radius]
 			{
-				this->Get().Radius(radius);
+				Get().Radius(radius);
 			});
 		}
 
@@ -84,8 +84,8 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				const auto center = this->Get().Center();
-				const auto radius = this->Get().Radius();
+				const auto center = Get().Center();
+				const auto radius = Get().Radius();
 				return Ellipse{ Point2F{ center }, radius.x, radius.y };
 			});
 		}

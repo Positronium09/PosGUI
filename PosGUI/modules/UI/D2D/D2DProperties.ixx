@@ -74,9 +74,9 @@ export namespace PGUI::UI::D2D
 				{
 					Error error{ ErrorCode::InvalidArgument };
 					error
-						.AddDetail(L"Index", std::to_wstring(index))
-						.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
-						.AddDetail(L"Value Size", std::to_wstring(size));
+						.AddDetail(L"index", std::to_wstring(index))
+						.AddDetail(L"spanSize", std::to_wstring(bytes.size()))
+						.AddDetail(L"valueSize", std::to_wstring(size));
 					return Unexpected{ error };
 				}
 
@@ -85,9 +85,9 @@ export namespace PGUI::UI::D2D
 				{
 					Error error{ hr };
 					error
-						.AddDetail(L"Index", std::to_wstring(index))
-						.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
-						.AddDetail(L"Value Size", std::to_wstring(size));
+						.AddDetail(L"index", std::to_wstring(index))
+						.AddDetail(L"spanSize", std::to_wstring(bytes.size()))
+						.AddDetail(L"valueSize", std::to_wstring(size));
 					return Unexpected{ error };
 				}
 
@@ -100,9 +100,9 @@ export namespace PGUI::UI::D2D
 				{
 					Error error{ hr };
 					error
-						.AddDetail(L"Index", std::to_wstring(index))
-						.AddDetail(L"Span Size", std::to_wstring(bytes.size()))
-						.AddDetail(L"Value Size", std::to_wstring(GetValueSize(index)));
+						.AddDetail(L"index", std::to_wstring(index))
+						.AddDetail(L"spanSize", std::to_wstring(bytes.size()))
+						.AddDetail(L"valueSize", std::to_wstring(GetValueSize(index)));
 					return Unexpected{ error };
 				}
 

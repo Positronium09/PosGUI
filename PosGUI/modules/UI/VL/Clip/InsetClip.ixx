@@ -100,14 +100,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().LeftInset();
+				return Get().LeftInset();
 			});
 		}
 		[[nodiscard]] auto SetLeftInset(const float leftInset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, leftInset]
 			{
-				this->Get().LeftInset(leftInset);
+				Get().LeftInset(leftInset);
 			});
 		}
 
@@ -115,14 +115,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().TopInset();
+				return Get().TopInset();
 			});
 		}
 		[[nodiscard]] auto SetTopInset(const float topInset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, topInset]
 			{
-				this->Get().TopInset(topInset);
+				Get().TopInset(topInset);
 			});
 		}
 
@@ -130,14 +130,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().RightInset();
+				return Get().RightInset();
 			});
 		}
 		[[nodiscard]] auto SetRightInset(const float rightInset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, rightInset]
 			{
-				this->Get().RightInset(rightInset);
+				Get().RightInset(rightInset);
 			});
 		}
 
@@ -145,14 +145,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().BottomInset();
+				return Get().BottomInset();
 			});
 		}
 		[[nodiscard]] auto SetBottomInset(const float bottomInset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, bottomInset]
 			{
-				this->Get().BottomInset(bottomInset);
+				Get().BottomInset(bottomInset);
 			});
 		}
 	};

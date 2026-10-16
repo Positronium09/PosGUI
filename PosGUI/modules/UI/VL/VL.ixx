@@ -10,3 +10,4 @@ export import PGUI.UI.VL.Brush;
 export import PGUI.UI.VL.Clip;
 export import PGUI.UI.VL.Surface;
 export import PGUI.UI.VL.DesktopWindowTarget;
+export import PGUI.UI.VL.Animation;

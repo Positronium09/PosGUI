@@ -50,14 +50,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Offset() };
+				return Point2F{ Get().Offset() };
 			});
 		}
 		[[nodiscard]] auto SetOffset(const Point2F& offset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &offset]
 			{
-				this->Get().Offset(offset);
+				Get().Offset(offset);
 			});
 		}
 
@@ -65,14 +65,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return SizeF{ this->Get().Size() };
+				return SizeF{ Get().Size() };
 			});
 		}
 		[[nodiscard]] auto SetSize(const SizeF& size) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &size]
 			{
-				this->Get().Size(size);
+				Get().Size(size);
 			});
 		}
 
@@ -81,8 +81,8 @@ export namespace PGUI::UI::VL
 			return CallProjected([this]
 			{
 				return RectF{ 
-					static_cast<Point2F>(this->Get().Offset()), 
-					static_cast<SizeF>(this->Get().Size())
+					static_cast<Point2F>(Get().Offset()), 
+					static_cast<SizeF>(Get().Size())
 				};
 			});
 		}

@@ -122,7 +122,7 @@ export namespace PGUI
 				return Unexpected{
 					Error{
 						ErrorCode::Failure,
-					}.AddDetail(L"Module", std::format(L"{:p}", static_cast<void*>(moduleHandle.get())))
+					}.AddDetail(L"moduleHandle", std::format(L"{:p}", static_cast<void*>(moduleHandle.get())))
 				};
 			}
 
@@ -155,7 +155,7 @@ export namespace PGUI
 				return Unexpected{
 					Error{
 						GetLastError(),
-					}.AddDetail(L"Module", moduleName.data())
+					}.AddDetail(L"moduleName", moduleName.data())
 				};
 			}
 

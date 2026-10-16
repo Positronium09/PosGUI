@@ -29,7 +29,7 @@ namespace PGUI::UI::Animation
 		auto __stdcall OnStoryboardStatusChanged(
 			IUIAnimationStoryboard2* storyboard,
 			UI_ANIMATION_STORYBOARD_STATUS newStatus,
-			UI_ANIMATION_STORYBOARD_STATUS previousStatus)->HRESULT override;
+			UI_ANIMATION_STORYBOARD_STATUS previousStatus) -> HRESULT override;
 
 		auto __stdcall OnStoryboardUpdated(IUIAnimationStoryboard2* storyboard) -> HRESULT override;
 

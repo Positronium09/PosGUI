@@ -467,7 +467,7 @@ export namespace PGUI
 			return dynamic_cast<RawWindowPtr<T>>(GetWindowPtrFromHWND(parentHwnd));
 		}
 
-		template <HandlerSignature Handler> requires !HandlerMemberType<Handler>
+		template <HandlerSignature Handler> requires (!HandlerMemberType<Handler>)
 		auto RegisterHandler(const MessageID msg, Handler&& handler) noexcept -> void
 		{
 			messageHandlerHost.RegisterHandler(msg, std::forward<Handler>(handler));

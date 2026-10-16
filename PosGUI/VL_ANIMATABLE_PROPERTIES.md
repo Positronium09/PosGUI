@@ -131,6 +131,35 @@ Spot). The properties exist but nothing marks them animatable.
 
 PointLight Offset/Color animation confirmed by VLTest.cpp LightShineTestWnd.
 
+## InteractionTracker (Windows.UI.Composition.Interactions)
+
+Nothing on the tracker is a StartAnimation target - the tracker is an animation
+SOURCE, not a destination. Its value enters the system by being bound into an
+expression via SetReferenceParameter("tracker", tracker); the expression then
+re-evaluates as the referenced properties change.
+
+Expression-readable properties:
+
+| Property | Type | Source | Notes |
+| --- | --- | --- | --- |
+| Position | Vector3 | D | output position; the main binding source. Can exceed Min/MaxPosition during Interacting/Inertia (bounce, resistance) |
+| Scale | Scalar | D | output scale, starts at 1, clamped to Min/MaxScale |
+| PositionVelocityInPixelsPerSecond | Vector3 | D | current velocity while in Inertia; property page explicitly documents ExpressionAnimation use |
+| ScaleVelocityInPercentPerSecond | Scalar | D | same, for scale |
+| NaturalRestingPosition | Vector3 | D | computed stop point ignoring boundaries/modifiers; useful for scroll virtualization |
+| NaturalRestingScale | Scalar | D | same, for scale |
+| MinPosition, MaxPosition | Vector3 | unverified | settable bounds, also readable |
+| MinScale, MaxScale | Scalar | unverified | settable bounds, also readable |
+| IsInertiaFromImpulse | Boolean | unverified | read-only |
+| IsPositionRoundingSuggested | Boolean | unverified | read-only |
+| PositionInertiaDecayRate | Vector3, nullable | unverified | settable; 0..1 per axis, null = default |
+| ScaleInertiaDecayRate | Scalar, nullable | unverified | settable; 0..1, null = default |
+
+To MOVE the tracker from code, call TryUpdatePosition /
+TryUpdatePositionWithAnimation / TryUpdateScale(WithAnimation) /
+TryUpdatePositionWithAdditionalVelocity etc. - those take keyframe/natural
+motion animations, which is how Position and Scale get animated indirectly.
+
 ## Property sets
 
 Every CompositionObject carries a Properties set (CompositionObject.Properties),
@@ -171,9 +200,9 @@ Two prerequisites before any of these can be animated:
 - Object references: Brush, Clip, Geometry, ViewBox, Surface, Mask,
   FillBrush/StrokeBrush
 - Collections: ColorStops, StrokeDashArray, Shapes
-- InteractionTracker: its properties are read-only - readable from
-  expressions, never a StartAnimation target. Animate it through
-  TryUpdatePositionWithAnimation / TryUpdateScaleWithAnimation.
+- InteractionTracker: its properties are never a StartAnimation target - see
+  the InteractionTracker section for what is readable from expressions.
+  Animate it through TryUpdatePositionWithAnimation / TryUpdateScaleWithAnimation.
 
 ## Wrapper-relevant notes
 
@@ -197,6 +226,7 @@ Two prerequisites before any of these can be animated:
 - https://learn.microsoft.com/en-us/uwp/api/windows.ui.composition.rectangleclip?view=winrt-28000
 - https://learn.microsoft.com/en-us/uwp/api/windows.ui.composition.compositionsurfacebrush?view=winrt-28000
 - https://learn.microsoft.com/en-us/uwp/api/windows.ui.composition.dropshadow?view=winrt-28000
+- https://learn.microsoft.com/en-us/uwp/api/windows.ui.composition.interactions.interactiontracker?view=winrt-28000
 - https://github.com/MicrosoftDocs/winrt-api (windows.ui.composition/ - per-property "Animatable" markers)
 - https://github.com/CommunityToolkit/WindowsCommunityToolkit (Microsoft.Toolkit.Uwp.UI.Animations/Expressions/ReferenceNodes)
 - https://github.com/CommunityToolkit/Lottie-Windows (source/LottieToWinComp)

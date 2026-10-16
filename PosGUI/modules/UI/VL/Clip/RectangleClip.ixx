@@ -165,12 +165,12 @@ export namespace PGUI::UI::VL
 			if (auto res = SetTopLeftRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"TopLeft") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"TopLeft") };
 			}
 			if (auto res = SetBottomLeftRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"BottomLeft") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"BottomLeft") };
 			}
 			return EmptyResult;
 		}
@@ -179,12 +179,12 @@ export namespace PGUI::UI::VL
 			if (auto res = SetTopLeftRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"TopLeft") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"TopLeft") };
 			}
 			if (auto res = SetTopRightRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"TopRight") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"TopRight") };
 			}
 			return EmptyResult;
 		}
@@ -193,12 +193,12 @@ export namespace PGUI::UI::VL
 			if (auto res = SetTopRightRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"TopRight") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"TopRight") };
 			}
 			if (auto res = SetBottomRightRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"BottomRight") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"BottomRight") };
 			}
 			return EmptyResult;
 		}
@@ -207,12 +207,12 @@ export namespace PGUI::UI::VL
 			if (auto res = SetBottomLeftRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"BottomLeft") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"BottomLeft") };
 			}
 			if (auto res = SetBottomRightRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"BottomRight") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"BottomRight") };
 			}
 			return EmptyResult;
 		}
@@ -221,22 +221,22 @@ export namespace PGUI::UI::VL
 			if (auto res = SetTopLeftRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"TopLeft") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"TopLeft") };
 			}
 			if (auto res = SetTopRightRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"TopRight") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"TopRight") };
 			}
 			if (auto res = SetBottomLeftRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"BottomLeft") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"BottomLeft") };
 			}
 			if (auto res = SetBottomRightRadius(radius);
 				!res.has_value())
 			{
-				return Unexpected{ res.error().AddDetail(L"Corner", L"BottomRight") };
+				return Unexpected{ res.error().AddDetail(L"corner", L"BottomRight") };
 			}
 			return EmptyResult;
 		}
@@ -245,14 +245,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().Bottom();
+				return Get().Bottom();
 			});
 		}
 		[[nodiscard]] auto SetBottom(const float bottom) const noexcept -> Result<void>
 		{
 			return CallProjected([this, bottom]
 			{
-				this->Get().Bottom(bottom);
+				Get().Bottom(bottom);
 			});
 		}
 
@@ -260,14 +260,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().BottomLeftRadius() };
+				return Point2F{ Get().BottomLeftRadius() };
 			});
 		}
 		[[nodiscard]] auto SetBottomLeftRadius(const Point2F& bottomLeftRadius) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &bottomLeftRadius]
 			{
-				this->Get().BottomLeftRadius(bottomLeftRadius);
+				Get().BottomLeftRadius(bottomLeftRadius);
 			});
 		}
 
@@ -275,14 +275,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().BottomRightRadius() };
+				return Point2F{ Get().BottomRightRadius() };
 			});
 		}
 		[[nodiscard]] auto SetBottomRightRadius(const Point2F& bottomRightRadius) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &bottomRightRadius]
 			{
-				this->Get().BottomRightRadius(bottomRightRadius);
+				Get().BottomRightRadius(bottomRightRadius);
 			});
 		}
 
@@ -290,14 +290,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().Left();
+				return Get().Left();
 			});
 		}
 		[[nodiscard]] auto SetLeft(const float left) const noexcept -> Result<void>
 		{
 			return CallProjected([this, left]
 			{
-				this->Get().Left(left);
+				Get().Left(left);
 			});
 		}
 
@@ -305,14 +305,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().Right();
+				return Get().Right();
 			});
 		}
 		[[nodiscard]] auto SetRight(const float right) const noexcept -> Result<void>
 		{
 			return CallProjected([this, right]
 			{
-				this->Get().Right(right);
+				Get().Right(right);
 			});
 		}
 
@@ -320,14 +320,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().Top();
+				return Get().Top();
 			});
 		}
 		[[nodiscard]] auto SetTop(const float top) const noexcept -> Result<void>
 		{
 			return CallProjected([this, top]
 			{
-				this->Get().Top(top);
+				Get().Top(top);
 			});
 		}
 
@@ -335,14 +335,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().TopLeftRadius() };
+				return Point2F{ Get().TopLeftRadius() };
 			});
 		}
 		[[nodiscard]] auto SetTopLeftRadius(const Point2F& topLeftRadius) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &topLeftRadius]
 			{
-				this->Get().TopLeftRadius(topLeftRadius);
+				Get().TopLeftRadius(topLeftRadius);
 			});
 		}
 
@@ -350,14 +350,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().TopRightRadius() };
+				return Point2F{ Get().TopRightRadius() };
 			});
 		}
 		[[nodiscard]] auto SetTopRightRadius(const Point2F& topRightRadius) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &topRightRadius]
 			{
-				this->Get().TopRightRadius(topRightRadius);
+				Get().TopRightRadius(topRightRadius);
 			});
 		}
 	};

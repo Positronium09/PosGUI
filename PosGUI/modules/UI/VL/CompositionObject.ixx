@@ -8,6 +8,7 @@ import std;
 import PGUI.ErrorHandling;
 import PGUI.ProjectionHolder;
 import PGUI.Wrapper;
+import PGUI.UI.VL.Properties;
 
 namespace WUC = winrt::Windows::UI::Composition;
 
@@ -27,7 +28,7 @@ export namespace PGUI::UI::VL
 				return std::wstring{ this->Get().Comment() };
 			});
 		}
-		[[nodiscard]] auto SetComment(const std::wstring& comment) const noexcept -> Result<void>
+		[[nodiscard]] auto SetComment(const std::wstring_view comment) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &comment]
 			{
@@ -41,9 +42,24 @@ export namespace PGUI::UI::VL
 
 		//TODO DispatcherQueue DispatcherQueue
 
-		//TODO ImplicitAnimations ImplicitAnimationCollection
+		template <WrapperDerivedFrom<WUC::ImplicitAnimationCollection> C> requires
+			requires { typename C::OwnerType; } &&
+			HandleDerivedFrom<Projected, typename C::OwnerType::HandleType>
+			[[nodiscard]] auto SetImplicitAnimations(const C& collection) const noexcept -> Result<void>
+		{
+			return CallProjected([this, &collection]
+			{
+				this->Get().ImplicitAnimations(collection.Get());
+			});
+		}
 
-		//TODO Properties CompositionPropertySet
+		[[nodiscard]] auto GetProperties() const noexcept -> Result<Wrapper<WUC::CompositionPropertySet>>
+		{
+			return CallProjected([this]
+			{
+				return Wrapper<WUC::CompositionPropertySet>{ this->Get().Properties() };
+			});
+		}
 
 		[[nodiscard]] auto Close() const noexcept -> Result<void>
 		{
@@ -53,7 +69,9 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		[[nodiscard]] auto PopulatePropertyInfo(const std::wstring& propertyName, const WrapperDerivedFrom<WUC::AnimationPropertyInfo> auto& propertyInfo) const noexcept -> Result<void>
+		[[nodiscard]] auto PopulatePropertyInfo(
+			const std::wstring_view propertyName, 
+			const WrapperDerivedFrom<WUC::AnimationPropertyInfo> auto& propertyInfo) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &propertyName, &propertyInfo]
 			{
@@ -61,7 +79,9 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		[[nodiscard]] auto StartAnimation(const std::wstring& propertyName, const WrapperDerivedFrom<WUC::CompositionAnimation> auto& animation) const noexcept -> Result<void>
+		[[nodiscard]] auto StartAnimation(
+			const std::wstring_view propertyName, 
+			const WrapperDerivedFrom<WUC::CompositionAnimation> auto& animation) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &propertyName, &animation]
 			{
@@ -69,7 +89,10 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		[[nodiscard]] auto StartAnimation(const std::wstring& propertyName, const WrapperDerivedFrom<WUC::CompositionAnimation> auto& animation, const WrapperDerivedFrom<WUC::AnimationController> auto& animationController) const noexcept -> Result<void>
+		[[nodiscard]] auto StartAnimation(
+			const std::wstring_view propertyName, 
+			const WrapperDerivedFrom<WUC::CompositionAnimation> auto& animation, 
+			const WrapperDerivedFrom<WUC::AnimationController> auto& animationController) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &propertyName, &animation, &animationController]
 			{
@@ -77,7 +100,27 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		[[nodiscard]] auto StartAnimationGroup(const WrapperDerivedFrom<WUC::ICompositionAnimationBase> auto& value) const noexcept -> Result<void>
+		template <Properties::IsProperty P, WrapperDerivedFrom<WUC::CompositionAnimation> A>
+			requires HandleDerivedFrom<Projected, typename P::OwnerHandleType> &&
+			std::same_as<typename A::AnimationTag, typename P::ValueTag>
+			[[nodiscard]] auto StartAnimation(const A& animation) const noexcept -> Result<void>
+		{
+			return StartAnimation(P::name, animation);
+		}
+
+		template <WrapperDerivedFrom<WUC::CompositionAnimationGroup> G> requires
+			requires { typename G::OwnerType; } &&
+			HandleDerivedFrom<Projected, typename G::OwnerType::HandleType>
+		[[nodiscard]] auto StartAnimationGroup(const G& group) const noexcept -> Result<void>
+		{
+			return CallProjected([this, &group]
+			{
+				this->Get().StartAnimationGroup(group.Get());
+			});
+		}
+		template <WrapperDerivedFrom<WUC::ICompositionAnimationBase> V> requires
+			(!requires { typename V::OwnerType; })
+		[[nodiscard]] auto StartAnimationGroup(const V& value) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &value]
 			{
@@ -85,7 +128,16 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		[[nodiscard]] auto StopAnimation(const std::wstring& propertyName) const noexcept -> Result<void>
+		template <Properties::IsProperty P> requires
+			HandleDerivedFrom<Projected, typename P::OwnerHandleType>
+		[[nodiscard]] auto StopAnimation() const noexcept -> Result<void>
+		{
+			return CallProjected([this]
+			{
+				this->Get().StopAnimation(P::name);
+			});
+		}
+		[[nodiscard]] auto StopAnimation(const std::wstring_view propertyName) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &propertyName]
 			{
@@ -93,7 +145,19 @@ export namespace PGUI::UI::VL
 			});
 		}
 
-		[[nodiscard]] auto StopAnimationGroup(const WrapperDerivedFrom<WUC::ICompositionAnimationBase> auto& value) const noexcept -> Result<void>
+		template <WrapperDerivedFrom<WUC::CompositionAnimationGroup> G> requires
+			requires { typename G::OwnerType; } &&
+			HandleDerivedFrom<Projected, typename G::OwnerType::HandleType>
+		[[nodiscard]] auto StopAnimationGroup(const G& group) const noexcept -> Result<void>
+		{
+			return CallProjected([this, &group]
+			{
+				this->Get().StopAnimationGroup(group.Get());
+			});
+		}
+		template <WrapperDerivedFrom<WUC::ICompositionAnimationBase> V> requires
+			(!requires { typename V::OwnerType; })
+		[[nodiscard]] auto StopAnimationGroup(const V& value) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &value]
 			{

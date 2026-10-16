@@ -246,6 +246,53 @@ export namespace PGUI::UI::VL
 			});
 		}
 
+		[[nodiscard]] auto GetRect() const noexcept -> Result<RectF>
+		{
+			auto offset = GetOffset();
+			if (!offset.has_value())
+			{
+				return Unexpected{ offset.error().AddDetail(L"part", L"Offset") };
+			}
+			auto size = GetSize();
+			if (!size.has_value())
+			{
+				return Unexpected{ size.error().AddDetail(L"part", L"Size") };
+			}
+
+			return RectF{ offset.value(), size.value() };
+		}
+		[[nodiscard]] auto GetRectWithZ() const noexcept -> Result<std::pair<RectF, float>>
+		{
+			auto offset = GetOffset();
+			if (!offset.has_value())
+			{
+				return Unexpected{ offset.error().AddDetail(L"part", L"Offset") };
+			}
+			auto size = GetSize();
+			if (!size.has_value())
+			{
+				return Unexpected{ size.error().AddDetail(L"part", L"Size") };
+			}
+
+			return std::pair{ RectF{ offset.value(), size.value() }, offset->z };
+		}
+		[[nodiscard]] auto SetRect(const RectF& rect, const float z = 0.0f) const noexcept -> Result<void>
+		{
+			const auto topLeft = rect.TopLeft();
+			if (auto result = SetOffset(Point3F{ topLeft.x, topLeft.y, z });
+				!result.has_value())
+			{
+				return Unexpected{ result.error().AddDetail(L"part", L"Offset") };
+			}
+			if (auto result = SetSize(rect.Size());
+				!result.has_value())
+			{
+				return Unexpected{ result.error().AddDetail(L"part", L"Size") };
+			}
+
+			return EmptyResult;
+		}
+
 		[[nodiscard]] auto GetRotationAngle() const noexcept -> Result<float>
 		{
 			return CallProjected([this]

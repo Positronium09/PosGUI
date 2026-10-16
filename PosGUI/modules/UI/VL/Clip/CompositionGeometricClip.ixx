@@ -39,14 +39,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return CompositionGeometry{ this->Get().Geometry() };
+				return CompositionGeometry{ Get().Geometry() };
 			});
 		}
 		[[nodiscard]] auto SetGeometry(const CompositionGeometry& geometry) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &geometry]
 			{
-				this->Get().Geometry(geometry.Get());
+				Get().Geometry(geometry.Get());
 			});
 		}
 
@@ -54,14 +54,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return CompositionViewBox{ this->Get().ViewBox() };
+				return CompositionViewBox{ Get().ViewBox() };
 			});
 		}
 		[[nodiscard]] auto SetViewBox(const CompositionViewBox& viewBox) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &viewBox]
 			{
-				this->Get().ViewBox(viewBox.Get());
+				Get().ViewBox(viewBox.Get());
 			});
 		}
 	};

@@ -2,7 +2,7 @@ export module PGUI.Utils:MetaUtils;
 
 import std;
 
-namespace PGUI::Detail
+namespace PGUI::MetaUtilsDetail
 {
 	struct DummyTemplateCheck { };
 
@@ -56,12 +56,19 @@ namespace PGUI::Detail
 
 	template <typename T, typename ReturnT, typename... Args>
 	struct IsConstMemberFunction<ReturnT(T::*)(Args...) const noexcept> : std::true_type {};
+
+	template <typename T, typename... Types>
+	constexpr auto FindTypeIndex() noexcept -> std::size_t
+	{
+		const auto matches = std::array{ std::same_as<T, Types>... };
+		return static_cast<std::size_t>(std::ranges::find(matches, true) - matches.begin());
+	}
 }
 
 export namespace PGUI
 {
 	template <typename T, typename Signature>
-	concept Callable = Detail::IsCallable<T, Signature>::value;
+	concept Callable = MetaUtilsDetail::IsCallable<T, Signature>::value;
 
 	template <typename T, typename... Types>
 	concept IsInTypeList = (std::same_as<T, Types> || ...);
@@ -88,18 +95,26 @@ export namespace PGUI
 	concept NotSameAs = !std::same_as<T, U>;
 
 	template <typename T>
-	using MemberFunctionClass = Detail::MemberFunctionClass<T>::type;
+	using MemberFunctionClass = MetaUtilsDetail::MemberFunctionClass<T>::type;
 
 	template <typename T>
-	concept ConstMemberFunction = Detail::IsConstMemberFunction<T>::value;
+	concept ConstMemberFunction = MetaUtilsDetail::IsConstMemberFunction<T>::value;
 
 	template <typename T>
 	concept NonConstMemberFunction = !ConstMemberFunction<T>;
+
+	template <typename T, typename... Types> requires IsInTypeList<T, Types...>
+	constexpr auto TypeIndex = MetaUtilsDetail::FindTypeIndex<T, Types...>();
 
 	template <typename... Types>
 	struct TypeList
 	{
 		static constexpr auto Count = TypeCount<Types...>;
+
+		static constexpr auto IsEmpty = Count == 0;
+
+		template <typename T>
+		static constexpr auto IndexOf = TypeIndex<T, Types...>;
 
 		template <std::size_t N>
 		using GetType = NthTypeOf<N, Types...>;
@@ -121,11 +136,29 @@ export namespace PGUI
 		using PushFront = TypeList<Ts..., Types...>;
 
 		template <typename... Lists>
-		using Append = Detail::ConcatTypeLists<TypeList, Lists...>::Type;
+		using Append = MetaUtilsDetail::ConcatTypeLists<TypeList, Lists...>::Type;
+	};
+
+	template <typename T1, typename T2>
+	struct TypePair
+	{
+		using First = T1;
+		using Second = T2;
 	};
 
 	template <typename T, template <typename...> typename Template>
-	concept IsSpecialization = Detail::IsSpecializationHelper<T, Template>::value;
+	concept IsSpecialization = MetaUtilsDetail::IsSpecializationHelper<T, Template>::value;
+
+	template <IsSpecialization<TypePair>... Pairs>
+	struct TypeMap : TypeList<Pairs...>
+	{
+		using Keys = TypeList<typename Pairs::First...>;
+		using Values = TypeList<typename Pairs::Second...>;
+		using Map = TypeList<Pairs...>;
+
+		template <typename T> requires Keys::template Contains<T>
+		using GetMappedType = Values::template GetType<Keys::template IndexOf<T>>;
+	};
 
 	template <typename Variant, typename... Visitors>
 	constexpr auto Match(Variant&& variant, Visitors&&... visitors)
@@ -139,9 +172,42 @@ export namespace PGUI
 			Overloaded{ std::forward<Visitors>(visitors)... }, 
 			std::forward<Variant>(variant));
 	}
+
+	template <typename CharT, std::size_t N>
+	struct TStringLiteral
+	{
+		explicit(false) constexpr TStringLiteral(const CharT (&str)[N]) noexcept
+		{
+			for (std::size_t i = 0; i < N; ++i)
+			{
+				data[i] = str[i];
+			}
+		}
+
+		CharT data[N];
+	};
+
+	template <std::size_t N>
+	using WStringLiteral = TStringLiteral<wchar_t, N>;
+
+	template <std::size_t N>
+	using StringLiteral = TStringLiteral<char, N>;
+
+	template <typename CharT, std::size_t... Ns>
+	consteval auto Concat(TStringLiteral<CharT, Ns>... literals) noexcept
+	{
+		constexpr std::size_t totalSize{ (Ns + ... + 0) - sizeof...(Ns) + 1 };
+		CharT result[totalSize]{ };
+		std::size_t index = 0;
+
+		((std::copy_n(literals.data, Ns - 1, result + index), index += Ns - 1), ...);
+		result[totalSize - 1] = CharT{ 0 };
+
+		return TStringLiteral<CharT, totalSize>{ result };
+	}
 }
 
-namespace PGUI::Detail
+namespace PGUI::MetaUtilsDetail
 {
 	template <>
 	struct ConcatTypeLists<>
@@ -165,5 +231,5 @@ namespace PGUI::Detail
 export namespace PGUI
 {
 	template <typename... Lists>
-	using CombineTypeLists = Detail::ConcatTypeLists<Lists...>::Type;
+	using CombineTypeLists = MetaUtilsDetail::ConcatTypeLists<Lists...>::Type;
 }

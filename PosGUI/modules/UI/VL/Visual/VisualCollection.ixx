@@ -109,8 +109,8 @@ export namespace PGUI::UI::VL
 					{
 						return Unexpected{ 
 							res.error()
-							.AddDetail(L"Iteration", std::to_wstring(i))
-							.AddDetail(L"Visual", std::format(L"{}", winrt::get_unknown(v)))
+							.AddDetail(L"iteration", std::to_wstring(i))
+							.AddDetail(L"visual", std::format(L"{}", winrt::get_unknown(v)))
 						};
 					}
 				}

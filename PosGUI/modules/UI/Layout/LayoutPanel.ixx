@@ -10,7 +10,7 @@ import PGUI.Shape;
 import PGUI.Utils;
 import PGUI.ErrorHandling;
 
-namespace PGUI::UI::Layout::Detail
+namespace PGUI::UI::Layout::LayoutPanelDetail
 {
 	template <typename T>
 	concept LayoutItemLike = requires (T & t)
@@ -52,7 +52,7 @@ export namespace PGUI::UI::Layout
 		};
 
 		public:
-		template <Detail::LayoutItemLike T>
+		template <LayoutPanelDetail::LayoutItemLike T>
 		explicit LayoutItem(T& item) noexcept :
 			obj{ std::addressof(item) },
 			vtable{ &vtableFor<T> }
@@ -98,7 +98,7 @@ export namespace PGUI::UI::Layout
 		const VTable* vtable;
 	};
 
-	[[nodiscard]] auto MakeLayoutItem(Detail::LayoutItemLike auto& item) noexcept -> LayoutItem
+	[[nodiscard]] auto MakeLayoutItem(LayoutPanelDetail::LayoutItemLike auto& item) noexcept -> LayoutItem
 	{
 		return LayoutItem{ item };
 	}
@@ -114,7 +114,7 @@ export namespace PGUI::UI::Layout
 
 		virtual auto RearrangeItems() noexcept -> void = 0;
 
-		template <typename T> requires Detail::LayoutItemLike<T>
+		template <typename T> requires LayoutPanelDetail::LayoutItemLike<T>
 		auto AddItem(T& item) noexcept -> void
 		{
 			managedItems.push_back(MakeLayoutItem(item));

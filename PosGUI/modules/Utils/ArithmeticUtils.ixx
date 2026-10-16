@@ -9,7 +9,7 @@ import PGUI.Shape;
 
 export namespace PGUI
 {
-	namespace Detail
+	namespace ArithmeticUtilsDetail
 	{
 		template <std::floating_point T>
 		using FloatBits = std::conditional_t<sizeof(T) == sizeof(std::uint32_t), std::uint32_t, std::uint64_t>;
@@ -49,7 +49,7 @@ export namespace PGUI
 		{
 			return 0;
 		}
-		return (std::bit_cast<Detail::FloatBits<T>>(x) & Detail::FloatSignMask<T>()) != 0 ? -1 : 1;
+		return (std::bit_cast<ArithmeticUtilsDetail::FloatBits<T>>(x) & ArithmeticUtilsDetail::FloatSignMask<T>()) != 0 ? -1 : 1;
 	}
 
 	template <std::signed_integral T>
@@ -73,7 +73,7 @@ export namespace PGUI
 	[[nodiscard]] constexpr auto Abs(T x) noexcept -> T
 	{
 		return std::bit_cast<T>(
-			static_cast<Detail::FloatBits<T>>(std::bit_cast<Detail::FloatBits<T>>(x) & ~Detail::FloatSignMask<T>()));
+			static_cast<ArithmeticUtilsDetail::FloatBits<T>>(std::bit_cast<ArithmeticUtilsDetail::FloatBits<T>>(x) & ~ArithmeticUtilsDetail::FloatSignMask<T>()));
 	}
 
 	template <std::floating_point T>

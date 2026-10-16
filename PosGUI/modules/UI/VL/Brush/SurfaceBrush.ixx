@@ -41,14 +41,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().AnchorPoint() };
+				return Point2F{ Get().AnchorPoint() };
 			});
 		}
 		[[nodiscard]] auto SetAnchorPoint(const Point2F& anchorPoint) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &anchorPoint]
 			{
-				this->Get().AnchorPoint(anchorPoint);
+				Get().AnchorPoint(anchorPoint);
 			});
 		}
 
@@ -56,14 +56,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().BitmapInterpolationMode();
+				return Get().BitmapInterpolationMode();
 			});
 		}
 		[[nodiscard]] auto SetBitmapInterpolationMode(const BitmapInterpolationMode bitmapInterpolationMode) const noexcept -> Result<void>
 		{
 			return CallProjected([this, bitmapInterpolationMode]
 			{
-				this->Get().BitmapInterpolationMode(bitmapInterpolationMode);
+				Get().BitmapInterpolationMode(bitmapInterpolationMode);
 			});
 		}
 
@@ -71,14 +71,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().CenterPoint() };
+				return Point2F{ Get().CenterPoint() };
 			});
 		}
 		[[nodiscard]] auto SetCenterPoint(const Point2F& centerPoint) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &centerPoint]
 			{
-				this->Get().CenterPoint(centerPoint);
+				Get().CenterPoint(centerPoint);
 			});
 		}
 
@@ -86,14 +86,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().HorizontalAlignmentRatio();
+				return Get().HorizontalAlignmentRatio();
 			});
 		}
 		[[nodiscard]] auto SetHorizontalAlignmentRatio(const float horizontalAlignmentRatio) const noexcept -> Result<void>
 		{
 			return CallProjected([this, horizontalAlignmentRatio]
 			{
-				this->Get().HorizontalAlignmentRatio(horizontalAlignmentRatio);
+				Get().HorizontalAlignmentRatio(horizontalAlignmentRatio);
 			});
 		}
 
@@ -101,14 +101,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Offset() };
+				return Point2F{ Get().Offset() };
 			});
 		}
 		[[nodiscard]] auto SetOffset(const Point2F& offset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &offset]
 			{
-				this->Get().Offset(offset);
+				Get().Offset(offset);
 			});
 		}
 
@@ -116,14 +116,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().RotationAngle();
+				return Get().RotationAngle();
 			});
 		}
 		[[nodiscard]] auto SetRotationAngle(const float rotationAngle) const noexcept -> Result<void>
 		{
 			return CallProjected([this, rotationAngle]
 			{
-				this->Get().RotationAngle(rotationAngle);
+				Get().RotationAngle(rotationAngle);
 			});
 		}
 
@@ -131,14 +131,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().RotationAngleInDegrees();
+				return Get().RotationAngleInDegrees();
 			});
 		}
 		[[nodiscard]] auto SetRotationAngleInDegrees(const float rotationAngleInDegrees) const noexcept -> Result<void>
 		{
 			return CallProjected([this, rotationAngleInDegrees]
 			{
-				this->Get().RotationAngleInDegrees(rotationAngleInDegrees);
+				Get().RotationAngleInDegrees(rotationAngleInDegrees);
 			});
 		}
 
@@ -146,14 +146,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Scale() };
+				return Point2F{ Get().Scale() };
 			});
 		}
 		[[nodiscard]] auto SetScale(const Point2F& scale) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &scale]
 			{
-				this->Get().Scale(scale);
+				Get().Scale(scale);
 			});
 		}
 
@@ -161,7 +161,7 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this, enabled]
 			{
-				this->Get().SnapToPixels(enabled);
+				Get().SnapToPixels(enabled);
 			});
 		}
 		[[nodiscard]] auto DisableSnapToPixels() const noexcept -> Result<void> { return EnableSnapToPixels(false); }
@@ -169,7 +169,7 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().SnapToPixels();
+				return Get().SnapToPixels();
 			});
 		}
 
@@ -177,14 +177,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().Stretch();
+				return Get().Stretch();
 			});
 		}
 		[[nodiscard]] auto SetStretch(const Stretch stretch) const noexcept -> Result<void>
 		{
 			return CallProjected([this, stretch]
 			{
-				this->Get().Stretch(stretch);
+				Get().Stretch(stretch);
 			});
 		}
 
@@ -194,14 +194,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Matrix3x2{ this->Get().TransformMatrix() };
+				return Matrix3x2{ Get().TransformMatrix() };
 			});
 		}
 		[[nodiscard]] auto SetTransformMatrix(const Matrix3x2& transformMatrix) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &transformMatrix]
 			{
-				this->Get().TransformMatrix(transformMatrix);
+				Get().TransformMatrix(transformMatrix);
 			});
 		}
 
@@ -209,14 +209,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().VerticalAlignmentRatio();
+				return Get().VerticalAlignmentRatio();
 			});
 		}
 		[[nodiscard]] auto SetVerticalAlignmentRatio(const float verticalAlignmentRatio) const noexcept -> Result<void>
 		{
 			return CallProjected([this, verticalAlignmentRatio]
 			{
-				this->Get().VerticalAlignmentRatio(verticalAlignmentRatio);
+				Get().VerticalAlignmentRatio(verticalAlignmentRatio);
 			});
 		}
 	};

@@ -63,14 +63,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return CompositionBrush{ this->Get().Brush() };
+				return CompositionBrush{ Get().Brush() };
 			});
 		}
 		[[nodiscard]] auto SetBrush(const CompositionBrush& brush) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &brush]
 			{
-				this->Get().Brush(brush.Get());
+				Get().Brush(brush.Get());
 			});
 		}
 

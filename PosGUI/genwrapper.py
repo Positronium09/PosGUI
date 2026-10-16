@@ -76,9 +76,12 @@ SCALARS = {"bool", "float", "double", "std::int32_t", "std::uint32_t",
 WRAPPER_TYPES = {}      # winrt metadata name -> PGUI class, for finished class wrappers only
 WRAPPER_MODULE = {}     # PGUI class -> module to import it from
 WRAPPER_DIR = {}        # PGUI class -> directory holding it, relative to modules/UI/VL
+WRAPPER_TEMPLATED = set()   # PGUI classes declared as a class template (XT<Projected>, aliased X)
 KNOWN_WRAPPERS = {}     # winrt metadata name -> (PGUI alias, needs explicit construction)
 STUBS = {}              # winrt metadata name -> module of a file that exists but is empty
 NAMESPACES = {}         # winrt metadata name -> module covering it as a namespace, not a class
+INTERFACE_TYPES = set()     # winrt interfaces in the namespace - collection elements fall back to Wrapper<>
+
 
 # files under modules/UI/VL that are not type wrappers and never will be
 NOT_WRAPPERS = {"VL", "VLEnums"}
@@ -119,7 +122,8 @@ def resolve_projected(qualified, aliases, namespace=DEFAULT_NAMESPACE):
 
 
 def wrapped_type_of(text, aliases, namespace=DEFAULT_NAMESPACE):
-    """(metadata name, PGUI name) read from the first wrapper class's base specifier.
+    """(metadata name, PGUI name, is a class template) read from the first wrapper class's
+    base specifier.
 
     A plain class names the projection directly - CompositionObjectT<WUC::CompositionDrawingSurface>.
     A class template passes its own parameter down to the base, so the projection comes from
@@ -127,7 +131,7 @@ def wrapped_type_of(text, aliases, namespace=DEFAULT_NAMESPACE):
     """
     m = CLASS_RE.search(text)
     if m is None:
-        return None, None
+        return None, None, False
 
     cls, targs = m.group("name"), m.group("targs")
     templated = targs is not None
@@ -143,8 +147,8 @@ def wrapped_type_of(text, aliases, namespace=DEFAULT_NAMESPACE):
         pgui = alias.group(1) if alias else (cls[:-1] if cls.endswith("T") else cls)
 
     if projected is None:
-        return None, pgui
-    return resolve_projected(projected, aliases, namespace), pgui
+        return None, pgui, templated
+    return resolve_projected(projected, aliases, namespace), pgui, templated
 
 
 def discover(vl_root, namespace=DEFAULT_NAMESPACE):
@@ -197,7 +201,7 @@ def discover(vl_root, namespace=DEFAULT_NAMESPACE):
                     NAMESPACES.setdefault(f"{namespace}.{name}", module)
                 continue
 
-            wrapped, pgui = wrapped_type_of(text, aliases, namespace)
+            wrapped, pgui, templated = wrapped_type_of(text, aliases, namespace)
             if pgui is None:
                 for name in name_candidates(stem, last):
                     STUBS.setdefault(f"{namespace}.{name}", module)
@@ -213,12 +217,19 @@ def discover(vl_root, namespace=DEFAULT_NAMESPACE):
                     WRAPPER_TYPES[f"{namespace}.{name}"] = pgui
             WRAPPER_MODULE[pgui] = module
             WRAPPER_DIR[pgui] = os.path.relpath(dirpath, vl_root)
+            if templated:
+                WRAPPER_TEMPLATED.add(pgui)
 
     enums_path = os.path.join(vl_root, "VLEnums.ixx")
     if os.path.isfile(enums_path):
         with open(enums_path, encoding="utf-8", errors="replace") as f:
-            for alias, winrt_name in re.findall(r"^\s*using\s+(\w+)\s*=\s*\w+::(\w+)\s*;", f.read(), re.M):
-                KNOWN_WRAPPERS[f"{namespace}.{winrt_name}"] = (alias, False)
+            text = f.read()
+            ns_aliases = {a: n.replace("::", ".")[len("winrt."):]
+                          for a, n in re.findall(r"^\s*namespace\s+(\w+)\s*=\s*([\w:]+)\s*;", text, re.M)}
+            for alias, ns_alias, winrt_name in re.findall(
+                    r"^\s*using\s+(\w+)\s*=\s*(\w+)::(\w+)\s*;", text, re.M):
+                enum_ns = ns_aliases.get(ns_alias, namespace)
+                KNOWN_WRAPPERS[f"{enum_ns}.{winrt_name}"] = (alias, False)
 
 
 def split_generic(name):
@@ -486,21 +497,94 @@ def arg_name(prop_name):
     return prop_name[0].lower() + prop_name[1:]
 
 
+LOSSY_WRAP = {
+    "Windows.Foundation.TimeSpan": "std::chrono::duration_cast<std::chrono::milliseconds>({})",
+}
+
+
+def wrap_expr(winrt_type, pgui, inner):
+    """TimeSpan is 100 ns ticks; milliseconds{ ticks } is rejected as lossy, so it needs a cast."""
+    if winrt_type in LOSSY_WRAP:
+        return LOSSY_WRAP[winrt_type].format(inner)
+    return f"{pgui}{{ {inner} }}"
+
+
+IREFERENCE = "Windows.Foundation.IReference`1"
+
+ARITY_RE = re.compile(r"`\d+")
+
+# winrt metadata type -> its C++/WinRT spelling, for the T of an IReference<T>
+PROJECTED_SPELLING = {
+    "bool": "bool",
+    "float": "float",
+    "double": "double",
+    "int32": "std::int32_t",
+    "uint32": "std::uint32_t",
+    "int64": "std::int64_t",
+    "uint64": "std::uint64_t",
+    "Windows.Foundation.Numerics.Vector2": "WFN::float2",
+    "Windows.Foundation.Numerics.Vector3": "WFN::float3",
+    "Windows.Foundation.Numerics.Vector4": "WFN::float4",
+    "Windows.Foundation.Numerics.Matrix3x2": "WFN::float3x2",
+    "Windows.Foundation.Numerics.Matrix4x4": "WFN::float4x4",
+    "Windows.Foundation.Numerics.Quaternion": "WFN::quaternion",
+    "Windows.Foundation.Point": "WF::Point",
+    "Windows.Foundation.Size": "WF::Size",
+    "Windows.Foundation.Rect": "WF::Rect",
+    "Windows.Foundation.TimeSpan": "WF::TimeSpan",
+    "Windows.UI.Color": "winrt::Windows::UI::Color",
+}
+
+
+def optional_of(winrt_type, prop_name):
+    """IReference<T> -> (PGUI T, projected T, pass-through, inner winrt T), or None.
+    Pass-through means the PGUI type IS the projected type, so the IReference <-> std::optional
+    conversions cppwinrt provides apply directly; otherwise an optional of the projected type
+    is built first and converted."""
+    base, targs = split_generic(winrt_type)
+    if base != IREFERENCE or len(targs) != 1:
+        return None
+    inner = targs[0]
+    pgui, needs_wrap = map_type(inner, prop_name)
+    if pgui is None or inner in WRAPPER_TYPES:
+        return None
+    if inner in KNOWN_WRAPPERS:
+        return pgui, projected_name(inner), True, inner
+    projected = PROJECTED_SPELLING.get(inner)
+    if projected is None:
+        return None
+    return pgui, projected, not needs_wrap, inner
+
+
 def is_scalar(pgui):
     return pgui in SCALARS or pgui in (v[0] for v in KNOWN_WRAPPERS.values())
+
+
+# PGUI type -> the view type a parameter of that type is taken as, by const value
+PARAM_VIEW = {"std::wstring": "std::wstring_view"}
+
+
+def param_decl(pgui, arg):
+    """(declaration, capture) for a non-wrapper parameter."""
+    if pgui in PARAM_VIEW:
+        return f"const {PARAM_VIEW[pgui]} {arg}", f"&{arg}"
+    if is_scalar(pgui):
+        return f"const {pgui} {arg}", arg
+    return f"const {pgui}& {arg}", f"&{arg}"
 
 
 def gen_free_functions(entries, indent="\t"):
     """Accessors whose return type is the class itself (or a descendant) cannot be members -
     std::expected needs a complete type. Emitted after the class, where the type is complete."""
     out = []
-    for owner, name, wtype, g, s in entries:
+    for owner, name, wtype, g, s, owner_templated in entries:
         pgui = WRAPPER_TYPES[wtype]
         arg = owner[0].lower() + owner[1:]
-        head = f"{indent}template <HandleDerivedFrom<WUC::{owner}> Projected>"
+        owner_type = f"{owner}T<Projected>" if owner_templated else owner
+        head = [f"{indent}template <HandleDerivedFrom<WUC::{owner}> Projected>"] if owner_templated else []
         if g:
-            out.append(head)
-            out.append(f"{indent}[[nodiscard]] auto Get{name}Of(const {owner}T<Projected>& {arg}) noexcept -> Result<{pgui}>")
+            out += head
+            out.append(f"{indent}[[nodiscard]] auto Get{name}Of(const {owner_type}& {arg}) noexcept -> Result<{pgui}>")
             out.append(f"{indent}{{")
             out.append(f"{indent}\treturn CallProjected([&{arg}]")
             out.append(f"{indent}\t{{")
@@ -509,8 +593,8 @@ def gen_free_functions(entries, indent="\t"):
             out.append(f"{indent}}}")
         if s:
             value = arg_name(name)
-            out.append(head)
-            out.append(f"{indent}[[nodiscard]] auto Set{name}Of(const {owner}T<Projected>& {arg}, const {pgui}& {value}) noexcept -> Result<void>")
+            out += head
+            out.append(f"{indent}[[nodiscard]] auto Set{name}Of(const {owner_type}& {arg}, const {pgui}& {value}) noexcept -> Result<void>")
             out.append(f"{indent}{{")
             out.append(f"{indent}\treturn CallProjected([&{arg}, &{value}]")
             out.append(f"{indent}\t{{")
@@ -523,8 +607,9 @@ def gen_free_functions(entries, indent="\t"):
     return out
 
 
-def gen_members(props, indent="\t\t", force_todo=frozenset()):
-    """Declarations with inline bodies - templated wrappers cannot split into a .cpp."""
+def gen_members(props, indent="\t\t", force_todo=frozenset(), self_get="this->Get()"):
+    """Declarations with inline bodies. self_get is 'this->Get()' in a class template, where the
+    base is dependent, and plain 'Get()' in a non-templated class."""
     out = []
 
     def block(sig, body):
@@ -537,6 +622,38 @@ def gen_members(props, indent="\t\t", force_todo=frozenset()):
         out.append(f"{indent}}}")
 
     for name, wtype, g, s in props:
+        opt = None if name in force_todo else optional_of(wtype, name)
+        if opt is not None:
+            inner_pgui, projected, passthrough, inner = opt
+            if g:
+                sig = f"[[nodiscard]] auto Get{name}() const noexcept -> Result<std::optional<{inner_pgui}>>"
+                if passthrough:
+                    block(sig, ("[this]", f"return std::optional<{projected}>{{ {self_get}.{name}() }};"))
+                else:
+                    out += [
+                        f"{indent}{sig}",
+                        f"{indent}{{",
+                        f"{indent}\treturn CallProjected([this]",
+                        f"{indent}\t{{",
+                        f"{indent}\t\treturn std::optional<{projected}>{{ {self_get}.{name}() }}.transform([](const auto& value)",
+                        f"{indent}\t\t{{",
+                        f"{indent}\t\t\treturn {wrap_expr(inner, inner_pgui, 'value')};",
+                        f"{indent}\t\t}});",
+                        f"{indent}\t}});",
+                        f"{indent}}}",
+                    ]
+            if s:
+                a = arg_name(name)
+                if passthrough:
+                    param, cap, value = f"const std::optional<{inner_pgui}> {a}", a, a
+                else:
+                    param, cap, value = (f"const std::optional<{inner_pgui}>& {a}", f"&{a}",
+                                         f"std::optional<{projected}>{{ {a} }}")
+                block(f"[[nodiscard]] auto Set{name}({param}) const noexcept -> Result<void>",
+                      (f"[this, {cap}]", f"{self_get}.{name}({value});"))
+            out.append("")
+            continue
+
         pgui, needs_wrap = map_type(wtype, name)
         if name in force_todo:
             pgui = None
@@ -547,23 +664,22 @@ def gen_members(props, indent="\t\t", force_todo=frozenset()):
         if pgui == "bool":
             en, dis, is_ = bool_names(name)
             block(f"[[nodiscard]] auto {en}(const bool enabled = true) const noexcept -> Result<void>",
-                  ("[this, enabled]", f"this->Get().{name}(enabled);"))
+                  ("[this, enabled]", f"{self_get}.{name}(enabled);"))
             out.append(f"{indent}[[nodiscard]] auto {dis}() const noexcept -> Result<void> {{ return {en}(false); }}")
             block(f"[[nodiscard]] auto {is_}() const noexcept -> Result<bool>",
-                  ("[this]", f"return this->Get().{name}();"))
+                  ("[this]", f"return {self_get}.{name}();"))
             out.append("")
             continue
         if g:
-            expr = f"{pgui}{{ this->Get().{name}() }}" if needs_wrap else f"this->Get().{name}()"
+            expr = wrap_expr(wtype, pgui, f"{self_get}.{name}()") if needs_wrap else f"{self_get}.{name}()"
             block(f"[[nodiscard]] auto Get{name}() const noexcept -> Result<{pgui}>",
                   ("[this]", f"return {expr};"))
         if s:
             a = arg_name(name)
-            scalar = is_scalar(pgui)
-            param = f"const {pgui} {a}" if scalar else f"const {pgui}& {a}"
-            cap = f"[this, {a}]" if scalar else f"[this, &{a}]"
+            param, cap = param_decl(pgui, a)
+            value = f"{a}.Get()" if wtype in WRAPPER_TYPES else a
             block(f"[[nodiscard]] auto Set{name}({param}) const noexcept -> Result<void>",
-                  (cap, f"this->Get().{name}({a});"))
+                  (f"[this, {cap}]", f"{self_get}.{name}({value});"))
         out.append("")
     while out and out[-1] == "":
         out.pop()
@@ -575,12 +691,79 @@ def projected_name(winrt_type):
     return "WUC::" + winrt_type[len(DEFAULT_NAMESPACE) + 1:].replace(".", "::")
 
 
-def gen_methods(methods, indent="\t\t", deferred_params=frozenset(), deferred_returns=frozenset()):
+def iterable_param_of(winrt_type):
+    """IIterable<X> as a PARAMETER -> (PGUI X, projected X, X is a wrapper), or None.
+    cppwinrt takes these as param::iterable<X>, which converts from an iterator pair, so a
+    span of PGUI values passes as { arg.begin(), arg.end() }. A span of WRAPPERS has to be
+    unwrapped into a vector of projections first - a wrapper does not convert to its handle."""
+    base, targs = split_generic(winrt_type)
+    if base != ITERABLE or len(targs) != 1:
+        return None
+    elem = targs[0]
+    if elem in WRAPPER_TYPES:
+        return WRAPPER_TYPES[elem], projected_name(elem), True
+    pgui, _ = map_type(elem, "")
+    if pgui is None or split_generic(elem)[1]:
+        return None
+    return pgui, pgui, False
+
+
+def map_params(params, deferred_params=frozenset()):
+    """[(PGUI type or a 'deferred'/'iterable' marker or None, winrt type, name)]."""
+    return [(("deferred" if t in deferred_params
+              else ("iterable" if iterable_param_of(t) else map_type(t, "")[0])), t, n)
+            for t, n in params]
+
+
+def build_params(mapped, caps):
+    """(declarations, call arguments, lambda captures, prologue lines) for one parameter list."""
+    decl, args, prologue = [], [], []
+    for pgui, wtype, n in mapped:
+        arg = arg_name(n)
+        if pgui == "iterable":
+            elem_pgui, elem_projected, is_wrapper = iterable_param_of(wtype)
+            decl.append(f"const std::span<const {elem_pgui}> {arg}")
+            caps.append(arg)
+            if is_wrapper:
+                projected_arg = f"{arg}Projected"
+                prologue += [
+                    f"std::vector<{elem_projected}> {projected_arg}{{ }};",
+                    f"{projected_arg}.reserve({arg}.size());",
+                    f"for (const auto& element : {arg})",
+                    "{",
+                    f"\t{projected_arg}.emplace_back(element.Get());",
+                    "}",
+                    "",
+                ]
+                args.append(projected_arg)
+            else:
+                args.append(f"{{ {arg}.begin(), {arg}.end() }}")
+        elif pgui == "deferred":
+            decl.append(f"const WrapperDerivedFrom<{projected_name(wtype)}> auto& {arg}")
+            args.append(f"{arg}.Get()")
+            caps.append(f"&{arg}")
+        elif wtype in WRAPPER_TYPES:
+            decl.append(f"const {pgui}& {arg}")
+            args.append(f"{arg}.Get()")
+            caps.append(f"&{arg}")
+        else:
+            declared, captured = param_decl(pgui, arg)
+            decl.append(declared)
+            args.append(arg)
+            caps.append(captured)
+    return decl, args, caps, prologue
+
+
+def gen_methods(methods, indent="\t\t", deferred_params=frozenset(), deferred_returns=frozenset(),
+                self_get="this->Get()", skip=frozenset()):
     """deferred_params: types taken as WrapperDerivedFrom<WUC::X> auto&, so the module never
-    imports their wrapper. deferred_returns: types a member cannot return without that import."""
+    imports their wrapper. deferred_returns: types a member cannot return without that import.
+    skip: (name, param types) identities emitted by a dedicated generator instead."""
     out = []
     for name, ret, params in methods:
-        mapped = [(("deferred" if t in deferred_params else map_type(t, "")[0]), t, n) for t, n in params]
+        if (name, tuple(t for t, _ in params)) in skip:
+            continue
+        mapped = map_params(params, deferred_params)
         ret_pgui = "void" if ret == "void" else (None if ret in deferred_returns else map_type(ret, "")[0])
 
         if ret_pgui is None or any(p is None for p, _, _ in mapped):
@@ -589,38 +772,22 @@ def gen_methods(methods, indent="\t\t", deferred_params=frozenset(), deferred_re
             out.append("")
             continue
 
-        decl, args, caps = [], [], ["this"]
-        for pgui, wtype, n in mapped:
-            arg = arg_name(n)
-            if pgui == "deferred":
-                decl.append(f"const WrapperDerivedFrom<{projected_name(wtype)}> auto& {arg}")
-                args.append(f"{arg}.Get()")
-                caps.append(f"&{arg}")
-            elif wtype in WRAPPER_TYPES:
-                decl.append(f"const {pgui}& {arg}")
-                args.append(f"{arg}.Get()")
-                caps.append(f"&{arg}")
-            elif is_scalar(pgui):
-                decl.append(f"const {pgui} {arg}")
-                args.append(arg)
-                caps.append(arg)
-            else:
-                decl.append(f"const {pgui}& {arg}")
-                args.append(arg)
-                caps.append(f"&{arg}")
+        decl, args, caps, prologue = build_params(mapped, ["this"])
 
-        call = f"this->Get().{name}({', '.join(args)});"
+        call = f"{self_get}.{name}({', '.join(args)});"
         result = "void" if ret_pgui == "void" else ret_pgui
         nodiscard = "[[nodiscard]] "
         if ret_pgui != "void":
-            call = f"return {ret_pgui}{{ this->Get().{name}({', '.join(args)}) }};" \
+            invoke = f"{self_get}.{name}({', '.join(args)})"
+            call = f"return {wrap_expr(ret, ret_pgui, invoke)};" \
                 if ret in WRAPPER_TYPES or map_type(ret, "")[1] \
-                else f"return this->Get().{name}({', '.join(args)});"
+                else f"return {self_get}.{name}({', '.join(args)});"
 
         out.append(f"{indent}{nodiscard}auto {name}({', '.join(decl)}) const noexcept -> Result<{result}>")
         out.append(f"{indent}{{")
         out.append(f"{indent}\treturn CallProjected([{', '.join(caps)}]")
         out.append(f"{indent}\t{{")
+        out += [f"{indent}\t\t{line}".rstrip() for line in prologue]
         out.append(f"{indent}\t\t{call}")
         out.append(f"{indent}\t}});")
         out.append(f"{indent}}}")
@@ -632,13 +799,231 @@ def gen_methods(methods, indent="\t\t", deferred_params=frozenset(), deferred_re
 
 ITERABLE = "Windows.Foundation.Collections.IIterable`1"
 KEY_VALUE_PAIR = "Windows.Foundation.Collections.IKeyValuePair`2"
+IMAP = "Windows.Foundation.Collections.IMap`2"
+COMPOSITOR = "Windows.UI.Composition.Compositor"
 
 
-def gen_iterable(element, indent="\t\t"):
+def statics_of(md, full_name):
+    """The type's I<Name>Statics, I<Name>Statics2, ... interfaces. These are NOT in the class's
+    InterfaceImpl set, so nothing else in this generator ever sees them - which is how every
+    statics-built wrapper ended up with no Create and not even a //TODO."""
+    namespace, _, name = full_name.rpartition(".")
+    out = []
+    for candidate in [f"{namespace}.I{name}Statics"] + \
+            [f"{namespace}.I{name}Statics{n}" for n in range(2, 10)]:
+        if candidate in md.by_name and md.is_interface(candidate):
+            out += md.methods_of(candidate)
+    return out
+
+
+def gen_statics(class_name, projected, full_name, statics, indent="\t\t",
+                deferred_params=frozenset(), deferred_returns=frozenset()):
+    """Static factories and helpers, called as Projected::Name(...).
+
+    A static whose first parameter is the compositor loses it: the wrapper pulls the
+    process-wide one through Compositor::GetCompositor() instead, which is what every
+    hand-written Create does. Create<ClassName> contracts to plain Create."""
+    out = []
+    for name, ret, params in statics:
+        mapped = map_params(params, deferred_params)
+        ret_pgui = "void" if ret == "void" else (None if ret in deferred_returns else map_type(ret, "")[0])
+        takes_compositor = bool(params) and params[0][0] == COMPOSITOR
+
+        if ret_pgui is None or any(p is None for p, _, _ in mapped[1 if takes_compositor else 0:]):
+            sig = ", ".join(f"{short(t)} {n}" for _, t, n in mapped)
+            out.append(f"{indent}//TODO static {name}({sig}) -> {short(ret)}")
+            out.append("")
+            continue
+
+        member = "Create" if name == f"Create{short(full_name)}" else name
+        decl, args, caps, prologue = build_params(mapped[1:] if takes_compositor else mapped, [])
+        if takes_compositor:
+            args.insert(0, "compositor")
+            caps.insert(0, "&compositor")
+
+        invoke = f"{projected}::{name}({', '.join(args)})"
+        if ret_pgui == "void":
+            call = f"{invoke};"
+        elif ret in WRAPPER_TYPES or ret == full_name or map_type(ret, "")[1]:
+            call = f"return {wrap_expr(ret, ret_pgui, invoke)};"
+        else:
+            call = f"return {invoke};"
+
+        out.append(f"{indent}[[nodiscard]] static auto {member}({', '.join(decl)}) noexcept -> Result<{ret_pgui}>")
+        out.append(f"{indent}{{")
+        if takes_compositor:
+            out += [
+                f"{indent}\tconst auto result = Compositor::GetCompositor();",
+                f"{indent}\tif (!result.has_value())",
+                f"{indent}\t{{",
+                f"{indent}\t\treturn Unexpected{{ result.error() }};",
+                f"{indent}\t}}",
+                f"{indent}\tconst auto& compositor = result.value();",
+                "",
+            ]
+        out.append(f"{indent}\treturn CallProjected([{', '.join(caps)}]")
+        out.append(f"{indent}\t{{")
+        out += [f"{indent}\t\t{line}".rstrip() for line in prologue]
+        out.append(f"{indent}\t\t{call}")
+        out.append(f"{indent}\t}});")
+        out.append(f"{indent}}}")
+        out.append("")
+    while out and out[-1] == "":
+        out.pop()
+    return out
+
+
+def collection_element(winrt_type):
+    """(PGUI type, needs explicit construction, is a handle) for a collection key/value/element.
+    An element whose type is a bare interface has no wrapper class, but Wrapper<WUC::IFoo> is a
+    perfectly good handle holder - which is what the hand-written map wrappers already return."""
+    pgui, needs_wrap = map_type(winrt_type, "")
+    if pgui is not None:
+        return pgui, needs_wrap, winrt_type in WRAPPER_TYPES
+    if winrt_type in INTERFACE_TYPES:
+        return f"Wrapper<{projected_name(winrt_type)}>", True, True
+    return None, False, False
+
+
+def gen_map(key, value, indent="\t\t", self_get="this->Get()"):
+    """The IMap<K, V> surface. TryLookup / TryRemove are cppwinrt extensions with no metadata -
+    TryLookup yields the nullable projection itself for a reference V and std::optional<V>
+    otherwise. GetView cannot hand back an IMapView wrapper (its lifetime is tied to the map and
+    every read can throw), so it is snapshotted into a std::map."""
+    key_pgui, key_wrap, key_handle = collection_element(key)
+    value_pgui, value_wrap, value_handle = collection_element(value)
+    if key_pgui is None or value_pgui is None:
+        return [f"{indent}//TODO IMap<{short(key)}, {short(value)}> members"]
+
+    if key_handle:
+        key_param, key_cap, key_arg = f"const {key_pgui}& key", "&key", "key.Get()"
+    else:
+        key_param, key_cap = param_decl(key_pgui, "key")
+        key_arg = "key"
+    if value_handle:
+        value_param, value_cap, value_arg = f"const {value_pgui}& value", "&value", "value.Get()"
+    else:
+        value_param, value_cap = param_decl(value_pgui, "value")
+        value_arg = "value"
+
+    def received(source):
+        return f"{value_pgui}{{ {source} }}" if value_wrap else source
+
+    out = [
+        f"{indent}[[nodiscard]] auto Lookup({key_param}) const noexcept -> Result<{value_pgui}>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this, {key_cap}]",
+        f"{indent}\t{{",
+        f"{indent}\t\treturn {received(f'{self_get}.Lookup({key_arg})')};",
+        f"{indent}\t}});",
+        f"{indent}}}",
+        "",
+    ]
+    if value_handle:
+        out += [
+            f"{indent}[[nodiscard]] auto TryLookup({key_param}) const noexcept -> Result<std::optional<{value_pgui}>>",
+            f"{indent}{{",
+            f"{indent}\treturn CallProjected([this, {key_cap}] -> std::optional<{value_pgui}>",
+            f"{indent}\t{{",
+            f"{indent}\t\tconst auto value = {self_get}.TryLookup({key_arg});",
+            f"{indent}\t\tif (!value)",
+            f"{indent}\t\t{{",
+            f"{indent}\t\t\treturn std::nullopt;",
+            f"{indent}\t\t}}",
+            "",
+            f"{indent}\t\treturn {received('value')};",
+            f"{indent}\t}});",
+            f"{indent}}}",
+            "",
+        ]
+    elif value_wrap:
+        out += [
+            f"{indent}[[nodiscard]] auto TryLookup({key_param}) const noexcept -> Result<std::optional<{value_pgui}>>",
+            f"{indent}{{",
+            f"{indent}\treturn CallProjected([this, {key_cap}]",
+            f"{indent}\t{{",
+            f"{indent}\t\treturn {self_get}.TryLookup({key_arg}).transform([](const auto& value)",
+            f"{indent}\t\t{{",
+            f"{indent}\t\t\treturn {received('value')};",
+            f"{indent}\t\t}});",
+            f"{indent}\t}});",
+            f"{indent}}}",
+            "",
+        ]
+    else:
+        out += [
+            f"{indent}[[nodiscard]] auto TryLookup({key_param}) const noexcept -> Result<std::optional<{value_pgui}>>",
+            f"{indent}{{",
+            f"{indent}\treturn CallProjected([this, {key_cap}]",
+            f"{indent}\t{{",
+            f"{indent}\t\treturn {self_get}.TryLookup({key_arg});",
+            f"{indent}\t}});",
+            f"{indent}}}",
+            "",
+        ]
+
+    stored = f"std::map<{key_pgui}, {value_pgui}>"
+    key_received = f"{key_pgui}{{ element.Key() }}" if key_wrap else "element.Key()"
+    out += [
+        f"{indent}[[nodiscard]] auto HasKey({key_param}) const noexcept -> Result<bool>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this, {key_cap}]",
+        f"{indent}\t{{",
+        f"{indent}\t\treturn {self_get}.HasKey({key_arg});",
+        f"{indent}\t}});",
+        f"{indent}}}",
+        "",
+        f"{indent}[[nodiscard]] auto GetView() const noexcept -> Result<{stored}>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this]",
+        f"{indent}\t{{",
+        f"{indent}\t\treturn {self_get}.GetView() | std::views::transform([](const auto& element)",
+        f"{indent}\t\t{{",
+        f"{indent}\t\t\treturn std::pair{{ {key_received}, {received('element.Value()')} }};",
+        f"{indent}\t\t}}) | std::ranges::to<std::map>();",
+        f"{indent}\t}});",
+        f"{indent}}}",
+        "",
+        f"{indent}[[nodiscard]] auto Insert({key_param}, {value_param}) const noexcept -> Result<bool>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this, {key_cap}, {value_cap}]",
+        f"{indent}\t{{",
+        f"{indent}\t\treturn {self_get}.Insert({key_arg}, {value_arg});",
+        f"{indent}\t}});",
+        f"{indent}}}",
+        "",
+        f"{indent}[[nodiscard]] auto Remove({key_param}) const noexcept -> Result<void>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this, {key_cap}]",
+        f"{indent}\t{{",
+        f"{indent}\t\t{self_get}.Remove({key_arg});",
+        f"{indent}\t}});",
+        f"{indent}}}",
+        f"{indent}[[nodiscard]] auto TryRemove({key_param}) const noexcept -> Result<bool>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this, {key_cap}]",
+        f"{indent}\t{{",
+        f"{indent}\t\treturn {self_get}.TryRemove({key_arg});",
+        f"{indent}\t}});",
+        f"{indent}}}",
+        "",
+        f"{indent}[[nodiscard]] auto Clear() const noexcept -> Result<void>",
+        f"{indent}{{",
+        f"{indent}\treturn CallProjected([this]",
+        f"{indent}\t{{",
+        f"{indent}\t\t{self_get}.Clear();",
+        f"{indent}\t}});",
+        f"{indent}}}",
+    ]
+    return out
+
+
+def gen_iterable(element, indent="\t\t", self_get="this->Get()", size_expr=None):
     """ToVector + ForEach over an IIterable<element>. A key/value element is unpacked, so
-    ForEach takes a (key, value) callable and ToVector yields pairs."""
+    ForEach takes a (key, value) callable and ToVector yields pairs. size_expr is the
+    collection's own count, when it has one, so ToVector reserves instead of regrowing."""
     def value_of(winrt_type, source):
-        pgui, needs_wrap = map_type(winrt_type, "")
+        pgui, needs_wrap, _ = collection_element(winrt_type)
         if pgui is None:
             return None, None
         return pgui, (f"{pgui}{{ {source} }}" if needs_wrap else source)
@@ -661,13 +1046,19 @@ def gen_iterable(element, indent="\t\t"):
         emplace_args = "element"
         invoke_args = expr
 
+    reserve = [
+        f"{indent}\t\telements.reserve({size_expr});",
+        "",
+    ] if size_expr else []
+
     return [
         f"{indent}[[nodiscard]] auto ToVector() const noexcept -> Result<std::vector<{stored}>>",
         f"{indent}{{",
         f"{indent}\treturn CallProjected([this]",
         f"{indent}\t{{",
         f"{indent}\t\tauto elements = std::vector<{stored}>{{ }};",
-        f"{indent}\t\tfor (const auto& element : this->Get())",
+        *reserve,
+        f"{indent}\t\tfor (const auto& element : {self_get})",
         f"{indent}\t\t{{",
         f"{indent}\t\t\telements.emplace_back({emplace_args});",
         f"{indent}\t\t}}",
@@ -681,7 +1072,7 @@ def gen_iterable(element, indent="\t\t"):
         f"{indent}{{",
         f"{indent}\treturn CallProjected([this, &f] -> Result<void>",
         f"{indent}\t{{",
-        f"{indent}\t\tfor (const auto& [i, element] : this->Get() | std::views::enumerate)",
+        f"{indent}\t\tfor (const auto& [i, element] : {self_get} | std::views::enumerate)",
         f"{indent}\t\t{{",
         f"{indent}\t\t\tif (auto result = std::invoke(f, {invoke_args});",
         f"{indent}\t\t\t\t!result.has_value())",
@@ -735,40 +1126,89 @@ def target_dir(base_wrapper):
 
 
 def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_todo=frozenset(),
-               deferred_params=frozenset(), deferred_returns=frozenset(), iterable=None):
-    """base_wrapper is the PGUI base WITHOUT the T suffix, e.g. 'Visual'."""
-    base = "Wrapper<Projected>" if base_wrapper == "ProjectionHolder" else f"{base_wrapper}T<Projected>"
+               deferred_params=frozenset(), deferred_returns=frozenset(), iterable=None,
+               templated=False, map_kv=None, skip_methods=frozenset(), statics=(), full_name=None):
+    """base_wrapper is the PGUI base WITHOUT the T suffix, e.g. 'Visual'.
+
+    templated=False (the default) emits a plain class over a fixed projection -
+        class X : public BaseT<WUC::X> { using BaseT::BaseT; ... };
+    templated=True emits the class template a further wrapper can derive from -
+        template <HandleDerivedFrom<WUC::X> Projected = WUC::X> class XT : public BaseT<Projected>
+    followed by 'using X = XT<>;'.
+    """
+    base_name = "Wrapper" if base_wrapper == "ProjectionHolder" else f"{base_wrapper}T"
+    self_get = "this->Get()" if templated else "Get()"
+    full_name = full_name or f"{DEFAULT_NAMESPACE}.{class_name}"
+    projected = projected_name(full_name)
 
     body = [
         "namespace WUC = winrt::Windows::UI::Composition;",
         "",
         "export namespace PGUI::UI::VL",
         "{",
-        f"\ttemplate <HandleDerivedFrom<WUC::{class_name}> Projected = WUC::{class_name}>",
-        f"\tclass {class_name}T : public {base}",
-        "\t{",
-        "\t\tpublic:",
-        f"\t\tusing Base = {base};",
-        "\t\tusing Base::Base;",
-        "",
     ]
-    members = gen_members(props, force_todo=force_todo)
-    method_lines = gen_methods(methods, deferred_params=deferred_params, deferred_returns=deferred_returns)
+    if templated:
+        base = f"{base_name}<Projected>"
+        body += [
+            f"\ttemplate <HandleDerivedFrom<{projected}> Projected = {projected}>",
+            f"\tclass {class_name}T : public {base}",
+            "\t{",
+            "\t\tpublic:",
+            f"\t\tusing Base = {base};",
+            "\t\tusing Base::Base;",
+            "",
+        ]
+    else:
+        body += [
+            f"\tclass {class_name} : public {base_name}<{projected}>",
+            "\t{",
+            "\t\tpublic:",
+            f"\t\tusing {base_name}::{base_name};",
+            "",
+        ]
+    static_lines = gen_statics(class_name, projected, full_name, statics,
+                               deferred_params=deferred_params, deferred_returns=deferred_returns)
+    if static_lines:
+        static_lines.append("")
+    body += static_lines
+    members = gen_members(props, force_todo=force_todo, self_get=self_get)
+    method_lines = gen_methods(methods, deferred_params=deferred_params, deferred_returns=deferred_returns,
+                               self_get=self_get, skip=skip_methods)
     if members and method_lines:
         members.append("")
-    iterable_lines = gen_iterable(iterable) if iterable else []
-    if (members or method_lines) and iterable_lines:
+    map_lines = gen_map(*map_kv, self_get=self_get) if map_kv else []
+    if (members or method_lines) and map_lines:
         method_lines.append("")
-    body += members + method_lines + iterable_lines
-    body += [
-        "\t};",
-        f"\tusing {class_name} = {class_name}T<>;",
-    ]
+    # Count is int32 in the Composition collections, Size uint32 - only the signed one
+    # needs the cast reserve() would otherwise warn about.
+    counter = next(((n, t) for n, t, g, _ in props if g and n in ("Size", "Count")), None)
+    size_expr = None
+    if counter is not None:
+        call = f"{self_get}.{counter[0]}()"
+        size_expr = f"static_cast<std::size_t>({call})" if counter[1].startswith("int") else call
+    iterable_lines = gen_iterable(iterable, self_get=self_get, size_expr=size_expr) if iterable else []
+    if (members or method_lines or map_lines) and iterable_lines:
+        (map_lines or method_lines).append("")
+    body += members + method_lines + map_lines + iterable_lines
+    body.append("\t};")
+    if templated:
+        body.append(f"\tusing {class_name} = {class_name}T<>;")
     if free_fns:
         body.append("")
         body += gen_free_functions(free_fns)
     body += ["}", ""]
     text = "\n".join(body)
+    aliases = []
+    if "WUC::Interactions::" in text:
+        text = text.replace("WUC::Interactions::", "WUCI::")
+        aliases.append("namespace WUCI = winrt::Windows::UI::Composition::Interactions;")
+    if "WF::" in text:
+        aliases.append("namespace WF = winrt::Windows::Foundation;")
+    if "WFN::" in text:
+        aliases.append("namespace WFN = winrt::Windows::Foundation::Numerics;")
+    if aliases:
+        text = text.replace("namespace WUC = winrt::Windows::UI::Composition;",
+                            "\n".join(["namespace WUC = winrt::Windows::UI::Composition;"] + aliases), 1)
 
     # Imports are derived from what the body actually names, so a wrapper that uses no
     # Shape type does not import PGUI.Shape and one with no members does not import
@@ -787,6 +1227,8 @@ def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_t
     imports = {"PGUI.ErrorHandling", "PGUI.Wrapper", base_import(base_wrapper)[len("import "):-1]}
     if "CallProjected(" in text:
         imports.add("PGUI.ProjectionHolder")
+    if "Compositor::GetCompositor()" in text:
+        imports.add("PGUI.UI.VL.Compositor")
     if "Callable<" in text:
         imports.add("PGUI.Utils")
     for pgui, module in TYPE_MODULE.items():
@@ -795,13 +1237,20 @@ def render_ixx(class_name, base_wrapper, props, methods=(), free_fns=(), force_t
     if any(re.search(rf"\b{re.escape(alias)}\b", text) for alias, _ in KNOWN_WRAPPERS.values()):
         imports.add("PGUI.UI.VL.VLEnums")
     imports |= {module_of(w) for w in referenced}
+    # a sibling class sharing this file would otherwise make the module import itself
+    imports.discard(target_module(class_name, base_wrapper))
+    imports.discard(WRAPPER_MODULE.get(class_name, ""))
 
     lines = [
         "module;",
         "#include <winrt/Windows.UI.Composition.h>",
         "",
     ]
-    if iterable:
+    if "WUCI::" in text:
+        lines += ["#include <winrt/Windows.UI.Composition.Interactions.h>", ""]
+    if "std::optional<" in text:
+        lines += ["#include <winrt/Windows.Foundation.h>", ""]
+    if iterable or map_kv:
         lines += ["#include <winrt/Windows.Foundation.Collections.h>", ""]
     lines += [
         f"export module {target_module(class_name, base_wrapper)};",
@@ -873,6 +1322,9 @@ def main():
                     help="report which types in the namespace are done, stubbed or missing, then exit")
     ap.add_argument("-o", "--outdir", default=None,
                     help="write modules/UI/VL/<T>.ixx under this project root instead of stdout")
+    ap.add_argument("-t", "--templated", "--template", dest="templated", action="store_true",
+                    help="emit a class template XT<Projected> + 'using X = XT<>;' that further "
+                         "wrappers can derive from (default: a plain class over WUC::X)")
     args = ap.parse_args()
 
     if not args.status and args.type is None:
@@ -888,11 +1340,20 @@ def main():
 
     full_name = md.resolve_name(args.type)
     class_name = short(full_name)
+    # the type being generated names itself in its own statics and in self-referential
+    # members, so it has to map like any other wrapper even before its file exists
+    WRAPPER_TYPES.setdefault(full_name, class_name)
     props = md.class_properties(full_name)
 
     base_meta = md.base_of(full_name)
     base_wrapper = args.base or (short(base_meta) if base_meta and base_meta != "System.Object"
                                  else "ProjectionHolder")
+
+    if base_wrapper != "ProjectionHolder" and base_wrapper in WRAPPER_MODULE \
+            and base_wrapper not in WRAPPER_TEMPLATED:
+        print(f"warning: base {base_wrapper} is a plain class, not a template - nothing can derive "
+              f"from {base_wrapper}T<WUC::{class_name}>; regenerate {base_wrapper} with --templated",
+              file=sys.stderr)
 
     methods = md.class_methods(full_name)
 
@@ -901,7 +1362,7 @@ def main():
     free_fns, force_todo = [], set()
     for name, wtype, g, s in props:
         if WRAPPER_TYPES.get(wtype) == class_name:
-            free_fns.append((class_name, name, wtype, g, s))
+            free_fns.append((class_name, name, wtype, g, s, args.templated))
             force_todo.add(name)
         elif wtype in WRAPPER_TYPES and full_name in md.ancestors(wtype):
             force_todo.add(name)          # emitted as a free function in the descendant's file
@@ -911,7 +1372,9 @@ def main():
     for ancestor in md.ancestors(full_name):
         for name, wtype, g, s in md.class_properties(ancestor):
             if WRAPPER_TYPES.get(wtype) == class_name:
-                free_fns.append((short(ancestor), name, wtype, g, s))
+                owner = WRAPPER_TYPES.get(ancestor, short(ancestor))
+                free_fns.append((short(ancestor), name, wtype, g, s,
+                                 owner in WRAPPER_TEMPLATED or ancestor not in WRAPPER_TYPES))
 
     # Method parameters of a descendant type (or an interface, which has no wrapper) are taken
     # through the projected type instead, so this module never imports the descendant's -
@@ -926,8 +1389,41 @@ def main():
     iterable = next((split_generic(i)[1][0] for i in md.interfaces_of(full_name)
                      if split_generic(i)[0] == ITERABLE), None)
 
+    INTERFACE_TYPES.update(n for n in md.by_name
+                           if n.startswith(DEFAULT_NAMESPACE + ".") and md.is_interface(n))
+
+    map_iface = next((i for i in md.interfaces_of(full_name) if split_generic(i)[0] == IMAP), None)
+    map_kv = tuple(split_generic(map_iface)[1]) if map_iface else None
+    skip_methods = {(name, tuple(t for t, _ in params))
+                    for name, _, params in (md.methods_of(map_iface) if map_iface else [])}
+
+    statics = statics_of(md, full_name)
+
     ixx = render_ixx(class_name, base_wrapper, props, methods, free_fns, force_todo,
-                     deferred_params, deferred_returns, iterable)
+                     deferred_params, deferred_returns, iterable, args.templated,
+                     map_kv, skip_methods, statics, full_name)
+
+    unmapped = [(n, t) for n, t, _, _ in props
+                if n not in force_todo and map_type(t, n)[0] is None and optional_of(t, n) is None]
+    for name, ret, params in list(methods) + [(f"static {n}", r, p) for n, r, p in statics]:
+        if (name, tuple(t for t, _ in params)) in skip_methods:
+            continue
+        for t in [ret] + [p for p, _ in params]:
+            if t == "void" or t in deferred_params or t in deferred_returns:
+                continue
+            # a static's leading compositor is elided, not unmapped
+            if t == COMPOSITOR and name.startswith("static "):
+                continue
+            if map_type(t, "")[0] is None and optional_of(t, "") is None \
+                    and iterable_param_of(t) is None:
+                unmapped.append((f"{name}()", t))
+    def report():
+        if not unmapped:
+            return
+        print(f"\n// {len(unmapped)} unmapped -> emitted as //TODO:", file=sys.stderr)
+        for n, t in unmapped:
+            readable = ARITY_RE.sub("", t)
+            print(f"//   {n}: {readable}", file=sys.stderr)
 
     if args.outdir:
         path = os.path.join(args.outdir, "modules", "UI", "VL",
@@ -936,15 +1432,11 @@ def main():
         with open(path, "w", encoding="utf-8", newline="\r\n") as f:
             f.write(ixx)
         print(f"wrote {path}", file=sys.stderr)
+        report()
         return
 
-    print(ixx)
-
-    unmapped = [(n, t) for n, t, _, _ in props if map_type(t, n)[0] is None]
-    if unmapped:
-        print(f"\n// {len(unmapped)} unmapped -> emitted as //TODO:", file=sys.stderr)
-        for n, t in unmapped:
-            print(f"//   {n}: {t}", file=sys.stderr)
+    print(ixx, flush=True)
+    report()
 
 
 if __name__ == "__main__":

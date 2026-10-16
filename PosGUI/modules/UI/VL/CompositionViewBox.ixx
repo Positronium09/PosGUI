@@ -42,7 +42,7 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().HorizontalAlignmentRatio();
+				return Get().HorizontalAlignmentRatio();
 			});
 		}
 		[[nodiscard]] auto SetHorizontalAlignmentRatio(
@@ -50,7 +50,7 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this, horizontalAlignmentRatio]
 			{
-				this->Get().HorizontalAlignmentRatio(horizontalAlignmentRatio);
+				Get().HorizontalAlignmentRatio(horizontalAlignmentRatio);
 			});
 		}
 
@@ -58,14 +58,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Offset() };
+				return Point2F{ Get().Offset() };
 			});
 		}
 		[[nodiscard]] auto SetOffset(const Point2F& offset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &offset]
 			{
-				this->Get().Offset(offset);
+				Get().Offset(offset);
 			});
 		}
 
@@ -73,14 +73,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return SizeF{ this->Get().Size() };
+				return SizeF{ Get().Size() };
 			});
 		}
 		[[nodiscard]] auto SetSize(const SizeF& size) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &size]
 			{
-				this->Get().Size(size);
+				Get().Size(size);
 			});
 		}
 
@@ -88,14 +88,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().Stretch();
+				return Get().Stretch();
 			});
 		}
 		[[nodiscard]] auto SetStretch(const Stretch stretch) const noexcept -> Result<void>
 		{
 			return CallProjected([this, stretch]
 			{
-				this->Get().Stretch(stretch);
+				Get().Stretch(stretch);
 			});
 		}
 
@@ -103,7 +103,7 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return this->Get().VerticalAlignmentRatio();
+				return Get().VerticalAlignmentRatio();
 			});
 		}
 		[[nodiscard]] auto SetVerticalAlignmentRatio(
@@ -111,19 +111,24 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this, verticalAlignmentRatio]
 			{
-				this->Get().VerticalAlignmentRatio(verticalAlignmentRatio);
+				Get().VerticalAlignmentRatio(verticalAlignmentRatio);
 			});
 		}
 
 		[[nodiscard]] auto GetRectangle() const noexcept -> Result<RectF>
 		{
-			return CallProjected([this]
+			auto offset = GetOffset();
+			if (!offset.has_value())
 			{
-				return RectF{
-					static_cast<Point2F>(this->Get().Offset()),
-					static_cast<SizeF>(this->Get().Size())
-				};
-			});
+				return Unexpected{ offset.error().AddDetail(L"part", L"Offset") };
+			}
+			auto size = GetSize();
+			if (!size.has_value())
+			{
+				return Unexpected{ size.error().AddDetail(L"part", L"Size") };
+			}
+
+			return RectF{ offset.value(), size.value() };
 		}
 		[[nodiscard]] auto SetRectangle(const RectF& rect) const noexcept -> Result<void>
 		{

@@ -52,14 +52,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return RGBA{ this->Get().Color() };
+				return RGBA{ Get().Color() };
 			});
 		}
 		[[nodiscard]] auto SetColor(const RGBA& color) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &color]
 			{
-				this->Get().Color(color);
+				Get().Color(color);
 			});
 		}
 	};

@@ -35,7 +35,7 @@ export namespace PGUI
 	concept HasUUID = requires { __uuidof(T); };
 }
 
-namespace PGUI::Detail
+namespace PGUI::ComPtrDetail
 {
 	template <typename Derived, ComInterface... Interfaces> 
 	struct ImplementsRawCom : Interfaces...
@@ -129,7 +129,7 @@ export namespace PGUI
 	concept DefaultInterfaceOf =
 		ComInterface<T> &&
 		WinrtProjection<P> &&
-		Detail::GuidsEqual(winrt::guid_of<P>(), winrt::guid{ __uuidof(T) });
+		ComPtrDetail::GuidsEqual(winrt::guid_of<P>(), winrt::guid{ __uuidof(T) });
 
 	template <typename T, typename... Policies>
 	[[nodiscard]] consteval auto GetIID(const wil::com_ptr_t<T, Policies...>&) noexcept
@@ -291,7 +291,7 @@ export namespace PGUI
 		public:
 		constexpr ComPtrHolder() noexcept = default;
 
-		explicit(false) ComPtrHolder(Detail::ComPtrHolderArg<Interfaces> auto&&... args) noexcept :
+		explicit(false) ComPtrHolder(ComPtrDetail::ComPtrHolderArg<Interfaces> auto&&... args) noexcept :
 			interfaces{ std::make_tuple(std::forward<ComPtr<Interfaces>>(NormalizeSmartPtr(args))...) }
 		{ }
 
@@ -446,8 +446,8 @@ export namespace PGUI
 			{
 				Error error{ SystemErrorCode::InterfaceNotSupported };
 				error
-					.AddDetail(L"From", StringToWString(typeid(T).name()))
-					.AddDetail(L"To", StringToWString(typeid(U).name()));
+					.AddDetail(L"from", StringToWString(typeid(T).name()))
+					.AddDetail(L"to", StringToWString(typeid(U).name()));
 				Logger::Error(error, L"Cannot cast between interfaces");
 				return Unexpected{ error };
 			}
@@ -487,7 +487,7 @@ export namespace PGUI
 	};
 
 	template <typename Derived, typename ...Interfaces>
-	using Implements = Detail::ImplementsSelector<
+	using Implements = ComPtrDetail::ImplementsSelector<
 		LogicalAnd<ComInterface<Interfaces>...>,
 		Derived,
 		Interfaces...>::Type;

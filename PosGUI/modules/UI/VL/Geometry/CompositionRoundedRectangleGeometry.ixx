@@ -52,14 +52,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().CornerRadius() };
+				return Point2F{ Get().CornerRadius() };
 			});
 		}
 		[[nodiscard]] auto SetCornerRadius(const Point2F& cornerRadius) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &cornerRadius]
 			{
-				this->Get().CornerRadius(cornerRadius);
+				Get().CornerRadius(cornerRadius);
 			});
 		}
 
@@ -67,14 +67,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return Point2F{ this->Get().Offset() };
+				return Point2F{ Get().Offset() };
 			});
 		}
 		[[nodiscard]] auto SetOffset(const Point2F& offset) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &offset]
 			{
-				this->Get().Offset(offset);
+				Get().Offset(offset);
 			});
 		}
 
@@ -82,14 +82,14 @@ export namespace PGUI::UI::VL
 		{
 			return CallProjected([this]
 			{
-				return SizeF{ this->Get().Size() };
+				return SizeF{ Get().Size() };
 			});
 		}
 		[[nodiscard]] auto SetSize(const SizeF& size) const noexcept -> Result<void>
 		{
 			return CallProjected([this, &size]
 			{
-				this->Get().Size(size);
+				Get().Size(size);
 			});
 		}
 	};
